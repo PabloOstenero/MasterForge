@@ -1,26 +1,28 @@
-# =========================
-# IGNORAR FRONTEND (Ionic/Angular)
-# =========================
-frontend/node_modules/
-frontend/dist/
-frontend/www/
-frontend/.angular/
-frontend/.npm/
+# ==========================================
+# IGNORAR FRONTEND (Ionic / Angular)
+# ==========================================
+masterforge-frontend/node_modules/
+masterforge-frontend/dist/
+masterforge-frontend/www/
+masterforge-frontend/.angular/
+masterforge-frontend/.npm/
 
-# =========================
-# IGNORAR BACKEND (Spring Boot/Kotlin)
-# =========================
-backend/build/
-backend/out/
-backend/target/
-backend/.gradle/
-backend/bin/
+# ==========================================
+# IGNORAR BACKEND (Spring Boot / Kotlin)
+# ==========================================
+masterforge-backend/build/
+masterforge-backend/out/
+masterforge-backend/target/
+masterforge-backend/.gradle/
+masterforge-backend/bin/
 
-# =========================
-# IGNORAR IDEs y SISTEMA OPERATIVO
-# =========================
+# ==========================================
+# IGNORAR ARCHIVOS DE IDEs Y SISTEMA OPERATIVO
+# ==========================================
 .idea/
 .vscode/
+masterforge-frontend/.vscode/
+masterforge-backend/.vscode/
 *.iml
 .DS_Store
 Thumbs.db
