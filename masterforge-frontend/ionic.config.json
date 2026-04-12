@@ -1,0 +1,7 @@
+{
+  "name": "masterforge-frontend",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
