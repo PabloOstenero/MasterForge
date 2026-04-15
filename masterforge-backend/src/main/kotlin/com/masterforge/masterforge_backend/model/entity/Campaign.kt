@@ -1,14 +1,13 @@
 package com.masterforge.masterforge_backend.model.entity
 
 import jakarta.persistence.*
-import java.math.BigDecimal
 import java.util.UUID
 
 import com.masterforge.masterforge_backend.model.entity.User
 
 @Entity
-@Table(name = "monsters")
-data class Monster(
+@Table(name = "campaigns")
+data class Campaign(
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -22,8 +21,5 @@ data class Monster(
     val name: String,
 
     @Column(nullable = false)
-    val challengeRating: BigDecimal,
-
-    @Column(nullable = false, columnDefinition = "jsonb")
-    val statsData: String
+    val description: String
 )

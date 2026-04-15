@@ -13,6 +13,21 @@ data class DndRace(
     @Column(nullable = false)
     val name: String,
 
-    @Column(nullable = false)
-    val bonusDex: Int
+    @Column(nullable = false, name = "bonus_str")
+    val bonusStr: Int,
+
+    @Column(nullable = false, name = "bonus_dex")
+    val bonusDex: Int,
+
+    @Column(nullable = false, name = "bonus_con")
+    val bonusCon: Int,
+
+    @Column(nullable = false, name = "bonus_int")
+    val bonusInt: Int,
+
+    @Column(nullable = false, name = "bonus_wis")
+    val bonusWis: Int,
+
+    @Column(nullable = false, name = "bonus_cha")
+    val bonusCha: Int
 )
