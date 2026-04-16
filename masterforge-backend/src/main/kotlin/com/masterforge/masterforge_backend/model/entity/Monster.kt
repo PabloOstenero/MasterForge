@@ -4,6 +4,10 @@ import jakarta.persistence.*
 import java.math.BigDecimal
 import java.util.UUID
 
+/**
+ * Represents a monster, which can be official (system-owned)
+ * or homebrew (created by a user).
+ */
 @Entity
 @Table(name = "monsters")
 data class Monster(
@@ -18,10 +22,13 @@ data class Monster(
     val challengeRating: BigDecimal,
 
     @Column(name = "stats_data", columnDefinition = "jsonb", nullable = false)
-    val statsData: String, // JSONB
+    val statsData: String, // Represents the monster's stat block as a JSON object
 
-    // Relaciones
+    /**
+     * The author of the monster. If null, it is considered a system-provided (official) monster.
+     * If a user is specified, it is considered homebrew content.
+     */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", nullable = false)
-    val author: User
+    @JoinColumn(name = "author_id", nullable = true)
+    val author: User? = null
 )

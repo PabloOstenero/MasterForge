@@ -4,12 +4,16 @@ import jakarta.persistence.*
 import java.math.BigDecimal
 import java.util.UUID
 
+/**
+ * Represents a user of the application. A user can be a Game Master, a player,
+ * or a content creator.
+ */
 @Entity
 @Table(name = "users")
 data class User(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    val id: UUID = UUID.randomUUID(),
+    val id: UUID? = null,
 
     @Column(nullable = false)
     val name: String,

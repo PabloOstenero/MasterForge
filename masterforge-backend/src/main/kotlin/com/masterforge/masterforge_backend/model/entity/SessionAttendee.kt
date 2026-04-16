@@ -4,6 +4,9 @@ import jakarta.persistence.*
 import java.io.Serializable
 import java.util.UUID
 
+/**
+ * Composite key for the SessionAttendee entity.
+ */
 @Embeddable
 data class SessionAttendeeId(
     @Column(name = "session_id")
@@ -13,6 +16,10 @@ data class SessionAttendeeId(
     val userId: UUID
 ) : Serializable
 
+/**
+ * Represents a user's attendance in a specific session, acting as a join table
+ * between Session and User.
+ */
 @Entity
 @Table(name = "session_attendees")
 data class SessionAttendee(
@@ -22,14 +29,15 @@ data class SessionAttendee(
     @Column(name = "has_paid", nullable = false)
     val hasPaid: Boolean,
 
-    // Relaciones
+    // The session this attendance record belongs to.
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("sessionId")
+    @MapsId("sessionId") // This maps the 'sessionId' part of the composite key
     @JoinColumn(name = "session_id")
     val session: Session,
 
+    // The user this attendance record belongs to.
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("userId")
+    @MapsId("userId") // This maps the 'userId' part of the composite key
     @JoinColumn(name = "user_id")
     val user: User
 )

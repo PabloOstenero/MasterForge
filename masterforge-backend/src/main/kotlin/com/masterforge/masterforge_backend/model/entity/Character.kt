@@ -3,12 +3,15 @@ package com.masterforge.masterforge_backend.model.entity
 import jakarta.persistence.*
 import java.util.UUID
 
+/**
+ * Represents a player's character in a campaign.
+ */
 @Entity
 @Table(name = "characters")
 data class Character(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    val id: UUID = UUID.randomUUID(),
+    val id: UUID? = null,
 
     @Column(nullable = false)
     val name: String,
@@ -19,6 +22,7 @@ data class Character(
     @Column(name = "current_hp", nullable = false)
     val currentHp: Int,
 
+    // --- Base Ability Scores ---
     @Column(name = "base_str", nullable = false)
     val baseStr: Int,
 
@@ -38,9 +42,9 @@ data class Character(
     val baseCha: Int,
 
     @Column(name = "skill_proficiencies", columnDefinition = "jsonb", nullable = false)
-    val skillProficiencies: String, // JSONB
+    val skillProficiencies: String, // Represents skill proficiencies as a JSON object
 
-    // Relaciones
+    // --- Relationships ---
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     val user: User,

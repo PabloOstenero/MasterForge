@@ -5,12 +5,15 @@ import java.math.BigDecimal
 import java.sql.Timestamp
 import java.util.UUID
 
+/**
+ * Represents a single game session within a campaign.
+ */
 @Entity
 @Table(name = "sessions")
 data class Session(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    val id: UUID = UUID.randomUUID(),
+    val id: UUID? = null,
 
     @Column(name = "scheduled_date", nullable = false)
     val scheduledDate: Timestamp,
@@ -18,6 +21,7 @@ data class Session(
     @Column(nullable = false)
     val price: BigDecimal,
 
+    // The campaign this session belongs to.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "campaign_id", nullable = false)
     val campaign: Campaign

@@ -1,5 +1,6 @@
 package com.masterforge.masterforge_backend.controller
 
+import com.masterforge.masterforge_backend.model.dto.UserDto
 import com.masterforge.masterforge_backend.model.entity.User
 import com.masterforge.masterforge_backend.repository.UserRepository
 import org.springframework.http.ResponseEntity
@@ -17,7 +18,17 @@ class UserController(private val userRepository: UserRepository) {
     }
 
     @PostMapping
-    fun createUser(@RequestBody user: User): User {
+    fun createUser(@RequestBody userDto: UserDto): User {
+        // Since User has no external relationships to resolve on creation,
+        // we can map directly from the DTO.
+        val user = User(
+            name = userDto.name,
+            email = userDto.email,
+            passwordHash = userDto.passwordHash,
+            subscriptionTier = userDto.subscriptionTier,
+            balance = userDto.balance,
+            isActive = userDto.isActive
+        )
         return userRepository.save(user)
     }
 

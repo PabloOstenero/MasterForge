@@ -4,6 +4,10 @@ import jakarta.persistence.*
 import java.math.BigDecimal
 import java.util.UUID
 
+/**
+ * Represents a Dungeons & Dragons race, which can be official (system-owned)
+ * or homebrew (created by a user).
+ */
 @Entity
 @Table(name = "dnd_races")
 data class DndRace(
@@ -17,6 +21,7 @@ data class DndRace(
     @Column(nullable = false)
     val price: BigDecimal,
 
+    // --- Ability Score Bonuses ---
     @Column(name = "bonus_str", nullable = false)
     val bonusStr: Int,
 
@@ -35,7 +40,11 @@ data class DndRace(
     @Column(name = "bonus_cha", nullable = false)
     val bonusCha: Int,
 
+    /**
+     * The author of the race. If null, it is considered a system-provided (official) race.
+     * If a user is specified, it is considered homebrew content.
+     */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", nullable = false)
-    val author: User
+    @JoinColumn(name = "author_id", nullable = true)
+    val author: User? = null
 )

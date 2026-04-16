@@ -1,15 +1,22 @@
 package com.masterforge.masterforge_backend.controller
 
+import com.masterforge.masterforge_backend.model.dto.SessionDto
 import com.masterforge.masterforge_backend.model.entity.Session
+import com.masterforge.masterforge_backend.repository.CampaignRepository
 import com.masterforge.masterforge_backend.repository.SessionRepository
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
 import java.util.UUID
 
 @RestController
 @RequestMapping("/api/sessions")
 @CrossOrigin(origins = ["*"])
-class SessionController(private val sessionRepository: SessionRepository) {
+class SessionController(
+    private val sessionRepository: SessionRepository,
+    private val campaignRepository: CampaignRepository
+) {
 
     @GetMapping
     fun getAllSessions(): List<Session> {
@@ -17,7 +24,16 @@ class SessionController(private val sessionRepository: SessionRepository) {
     }
 
     @PostMapping
-    fun createSession(@RequestBody session: Session): Session {
+    fun createSession(@RequestBody sessionDto: SessionDto): Session {
+        // Find the parent campaign for this session.
+        val campaign = campaignRepository.findById(sessionDto.campaignId)
+            .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Campaign not found with id ${sessionDto.campaignId}") }
+
+        val session = Session(
+            scheduledDate = sessionDto.scheduledDate,
+            price = sessionDto.price,
+            campaign = campaign
+        )
         return sessionRepository.save(session)
     }
 
