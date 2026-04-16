@@ -3,26 +3,12 @@ package com.masterforge.masterforge_backend.model.entity
 import jakarta.persistence.*
 import java.util.UUID
 
-import com.masterforge.masterforge_backend.model.entity.Client
-import com.masterforge.masterforge_backend.model.entity.Campaign
-import com.masterforge.masterforge_backend.model.entity.DndRace
-import com.masterforge.masterforge_backend.model.entity.DndClass
-
 @Entity
 @Table(name = "characters")
 data class Character(
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    val id: UUID? = null,
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_id", nullable = false)
-    val client: Client,
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "campaign_id", nullable = false)
-    val campaign: Campaign,
+    val id: UUID = UUID.randomUUID(),
 
     @Column(nullable = false)
     val name: String,
@@ -30,29 +16,38 @@ data class Character(
     @Column(nullable = false)
     val level: Int,
 
-    @Column(nullable = false, name = "current_hp")
+    @Column(name = "current_hp", nullable = false)
     val currentHp: Int,
 
-    @Column(nullable = false, name = "base_str")
+    @Column(name = "base_str", nullable = false)
     val baseStr: Int,
 
-    @Column(nullable = false, name = "base_dex")
+    @Column(name = "base_dex", nullable = false)
     val baseDex: Int,
 
-    @Column(nullable = false, name = "base_con")
+    @Column(name = "base_con", nullable = false)
     val baseCon: Int,
 
-    @Column(nullable = false, name = "base_int")
+    @Column(name = "base_int", nullable = false)
     val baseInt: Int,
 
-    @Column(nullable = false, name = "base_wis")
+    @Column(name = "base_wis", nullable = false)
     val baseWis: Int,
 
-    @Column(nullable = false, name = "base_cha")
+    @Column(name = "base_cha", nullable = false)
     val baseCha: Int,
 
-    @Column(nullable = false, columnDefinition = "jsonb", name = "skill_proficiencies")
-    val skillProficiencies: String,
+    @Column(name = "skill_proficiencies", columnDefinition = "jsonb", nullable = false)
+    val skillProficiencies: String, // JSONB
+
+    // Relaciones
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    val user: User,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "campaign_id", nullable = false)
+    val campaign: Campaign,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dnd_race_id", nullable = false)

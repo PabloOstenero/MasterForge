@@ -1,33 +1,41 @@
 package com.masterforge.masterforge_backend.model.entity
 
 import jakarta.persistence.*
+import java.math.BigDecimal
+import java.util.UUID
 
 @Entity
 @Table(name = "dnd_races")
 data class DndRace(
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Int? = null,
+    val id: Int = 0,
 
     @Column(nullable = false)
     val name: String,
 
-    @Column(nullable = false, name = "bonus_str")
+    @Column(nullable = false)
+    val price: BigDecimal,
+
+    @Column(name = "bonus_str", nullable = false)
     val bonusStr: Int,
 
-    @Column(nullable = false, name = "bonus_dex")
+    @Column(name = "bonus_dex", nullable = false)
     val bonusDex: Int,
 
-    @Column(nullable = false, name = "bonus_con")
+    @Column(name = "bonus_con", nullable = false)
     val bonusCon: Int,
 
-    @Column(nullable = false, name = "bonus_int")
+    @Column(name = "bonus_int", nullable = false)
     val bonusInt: Int,
 
-    @Column(nullable = false, name = "bonus_wis")
+    @Column(name = "bonus_wis", nullable = false)
     val bonusWis: Int,
 
-    @Column(nullable = false, name = "bonus_cha")
-    val bonusCha: Int
+    @Column(name = "bonus_cha", nullable = false)
+    val bonusCha: Int,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id", nullable = false)
+    val author: User
 )

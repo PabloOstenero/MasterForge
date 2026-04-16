@@ -7,29 +7,29 @@ import java.util.UUID
 @Embeddable
 data class SessionAttendeeId(
     @Column(name = "session_id")
-    val sessionId: UUID = UUID(0,0),
+    val sessionId: UUID,
 
-    @Column(name = "client_id")
-    val clientId: UUID = UUID(0,0)
-): Serializable
+    @Column(name = "user_id")
+    val userId: UUID
+) : Serializable
 
 @Entity
 @Table(name = "session_attendees")
 data class SessionAttendee(
-
     @EmbeddedId
     val id: SessionAttendeeId,
 
-    @MapsId("sessionId")
+    @Column(name = "has_paid", nullable = false)
+    val hasPaid: Boolean,
+
+    // Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "session_id", insertable = false, updatable = false)
+    @MapsId("sessionId")
+    @JoinColumn(name = "session_id")
     val session: Session,
 
-    @MapsId("clientId")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_id", insertable = false, updatable = false)
-    val client: Client,
-
-    @Column(nullable = false, name = "has_paid")
-    val hasPaid: Boolean
+    @MapsId("userId")
+    @JoinColumn(name = "user_id")
+    val user: User
 )

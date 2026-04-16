@@ -4,26 +4,24 @@ import jakarta.persistence.*
 import java.math.BigDecimal
 import java.util.UUID
 
-import com.masterforge.masterforge_backend.model.entity.User
-
 @Entity
 @Table(name = "monsters")
 data class Monster(
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    val id: UUID? = null,
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    val user: User,
+    val id: UUID = UUID.randomUUID(),
 
     @Column(nullable = false)
     val name: String,
 
-    @Column(nullable = false)
+    @Column(name = "challenge_rating", nullable = false)
     val challengeRating: BigDecimal,
 
-    @Column(nullable = false, columnDefinition = "jsonb")
-    val statsData: String
+    @Column(name = "stats_data", columnDefinition = "jsonb", nullable = false)
+    val statsData: String, // JSONB
+
+    // Relaciones
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id", nullable = false)
+    val author: User
 )

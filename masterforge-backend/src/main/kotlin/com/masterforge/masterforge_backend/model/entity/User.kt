@@ -1,35 +1,31 @@
 package com.masterforge.masterforge_backend.model.entity
 
 import jakarta.persistence.*
+import java.math.BigDecimal
 import java.util.UUID
-
-import com.masterforge.masterforge_backend.model.entity.Client
-import com.masterforge.masterforge_backend.model.entity.Campaign
-import com.masterforge.masterforge_backend.model.entity.Monster
 
 @Entity
 @Table(name = "users")
 data class User(
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    val id: UUID? = null,
+    val id: UUID = UUID.randomUUID(),
+
+    @Column(nullable = false)
+    val name: String,
 
     @Column(nullable = false, unique = true)
     val email: String,
 
-    @Column(nullable = false, name = "password_hash")
+    @Column(name = "password_hash", nullable = false)
     val passwordHash: String,
 
-    @Column(nullable = false, name = "subscription_tier")
+    @Column(name = "subscription_tier", nullable = false)
     val subscriptionTier: String = "FREE",
 
-    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-    val clients: MutableList<Client> = mutableListOf(),
+    @Column(nullable = false)
+    val balance: BigDecimal = BigDecimal.ZERO,
 
-    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-    val campaigns: MutableList<Campaign> = mutableListOf(),
-
-    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-    val monsters: MutableList<Monster> = mutableListOf()
+    @Column(name = "is_active", nullable = false)
+    val isActive: Boolean = true
 )
