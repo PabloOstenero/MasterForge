@@ -40,6 +40,9 @@ data class DndRace(
     @Column(name = "bonus_cha", nullable = false)
     val bonusCha: Int,
 
+    @OneToMany(mappedBy = "race", cascade = [CascadeType.ALL])
+    val traits: MutableList<RaceTrait> = mutableListOf(),
+
     /**
      * The author of the race. If null, it is considered a system-provided (official) race.
      * If a user is specified, it is considered homebrew content.

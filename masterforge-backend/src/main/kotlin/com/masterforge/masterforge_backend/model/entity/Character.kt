@@ -1,6 +1,8 @@
 package com.masterforge.masterforge_backend.model.entity
 
 import jakarta.persistence.*
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import java.util.UUID
 
 /**
@@ -59,5 +61,15 @@ data class Character(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dnd_class_id", nullable = false)
-    val dndClass: DndClass
+    val dndClass: DndClass,
+
+    // The subclass is optional because it's not selected at level 1
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subclass_id")
+    val subclass: DndSubclass? = null,
+
+    // Here we store the player choices when leveling up
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "choices_json", columnDefinition = "jsonb")
+    val choicesJson: Map<String, Any> = emptyMap()
 )

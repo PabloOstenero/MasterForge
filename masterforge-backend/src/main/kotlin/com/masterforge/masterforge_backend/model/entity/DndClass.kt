@@ -2,7 +2,6 @@ package com.masterforge.masterforge_backend.model.entity
 
 import jakarta.persistence.*
 import java.math.BigDecimal
-import java.util.UUID
 
 /**
  * Represents a Dungeons & Dragons class, which can be official (system-owned)
@@ -26,6 +25,12 @@ data class DndClass(
 
     @Column(name = "saving_throws", nullable = false)
     val savingThrows: String,
+
+    @OneToMany(mappedBy = "dndClass", cascade = [CascadeType.ALL])
+    val features: MutableList<ClassFeature> = mutableListOf(),
+
+    @OneToMany(mappedBy = "parentClass", cascade = [CascadeType.ALL])
+    val subclasses: MutableList<DndSubclass> = mutableListOf(),
 
     /**
      * The author of the class. If null, it is considered a system-provided (official) class.
