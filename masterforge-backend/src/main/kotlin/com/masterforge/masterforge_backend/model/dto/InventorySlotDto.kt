@@ -7,5 +7,6 @@ data class InventorySlotDto(
     val characterId: UUID,
     val itemId: UUID,
     val quantity: Int,
-    val isEquipped: Boolean
+    val isEquipped: Boolean,
+    val isAttuned: Boolean
 )

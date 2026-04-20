@@ -21,8 +21,43 @@ data class Character(
     @Column(nullable = false)
     val level: Int,
 
+    @Column(name = "max_hp", nullable = false)
+    val maxHp: Int,
+
     @Column(name = "current_hp", nullable = false)
     val currentHp: Int,
+
+    @Column(name = "temp_hp", nullable = false)
+    val tempHp: Int = 0,  // Temporary hit points
+
+    @Column(name = "armor_class", nullable = false)
+    val armorClass: Int = 10,
+
+    @Column(nullable = false)
+    val speed: Int = 30,  // Speed in feet
+
+    @Column(name = "hit_dice_total", nullable = false)
+    val hitDiceTotal: Int = 1,  // Total number of hit dice
+
+    @Column(name = "hit_dice_spent", nullable = false)
+    val hitDiceSpent: Int = 1,
+
+    // --- BIOGRAPHY ---
+    @Column(nullable = false)
+    val background: String = "Héroe del Pueblo",
+
+    @Column(nullable = false)
+    val alignment: String = "Neutral",
+
+    @Column(nullable = false)
+    val xp: Int = 0,
+
+    // --- ECONOMY ---
+    @Column(nullable = false) val cp: Int = 0, // Copper
+    @Column(nullable = false) val sp: Int = 0, // Silver
+    @Column(nullable = false) val ep: Int = 0, // Electrum
+    @Column(nullable = false) val gp: Int = 0, // Gold
+    @Column(nullable = false) val pp: Int = 0, // Platinum
 
     // --- Base Ability Scores ---
     @Column(name = "base_str", nullable = false)
@@ -45,6 +80,12 @@ data class Character(
 
     @Column(name = "skill_proficiencies", columnDefinition = "jsonb", nullable = false)
     val skillProficiencies: String, // Represents skill proficiencies as a JSON object
+
+    // ---Spell Slots ---
+    // It will store something like this: {"level_1": {"max": 4, "available": 2}, "level_2": {"max": 2, "available": 2}}
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "spell_slots", columnDefinition = "jsonb")
+    val spellSlots: Map<String, Any> = emptyMap(),
 
     // --- Relationships ---
     @ManyToOne(fetch = FetchType.LAZY)

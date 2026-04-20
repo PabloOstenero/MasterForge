@@ -36,7 +36,8 @@ class InventorySlotController(
             character = character,
             item = item,
             quantity = dto.quantity,
-            isEquipped = dto.isEquipped
+            isEquipped = dto.isEquipped,
+            isAttuned = dto.isAttuned
         )
         return inventorySlotRepository.save(inventorySlot)
     }

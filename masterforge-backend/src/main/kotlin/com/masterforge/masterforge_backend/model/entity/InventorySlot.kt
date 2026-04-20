@@ -21,5 +21,8 @@ data class InventorySlot(
     val quantity: Int = 1,
 
     @Column(name = "is_equipped", nullable = false)
-    val isEquipped: Boolean = false
+    val isEquipped: Boolean = false,
+
+    @Column(name = "is_attuned", nullable = false)
+    val isAttuned: Boolean = false // Is the player attuned with this item?
 )

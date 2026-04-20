@@ -17,7 +17,8 @@ class CharacterController(
     private val userRepository: UserRepository,
     private val campaignRepository: CampaignRepository,
     private val dndRaceRepository: DndRaceRepository,
-    private val dndClassRepository: DndClassRepository
+    private val dndClassRepository: DndClassRepository,
+    private val dndSubclassRepository: DndSubclassRepository
 ) {
 
     @GetMapping
@@ -36,11 +37,29 @@ class CharacterController(
             .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "D&D Race not found with id ${dto.dndRaceId}") }
         val dndClass = dndClassRepository.findById(dto.dndClassId)
             .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "D&D Class not found with id ${dto.dndClassId}") }
+        val subclass = dto.subclassId?.let {
+            dndSubclassRepository.findById(it)
+                .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "D&D Subclass not found with id $it") }
+        }
 
         val character = Character(
             name = dto.name,
             level = dto.level,
+            maxHp = dto.maxHp,
             currentHp = dto.currentHp,
+            tempHp = dto.tempHp,
+            armorClass = dto.armorClass,
+            speed = dto.speed,
+            hitDiceTotal = dto.hitDiceTotal,
+            hitDiceSpent = dto.hitDiceSpent,
+            background = dto.background,
+            alignment = dto.alignment,
+            xp = dto.xp,
+            cp = dto.cp,
+            sp = dto.sp,
+            ep = dto.ep,
+            gp = dto.gp,
+            pp = dto.pp,
             baseStr = dto.baseStr,
             baseDex = dto.baseDex,
             baseCon = dto.baseCon,
@@ -48,10 +67,13 @@ class CharacterController(
             baseWis = dto.baseWis,
             baseCha = dto.baseCha,
             skillProficiencies = dto.skillProficiencies,
+            spellSlots = dto.spellSlots,
             user = user,
             campaign = campaign,
             dndRace = dndRace,
-            dndClass = dndClass
+            dndClass = dndClass,
+            subclass = subclass,
+            choicesJson = dto.choicesJson
         )
         return characterRepository.save(character)
     }

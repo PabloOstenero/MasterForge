@@ -35,8 +35,20 @@ class MonsterController(
 
         val monster = Monster(
             name = dto.name,
+            type = dto.type,
+            size = dto.size,
+            armorClass = dto.armorClass,
+            hitPoints = dto.hitPoints,
+            speed = dto.speed,
+            str = dto.str,
+            dex = dto.dex,
+            con = dto.con,
+            intStat = dto.intStat,
+            wis = dto.wis,
+            cha = dto.cha,
             challengeRating = dto.challengeRating,
-            statsData = dto.statsData,
+            xp = dto.xp,
+            combatMechanics = dto.combatMechanics,
             author = author
         )
         return monsterRepository.save(monster)
