@@ -44,10 +44,10 @@ export class CharacterSheetPage implements OnInit {
 
   ngOnInit() {
     // ⚠️ ATENCIÓN: Pega aquí el ID larguísimo (UUID) de un personaje que hayas creado en Postman
-    const idDePrueba = 'PON_AQUI_TU_UUID'; 
+    const idDePrueba = 'a545080f-4585-4e2c-bce6-786b3f791aa0'; 
     
     // Solo llamamos a la base de datos si hemos puesto un ID válido
-    if (idDePrueba !== 'PON_AQUI_TU_UUID') {
+    if (idDePrueba == 'a545080f-4585-4e2c-bce6-786b3f791aa0') {
       this.loadCharacter(idDePrueba);
     }
   }
@@ -96,8 +96,10 @@ export class CharacterSheetPage implements OnInit {
   }
 
   // Calcula el modificador de D&D a partir de la puntuación base (Ej: 16 -> +3)
-  getMod(score: number): string {
-    const mod = Math.floor((score - 10) / 2);
+  getMod(score: any): string {
+    // Forzamos a que el valor se convierta en número por seguridad
+    const num = Number(score); 
+    const mod = Math.floor((num - 10) / 2);
     return mod >= 0 ? `+${mod}` : `${mod}`;
   }
 }

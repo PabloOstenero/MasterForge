@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonAvatar, IonLabel, IonBadge, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonInput, IonButton } from '@ionic/angular/standalone';
+import { IonContent, IonList, IonItem, IonAvatar, IonLabel, IonBadge, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonInput, IonButton } from '@ionic/angular/standalone';
 import { ApiService } from '../services/api';
 
 @Component({
@@ -8,7 +8,7 @@ import { ApiService } from '../services/api';
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
   standalone: true,
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonAvatar, IonLabel, IonBadge, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonInput, IonButton, FormsModule],
+  imports: [IonContent, IonList, IonItem, IonAvatar, IonLabel, IonBadge, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonInput, IonButton, FormsModule],
 })
 export class HomePage implements OnInit {
   
