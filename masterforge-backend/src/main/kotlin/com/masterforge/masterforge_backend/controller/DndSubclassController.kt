@@ -53,4 +53,35 @@ class DndSubclassController(
             ResponseEntity.notFound().build()
         }
     }
+
+    @PutMapping("/{id}")
+    fun updateDndSubclass(@PathVariable id: Int, @RequestBody dto: DndSubclassDto): DndSubclass {
+        val existingSubclass = dndSubclassRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "D&D Subclass not found with id $id") }
+
+        val parentClass = dndClassRepository.findById(dto.parentClassId)
+            .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Parent class not found with id ${dto.parentClassId}") }
+
+        val author: User? = dto.authorId?.let {
+            userRepository.findById(it)
+                .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Author not found with id $it") }
+        }
+
+        val updatedSubclass = existingSubclass.copy(
+            name = dto.name,
+            description = dto.description,
+            parentClass = parentClass,
+            author = author
+        )
+        return dndSubclassRepository.save(updatedSubclass)
+    }
+
+    @DeleteMapping("/{id}")
+    fun deleteDndSubclass(@PathVariable id: Int): ResponseEntity<Void> {
+        if (!dndSubclassRepository.existsById(id)) {
+            return ResponseEntity.notFound().build()
+        }
+        dndSubclassRepository.deleteById(id)
+        return ResponseEntity.noContent().build()
+    }
 }

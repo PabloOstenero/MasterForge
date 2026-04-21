@@ -50,4 +50,33 @@ class ItemController(
             ResponseEntity.notFound().build()
         }
     }
+
+    @PutMapping("/{id}")
+    fun updateItem(@PathVariable id: UUID, @RequestBody dto: ItemDto): Item {
+        val existingItem = itemRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Item not found with id $id") }
+
+        val author: User? = dto.authorId?.let {
+            userRepository.findById(it)
+                .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Author not found with id $it") }
+        }
+
+        val updatedItem = existingItem.copy(
+            name = dto.name,
+            type = dto.type,
+            weight = dto.weight,
+            properties = dto.properties,
+            author = author
+        )
+        return itemRepository.save(updatedItem)
+    }
+
+    @DeleteMapping("/{id}")
+    fun deleteItem(@PathVariable id: UUID): ResponseEntity<Void> {
+        if (!itemRepository.existsById(id)) {
+            return ResponseEntity.notFound().build()
+        }
+        itemRepository.deleteById(id)
+        return ResponseEntity.noContent().build()
+    }
 }

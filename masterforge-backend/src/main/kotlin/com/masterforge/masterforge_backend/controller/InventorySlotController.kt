@@ -51,4 +51,34 @@ class InventorySlotController(
             ResponseEntity.notFound().build()
         }
     }
+
+    @PutMapping("/{id}")
+    fun updateInventorySlot(@PathVariable id: Int, @RequestBody dto: InventorySlotDto): InventorySlot {
+        val existingSlot = inventorySlotRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Inventory Slot not found with id $id") }
+
+        val character = characterRepository.findById(dto.characterId)
+            .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Character not found with id ${dto.characterId}") }
+
+        val item = itemRepository.findById(dto.itemId)
+            .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Item not found with id ${dto.itemId}") }
+
+        val updatedSlot = existingSlot.copy(
+            character = character,
+            item = item,
+            quantity = dto.quantity,
+            isEquipped = dto.isEquipped,
+            isAttuned = dto.isAttuned
+        )
+        return inventorySlotRepository.save(updatedSlot)
+    }
+
+    @DeleteMapping("/{id}")
+    fun deleteInventorySlot(@PathVariable id: Int): ResponseEntity<Void> {
+        if (!inventorySlotRepository.existsById(id)) {
+            return ResponseEntity.notFound().build()
+        }
+        inventorySlotRepository.deleteById(id)
+        return ResponseEntity.noContent().build()
+    }
 }

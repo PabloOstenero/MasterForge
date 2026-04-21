@@ -49,4 +49,32 @@ class CharacterSpellController(
             ResponseEntity.notFound().build()
         }
     }
+
+    @PutMapping("/{id}")
+    fun updateCharacterSpell(@PathVariable id: Int, @RequestBody dto: CharacterSpellDto): CharacterSpell {
+        val existingCharacterSpell = characterSpellRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character Spell not found with id $id") }
+
+        val character = characterRepository.findById(dto.characterId)
+            .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Character not found with id ${dto.characterId}") }
+
+        val spell = spellRepository.findById(dto.spellId)
+            .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Spell not found with id ${dto.spellId}") }
+
+        val updatedCharacterSpell = existingCharacterSpell.copy(
+            character = character,
+            spell = spell,
+            isPrepared = dto.isPrepared
+        )
+        return characterSpellRepository.save(updatedCharacterSpell)
+    }
+
+    @DeleteMapping("/{id}")
+    fun deleteCharacterSpell(@PathVariable id: Int): ResponseEntity<Void> {
+        if (!characterSpellRepository.existsById(id)) {
+            return ResponseEntity.notFound().build()
+        }
+        characterSpellRepository.deleteById(id)
+        return ResponseEntity.noContent().build()
+    }
 }

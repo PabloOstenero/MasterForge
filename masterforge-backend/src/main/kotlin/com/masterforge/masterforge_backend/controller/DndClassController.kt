@@ -51,4 +51,33 @@ class DndClassController(
             ResponseEntity.notFound().build()
         }
     }
+
+    @PutMapping("/{id}")
+    fun updateDndClass(@PathVariable id: Int, @RequestBody dto: DndClassDto): DndClass {
+        val existingClass = dndClassRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "D&D Class not found with id $id") }
+
+        val author: User? = dto.authorId?.let {
+            userRepository.findById(it)
+                .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Author not found with id $it") }
+        }
+
+        val updatedClass = existingClass.copy(
+            name = dto.name,
+            price = dto.price,
+            hitDie = dto.hitDie,
+            savingThrows = dto.savingThrows,
+            author = author
+        )
+        return dndClassRepository.save(updatedClass)
+    }
+
+    @DeleteMapping("/{id}")
+    fun deleteDndClass(@PathVariable id: Int): ResponseEntity<Void> {
+        if (!dndClassRepository.existsById(id)) {
+            return ResponseEntity.notFound().build()
+        }
+        dndClassRepository.deleteById(id)
+        return ResponseEntity.noContent().build()
+    }
 }

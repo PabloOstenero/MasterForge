@@ -20,4 +20,9 @@ export class ApiService {
   createUser(userData: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/users`, userData);
   }
+
+  // Function to fetch characters from the database
+  getCharacter(id: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/characters/${id}`);
+  }
 }

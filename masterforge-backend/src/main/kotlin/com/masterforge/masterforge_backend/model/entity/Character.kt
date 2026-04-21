@@ -40,7 +40,7 @@ data class Character(
     val hitDiceTotal: Int = 1,  // Total number of hit dice
 
     @Column(name = "hit_dice_spent", nullable = false)
-    val hitDiceSpent: Int = 1,
+    val hitDiceSpent: Int = 0,
 
     // --- BIOGRAPHY ---
     @Column(nullable = false)
@@ -78,8 +78,9 @@ data class Character(
     @Column(name = "base_cha", nullable = false)
     val baseCha: Int,
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "skill_proficiencies", columnDefinition = "jsonb", nullable = false)
-    val skillProficiencies: String, // Represents skill proficiencies as a JSON object
+    val skillProficiencies: Map<String, Any> = emptyMap(),
 
     // ---Spell Slots ---
     // It will store something like this: {"level_1": {"max": 4, "available": 2}, "level_2": {"max": 2, "available": 2}}
@@ -93,8 +94,8 @@ data class Character(
     val user: User,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "campaign_id", nullable = false)
-    val campaign: Campaign,
+    @JoinColumn(name = "campaign_id", nullable = true)
+    val campaign: Campaign? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dnd_race_id", nullable = false)

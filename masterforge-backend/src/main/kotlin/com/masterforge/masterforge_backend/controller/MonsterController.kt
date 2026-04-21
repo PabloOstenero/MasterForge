@@ -63,4 +63,44 @@ class MonsterController(
             ResponseEntity.notFound().build()
         }
     }
+
+    @PutMapping("/{id}")
+    fun updateMonster(@PathVariable id: UUID, @RequestBody dto: MonsterDto): Monster {
+        val existingMonster = monsterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Monster not found with id $id") }
+
+        val author: User? = dto.authorId?.let {
+            userRepository.findById(it)
+                .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Author not found with id $it") }
+        }
+
+        val updatedMonster = existingMonster.copy(
+            name = dto.name,
+            type = dto.type,
+            size = dto.size,
+            armorClass = dto.armorClass,
+            hitPoints = dto.hitPoints,
+            speed = dto.speed,
+            str = dto.str,
+            dex = dto.dex,
+            con = dto.con,
+            intStat = dto.intStat,
+            wis = dto.wis,
+            cha = dto.cha,
+            challengeRating = dto.challengeRating,
+            xp = dto.xp,
+            combatMechanics = dto.combatMechanics,
+            author = author
+        )
+        return monsterRepository.save(updatedMonster)
+    }
+
+    @DeleteMapping("/{id}")
+    fun deleteMonster(@PathVariable id: UUID): ResponseEntity<Void> {
+        if (!monsterRepository.existsById(id)) {
+            return ResponseEntity.notFound().build()
+        }
+        monsterRepository.deleteById(id)
+        return ResponseEntity.noContent().build()
+    }
 }

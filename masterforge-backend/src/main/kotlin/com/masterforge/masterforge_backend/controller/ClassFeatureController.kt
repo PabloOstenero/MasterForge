@@ -45,4 +45,30 @@ class ClassFeatureController(
             ResponseEntity.notFound().build()
         }
     }
+
+    @PutMapping("/{id}")
+    fun updateClassFeature(@PathVariable id: Long, @RequestBody dto: ClassFeatureDto): ClassFeature {
+        val existingFeature = classFeatureRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Class Feature not found with id $id") }
+
+        val dndClass = dndClassRepository.findById(dto.dndClassId)
+            .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Class not found with id ${dto.dndClassId}") }
+
+        val updatedFeature = existingFeature.copy(
+            name = dto.name,
+            description = dto.description,
+            levelRequired = dto.levelRequired,
+            dndClass = dndClass
+        )
+        return classFeatureRepository.save(updatedFeature)
+    }
+
+    @DeleteMapping("/{id}")
+    fun deleteClassFeature(@PathVariable id: Long): ResponseEntity<Void> {
+        if (!classFeatureRepository.existsById(id)) {
+            return ResponseEntity.notFound().build()
+        }
+        classFeatureRepository.deleteById(id)
+        return ResponseEntity.noContent().build()
+    }
 }

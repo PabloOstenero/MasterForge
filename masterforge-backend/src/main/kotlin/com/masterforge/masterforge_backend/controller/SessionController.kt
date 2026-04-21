@@ -46,4 +46,29 @@ class SessionController(
             ResponseEntity.notFound().build()
         }
     }
+
+    @PutMapping("/{id}")
+    fun updateSession(@PathVariable id: UUID, @RequestBody dto: SessionDto): Session {
+        val existingSession = sessionRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Session not found with id $id") }
+
+        val campaign = campaignRepository.findById(dto.campaignId)
+            .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Campaign not found with id ${dto.campaignId}") }
+
+        val updatedSession = existingSession.copy(
+            scheduledDate = dto.scheduledDate,
+            price = dto.price,
+            campaign = campaign
+        )
+        return sessionRepository.save(updatedSession)
+    }
+
+    @DeleteMapping("/{id}")
+    fun deleteSession(@PathVariable id: UUID): ResponseEntity<Void> {
+        if (!sessionRepository.existsById(id)) {
+            return ResponseEntity.notFound().build()
+        }
+        sessionRepository.deleteById(id)
+        return ResponseEntity.noContent().build()
+    }
 }

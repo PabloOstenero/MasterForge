@@ -1,0 +1,101 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="dark">
+    <ion-title>{{ pj.name }} (Nvl. {{ pj.level }})</ion-title>
+  </ion-toolbar>
+
+  <ion-toolbar color="dark">
+    <ion-segment [value]="currentTab" (ionChange)="segmentChanged($event)">
+      <ion-segment-button value="stats">
+        <ion-label>Atributos</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="inventory">
+        <ion-label>Inventario</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="magic">
+        <ion-label>Magia</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <ion-row class="ion-align-items-center ion-margin-bottom">
+    <ion-col size="8">
+      <h2>{{ pj.dndClass }} - {{ pj.subclass }}</h2>
+    </ion-col>
+    <ion-col size="4" class="ion-text-right">
+      <ion-badge color="danger" style="font-size: 1.2rem;">
+        ♥ {{ pj.currentHp }} / {{ pj.maxHp }}
+      </ion-badge>
+    </ion-col>
+  </ion-row>
+
+  @if (currentTab === 'stats') {
+    <ion-grid>
+      <ion-row>
+        <ion-col size="6">
+          <ion-card color="primary">
+            <ion-card-content class="ion-text-center">
+              <h1>🛡️ {{ pj.armorClass }}</h1>
+              <p>Clase de Armadura</p>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+        <ion-col size="6">
+          <ion-card color="tertiary">
+            <ion-card-content class="ion-text-center">
+              <h1>👟 {{ pj.speed }} ft</h1>
+              <p>Velocidad</p>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        @for (stat of pj.stats | keyvalue; track stat.key) {
+          <ion-col size="4">
+            <ion-card class="ion-text-center">
+              <ion-card-header>
+                <ion-card-title style="text-transform: uppercase; font-size: 0.9rem;">
+                  {{ stat.key }}
+                </ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <h2 style="font-weight: bold;">{{ getMod(stat.value) }}</h2>
+                <p style="font-size: 0.8rem; color: gray;">{{ stat.value }}</p>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+        }
+      </ion-row>
+    </ion-grid>
+  }
+
+  @if (currentTab === 'inventory') {
+    <ion-item color="warning" class="ion-margin-bottom">
+      <ion-label>Oro (GP):</ion-label>
+      <ion-badge slot="end" color="dark">{{ pj.gold }}</ion-badge>
+    </ion-item>
+
+    <ion-list>
+      @for (item of pj.inventory; track item.name) {
+        <ion-item>
+          <ion-label>
+            <h2>{{ item.name }} x{{ item.quantity }}</h2>
+          </ion-label>
+          @if (item.equipped) {
+            <ion-badge color="success" slot="end">Equipado</ion-badge>
+          }
+        </ion-item>
+      }
+    </ion-list>
+  }
+
+  @if (currentTab === 'magic') {
+    <div class="ion-text-center ion-padding">
+      <h3 style="color: gray;">Este personaje no puede lanzar conjuros.</h3>
+    </div>
+  }
+
+</ion-content>

@@ -47,4 +47,29 @@ class CampaignController(
             ResponseEntity.notFound().build()
         }
     }
+
+    @PutMapping("/{id}")
+    fun updateCampaign(@PathVariable id: UUID, @RequestBody dto: CampaignDto): Campaign {
+        val existingCampaign = campaignRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign not found with id $id") }
+
+        val owner = userRepository.findById(dto.ownerId)
+            .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Owner not found with id ${dto.ownerId}") }
+
+        val updatedCampaign = existingCampaign.copy(
+            name = dto.name,
+            description = dto.description,
+            owner = owner
+        )
+        return campaignRepository.save(updatedCampaign)
+    }
+
+    @DeleteMapping("/{id}")
+    fun deleteCampaign(@PathVariable id: UUID): ResponseEntity<Void> {
+        if (!campaignRepository.existsById(id)) {
+            return ResponseEntity.notFound().build()
+        }
+        campaignRepository.deleteById(id)
+        return ResponseEntity.noContent().build()
+    }
 }
