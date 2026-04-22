@@ -12,6 +12,7 @@
 - [Technology Stack](#technology-stack)
 - [Project Architecture](#project-architecture)
 - [Getting Started](#getting-started)
+- [Documentation](#documentation)
 - [Project Scope](#project-scope)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
@@ -42,6 +43,15 @@ However, this emerging professional niche lacks a **specialized software managem
 - AI-assisted procedural generation of balanced, narratively-rich encounters
 - A mobile-first experience for both GMs and players
 - A SaaS business model scalable to a growing professional community
+
+---
+
+## 📖 Documentation
+
+Detailed project planning and presentation documents are available:
+
+- **English**: Planning & Design | Presentation
+- **Spanish**: Planificación y Diseño | Presentación
 
 ---
 
