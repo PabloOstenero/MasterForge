@@ -1,6 +1,7 @@
 package com.masterforge.masterforge_backend.model.entity
 
 import jakarta.persistence.*
+import com.fasterxml.jackson.annotation.JsonIgnore
 
 @Entity
 @Table(name = "inventory_slots")
@@ -9,6 +10,7 @@ data class InventorySlot(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null,
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "character_id", nullable = false)
     val character: Character,

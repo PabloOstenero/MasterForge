@@ -42,7 +42,9 @@ data class CharacterDto(
     val campaign: CampaignRef? = null,
     
     val subclassId: Int? = null,
-    val choicesJson: Map<String, Any> = emptyMap()
+    val choicesJson: Map<String, Any> = emptyMap(),
+
+    val inventory: List<InventorySlotDto> = emptyList()
 )
 
 data class UserRef(val id: UUID)

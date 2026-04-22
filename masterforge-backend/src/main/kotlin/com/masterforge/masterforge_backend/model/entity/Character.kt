@@ -113,5 +113,8 @@ data class Character(
     // Here we store the player choices when leveling up
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "choices_json", columnDefinition = "jsonb")
-    val choicesJson: Map<String, Any> = emptyMap()
+    val choicesJson: Map<String, Any> = emptyMap(),
+
+    @OneToMany(mappedBy = "character", cascade = [CascadeType.ALL])
+    val inventory: MutableList<InventorySlot> = mutableListOf()
 )

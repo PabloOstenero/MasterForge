@@ -78,7 +78,11 @@ export class CharacterSheetPage implements OnInit {
             cha: data.baseCha
           },
           gold: data.gp, // Mapeamos las monedas de oro
-          inventory: []  // El inventario lo conectaremos más adelante
+          inventory: data.inventory ? data.inventory.map((slot: any) => ({
+          name: slot.item.name,
+          quantity: slot.quantity,
+          equipped: slot.isEquipped
+          })) : []
         };
       },
       error: (err) => {
