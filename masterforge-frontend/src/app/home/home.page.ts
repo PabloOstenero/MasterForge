@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { IonContent, IonList, IonItem, IonAvatar, IonLabel, IonBadge, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonInput, IonButton } from '@ionic/angular/standalone';
 import { ApiService } from '../services/api';
 
@@ -19,7 +20,7 @@ export class HomePage implements OnInit {
     email: ''
   };
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService, private router: Router) {}
 
   ngOnInit() {
     this.loadUsers();
@@ -33,7 +34,7 @@ export class HomePage implements OnInit {
       },
       error: (err) => {
         console.error('Error al conectar con el backend', err);
-      }
+      } 
     });
   }
 
@@ -67,5 +68,10 @@ export class HomePage implements OnInit {
         alert("Hubo un error. ¿A lo mejor ese email ya existe en la base de datos?");
       }
     });
+  }
+
+  goToSheet(characterId: string) {
+    console.log("Navegando a la ficha del personaje con ID:", characterId);
+    this.router.navigate(['/character-sheet', characterId]);
   }
 }

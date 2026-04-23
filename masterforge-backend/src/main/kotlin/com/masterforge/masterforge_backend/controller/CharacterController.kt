@@ -2,11 +2,13 @@ package com.masterforge.masterforge_backend.controller
 
 import com.masterforge.masterforge_backend.model.dto.CharacterDto
 import com.masterforge.masterforge_backend.model.entity.Character
+import com.masterforge.masterforge_backend.model.dto.CharacterResponseDto
 import com.masterforge.masterforge_backend.repository.*
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @RestController
@@ -22,12 +24,14 @@ class CharacterController(
 ) {
 
     @GetMapping
-    fun getAllCharacters(): List<Character> {
-        return characterRepository.findAll()
+    @Transactional // Ensure lazy-loaded relationships are fetched for DTO mapping
+    fun getAllCharacters(): List<CharacterResponseDto> {
+        return characterRepository.findAll().map { CharacterResponseDto.fromEntity(it) }
     }
 
     @PostMapping
-    fun createCharacter(@RequestBody dto: CharacterDto): Character {
+    @Transactional // Ensure lazy-loaded relationships are fetched for DTO mapping
+    fun createCharacter(@RequestBody dto: CharacterDto): CharacterResponseDto {
         val user = userRepository.findById(dto.user.id)
             .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found with id ${dto.user.id}") }
         
@@ -81,21 +85,23 @@ class CharacterController(
             subclass = subclass,
             choicesJson = dto.choicesJson
         )
-        return characterRepository.save(character)
+        return CharacterResponseDto.fromEntity(characterRepository.save(character))
     }
 
     @GetMapping("/{id}")
-    fun getCharacterById(@PathVariable id: UUID): ResponseEntity<Character> {
+    @Transactional // Ensure lazy-loaded relationships are fetched for DTO mapping
+    fun getCharacterById(@PathVariable id: UUID): ResponseEntity<CharacterResponseDto> {
         val character = characterRepository.findById(id)
         return if (character.isPresent) {
-            ResponseEntity.ok(character.get())
+            ResponseEntity.ok(CharacterResponseDto.fromEntity(character.get()))
         } else {
             ResponseEntity.notFound().build()
         }
     }
 
     @PutMapping("/{id}")
-    fun updateCharacter(@PathVariable id: UUID, @RequestBody dto: CharacterDto): Character {
+    @Transactional // Ensure lazy-loaded relationships are fetched for DTO mapping
+    fun updateCharacter(@PathVariable id: UUID, @RequestBody dto: CharacterDto): CharacterResponseDto {
         val existingCharacter = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found with id $id") }
 
@@ -151,7 +157,12 @@ class CharacterController(
             subclass = subclass,
             choicesJson = dto.choicesJson
         )
-        return characterRepository.save(updatedCharacter)
+
+        val savedCharacter = characterRepository.save(updatedCharacter)
+        // Sincronizamos el lado inverso de la relación en memoria
+        user.characters.add(savedCharacter) 
+
+        return CharacterResponseDto.fromEntity(savedCharacter)
     }
 
     @DeleteMapping("/{id}")

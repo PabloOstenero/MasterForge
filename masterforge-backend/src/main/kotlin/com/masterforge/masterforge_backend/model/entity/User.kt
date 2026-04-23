@@ -31,5 +31,8 @@ data class User(
     val balance: BigDecimal = BigDecimal.ZERO,
 
     @Column(name = "is_active", nullable = false)
-    val isActive: Boolean = true
+    val isActive: Boolean = true,
+
+    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    val characters: MutableList<Character> = mutableListOf()
 )

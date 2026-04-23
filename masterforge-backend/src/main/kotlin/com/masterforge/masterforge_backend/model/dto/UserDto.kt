@@ -8,5 +8,6 @@ data class UserDto(
     val passwordHash: String,
     val subscriptionTier: String,
     val balance: BigDecimal,
-    val isActive: Boolean
+    val isActive: Boolean,
+    val characters: List<CharacterDto> = emptyList()
 )

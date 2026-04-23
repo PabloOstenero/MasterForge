@@ -41,13 +41,31 @@ data class CharacterDto(
     // Campaign is mandatory in Entity, so it must be here too.
     val campaign: CampaignRef? = null,
     
-    val subclassId: Int? = null,
+    val subclassId: Int? = null, // For requests, we send the ID
     val choicesJson: Map<String, Any> = emptyMap(),
 
-    val inventory: List<InventorySlotDto> = emptyList()
+    val inventory: List<InventorySlotRequestDto> = emptyList() // Use Request DTO for input
 )
 
 data class UserRef(val id: UUID)
 data class RaceRef(val id: Int)
 data class ClassRef(val id: Int)
 data class CampaignRef(val id: UUID)
+
+// DTO for Item within InventorySlotRequestDto (for requests)
+data class ItemRequestDto(
+    val id: UUID,
+    val name: String,
+    val type: String,
+    val weight: Double,
+    val properties: Map<String, Any> = emptyMap()
+)
+
+// DTO for InventorySlot in CharacterDto (for requests)
+data class InventorySlotRequestDto(
+    val id: Long? = null, // Optional for new slots, used for updates
+    val item: ItemRequestDto, // Now expects a full ItemRequestDto
+    val quantity: Int,
+    val attuned: Boolean,
+    val equipped: Boolean
+)

@@ -28,7 +28,7 @@
   <h2 class="ion-margin-top">Usuarios Registrados</h2>
   <ion-list>
     @for (user of users; track user.id) {
-      <ion-item>
+      <ion-item button (click)="goToSheet(user.characters[0].id)" detail="true">
         <ion-avatar slot="start">
           <img src="https://ionicframework.com/docs/img/demos/avatar.svg" />
         </ion-avatar>

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { 
   IonHeader, IonToolbar, IonTitle, IonContent, IonSegment, IonSegmentButton, IonLabel, 
   IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardTitle, IonCardContent, 
@@ -40,15 +41,18 @@ export class CharacterSheetPage implements OnInit {
   };
 
   // Inyectamos el servicio en el constructor
-  constructor(private apiService: ApiService) { }
+  constructor(private apiService: ApiService, private route: ActivatedRoute) { }
 
   ngOnInit() {
     // ⚠️ ATENCIÓN: Pega aquí el ID larguísimo (UUID) de un personaje que hayas creado en Postman
-    const idDePrueba = 'a545080f-4585-4e2c-bce6-786b3f791aa0'; 
+    const routeId = this.route.snapshot.paramMap.get('id');
     
     // Solo llamamos a la base de datos si hemos puesto un ID válido
-    if (idDePrueba == 'a545080f-4585-4e2c-bce6-786b3f791aa0') {
-      this.loadCharacter(idDePrueba);
+    if (routeId) {
+      console.log("Abriendo ficha del personaje ID:", routeId);
+      this.loadCharacter(routeId);
+    } else {
+      console.error("No se ha pasado ningún ID en la URL");
     }
   }
 

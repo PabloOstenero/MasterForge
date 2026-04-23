@@ -1,6 +1,7 @@
 package com.masterforge.masterforge_backend.model.entity
 
 import jakarta.persistence.*
+import com.fasterxml.jackson.annotation.JsonIgnore
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import java.util.UUID
@@ -89,6 +90,7 @@ data class Character(
     val spellSlots: Map<String, Any> = emptyMap(),
 
     // --- Relationships ---
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     val user: User,
