@@ -13,7 +13,6 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/spells")
-@CrossOrigin(origins = ["*"])
 class SpellController(
     private val spellRepository: SpellRepository,
     private val userRepository: UserRepository

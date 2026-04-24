@@ -12,7 +12,6 @@ import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @RequestMapping("/api/dnd-races")
-@CrossOrigin(origins = ["*"])
 class DndRaceController(
     private val dndRaceRepository: DndRaceRepository,
     private val userRepository: UserRepository

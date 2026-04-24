@@ -12,7 +12,6 @@ import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @RequestMapping("/api/character-spells")
-@CrossOrigin(origins = ["*"])
 class CharacterSpellController(
     private val characterSpellRepository: CharacterSpellRepository,
     private val characterRepository: CharacterRepository,

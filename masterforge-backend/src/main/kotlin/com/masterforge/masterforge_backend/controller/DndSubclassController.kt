@@ -13,7 +13,6 @@ import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @RequestMapping("/api/dnd-subclasses")
-@CrossOrigin(origins = ["*"])
 class DndSubclassController(
     private val dndSubclassRepository: DndSubclassRepository,
     private val dndClassRepository: DndClassRepository,

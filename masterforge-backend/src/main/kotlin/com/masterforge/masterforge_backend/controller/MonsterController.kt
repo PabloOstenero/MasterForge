@@ -13,7 +13,6 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/monsters")
-@CrossOrigin(origins = ["*"])
 class MonsterController(
     private val monsterRepository: MonsterRepository,
     private val userRepository: UserRepository

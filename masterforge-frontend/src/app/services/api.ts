@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 export class ApiService {
   // URL to the Kotlin backend
   private apiUrl = 'http://localhost:8080/api'; 
-
+  
   constructor(private http: HttpClient) { }
 
   // Function to fetch users from the database
@@ -24,5 +24,10 @@ export class ApiService {
   // Function to fetch characters from the database
   getCharacter(id: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/characters/${id}`);
+  }
+
+  // Function to update character current HP
+  updateCharacterHp(id: string, currentHp: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/characters/${id}/hp`, { currentHp: Number(currentHp) });
   }
 }

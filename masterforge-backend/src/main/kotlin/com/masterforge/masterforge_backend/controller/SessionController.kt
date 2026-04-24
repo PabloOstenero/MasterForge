@@ -12,7 +12,6 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/sessions")
-@CrossOrigin(origins = ["*"])
 class SessionController(
     private val sessionRepository: SessionRepository,
     private val campaignRepository: CampaignRepository

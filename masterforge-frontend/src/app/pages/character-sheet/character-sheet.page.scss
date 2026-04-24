@@ -1,0 +1,227 @@
+.header-toolbar {
+  --background: #121212;
+  --color: #C5A059;
+  --border-width: 0;
+}
+
+.gold-title {
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.6rem;
+  margin-top: 10px;
+}
+
+.char-sheet-content {
+  --background: #121212;
+}
+
+.info-box {
+  background: #1E1E1E;
+  color: white;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #333;
+  font-weight: 500;
+  text-align: center;
+}
+
+.hp-bar-container {
+  height: 12px;
+  width: 100%;
+  background: #222;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid #333;
+  margin-bottom: 8px;
+}
+
+.hp-bar-fill {
+  height: 100%;
+  background: #C62828;
+  transition: width 0.3s ease;
+}
+
+.hp-text {
+  text-align: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.btn-damage {
+  --background: #C62828;
+  --color: white;
+  --border-radius: 12px;
+  font-weight: bold;
+  height: 50px;
+}
+
+.btn-heal {
+  --background: #C5A059;
+  --color: #121212;
+  --border-radius: 12px;
+  font-weight: bold;
+  height: 50px;
+}
+
+.section-title {
+  color: #C5A059;
+  margin-bottom: 20px;
+  font-size: 1.4rem;
+}
+
+.stat-card {
+  background: #1E1E1E;
+  margin: 5px;
+  padding: 20px 5px;
+  border-radius: 10px;
+  text-align: center;
+  border: 1px solid #333;
+
+  .stat-label {
+    color: #888;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+
+  .stat-value {
+    color: white;
+    font-size: 2rem;
+    font-weight: bold;
+  }
+
+  .stat-mod {
+    color: #C5A059;
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-top: 5px;
+  }
+}
+
+.skill-item {
+  --background: #1E1E1E;
+  --border-radius: 10px;
+  margin-bottom: 12px;
+  --padding-start: 15px;
+  border: 1px solid #333;
+
+  .prof-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    &.filled { background: white; border: 2px solid #888; }
+    &.outline { background: black; border: 2px solid #888; }
+  }
+
+  h2 { color: white; font-weight: bold; }
+  p { color: #888; }
+  .skill-mod { color: white; font-size: 1.3rem; font-weight: bold; }
+  .accent-text { color: #C5A059; font-size: 0.8rem; margin-left: 5px; }
+}
+
+.transparent-list {
+  background: transparent;
+}
+
+.gold-badge-container {
+  background: #C5A059;
+  color: #121212;
+  padding: 15px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.gold-badge {
+  background: #121212;
+  color: #C5A059;
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid #333;
+}
+
+.footer-toolbar {
+  --background: #1E1E1E;
+  border-top: 1px solid #333;
+}
+
+ion-segment {
+  --background: #1E1E1E;
+}
+
+ion-segment-button {
+  --color: #888;
+  --color-checked: #C5A059;
+  --indicator-color: transparent;
+
+  ion-label {
+    color: inherit;
+  }
+
+  ion-icon {
+    color: inherit;
+  }
+}
+
+/* --- Alert Styling for Damage/Heal Buttons --- */
+/* These work because ViewEncapsulation is set to None in the .ts file */
+
+.damage-alert, .heal-alert {
+  --background: #1E1E1E; /* Anthracite background for the alert */
+  --color: white; /* Default text color */
+  --border-radius: 10px;
+  --box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+
+  .alert-head {
+    padding-top: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #333;
+  }
+
+  .alert-title {
+    color: #C5A059; /* Gold title */
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+
+  .alert-input-wrapper {
+    background: #2a2a2a; /* Darker input background */
+    border-radius: 5px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #333;
+  }
+
+  .alert-input {
+    color: white; /* Input text color */
+    font-size: 1.1rem;
+  }
+
+  .alert-button {
+    font-weight: bold;
+    color: white; /* Default button text color */
+    background: #333; /* Default button background */
+    border-radius: 8px;
+    margin: 5px;
+    padding: 10px 15px;
+  }
+
+  .alert-button:hover {
+    opacity: 0.8;
+  }
+}
+
+.damage-alert .alert-button:last-child { 
+  background: #C62828 !important; 
+}
+
+.heal-alert .alert-button:last-child { 
+  background: #C5A059 !important; 
+  color: #121212 !important;
+}

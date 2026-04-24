@@ -11,9 +11,10 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
+data class HpUpdateDto(val currentHp: Int)
+
 @RestController
 @RequestMapping("/api/characters")
-@CrossOrigin(origins = ["*"])
 class CharacterController(
     private val characterRepository: CharacterRepository,
     private val userRepository: UserRepository,
@@ -163,6 +164,18 @@ class CharacterController(
         user.characters.add(savedCharacter) 
 
         return CharacterResponseDto.fromEntity(savedCharacter)
+    }
+
+    @PutMapping("/{id}/hp")
+    @Transactional
+    fun updateHp(@PathVariable id: UUID, @RequestBody dto: HpUpdateDto): ResponseEntity<Void> {
+        val character = characterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found with id $id") }
+
+        val updatedCharacter = character.copy(currentHp = dto.currentHp)
+        characterRepository.save(updatedCharacter)
+        
+        return ResponseEntity.ok().build()
     }
 
     @DeleteMapping("/{id}")

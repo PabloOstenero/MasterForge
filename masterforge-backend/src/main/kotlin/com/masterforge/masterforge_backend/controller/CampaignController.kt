@@ -12,7 +12,6 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/campaigns")
-@CrossOrigin(origins = ["*"])
 class CampaignController(
     private val campaignRepository: CampaignRepository,
     private val userRepository: UserRepository

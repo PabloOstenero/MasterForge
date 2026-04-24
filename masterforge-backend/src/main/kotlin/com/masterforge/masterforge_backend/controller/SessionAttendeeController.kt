@@ -14,7 +14,6 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/session-attendees")
-@CrossOrigin(origins = ["*"])
 class SessionAttendeeController(
     private val sessionAttendeeRepository: SessionAttendeeRepository,
     private val sessionRepository: SessionRepository,

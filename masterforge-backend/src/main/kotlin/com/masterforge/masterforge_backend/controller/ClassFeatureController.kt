@@ -11,7 +11,6 @@ import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @RequestMapping("/api/class-features")
-@CrossOrigin(origins = ["*"])
 class ClassFeatureController(
     private val classFeatureRepository: ClassFeatureRepository,
     private val dndClassRepository: DndClassRepository

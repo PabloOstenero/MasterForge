@@ -13,7 +13,6 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/items")
-@CrossOrigin(origins = ["*"])
 class ItemController(
     private val itemRepository: ItemRepository,
     private val userRepository: UserRepository

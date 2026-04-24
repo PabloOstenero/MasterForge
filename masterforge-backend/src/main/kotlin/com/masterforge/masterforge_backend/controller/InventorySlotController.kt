@@ -12,7 +12,6 @@ import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @RequestMapping("/api/inventory-slots")
-@CrossOrigin(origins = ["*"])
 class InventorySlotController(
     private val inventorySlotRepository: InventorySlotRepository,
     private val characterRepository: CharacterRepository,

@@ -13,7 +13,6 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = ["*"])
 class UserController(private val userRepository: UserRepository) {
 
     @GetMapping
