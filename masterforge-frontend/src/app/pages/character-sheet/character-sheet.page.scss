@@ -25,6 +25,48 @@
   text-align: center;
 }
 
+.hp-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hp-main-side {
+  flex: 1;
+}
+
+.temp-hp-counter {
+  background: #1E1E1E;
+  border: 1px solid #333;
+  border-radius: 8px;
+  min-width: 55px;
+  height: 52px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:active {
+    background: #2a2a2a;
+  }
+
+  .temp-val {
+    color: #C5A059;
+    font-size: 1.3rem;
+    font-weight: bold;
+    line-height: 1;
+  }
+  .temp-label {
+    color: #888;
+    font-size: 0.6rem;
+    font-weight: bold;
+    margin-top: 2px;
+    text-transform: uppercase;
+  }
+}
+
 .hp-bar-container {
   height: 12px;
   width: 100%;
@@ -47,6 +89,15 @@
   color: white;
   font-weight: bold;
   font-size: 1.1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.temp-hp-badge {
+  color: #C5A059;
+  font-size: 0.9rem;
 }
 
 .btn-damage {
@@ -120,6 +171,140 @@
   p { color: #888; }
   .skill-mod { color: white; font-size: 1.3rem; font-weight: bold; }
   .accent-text { color: #C5A059; font-size: 0.8rem; margin-left: 5px; }
+}
+
+/* Pen & Paper Combat Style */
+.combat-header-grid {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.ac-shield {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  background: #1E1E1E;
+  color: white;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #333;
+  font-weight: 500;
+
+  .ac-value { font-size: 1.1rem; order: 2; }
+  .combat-label { font-size: 1.1rem; order: 1; &::after { content: ':'; } }
+}
+
+.clickable-box {
+  cursor: pointer;
+  transition: background 0.2s;
+  
+  &:active {
+    background: #2a2a2a;
+  }
+}
+
+.top-shield {
+  width: 100% !important;
+  height: auto !important;
+  margin: 0 auto;
+}
+
+.combat-square-box {
+  border: 2px solid #333;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  min-width: 80px;
+  background: #1e1e1e;
+
+  &.clickable {
+    cursor: pointer;
+    &:active {
+      background: #2a2a2a;
+    }
+  }
+
+  .hp-header {
+    color: #C5A059;
+  }
+
+  .combat-value { color: white; font-size: 1.5rem; font-weight: bold; }
+  .combat-value.small { font-size: 1.1rem; }
+  .combat-label { color: #888; font-size: 0.65rem; text-transform: uppercase; font-weight: bold; margin-top: 5px; }
+}
+
+.combat-hp-section {
+  border: 2px solid #333;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 15px;
+  
+  .hp-header { background: #121212; color: #888; font-size: 0.7rem; padding: 4px; text-align: center; }
+  .hp-current-display { padding: 15px; text-align: center; background: #1e1e1e; }
+  .hp-input { 
+    background: transparent; border: none; color: white; font-size: 2rem; 
+    font-weight: bold; width: 100%; text-align: center; 
+    &.temp { color: #C5A059; }
+  }
+  .combat-label { text-align: center; background: #121212; color: #888; font-size: 0.65rem; padding: 4px; text-transform: uppercase; }
+}
+
+.death-saves-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  span { color: #888; font-size: 0.7rem; margin-right: 10px; }
+}
+
+.ds-dot {
+  width: 12px;
+  height: 12px;
+  border: 1px solid #444;
+  border-radius: 50%;
+  &.checked { background: #4CAF50; border-color: #4CAF50; }
+  &.error.checked { background: #C62828; border-color: #C62828; }
+}
+
+.attack-header {
+  display: flex;
+  padding: 0 10px 5px 10px;
+  align-items: center;
+
+  div { 
+    flex: 1; 
+    text-align: center; 
+    color: #888; 
+    font-size: 0.65rem; 
+    text-transform: uppercase; 
+    font-weight: bold; 
+  }
+  .atk-name { flex: 2; text-align: left; }
+  .atk-damage { flex: 2; }
+}
+
+.attack-row {
+  display: flex;
+  background: #1e1e1e;
+  border: 1px solid #333;
+  margin-bottom: 2px;
+  padding: 10px;
+  align-items: center;
+
+  div { flex: 1; text-align: center; color: white; font-size: 0.9rem; }
+  .atk-name { flex: 2; text-align: left; font-weight: bold; color: #C5A059; }
+  .atk-bonus { border-left: 1px solid #333; border-right: 1px solid #333; font-weight: bold; }
+  .atk-damage { flex: 2; font-size: 0.8rem; color: #888; }
+
+  &.unequipped {
+    opacity: 0.6;
+    background: #141414;
+    .atk-name { color: #888; }
+  }
 }
 
 .transparent-list {
@@ -242,6 +427,43 @@ ion-segment-button {
   }
 }
 
+.money-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+
+.coin-box {
+  flex: 1;
+  background: #1E1E1E;
+  border: 1px solid #333;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 2px;
+
+  .coin-label {
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+
+  .coin-value {
+    color: white;
+    font-size: 1.1rem;
+    font-weight: bold;
+  }
+
+  &.cp .coin-label { color: #CD7F32; } /* Cobre - PC */
+  &.sp .coin-label { color: #C0C0C0; } /* Plata - PP */
+  &.ep .coin-label { color: #9DBAD5; } /* Electrum - PE */
+  &.gp .coin-label { color: #C5A059; } /* Oro - PO */
+  &.pp .coin-label { color: #E5E4E2; } /* Platino - PT */
+}
+
 /* --- Alert Styling for Damage/Heal Buttons --- */
 /* These work because ViewEncapsulation is set to None in the .ts file */
 
@@ -274,6 +496,16 @@ ion-segment-button {
   .alert-input {
     color: white; /* Input text color */
     font-size: 1.1rem;
+  }
+
+  .alert-radio-label {
+    color: white !important; /* Forza el texto de la lista a blanco */
+    font-size: 1rem;
+  }
+
+  .alert-radio-icon {
+    border-color: #C5A059 !important; /* El círculo del radio button en dorado */
+    .alert-radio-inner { background-color: #C5A059 !important; }
   }
 
   .alert-button {

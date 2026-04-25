@@ -2,6 +2,7 @@ package com.masterforge.masterforge_backend.controller
 
 import com.masterforge.masterforge_backend.model.dto.CharacterDto
 import com.masterforge.masterforge_backend.model.entity.Character
+import com.masterforge.masterforge_backend.model.entity.InventorySlot
 import com.masterforge.masterforge_backend.model.dto.CharacterResponseDto
 import com.masterforge.masterforge_backend.repository.*
 import org.springframework.http.HttpStatus
@@ -12,7 +13,9 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 data class HpUpdateDto(val currentHp: Int)
+data class TempHpUpdateDto(val tempHp: Int)
 data class HitDiceUpdateDto(val hitDiceSpent: Int)
+data class MoneyUpdateDto(val cp: Int, val sp: Int, val ep: Int, val gp: Int, val pp: Int)
 
 @RestController
 @RequestMapping("/api/characters")
@@ -22,7 +25,8 @@ class CharacterController(
     private val campaignRepository: CampaignRepository,
     private val dndRaceRepository: DndRaceRepository,
     private val dndClassRepository: DndClassRepository,
-    private val dndSubclassRepository: DndSubclassRepository
+    private val dndSubclassRepository: DndSubclassRepository,
+    private val itemRepository: ItemRepository
 ) {
 
     @GetMapping
@@ -60,7 +64,6 @@ class CharacterController(
             maxHp = dto.maxHp,
             currentHp = dto.currentHp,
             tempHp = dto.tempHp,
-            armorClass = dto.armorClass,
             speed = dto.speed,
             hitDiceTotal = dto.hitDiceTotal,
             hitDiceSpent = dto.hitDiceSpent,
@@ -88,6 +91,20 @@ class CharacterController(
             subclass = subclass,
             choicesJson = dto.choicesJson
         )
+
+        // Map inventory items from DTO
+        dto.inventory.forEach { slotDto ->
+            val item = itemRepository.findById(slotDto.item.id)
+                .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Item not found: ${slotDto.item.id}") }
+            character.inventory.add(InventorySlot(
+                item = item,
+                quantity = slotDto.quantity,
+                isEquipped = slotDto.isEquipped,
+                isAttuned = slotDto.isAttuned,
+                character = character
+            ))
+        }
+
         return CharacterResponseDto.fromEntity(characterRepository.save(character))
     }
 
@@ -133,7 +150,6 @@ class CharacterController(
             maxHp = dto.maxHp,
             currentHp = dto.currentHp,
             tempHp = dto.tempHp,
-            armorClass = dto.armorClass,
             speed = dto.speed,
             hitDiceTotal = dto.hitDiceTotal,
             hitDiceSpent = dto.hitDiceSpent,
@@ -162,6 +178,20 @@ class CharacterController(
             choicesJson = dto.choicesJson
         )
 
+        // Sync Inventory
+        updatedCharacter.inventory.clear()
+        dto.inventory.forEach { slotDto ->
+            val item = itemRepository.findById(slotDto.item.id)
+                .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Item not found: ${slotDto.item.id}") }
+            updatedCharacter.inventory.add(InventorySlot(
+                item = item,
+                quantity = slotDto.quantity,
+                isEquipped = slotDto.isEquipped,
+                isAttuned = slotDto.isAttuned,
+                character = updatedCharacter
+            ))
+        }
+
         val savedCharacter = characterRepository.save(updatedCharacter)
         // Sincronizamos el lado inverso de la relación en memoria
         user.characters.add(savedCharacter) 
@@ -181,6 +211,36 @@ class CharacterController(
         return ResponseEntity.ok().build()
     }
 
+    @PutMapping("/{id}/temp-hp")
+    @Transactional
+    fun updateTempHp(@PathVariable id: UUID, @RequestBody dto: TempHpUpdateDto): ResponseEntity<Void> {
+        val character = characterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found with id $id") }
+
+        val updatedCharacter = character.copy(tempHp = dto.tempHp)
+        characterRepository.save(updatedCharacter)
+        
+        return ResponseEntity.ok().build()
+    }
+
+    @PutMapping("/{id}/money")
+    @Transactional
+    fun updateMoney(@PathVariable id: UUID, @RequestBody dto: MoneyUpdateDto): ResponseEntity<Void> {
+        val character = characterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found with id $id") }
+
+        val updatedCharacter = character.copy(
+            cp = dto.cp,
+            sp = dto.sp,
+            ep = dto.ep,
+            gp = dto.gp,
+            pp = dto.pp
+        )
+        characterRepository.save(updatedCharacter)
+        
+        return ResponseEntity.ok().build()
+    }
+
     @PutMapping("/{id}/inventory/{slotId}/toggle-equip")
     @Transactional
     fun toggleEquip(@PathVariable id: UUID, @PathVariable slotId: Int): ResponseEntity<CharacterResponseDto> {
@@ -194,6 +254,75 @@ class CharacterController(
 
         val slot = character.inventory[index]
         character.inventory[index] = slot.copy(isEquipped = !slot.isEquipped)
+        
+        val saved = characterRepository.save(character)
+        return ResponseEntity.ok(CharacterResponseDto.fromEntity(saved))
+    }
+
+    @PostMapping("/{id}/inventory/{itemId}")
+    @Transactional
+    fun addItemToInventory(@PathVariable id: UUID, @PathVariable itemId: UUID): ResponseEntity<CharacterResponseDto> {
+        val character = characterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        val item = itemRepository.findById(itemId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Item not found") }
+
+        // Check if item already exists to increment quantity
+        val existingSlot = character.inventory.find { it.item.id == itemId }
+        if (existingSlot != null) {
+            val index = character.inventory.indexOf(existingSlot)
+            character.inventory[index] = existingSlot.copy(quantity = existingSlot.quantity + 1)
+        } else {
+            character.inventory.add(InventorySlot(
+                character = character,
+                item = item,
+                quantity = 1,
+                isEquipped = false,
+                isAttuned = false
+            ))
+        }
+
+        val saved = characterRepository.save(character)
+        return ResponseEntity.ok(CharacterResponseDto.fromEntity(saved))
+    }
+
+    @PutMapping("/{id}/inventory/{slotId}/use")
+    @Transactional
+    fun useItem(@PathVariable id: UUID, @PathVariable slotId: Int): ResponseEntity<CharacterResponseDto> {
+        val character = characterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        
+        val index = character.inventory.indexOfFirst { it.id == slotId }
+        if (index == -1) throw ResponseStatusException(HttpStatus.NOT_FOUND, "Slot not found")
+
+        val slot = character.inventory[index]
+        
+        if (slot.quantity > 1) {
+            character.inventory[index] = slot.copy(quantity = slot.quantity - 1)
+        } else {
+            character.inventory.removeAt(index)
+        }
+        
+        val saved = characterRepository.save(character)
+        return ResponseEntity.ok(CharacterResponseDto.fromEntity(saved))
+    }
+
+    @DeleteMapping("/{id}/inventory/{slotId}")
+    @Transactional
+    fun removeInventoryItem(@PathVariable id: UUID, @PathVariable slotId: Int): ResponseEntity<CharacterResponseDto> {
+        val character = characterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        
+        val index = character.inventory.indexOfFirst { it.id == slotId }
+        if (index == -1) throw ResponseStatusException(HttpStatus.NOT_FOUND, "Slot not found")
+
+        val slot = character.inventory[index]
+        
+        if (slot.quantity > 1) {
+            character.inventory[index] = slot.copy(quantity = slot.quantity - 1)
+        } else {
+            character.inventory.removeAt(index)
+        }
         
         val saved = characterRepository.save(character)
         return ResponseEntity.ok(CharacterResponseDto.fromEntity(saved))

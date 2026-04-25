@@ -7,6 +7,7 @@ data class UserRef(val id: UUID)
 data class CampaignRef(val id: UUID)
 data class RaceRef(val id: Int)
 data class ClassRef(val id: Int)
+data class ItemRef(val id: UUID)
 
 data class CharacterDto(
     val name: String,
@@ -14,7 +15,6 @@ data class CharacterDto(
     val maxHp: Int,
     val currentHp: Int,
     val tempHp: Int,
-    val armorClass: Int,
     val speed: Int,
     val hitDiceTotal: Int,
     val hitDiceSpent: Int,
@@ -40,5 +40,6 @@ data class CharacterDto(
     val dndRace: RaceRef,
     val dndClass: ClassRef,
     val subclassId: Int? = null,
-    val choicesJson: Map<String, Any>
+    val choicesJson: Map<String, Any>,
+    val inventory: List<InventorySlotDto> = emptyList()
 )

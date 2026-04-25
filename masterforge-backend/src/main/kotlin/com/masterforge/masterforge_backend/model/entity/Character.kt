@@ -31,9 +31,6 @@ data class Character(
     @Column(name = "temp_hp", nullable = false)
     val tempHp: Int = 0,  // Temporary hit points
 
-    @Column(name = "armor_class", nullable = false)
-    val armorClass: Int = 10,
-
     @Column(nullable = false)
     val speed: Int = 30,  // Speed in feet
 
@@ -121,6 +118,6 @@ data class Character(
     @Column(name = "choices_json", columnDefinition = "jsonb")
     val choicesJson: Map<String, Any> = emptyMap(),
 
-    @OneToMany(mappedBy = "character", cascade = [CascadeType.ALL])
+    @OneToMany(mappedBy = "character", cascade = [CascadeType.ALL], orphanRemoval = true)
     val inventory: MutableList<InventorySlot> = mutableListOf()
 )

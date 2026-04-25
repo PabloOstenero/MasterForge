@@ -7,26 +7,31 @@
 <ion-content class="char-sheet-content">
   <div class="ion-padding">
     <!-- Class and AC Info boxes -->
-    <ion-row class="ion-margin-bottom">
+    <ion-row class="ion-margin-bottom ion-align-items-center">
       <ion-col size="8">
         <div class="info-box">
           Clase: {{ pj.dndClass }} {{ pj.level }}
         </div>
       </ion-col>
-      <ion-col size="4">
-        <div class="info-box">
-          CA: {{ pj.armorClass }}
+      <ion-col size="4" class="ion-text-center">
+        <div class="ac-shield top-shield">
+          <div class="ac-value">{{ pj.armorClass }}</div>
+          <div class="combat-label">CA</div>
         </div>
       </ion-col>
     </ion-row>
 
     <!-- HP Progress Bar -->
-    <div class="ion-margin-bottom">
-      <div class="hp-bar-container">
-        <div class="hp-bar-fill" [style.width.%]="(pj.currentHp / pj.maxHp) * 100"></div>
+    <div class="hp-section ion-margin-bottom">
+      <div class="hp-main-side">
+        <div class="hp-bar-container">
+          <div class="hp-bar-fill" [style.width.%]="(pj.currentHp / pj.maxHp) * 100"></div>
+        </div>
+        <div class="hp-text">HP {{ pj.currentHp }} / {{ pj.maxHp }}</div>
       </div>
-      <div class="hp-text">
-        HP {{ pj.currentHp }} / {{ pj.maxHp }}
+      <div class="temp-hp-counter" (click)="updateTempHpAlert()">
+        <div class="temp-val">{{ pj.tempHp }}</div>
+        <div class="temp-label">TEMP</div>
       </div>
     </div>
 
@@ -116,21 +121,21 @@
         </ion-row>
       </ion-grid>
 
-      <!-- New Section: Hit Dice -->
-      <h2 class="section-title" style="margin-top: 30px;">Dados de Golpe</h2>
-      <div class="info-box ion-margin-bottom">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-          <span style="color: white; font-weight: bold;">Disponibles: {{ pj.hitDiceTotal - pj.hitDiceSpent }}d{{ pj.hitDieType }}</span>
-          <span style="color: #C5A059; font-weight: bold;">Total: {{ pj.hitDiceTotal }}d{{ pj.hitDieType }}</span>
-        </div>
-      </div>
-      <ion-row class="ion-margin-bottom">
-        <ion-col size="12">
-          <ion-button expand="block" class="btn-spend-hit-dice" (click)="spendOneHitDie()" [disabled]="pj.hitDiceSpent >= pj.hitDiceTotal">
-            Gastar 1 Dado de Golpe
-          </ion-button>
-        </ion-col>
-      </ion-row>
+      <!-- New Section: Class Features (Testing placeholder) -->
+      <h2 class="section-title" style="margin-top: 30px;">Rasgos de Clase</h2>
+      <ion-list class="transparent-list">
+        <!-- This will iterate over features once you add them to the DndClass entity in the DB -->
+        @for (feature of pj.features; track feature.id) {
+          <ion-item lines="none" class="skill-item">
+            <ion-label>
+              <h2 style="color: #C5A059;">{{ feature.name }}</h2>
+              <p>{{ feature.description }}</p>
+            </ion-label>
+          </ion-item>
+        } @empty {
+          <p style="color: #666; font-style: italic; padding-left: 10px;">No se han configurado rasgos para esta clase todavía.</p>
+        }
+      </ion-list>
 
       <h2 class="section-title" style="margin-top: 30px;">Habilidades (Skills)</h2>
       <ion-list class="transparent-list">
@@ -138,8 +143,11 @@
           <ion-item lines="none" class="skill-item">
             <div slot="start" class="prof-dot" [class.outline]="pj.skillProficiencies?.[skill.id]" [class.filled]="!pj.skillProficiencies?.[skill.id]"></div>
             <ion-label>
-              <h2>{{ skill.name }} 
-                @if (pj.skillProficiencies?.[skill.id]) { <span class="accent-text">[P]</span> }
+              <h2>{{ skill.name }}
+                @if (pj.choicesJson?.expertise?.includes(skill.id)) {
+                  <span class="accent-text" title="Pericia">[P+]</span>
+                }
+                @else if (pj.skillProficiencies?.[skill.id]) { <span class="accent-text" title="Competente">[P]</span> }
               </h2>
               <p>({{ statLabels[skill.stat] }})</p>
             </ion-label>
@@ -150,31 +158,138 @@
     </div>
   }
 
-  @if (currentTab === 'inventory') {
+  @if (currentTab === 'combat') {
     <div class="ion-padding">
-      <div class="gold-badge-container">
-        <span>Oro (GP)</span>
-        <span class="gold-badge">{{ pj.gold }}</span>
+      <!-- Combat Stats: Initiative and Speed -->
+      <ion-row class="ion-margin-bottom">
+        <ion-col size="6">
+          <div class="combat-square-box">
+            <div class="combat-value">{{ pj.initiative >= 0 ? '+' : '' }}{{ pj.initiative }}</div>
+            <div class="combat-label">Iniciativa</div>
+          </div>
+        </ion-col>
+        <ion-col size="6">
+          <div class="combat-square-box">
+            <div class="combat-value">{{ pj.speed }}</div>
+            <div class="combat-label">Velocidad</div>
+          </div>
+        </ion-col>
+      </ion-row>
+
+      <!-- Hit Dice and Death Saves -->
+      <ion-row>
+        <ion-col size="5">
+          <div class="combat-square-box hit-dice clickable" (click)="updateHitDiceAlert()">
+            <div class="hp-header">Total: {{ pj.hitDiceTotal }}d{{ pj.hitDieType }}</div>
+            <div class="combat-value small">{{ pj.hitDiceTotal - pj.hitDiceSpent }}d{{ pj.hitDieType }}</div>
+            <div class="combat-label">Dados de Golpe</div>
+          </div>
+        </ion-col>
+        <ion-col size="7">
+          <div class="combat-square-box death-saves">
+            <div class="death-saves-row">
+              <span>Éxitos</span>
+              @for (i of [0, 1, 2]; track i) {
+                <div class="ds-dot" [class.checked]="pj.deathSaves.success > i" (click)="toggleDeathSave('success', i)"></div>
+              }
+            </div>
+            <div class="death-saves-row">
+              <span>Fallos</span>
+              @for (i of [0, 1, 2]; track i) {
+                <div class="ds-dot error" [class.checked]="pj.deathSaves.failure > i" (click)="toggleDeathSave('failure', i)"></div>
+              }
+            </div>
+            <div class="combat-label">Salvaciones de Muerte</div>
+          </div>
+        </ion-col>
+      </ion-row>
+
+      <h2 class="section-title" style="margin-top: 20px;">Ataques y Conjuros</h2>
+      <div class="attack-header">
+        <div class="atk-name">Arma</div>
+        <div class="atk-bonus">Bono</div>
+        <div class="atk-damage">Daño</div>
       </div>
 
       <ion-list class="transparent-list">
-        @for (item of pj.inventory; track item.name) {
-          <ion-item lines="none" class="skill-item" (click)="toggleEquip(item.id)">
+        @for (item of pj.inventory; track item.id) {
+          @if (item.type === 'WEAPON') {
+            <div class="attack-row" [class.unequipped]="!item.equipped" (click)="toggleEquip(item.id)">
+              <div class="atk-name">
+                {{ item.name }}
+                @if (!item.equipped) { <small style="color: #666; font-size: 0.6rem;">(OFF)</small> }
+              </div>
+              <div class="atk-bonus">{{ getAttackBonus(item) }}</div>
+              <div class="atk-damage">{{ item.properties.damageDice }}{{ getDamageMod(item) }} {{ item.properties.damageType }}</div>
+            </div>
+          }
+        }
+      </ion-list>
+
+      <!-- Quick Toggle for other combat gear -->
+      <p style="color: #666; font-size: 0.8rem; margin-top: 20px;">Armaduras y Escudos (Toca para equipar):</p>
+      <div class="gear-chips">
+        @for (item of pj.inventory; track item.id) {
+          @if (item.type === 'ARMOR' || item.type === 'SHIELD') {
+            <ion-badge [color]="item.equipped ? 'success' : 'medium'" (click)="toggleEquip(item.id)" class="ion-margin-end">
+              {{ item.name }}
+            </ion-badge>
+          }
+        }
+      </div>
+    </div>
+  }
+
+  @if (currentTab === 'inventory') {
+    <div class="ion-padding">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h2 class="section-title" style="margin: 0;">Tu Mochila</h2>
+        <ion-button fill="clear" (click)="addItemAlert()">
+          <ion-icon slot="icon-only" name="add" color="warning"></ion-icon>
+        </ion-button>
+      </div>
+
+      <div class="money-row">
+        <div class="coin-box cp" (click)="updateMoneyAlert('cp')">
+          <span class="coin-label">PC</span>
+          <span class="coin-value">{{ pj.money.cp }}</span>
+        </div>
+        <div class="coin-box sp" (click)="updateMoneyAlert('sp')">
+          <span class="coin-label">PP</span>
+          <span class="coin-value">{{ pj.money.sp }}</span>
+        </div>
+        <div class="coin-box ep" (click)="updateMoneyAlert('ep')">
+          <span class="coin-label">PE</span>
+          <span class="coin-value">{{ pj.money.ep }}</span>
+        </div>
+        <div class="coin-box gp" (click)="updateMoneyAlert('gp')">
+          <span class="coin-label">PO</span>
+          <span class="coin-value">{{ pj.money.gp }}</span>
+        </div>
+        <div class="coin-box pp" (click)="updateMoneyAlert('pp')">
+          <span class="coin-label">PT</span>
+          <span class="coin-value">{{ pj.money.pp }}</span>
+        </div>
+      </div>
+
+      <ion-list class="transparent-list">
+        @for (item of pj.inventory; track item.id) {
+          <ion-item lines="none" class="skill-item">
             <ion-label>
               <h2>{{ item.name }}</h2>
-              @if (item.type === 'WEAPON') {
-                <p>Daño: {{ item.properties.damageDice }} {{ item.properties.damageType }}</p>
-              } @else if (item.type === 'ARMOR') {
-                <p>Base AC: {{ item.properties.baseAc }}</p>
-              } @else {
-                <p>Cantidad: x{{ item.quantity }}</p>
-              }
+              <p>Tipo: {{ item.type }} | Cantidad: x{{ item.quantity }}</p>
             </ion-label>
-            @if (item.equipped) {
-              <ion-badge color="success" slot="end">Equipado</ion-badge>
-            } @else {
-              <ion-badge color="medium" slot="end">Mochila</ion-badge>
+            @if (item.type === 'POTION' || item.type === 'CONSUMABLE') {
+              <ion-button slot="end" fill="clear" (click)="useItem(item)">
+                <ion-icon name="sparkles" color="warning"></ion-icon>
+              </ion-button>
             }
+            <ion-button slot="end" fill="clear" (click)="removeItem(item.id)">
+              <ion-icon name="trash" color="danger"></ion-icon>
+            </ion-button>
+            <ion-badge [color]="item.equipped ? 'success' : 'medium'" slot="end">
+              {{ item.equipped ? 'Equipado' : 'Mochila' }}
+            </ion-badge>
           </ion-item>
         }
       </ion-list>
@@ -195,11 +310,15 @@
     <ion-segment [value]="currentTab" (ionChange)="segmentChanged($event)" mode="md">
       <ion-segment-button value="stats">
         <ion-icon name="stats-chart"></ion-icon>
-        <ion-label>Stats</ion-label>
+        <ion-label>Ficha</ion-label>
       </ion-segment-button>
-      <ion-segment-button value="inventory">
+      <ion-segment-button value="combat">
         <ion-icon name="shield"></ion-icon>
         <ion-label>Combate</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="inventory">
+        <ion-icon name="briefcase"></ion-icon>
+        <ion-label>Mochila</ion-label>
       </ion-segment-button>
       <ion-segment-button value="magic">
         <ion-icon name="sparkles"></ion-icon>

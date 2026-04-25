@@ -11,6 +11,11 @@ export class ApiService {
   
   constructor(private http: HttpClient) { }
 
+  // Fetch the master list of all items in the system
+  getAllItems(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/items`);
+  }
+
   // Function to fetch users from the database
   getUsers(): Observable<any> {
     return this.http.get(`${this.apiUrl}/users`);
@@ -36,8 +41,39 @@ export class ApiService {
     return this.http.put(`${this.apiUrl}/characters/${id}/hit-dice`, { hitDiceSpent: Number(hitDiceSpent) });
   }
 
+  // Updates the character's money
+  updateMoney(id: string, money: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/characters/${id}/money`, money);
+  }
+
   // Toggles the equipped status of an item
   toggleEquip(charId: string, slotId: number): Observable<any> {
     return this.http.put(`${this.apiUrl}/characters/${charId}/inventory/${slotId}/toggle-equip`, {});
   }
+
+  // Consumes one use of an item
+  useItem(charId: string, slotId: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/characters/${charId}/inventory/${slotId}/use`, {});
+  }
+
+  // Removes an item entirely from the inventory
+  removeInventoryItem(charId: string, slotId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/characters/${charId}/inventory/${slotId}`);
+  }
+
+  // Adds a new item from the master list to the character
+  addItemToInventory(charId: string, itemId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/characters/${charId}/inventory/${itemId}`, {});
+  }
+
+  /**
+ * Actualiza los puntos de vida temporales del personaje en la base de datos.
+ * @param characterId UUID del personaje.
+ * @param tempHp Cantidad de vida temporal a establecer.
+ */
+updateTempHp(characterId: string, tempHp: number): Observable<any> {
+  // Cambiamos PATCH a PUT para mantener la consistencia con el resto de la API de MasterForge
+  return this.http.put(`${this.apiUrl}/characters/${characterId}/temp-hp`, { tempHp: Number(tempHp) });
+}
+
 }

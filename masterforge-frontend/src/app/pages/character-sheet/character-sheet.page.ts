@@ -9,7 +9,7 @@ import {
 } from '@ionic/angular/standalone';
 import { ApiService } from '../../services/api';
 import { addIcons } from 'ionicons';
-import { statsChart, sparkles, shield } from 'ionicons/icons';
+import { statsChart, sparkles, shield, briefcase, trash, add } from 'ionicons/icons';
 
 export const DND_SKILLS = [
   { id: 'acrobatics', name: 'Acrobacias', stat: 'dex' },
@@ -63,6 +63,7 @@ export class CharacterSheetPage implements OnInit {
     subclass: '...',
     maxHp: 0,
     currentHp: 0,
+    tempHp: 0,
     armorClass: 0,
     speed: 0,
     proficiencyBonus: 0, // Nuevo
@@ -72,8 +73,9 @@ export class CharacterSheetPage implements OnInit {
     hitDiceSpent: 0,
     hitDieType: 8,
     stats: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-    gold: 0,
+    money: { cp: 0, sp: 0, ep: 0, gp: 0, pp: 0 },
     inventory: [],
+    deathSaves: { success: 0, failure: 0 },
     skillProficiencies: {}, // Matches the Map structure from the backend
     savingThrowsProficiencies: {}
   };
@@ -86,7 +88,7 @@ export class CharacterSheetPage implements OnInit {
     private route: ActivatedRoute,
     private alertController: AlertController
   ) {
-    addIcons({ statsChart, sparkles, shield });
+    addIcons({ statsChart, sparkles, shield, briefcase, trash, add });
   }
 
   ngOnInit() {
@@ -95,11 +97,11 @@ export class CharacterSheetPage implements OnInit {
     
     // Solo llamamos a la base de datos si hemos puesto un ID válido
     if (routeId) {
-      console.log("Abriendo ficha del personaje ID:", routeId);
+      console.log("Opening character sheet for ID:", routeId);
       this.characterId = routeId; // Store the ID for later updates
       this.loadCharacter(routeId);
     } else {
-      console.error("No se ha pasado ningún ID en la URL");
+      console.error("No character ID provided in the URL");
     }
   }
 
@@ -107,10 +109,10 @@ export class CharacterSheetPage implements OnInit {
   loadCharacter(id: string) {
     this.apiService.getCharacter(id).subscribe({
       next: (data) => {
-        console.log('Datos puros de PostgreSQL:', data);
+        console.log('Raw data from DB:', data);
         
         // Calculate final stats including racial bonuses first
-        const stats = {
+        const stats: any = {
           str: (data.baseStr || 10) + (data.dndRace?.bonusStr || 0),
           dex: (data.baseDex || 10) + (data.dndRace?.bonusDex || 0),
           con: (data.baseCon || 10) + (data.dndRace?.bonusCon || 0),
@@ -122,7 +124,6 @@ export class CharacterSheetPage implements OnInit {
         // Dex modifier calculation for AC: (Score - 10) / 2
         const dexMod = Math.floor((stats.dex - 10) / 2);
         const wisMod = Math.floor((stats.wis - 10) / 2);
-        const strMod = Math.floor((stats.str - 10) / 2);
 
         // Cálculo del Bono de Competencia
         const proficiencyBonus = Math.floor((data.level - 1) / 4) + 2;
@@ -140,7 +141,7 @@ export class CharacterSheetPage implements OnInit {
           baseAc = props.baseAc || 10;
           // Si es armadura pesada (dexBonus: false) o tiene límite (dexLimit)
           if (props.dexBonus === false) appliedDexMod = 0;
-          else if (props.dexLimit !== undefined) appliedDexMod = Math.min(dexMod, props.dexLimit);
+          else if (typeof props.dexLimit === 'number' && props.dexLimit !== null) appliedDexMod = Math.min(dexMod, props.dexLimit);
         }
 
         const shieldBonus = equippedShield ? (equippedShield.item.properties?.acBonus || 2) : 0;
@@ -159,22 +160,30 @@ export class CharacterSheetPage implements OnInit {
         this.pj = {
           name: data.name,
           level: data.level,
-          // Añadimos el "?" por si la relación viene nula no nos dé error
           dndClass: data.dndClass?.name || 'Aventurero', 
           subclass: data.subclass?.name || 'Sin subclase',
-          // Intentamos leer camelCase o snake_case para evitar NaN
-          maxHp: data.maxHp || data.max_hp || 10,
-          currentHp: Number((data.currentHp !== undefined) ? data.currentHp : (data.current_hp !== undefined ? data.current_hp : 10)),
+          choicesJson: data.choicesJson || {},
+          maxHp: data.maxHp ?? data.max_hp ?? 10,
+          currentHp: Number(data.currentHp ?? data.current_hp ?? 10),
+          // Defensive check for camelCase and snake_case mapping for Temp HP
+          tempHp: data.tempHp ?? data.temp_hp ?? 0,
           armorClass: finalAc,
-          speed: data.speed,
-          proficiencyBonus: proficiencyBonus, // Nuevo
-          initiative: dexMod, // Nuevo
-          passivePerception: passivePerception, // Nuevo
+          speed: data.speed ?? 30,
+          proficiencyBonus: proficiencyBonus,
+          initiative: dexMod,
+          passivePerception: passivePerception,
           hitDiceTotal: data.hitDiceTotal || 0,
+          deathSaves: { success: 0, failure: 0 }, // Initial state
           hitDiceSpent: data.hitDiceSpent || 0,
           hitDieType: data.dndClass?.hitDie || 8,
           stats: stats,
-          gold: data.gp, // Mapeamos las monedas de oro
+          money: {
+            cp: data.cp ?? 0,
+            sp: data.sp ?? 0,
+            ep: data.ep ?? 0,
+            gp: data.gp ?? 0,
+            pp: data.pp ?? 0
+          },
           inventory: data.inventory ? data.inventory.map((slot: any) => ({
           id: slot.id,
           name: slot.item.name,
@@ -188,8 +197,8 @@ export class CharacterSheetPage implements OnInit {
         };
       },
       error: (err) => {
-        console.error("Error crítico al cargar la ficha del personaje", err);
-        alert("No se ha podido conectar con la base de datos de MasterForge.");
+        console.error("Critical error loading character:", err);
+        alert("Could not connect to MasterForge database.");
       }
     });
   }
@@ -199,6 +208,169 @@ export class CharacterSheetPage implements OnInit {
     this.apiService.toggleEquip(this.characterId, slotId).subscribe({
       next: (updatedChar) => {
         // Re-load to trigger recalculation of AC and modifiers
+        this.loadCharacter(this.characterId!);
+      }
+    });
+  }
+
+  useItem(item: any) {
+    if (!this.characterId) return;
+
+    // Differentiate behavior by type
+    if (item.type === 'POTION') {
+      const healAmount = item.properties?.healingAmount || 5; // Simplified logic
+      this.pj.currentHp = Math.min(this.pj.maxHp, this.pj.currentHp + healAmount);
+      this.updateCharacterHpOnBackend();
+    }
+
+    this.apiService.useItem(this.characterId!, item.id).subscribe({
+      next: () => {
+        this.loadCharacter(this.characterId!);
+      }
+    });
+  }
+
+  async addItemAlert() {
+    // 1. Fetch available items from the database
+    this.apiService.getAllItems().subscribe({
+      next: async (items) => {
+        if (!items || items.length === 0) {
+          console.warn("No items available in master catalog.");
+          return;
+        }
+
+        const alert = await this.alertController.create({
+          header: 'Añadir al Equipo',
+          cssClass: 'heal-alert',
+          inputs: items.map(item => ({
+            type: 'radio',
+            label: `${item.name} (${item.type})`,
+            value: item.id
+          })),
+          buttons: [
+            { text: 'Cancelar', role: 'cancel' },
+            {
+              text: 'Añadir',
+              handler: (itemId) => {
+                if (!itemId) {
+                  console.warn("No item selected.");
+                  return false;
+                }
+                if (this.characterId) {
+                  this.apiService.addItemToInventory(this.characterId!, itemId).subscribe({
+                    next: () => this.loadCharacter(this.characterId!),
+                    error: (err) => console.error("Error adding item to inventory:", err)
+                  });
+                }
+                return true;
+              }
+            }
+          ]
+        });
+        await alert.present();
+      },
+      error: (err) => console.error("Error loading item catalog:", err)
+    });
+  }
+
+  // Toggles death save markers
+  toggleDeathSave(type: 'success' | 'failure', index: number) {
+    const current = this.pj.deathSaves[type];
+    // If they click the same dot that is the current maximum, we toggle it off
+    if (current === index + 1) {
+      this.pj.deathSaves[type] = index;
+    } else {
+      this.pj.deathSaves[type] = index + 1;
+    }
+    // Note: In a production build, you'd sync this to the backend as well
+  }
+
+  // Opens an alert to update a specific coin quantity
+  async updateMoneyAlert(coinKey: string) {
+    const coinNames: any = { 
+      cp: 'Cobre (PC)', 
+      sp: 'Plata (PP)', 
+      ep: 'Electrum (PE)', 
+      gp: 'Oro (PO)', 
+      pp: 'Platino (PT)' 
+    };
+
+    const alert = await this.alertController.create({
+      header: `Actualizar ${coinNames[coinKey]}`,
+      cssClass: 'heal-alert',
+      inputs: [
+        {
+          name: 'amount',
+          type: 'number',
+          placeholder: 'Cantidad',
+          value: this.pj.money[coinKey],
+          min: 0
+        }
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Guardar',
+          handler: (data) => {
+            const val = parseInt(data.amount, 10);
+            if (!isNaN(val) && val >= 0) {
+              this.pj.money[coinKey] = val;
+              this.updateMoneyOnBackend();
+            }
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  async updateTempHpAlert() {
+    const alert = await this.alertController.create({
+      header: 'Vida Temporal',
+      cssClass: 'heal-alert',
+      inputs: [
+        {
+          name: 'amount',
+          type: 'number',
+          placeholder: 'Cantidad de vida temporal',
+          value: this.pj.tempHp,
+          min: 0
+        }
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Guardar',
+          handler: (data) => {
+            const val = parseInt(data.amount, 10);
+            if (!isNaN(val) && val >= 0 && this.characterId) {
+              this.pj.tempHp = val;
+              this.apiService.updateTempHp(this.characterId, val).subscribe({
+                next: () => console.log('Temporary HP updated successfully in DB'),
+                error: (err: any) => console.error("Error updating temporary HP:", err)
+              });
+            }
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  private updateMoneyOnBackend() {
+    if (!this.characterId) return;
+    this.apiService.updateMoney(this.characterId!, this.pj.money).subscribe({
+      next: () => {},
+      error: (err) => console.error("Error updating money:", err)
+    });
+  }
+
+  removeItem(slotId: number) {
+    if (!this.characterId) return;
+    
+    this.apiService.removeInventoryItem(this.characterId, slotId).subscribe({
+      next: () => {
+        // Refresh state
         this.loadCharacter(this.characterId!);
       }
     });
@@ -284,13 +456,13 @@ export class CharacterSheetPage implements OnInit {
     const alert = await this.alertController.create({
       header: 'Actualizar Dados de Golpe',
       cssClass: 'heal-alert',
-      message: `Disponibles: ${this.pj.hitDiceTotal - this.pj.hitDiceSpent} / ${this.pj.hitDiceTotal}`,
+      message: `Total de dados: ${this.pj.hitDiceTotal}d${this.pj.hitDieType}`,
       inputs: [
         {
-          name: 'spentAmount',
+          name: 'remainingAmount',
           type: 'number',
-          placeholder: 'Dados gastados',
-          value: this.pj.hitDiceSpent,
+          placeholder: 'Dados disponibles',
+          value: this.pj.hitDiceTotal - this.pj.hitDiceSpent,
           min: 0,
           max: this.pj.hitDiceTotal
         }
@@ -300,9 +472,9 @@ export class CharacterSheetPage implements OnInit {
         {
           text: 'Guardar',
           handler: (data) => {
-            const val = parseInt(data.spentAmount, 10);
+            const val = parseInt(data.remainingAmount, 10);
             if (!isNaN(val) && val >= 0 && val <= this.pj.hitDiceTotal) {
-              this.pj.hitDiceSpent = val;
+              this.pj.hitDiceSpent = this.pj.hitDiceTotal - val;
               this.updateHitDiceOnBackend();
             }
           }
@@ -326,10 +498,35 @@ export class CharacterSheetPage implements OnInit {
     const baseMod = Math.floor((Number(baseScore) - 10) / 2);
     
     const isProficient = !!this.pj.skillProficiencies?.[skill.id];
-    const profBonus = this.pj.proficiencyBonus || 0; // Usar el valor centralizado
+    const hasExpertise = this.pj.choicesJson?.expertise?.includes(skill.id);
+    const profBonus = this.pj.proficiencyBonus || 0;
     
-    const total = isProficient ? baseMod + profBonus : baseMod;
+    let total = baseMod;
+    if (hasExpertise) {
+      total += (profBonus * 2);
+    } else if (isProficient) {
+      total += profBonus;
+    }
+
     return total >= 0 ? `+${total}` : `${total}`;
+  }
+
+  // Helper to get weapon attack bonus (Stat + Proficiency)
+  getAttackBonus(item: any): string {
+    const stat = item.properties?.stat || 'str';
+    const score = this.pj.stats[stat] || 10;
+    const mod = Math.floor((score - 10) / 2);
+    const total = mod + (this.pj.proficiencyBonus || 0);
+    return total >= 0 ? `+${total}` : `${total}`;
+  }
+
+  // Helper to get damage modifier string
+  getDamageMod(item: any): string {
+    const stat = item.properties?.stat || 'str';
+    const score = this.pj.stats[stat] || 10;
+    const mod = Math.floor((score - 10) / 2);
+    if (mod === 0) return '';
+    return mod > 0 ? `+${mod}` : `${mod}`;
   }
 
   // Calcula el modificador de tirada de salvación (Modificador de Stat + Competencia si aplica)
@@ -353,7 +550,7 @@ export class CharacterSheetPage implements OnInit {
   }
 
   // Sends HP update to the backend
-  private updateCharacterHpOnBackend() {
+  updateCharacterHpOnBackend() {
     if (!this.characterId) {
       console.error('Character ID is not available for HP update.');
       return;
@@ -363,7 +560,7 @@ export class CharacterSheetPage implements OnInit {
     console.log(`Enviando actualización de HP a la BD: ID=${this.characterId}, HP=${hpValue}`);
 
     // Assuming apiService.updateCharacterHp exists and takes characterId and newHp
-    this.apiService.updateCharacterHp(this.characterId, hpValue).subscribe({
+    this.apiService.updateCharacterHp(this.characterId!, hpValue).subscribe({
       next: () => {},
       error: (err) => {
         console.error('Error detallado de MasterForge:', err);
@@ -376,7 +573,7 @@ export class CharacterSheetPage implements OnInit {
     
     const spentValue = Math.floor(Number(this.pj.hitDiceSpent));
     
-    this.apiService.updateHitDice(this.characterId, spentValue).subscribe({
+    this.apiService.updateHitDice(this.characterId!, spentValue).subscribe({
       next: () => {},
       error: (err) => {
         console.error('Error actualizando dados de golpe:', err);
