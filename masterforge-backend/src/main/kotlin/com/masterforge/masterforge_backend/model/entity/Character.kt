@@ -80,6 +80,10 @@ data class Character(
     val baseCha: Int,
 
     @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "saving_throws_proficiencies", columnDefinition = "jsonb", nullable = false)
+    val savingThrowsProficiencies: Map<String, Any> = emptyMap(),
+
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "skill_proficiencies", columnDefinition = "jsonb", nullable = false)
     val skillProficiencies: Map<String, Any> = emptyMap(),
 

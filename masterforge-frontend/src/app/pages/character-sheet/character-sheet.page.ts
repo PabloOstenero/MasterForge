@@ -65,10 +65,17 @@ export class CharacterSheetPage implements OnInit {
     currentHp: 0,
     armorClass: 0,
     speed: 0,
+    proficiencyBonus: 0, // Nuevo
+    initiative: 0,       // Nuevo
+    passivePerception: 0, // Nuevo
+    hitDiceTotal: 0,
+    hitDiceSpent: 0,
+    hitDieType: 8,
     stats: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
     gold: 0,
     inventory: [],
-    skillProficiencies: {} // Matches the Map structure from the backend
+    skillProficiencies: {}, // Matches the Map structure from the backend
+    savingThrowsProficiencies: {}
   };
 
   private characterId: string | null = null;
@@ -114,6 +121,39 @@ export class CharacterSheetPage implements OnInit {
 
         // Dex modifier calculation for AC: (Score - 10) / 2
         const dexMod = Math.floor((stats.dex - 10) / 2);
+        const wisMod = Math.floor((stats.wis - 10) / 2);
+        const strMod = Math.floor((stats.str - 10) / 2);
+
+        // Cálculo del Bono de Competencia
+        const proficiencyBonus = Math.floor((data.level - 1) / 4) + 2;
+
+        // --- CÁLCULO DINÁMICO DE CA (REGLAS 5E) ---
+        const inventorySlots = data.inventory || [];
+        const equippedArmor = inventorySlots.find((s: any) => s.equipped && s.item.type === 'ARMOR');
+        const equippedShield = inventorySlots.find((s: any) => s.equipped && s.item.type === 'SHIELD');
+
+        let baseAc = 10;
+        let appliedDexMod = dexMod;
+
+        if (equippedArmor) {
+          const props = equippedArmor.item.properties || {};
+          baseAc = props.baseAc || 10;
+          // Si es armadura pesada (dexBonus: false) o tiene límite (dexLimit)
+          if (props.dexBonus === false) appliedDexMod = 0;
+          else if (props.dexLimit !== undefined) appliedDexMod = Math.min(dexMod, props.dexLimit);
+        }
+
+        const shieldBonus = equippedShield ? (equippedShield.item.properties?.acBonus || 2) : 0;
+        const finalAc = baseAc + appliedDexMod + (data.dndRace?.bonusArmorClass || 0) + shieldBonus;
+
+        // Cálculo de Percepción Pasiva (10 + Modificador de Sabiduría + Bono de Competencia si es competente en Percepción)
+        const isPerceptionProficient = !!data.skillProficiencies?.perception;
+        const passivePerception = 10 + wisMod + (isPerceptionProficient ? proficiencyBonus : 0);
+
+        // Combine base class saving throws with character specific ones
+        const classSaves = data.dndClass?.savingThrows || {};
+        const charSaves = data.savingThrowsProficiencies || {};
+        const mergedSaves = { ...classSaves, ...charSaves };
 
         // Mapeamos los datos de la base de datos a la estructura que espera nuestro HTML
         this.pj = {
@@ -125,22 +165,41 @@ export class CharacterSheetPage implements OnInit {
           // Intentamos leer camelCase o snake_case para evitar NaN
           maxHp: data.maxHp || data.max_hp || 10,
           currentHp: Number((data.currentHp !== undefined) ? data.currentHp : (data.current_hp !== undefined ? data.current_hp : 10)),
-          // AC = Base Armor Value (from DB) + Final Dex Modifier + Racial AC Bonuses
-          armorClass: (data.armorClass || 10) + dexMod + (data.dndRace?.bonusArmorClass || 0),
+          armorClass: finalAc,
           speed: data.speed,
+          proficiencyBonus: proficiencyBonus, // Nuevo
+          initiative: dexMod, // Nuevo
+          passivePerception: passivePerception, // Nuevo
+          hitDiceTotal: data.hitDiceTotal || 0,
+          hitDiceSpent: data.hitDiceSpent || 0,
+          hitDieType: data.dndClass?.hitDie || 8,
           stats: stats,
           gold: data.gp, // Mapeamos las monedas de oro
           inventory: data.inventory ? data.inventory.map((slot: any) => ({
+          id: slot.id,
           name: slot.item.name,
+          type: slot.item.type,
           quantity: slot.quantity,
-          equipped: slot.isEquipped
+          equipped: slot.equipped,
+          properties: slot.item.properties || {}
           })) : [],
-          skillProficiencies: data.skillProficiencies || {} // Look up from the data map
+          skillProficiencies: data.skillProficiencies || {}, // Look up from the data map
+          savingThrowsProficiencies: mergedSaves
         };
       },
       error: (err) => {
         console.error("Error crítico al cargar la ficha del personaje", err);
         alert("No se ha podido conectar con la base de datos de MasterForge.");
+      }
+    });
+  }
+
+  toggleEquip(slotId: number) {
+    if (!this.characterId) return;
+    this.apiService.toggleEquip(this.characterId, slotId).subscribe({
+      next: (updatedChar) => {
+        // Re-load to trigger recalculation of AC and modifiers
+        this.loadCharacter(this.characterId!);
       }
     });
   }
@@ -220,13 +279,66 @@ export class CharacterSheetPage implements OnInit {
     await alert.present();
   }
 
+  // Opens an alert to update the number of spent hit dice
+  async updateHitDiceAlert() {
+    const alert = await this.alertController.create({
+      header: 'Actualizar Dados de Golpe',
+      cssClass: 'heal-alert',
+      message: `Disponibles: ${this.pj.hitDiceTotal - this.pj.hitDiceSpent} / ${this.pj.hitDiceTotal}`,
+      inputs: [
+        {
+          name: 'spentAmount',
+          type: 'number',
+          placeholder: 'Dados gastados',
+          value: this.pj.hitDiceSpent,
+          min: 0,
+          max: this.pj.hitDiceTotal
+        }
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Guardar',
+          handler: (data) => {
+            const val = parseInt(data.spentAmount, 10);
+            if (!isNaN(val) && val >= 0 && val <= this.pj.hitDiceTotal) {
+              this.pj.hitDiceSpent = val;
+              this.updateHitDiceOnBackend();
+            }
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  // Spends one hit die
+  spendOneHitDie() {
+    if (this.pj.hitDiceSpent < this.pj.hitDiceTotal) {
+      this.pj.hitDiceSpent++;
+      this.updateHitDiceOnBackend();
+    }
+  }
+
   // Calculates the skill modifier (Stat Mod + Proficiency if applicable)
   getSkillMod(skill: any): string {
     const baseScore = this.pj.stats[skill.stat] || 10;
     const baseMod = Math.floor((Number(baseScore) - 10) / 2);
     
     const isProficient = !!this.pj.skillProficiencies?.[skill.id];
-    const profBonus = Math.floor((this.pj.level - 1) / 4) + 2;
+    const profBonus = this.pj.proficiencyBonus || 0; // Usar el valor centralizado
+    
+    const total = isProficient ? baseMod + profBonus : baseMod;
+    return total >= 0 ? `+${total}` : `${total}`;
+  }
+
+  // Calcula el modificador de tirada de salvación (Modificador de Stat + Competencia si aplica)
+  getSavingThrowMod(statKey: string): string {
+    const baseScore = this.pj.stats[statKey] || 10;
+    const baseMod = Math.floor((Number(baseScore) - 10) / 2);
+    
+    const isProficient = !!this.pj.savingThrowsProficiencies?.[statKey];
+    const profBonus = this.pj.proficiencyBonus || 0; // Usamos el bono de competencia ya calculado
     
     const total = isProficient ? baseMod + profBonus : baseMod;
     return total >= 0 ? `+${total}` : `${total}`;
@@ -255,6 +367,19 @@ export class CharacterSheetPage implements OnInit {
       next: () => {},
       error: (err) => {
         console.error('Error detallado de MasterForge:', err);
+      }
+    });
+  }
+
+  private updateHitDiceOnBackend() {
+    if (!this.characterId) return;
+    
+    const spentValue = Math.floor(Number(this.pj.hitDiceSpent));
+    
+    this.apiService.updateHitDice(this.characterId, spentValue).subscribe({
+      next: () => {},
+      error: (err) => {
+        console.error('Error actualizando dados de golpe:', err);
       }
     });
   }

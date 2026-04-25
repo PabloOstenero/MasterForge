@@ -65,6 +65,73 @@
         </ion-row>
       </ion-grid>
 
+      <!-- New Section: Derived Combat/Exploration Stats -->
+      <h2 class="section-title" style="margin-top: 30px;">Información de Combate</h2>
+      <ion-grid class="ion-no-padding ion-margin-bottom">
+        <ion-row>
+          <ion-col size="6">
+            <div class="info-box-small">
+              <div class="info-label">Bono de Competencia</div>
+              <div class="info-value-gold">{{ pj.proficiencyBonus >= 0 ? '+' : '' }}{{ pj.proficiencyBonus }}</div>
+            </div>
+          </ion-col>
+          <ion-col size="6">
+            <div class="info-box-small">
+              <div class="info-label">Iniciativa</div>
+              <div class="info-value-gold">{{ pj.initiative >= 0 ? '+' : '' }}{{ pj.initiative }}</div>
+            </div>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="6">
+            <div class="info-box-small">
+              <div class="info-label">Velocidad</div>
+              <div class="info-value-gold">{{ pj.speed }} ft</div>
+            </div>
+          </ion-col>
+          <ion-col size="6">
+            <div class="info-box-small">
+              <div class="info-label">Percepción Pasiva</div>
+              <div class="info-value-gold">{{ pj.passivePerception }}</div>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+
+      <!-- New Section: Saving Throws -->
+      <h2 class="section-title" style="margin-top: 30px;">Tiradas de Salvación</h2>
+      <ion-grid class="ion-no-padding ion-margin-bottom">
+        <ion-row>
+          @for (statKey of ['str', 'dex', 'con', 'int', 'wis', 'cha']; track statKey) {
+            <ion-col size="4">
+              <div class="stat-card-small">
+                <div class="prof-dot-small" [class.proficient]="pj.savingThrowsProficiencies?.[statKey]" [class.unproficient]="!pj.savingThrowsProficiencies?.[statKey]"></div>
+                <div class="stat-label-small">
+                  {{ statKey === 'str' ? 'FU' : statKey === 'dex' ? 'DES' : statKey === 'con' ? 'CON' : statKey === 'int' ? 'INT' : statKey === 'wis' ? 'SAB' : 'CAR' }}
+                </div>
+                <div class="stat-mod-small">{{ getSavingThrowMod(statKey) }}</div>
+              </div>
+            </ion-col>
+          }
+        </ion-row>
+      </ion-grid>
+
+      <!-- New Section: Hit Dice -->
+      <h2 class="section-title" style="margin-top: 30px;">Dados de Golpe</h2>
+      <div class="info-box ion-margin-bottom">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+          <span style="color: white; font-weight: bold;">Disponibles: {{ pj.hitDiceTotal - pj.hitDiceSpent }}d{{ pj.hitDieType }}</span>
+          <span style="color: #C5A059; font-weight: bold;">Total: {{ pj.hitDiceTotal }}d{{ pj.hitDieType }}</span>
+        </div>
+      </div>
+      <ion-row class="ion-margin-bottom">
+        <ion-col size="12">
+          <ion-button expand="block" class="btn-spend-hit-dice" (click)="spendOneHitDie()" [disabled]="pj.hitDiceSpent >= pj.hitDiceTotal">
+            Gastar 1 Dado de Golpe
+          </ion-button>
+        </ion-col>
+      </ion-row>
+
       <h2 class="section-title" style="margin-top: 30px;">Habilidades (Skills)</h2>
       <ion-list class="transparent-list">
         @for (skill of skills; track skill.id) {
@@ -92,13 +159,21 @@
 
       <ion-list class="transparent-list">
         @for (item of pj.inventory; track item.name) {
-          <ion-item lines="none" class="skill-item">
+          <ion-item lines="none" class="skill-item" (click)="toggleEquip(item.id)">
             <ion-label>
               <h2>{{ item.name }}</h2>
-              <p>Cantidad: x{{ item.quantity }}</p>
+              @if (item.type === 'WEAPON') {
+                <p>Daño: {{ item.properties.damageDice }} {{ item.properties.damageType }}</p>
+              } @else if (item.type === 'ARMOR') {
+                <p>Base AC: {{ item.properties.baseAc }}</p>
+              } @else {
+                <p>Cantidad: x{{ item.quantity }}</p>
+              }
             </ion-label>
             @if (item.equipped) {
               <ion-badge color="success" slot="end">Equipado</ion-badge>
+            } @else {
+              <ion-badge color="medium" slot="end">Mochila</ion-badge>
             }
           </ion-item>
         }

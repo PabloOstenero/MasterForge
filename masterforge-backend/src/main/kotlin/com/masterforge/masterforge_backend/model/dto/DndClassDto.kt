@@ -7,6 +7,6 @@ data class DndClassDto(
     val name: String,
     val price: BigDecimal,
     val hitDie: Int,
-    val savingThrows: String,
+    val savingThrows: Map<String, Any>,
     val authorId: UUID? = null
 )

@@ -169,6 +169,79 @@ ion-segment-button {
   }
 }
 
+/* New button for spending one hit die */
+.btn-spend-hit-dice {
+  --background: #A08040; /* A darker gold/bronze */
+  --color: white;
+  --border-radius: 12px;
+  font-weight: bold;
+  height: 40px; /* Slightly smaller than damage/heal */
+  margin-top: -10px; /* Pull it up a bit closer to the info box */
+}
+
+/* New styles for smaller info boxes and saving throws */
+.info-box-small {
+  background: #1E1E1E;
+  margin: 5px;
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
+  border: 1px solid #333;
+
+  .info-label {
+    color: #888;
+    font-size: 0.8rem;
+    margin-bottom: 5px;
+  }
+
+  .info-value-gold {
+    color: #C5A059;
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+}
+
+.stat-card-small {
+  background: #1E1E1E;
+  margin: 5px;
+  padding: 10px 5px;
+  border-radius: 10px;
+  text-align: center;
+  border: 1px solid #333;
+  position: relative; // Para posicionar el dot de competencia
+
+  .prof-dot-small {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    &.unproficient { 
+      background: white; 
+      border: 1px solid #444; 
+    }
+    &.proficient { 
+      background: #121212; /* Fondo oscuro para que parezca hueco */
+      border: 1px solid white; /* Borde blanco */
+    }
+  }
+
+  .stat-label-small {
+    color: #888;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    margin-bottom: 3px;
+    font-weight: bold;
+  }
+
+  .stat-mod-small {
+    color: white;
+    font-size: 1.4rem;
+    font-weight: bold;
+  }
+}
+
 /* --- Alert Styling for Damage/Heal Buttons --- */
 /* These work because ViewEncapsulation is set to None in the .ts file */
 

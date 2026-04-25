@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
+import org.springframework.transaction.annotation.Transactional
 
 @RestController
 @RequestMapping("/api/dnd-classes")
@@ -23,6 +24,7 @@ class DndClassController(
     }
 
     @PostMapping
+    @Transactional
     fun createDndClass(@RequestBody dto: DndClassDto): DndClass {
         // The author is optional. If an authorId is provided, find the user.
         // If not, the author will be null, marking it as a system-owned entity.
@@ -52,6 +54,7 @@ class DndClassController(
     }
 
     @PutMapping("/{id}")
+    @Transactional
     fun updateDndClass(@PathVariable id: Int, @RequestBody dto: DndClassDto): DndClass {
         val existingClass = dndClassRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "D&D Class not found with id $id") }

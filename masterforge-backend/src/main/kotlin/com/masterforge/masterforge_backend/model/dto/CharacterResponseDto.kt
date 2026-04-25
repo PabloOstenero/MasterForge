@@ -48,7 +48,7 @@ data class DndClassResponseDto(
     val id: Int,
     val name: String,
     val hitDie: Int,
-    val savingThrows: String
+    val savingThrows: Map<String, Any>
     // Add other fields from DndClass entity as needed, e.g., features, subclasses, author, price
 ) {
     companion object {
@@ -131,6 +131,7 @@ data class CharacterResponseDto(
     val baseInt: Int,
     val baseWis: Int,
     val baseCha: Int,
+    val savingThrowsProficiencies: Map<String, Any>,
     val skillProficiencies: Map<String, Any>,
     val spellSlots: Map<String, Any>,
     val user: UserSimpleDto,
@@ -176,6 +177,7 @@ data class CharacterResponseDto(
                 baseInt = character.baseInt,
                 baseWis = character.baseWis,
                 baseCha = character.baseCha,
+                savingThrowsProficiencies = character.savingThrowsProficiencies,
                 skillProficiencies = character.skillProficiencies,
                 spellSlots = character.spellSlots,
                 user = userSimpleDto,

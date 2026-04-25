@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 data class HpUpdateDto(val currentHp: Int)
+data class HitDiceUpdateDto(val hitDiceSpent: Int)
 
 @RestController
 @RequestMapping("/api/characters")
@@ -77,6 +78,7 @@ class CharacterController(
             baseInt = dto.baseInt,
             baseWis = dto.baseWis,
             baseCha = dto.baseCha,
+            savingThrowsProficiencies = dto.savingThrowsProficiencies,
             skillProficiencies = dto.skillProficiencies,
             spellSlots = dto.spellSlots,
             user = user,
@@ -149,6 +151,7 @@ class CharacterController(
             baseInt = dto.baseInt,
             baseWis = dto.baseWis,
             baseCha = dto.baseCha,
+            savingThrowsProficiencies = dto.savingThrowsProficiencies,
             skillProficiencies = dto.skillProficiencies,
             spellSlots = dto.spellSlots,
             user = user,
@@ -173,6 +176,36 @@ class CharacterController(
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found with id $id") }
 
         val updatedCharacter = character.copy(currentHp = dto.currentHp)
+        characterRepository.save(updatedCharacter)
+        
+        return ResponseEntity.ok().build()
+    }
+
+    @PutMapping("/{id}/inventory/{slotId}/toggle-equip")
+    @Transactional
+    fun toggleEquip(@PathVariable id: UUID, @PathVariable slotId: Int): ResponseEntity<CharacterResponseDto> {
+        val character = characterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        
+        val index = character.inventory.indexOfFirst { it.id == slotId }
+        if (index == -1) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Slot not found")
+        }
+
+        val slot = character.inventory[index]
+        character.inventory[index] = slot.copy(isEquipped = !slot.isEquipped)
+        
+        val saved = characterRepository.save(character)
+        return ResponseEntity.ok(CharacterResponseDto.fromEntity(saved))
+    }
+
+    @PutMapping("/{id}/hit-dice")
+    @Transactional
+    fun updateHitDice(@PathVariable id: UUID, @RequestBody dto: HitDiceUpdateDto): ResponseEntity<Void> {
+        val character = characterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found with id $id") }
+
+        val updatedCharacter = character.copy(hitDiceSpent = dto.hitDiceSpent)
         characterRepository.save(updatedCharacter)
         
         return ResponseEntity.ok().build()

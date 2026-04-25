@@ -30,4 +30,14 @@ export class ApiService {
   updateCharacterHp(id: string, currentHp: number): Observable<any> {
     return this.http.put(`${this.apiUrl}/characters/${id}/hp`, { currentHp: Number(currentHp) });
   }
+
+  // Function to update character hit dice spent
+  updateHitDice(id: string, hitDiceSpent: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/characters/${id}/hit-dice`, { hitDiceSpent: Number(hitDiceSpent) });
+  }
+
+  // Toggles the equipped status of an item
+  toggleEquip(charId: string, slotId: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/characters/${charId}/inventory/${slotId}/toggle-equip`, {});
+  }
 }
