@@ -1,27 +1,64 @@
-#container {
-  text-align: center;
+@use '../../theme/variables' as *;
 
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+// Page background
+ion-content {
+  --background: #{$bg-primary};
 }
 
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
+// Role toggle
+ion-segment {
+  --background: #{$bg-surface};
 }
 
-#container p {
-  font-size: 16px;
-  line-height: 22px;
-
-  color: #8c8c8c;
-
-  margin: 0;
+ion-segment-button {
+  --color: #{$text-muted};
+  --color-checked: #{$accent-gold};
+  --indicator-color: #{$accent-gold};
 }
 
-#container a {
-  text-decoration: none;
+// Cards (campaigns, sessions, characters)
+ion-card {
+  --background: #{$bg-surface};
+  --color: #{$text-primary};
+
+  ion-card-title {
+    color: $text-primary;
+  }
+}
+
+// Inline forms
+.inline-form {
+  padding: 12px 0;
+
+  ion-input,
+  ion-select {
+    --background: #{$bg-surface};
+    --color: #{$text-primary};
+    --placeholder-color: #{$text-muted};
+    margin-bottom: 8px;
+  }
+}
+
+// Error messages
+.error-msg {
+  color: $accent-crimson;
+  font-size: 0.875rem;
+  margin: 4px 0;
+}
+
+// Subscription badges
+.badge-pro {
+  --background: #{$accent-gold};
+  --color: #{$bg-primary};
+}
+
+.badge-free {
+  --background: transparent;
+  --color: #{$text-muted};
+  border: 1px solid $text-muted;
+}
+
+// Muted helper text
+.text-muted {
+  color: $text-muted;
 }

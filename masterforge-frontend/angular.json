@@ -28,6 +28,9 @@
             ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
+            "stylePreprocessorOptions": {
+              "includePaths": ["."]
+            },
             "assets": [
               {
                 "glob": "**/*",
@@ -95,13 +98,16 @@
           }
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "main": "src/test.ts",
-            "polyfills": "src/polyfills.ts",
+            "polyfills": ["src/polyfills.ts"],
             "tsConfig": "tsconfig.spec.json",
             "karmaConfig": "karma.conf.js",
             "inlineStyleLanguage": "scss",
+            "stylePreprocessorOptions": {
+              "includePaths": ["."]
+            },
             "assets": [
               {
                 "glob": "**/*",
@@ -116,6 +122,14 @@
             "ci": {
               "progress": false,
               "watch": false
+            },
+            "preservation": {
+              "tsConfig": "tsconfig.preservation.json",
+              "include": [
+                "src/app/services/auth.service.spec.ts",
+                "src/app/pages/login/login.page.spec.ts",
+                "src/app/home/home.page.spec.ts"
+              ]
             }
           }
         },

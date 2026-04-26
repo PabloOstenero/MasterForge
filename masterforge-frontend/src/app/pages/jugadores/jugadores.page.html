@@ -1,0 +1,58 @@
+<ion-header>
+  <ion-toolbar class="jugadores-toolbar">
+    <ion-title>Jugadores</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+
+  @if (loading) {
+    <ion-spinner name="crescent" data-testid="spinner-jugadores"></ion-spinner>
+  }
+
+  @if (error) {
+    <p class="error-msg" data-testid="error-jugadores">{{ error }}</p>
+  }
+
+  <ion-list data-testid="users-list">
+    @for (user of users; track user.id) {
+
+      <ion-item class="user-row" data-testid="user-row">
+        <ion-avatar slot="start">
+          <img src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="avatar" />
+        </ion-avatar>
+        <ion-label>
+          <h2 class="user-name">{{ user.name }}</h2>
+          <p class="user-email">{{ user.email }}</p>
+        </ion-label>
+        <ion-badge
+          slot="end"
+          [class]="user.subscriptionTier === 'PRO' ? 'badge-pro' : 'badge-free'"
+          data-testid="subscription-badge">
+          {{ user.subscriptionTier }}
+        </ion-badge>
+      </ion-item>
+
+      @for (char of user.characters; track char.id) {
+        <ion-card
+          button
+          class="character-card"
+          data-testid="character-card"
+          (click)="goToSheet(char.id)">
+          <ion-card-content>
+            <strong class="char-name">{{ char.name }}</strong>
+            <p class="char-details">{{ char.dndClass }} — Nivel {{ char.level }}</p>
+          </ion-card-content>
+        </ion-card>
+      } @empty {
+        <p class="ion-padding-start text-muted" data-testid="sin-personajes">Sin personajes</p>
+      }
+
+    } @empty {
+      @if (!loading) {
+        <p class="text-muted" data-testid="empty-jugadores">No hay jugadores todavía.</p>
+      }
+    }
+  </ion-list>
+
+</ion-content>

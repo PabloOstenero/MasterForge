@@ -1,5 +1,6 @@
 package com.masterforge.masterforge_backend.model.entity
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import jakarta.persistence.*
 import java.math.BigDecimal
 import java.sql.Timestamp
@@ -10,6 +11,7 @@ import java.util.UUID
  */
 @Entity
 @Table(name = "sessions")
+@JsonIgnoreProperties(ignoreUnknown = true, value = ["hibernateLazyInitializer", "handler"])
 data class Session(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

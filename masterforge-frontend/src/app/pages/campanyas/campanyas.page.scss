@@ -1,0 +1,119 @@
+@use 'src/theme/variables' as *;
+
+// ── Toolbar ───────────────────────────────────────────────────────────────────
+.campanyas-toolbar {
+  --background: #{$bg-primary};
+  --color: #{$text-primary};
+
+  ion-title {
+    color: $accent-gold;
+    font-weight: 700;
+  }
+}
+
+// ── Section ───────────────────────────────────────────────────────────────────
+.section {
+  margin-bottom: 32px;
+}
+
+.section-title {
+  color: $text-primary;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 12px;
+}
+
+// ── Campaign Card ─────────────────────────────────────────────────────────────
+.campaign-card {
+  --background: #{$bg-surface};
+  --color: #{$text-primary};
+  border-radius: 10px;
+  margin: 0 0 10px;
+}
+
+.card-title {
+  color: $accent-gold;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.card-description {
+  color: $text-primary;
+  font-size: 0.9rem;
+  margin: 4px 0;
+}
+
+.session-count {
+  color: $text-muted;
+  font-size: 0.85rem;
+  margin: 4px 0 0;
+}
+
+// ── Session Card ──────────────────────────────────────────────────────────────
+.session-card {
+  --background: #{$bg-surface};
+  --color: #{$text-primary};
+  border-radius: 10px;
+  margin: 0 0 10px;
+}
+
+.session-date {
+  color: $text-primary;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin: 0 0 4px;
+}
+
+.session-price {
+  color: $accent-gold;
+  font-size: 0.9rem;
+  margin: 0 0 4px;
+}
+
+.session-campaign {
+  font-size: 0.85rem;
+}
+
+// ── Buttons ───────────────────────────────────────────────────────────────────
+.new-btn {
+  --color: #{$accent-gold};
+  --border-color: #{$accent-gold};
+  margin: 8px 0 16px;
+}
+
+.submit-btn {
+  --background: #{$accent-gold};
+  --color: #{$bg-primary};
+  --background-activated: #b8922e;
+  margin-top: 12px;
+  font-weight: 700;
+}
+
+// ── Inline Form ───────────────────────────────────────────────────────────────
+.inline-form {
+  background: $bg-surface;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.form-input {
+  --background: #{$bg-primary};
+  --color: #{$text-primary};
+  --placeholder-color: #{$text-muted};
+  --border-color: rgba(255, 255, 255, 0.12);
+  margin-bottom: 10px;
+  border-radius: 6px;
+}
+
+// ── Shared ────────────────────────────────────────────────────────────────────
+.error-msg {
+  color: $accent-crimson;
+  font-size: 0.9rem;
+  margin: 8px 0;
+}
+
+.text-muted {
+  color: $text-muted;
+  font-size: 0.9rem;
+}

@@ -1,0 +1,56 @@
+@use 'src/theme/variables' as *;
+
+.login-content {
+  --background: #{$bg-primary};
+}
+
+.login-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 24px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  --background: #{$bg-surface};
+  border-radius: 12px;
+}
+
+.login-title {
+  color: $accent-gold;
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+
+  ion-input {
+    --color: #{$text-primary};
+    --placeholder-color: #{$text-muted};
+    --background: transparent;
+    --border-color: #{$text-muted};
+    --highlight-color-focused: #{$accent-gold};
+  }
+}
+
+.error-msg {
+  color: $accent-crimson;
+  font-size: 0.875rem;
+  margin: 8px 0 0;
+  text-align: center;
+}
+
+.login-btn {
+  --background: #{$accent-gold};
+  --background-activated: #{darken($accent-gold, 10%)};
+  --color: #{$bg-primary};
+  --border-radius: 8px;
+  font-weight: 600;
+  margin-top: 8px;
+}

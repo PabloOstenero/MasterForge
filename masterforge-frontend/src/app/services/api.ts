@@ -76,4 +76,34 @@ updateTempHp(characterId: string, tempHp: number): Observable<any> {
   return this.http.put(`${this.apiUrl}/characters/${characterId}/temp-hp`, { tempHp: Number(tempHp) });
 }
 
+  // Fetch all campaigns
+  getCampaigns(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/campaigns`);
+  }
+
+  // Create a new campaign
+  createCampaign(dto: { name: string; description: string; ownerId: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/campaigns`, dto);
+  }
+
+  // Fetch all sessions
+  getSessions(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/sessions`);
+  }
+
+  // Create a new session
+  createSession(dto: { scheduledDate: string; price: number; campaignId: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/sessions`, dto);
+  }
+
+  // Authenticate user and retrieve JWT token
+  login(email: string, password: string): Observable<{ token: string }> {
+    return this.http.post<{ token: string }>(`${this.apiUrl}/auth/login`, { email, password });
+  }
+
+  // Fetch all monsters
+  getMonsters(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/monsters`);
+  }
+
 }

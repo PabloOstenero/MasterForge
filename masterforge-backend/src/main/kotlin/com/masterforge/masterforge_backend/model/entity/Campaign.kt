@@ -1,5 +1,6 @@
 package com.masterforge.masterforge_backend.model.entity
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import jakarta.persistence.*
 import java.util.UUID
 
@@ -7,6 +8,7 @@ import java.util.UUID
  * Represents a campaign, which is a container for game sessions and characters.
  * Each campaign is owned by a single user (the Game Master).
  */
+@JsonIgnoreProperties(ignoreUnknown = true, value = ["hibernateLazyInitializer", "handler"])
 @Entity
 @Table(name = "campaigns")
 data class Campaign(

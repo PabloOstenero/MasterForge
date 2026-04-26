@@ -21,6 +21,7 @@ masterforge-backend/bin/
 # ==========================================
 .idea/
 .vscode/
+.kiro/
 masterforge-frontend/.vscode/
 masterforge-backend/.vscode/
 *.iml

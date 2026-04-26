@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/preservation",
+    "types": ["jasmine"]
+  },
+  "files": [
+    "src/test.ts",
+    "src/polyfills.ts",
+    "src/app/services/auth.service.spec.ts",
+    "src/app/pages/login/login.page.spec.ts",
+    "src/app/home/home.page.spec.ts"
+  ],
+  "include": [
+    "src/**/*.d.ts",
+    "src/app/services/**/*.ts",
+    "src/app/pages/login/**/*.ts",
+    "src/app/home/**/*.ts",
+    "src/app/app.routes.ts",
+    "src/app/app.component.ts",
+    "src/environments/**/*.ts"
+  ]
+}

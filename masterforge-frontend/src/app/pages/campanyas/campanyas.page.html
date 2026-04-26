@@ -1,0 +1,135 @@
+<ion-header>
+  <ion-toolbar class="campanyas-toolbar">
+    <ion-title>Campañas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+
+  <!-- ── Campañas Section ── -->
+  <section class="section" data-testid="campaigns-section">
+    <h2 class="section-title">Campañas</h2>
+
+    @if (loadingCampaigns) {
+      <ion-spinner name="crescent" data-testid="spinner-campaigns"></ion-spinner>
+    }
+
+    @if (errorCampaigns) {
+      <p class="error-msg" data-testid="error-campaigns">{{ errorCampaigns }}</p>
+    }
+
+    @for (campaign of campaigns; track campaign.id) {
+      <ion-card class="campaign-card" data-testid="campaign-card">
+        <ion-card-header>
+          <ion-card-title class="card-title">{{ campaign.name }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p class="card-description">{{ campaign.description }}</p>
+          <p class="session-count">{{ getSessionCount(campaign.id) }} sesiones</p>
+        </ion-card-content>
+      </ion-card>
+    } @empty {
+      @if (!loadingCampaigns) {
+        <p class="text-muted" data-testid="empty-campaigns">No hay campañas todavía.</p>
+      }
+    }
+
+    <ion-button fill="outline" class="new-btn" (click)="toggleCampaignForm()" data-testid="btn-nueva-campanya">
+      Nueva Campaña
+    </ion-button>
+
+    @if (showNewCampaignForm) {
+      <div class="inline-form" data-testid="campaign-form">
+        @if (validationErrorCampaign) {
+          <p class="error-msg" data-testid="validation-error-campaign">{{ validationErrorCampaign }}</p>
+        }
+        <ion-input
+          label="Nombre"
+          labelPlacement="floating"
+          class="form-input"
+          [(ngModel)]="newCampaign.name"
+          data-testid="input-campaign-name">
+        </ion-input>
+        <ion-input
+          label="Descripción"
+          labelPlacement="floating"
+          class="form-input"
+          [(ngModel)]="newCampaign.description"
+          data-testid="input-campaign-description">
+        </ion-input>
+        <ion-button expand="block" class="submit-btn" (click)="submitCampaign()" data-testid="btn-crear-campanya">
+          Crear Campaña
+        </ion-button>
+      </div>
+    }
+  </section>
+
+  <!-- ── Sesiones Section ── -->
+  <section class="section" data-testid="sessions-section">
+    <h2 class="section-title">Sesiones</h2>
+
+    @if (loadingSessions) {
+      <ion-spinner name="crescent" data-testid="spinner-sessions"></ion-spinner>
+    }
+
+    @if (errorSessions) {
+      <p class="error-msg" data-testid="error-sessions">{{ errorSessions }}</p>
+    }
+
+    @for (session of sessions; track session.id) {
+      <ion-card class="session-card" data-testid="session-card">
+        <ion-card-content>
+          <p class="session-date">{{ formatDate(session.scheduledDate) }}</p>
+          <p class="session-price">{{ session.price }} €</p>
+          <p class="session-campaign text-muted">{{ session.campaign?.name ?? '—' }}</p>
+        </ion-card-content>
+      </ion-card>
+    } @empty {
+      @if (!loadingSessions) {
+        <p class="text-muted" data-testid="empty-sessions">No hay sesiones todavía.</p>
+      }
+    }
+
+    <ion-button fill="outline" class="new-btn" (click)="toggleSessionForm()" data-testid="btn-nueva-sesion">
+      Nueva Sesión
+    </ion-button>
+
+    @if (showNewSessionForm) {
+      <div class="inline-form" data-testid="session-form">
+        @if (validationErrorSession) {
+          <p class="error-msg" data-testid="validation-error-session">{{ validationErrorSession }}</p>
+        }
+        <ion-input
+          label="Fecha"
+          labelPlacement="floating"
+          type="datetime-local"
+          class="form-input"
+          [(ngModel)]="newSession.scheduledDate"
+          data-testid="input-session-date">
+        </ion-input>
+        <ion-input
+          label="Precio"
+          labelPlacement="floating"
+          type="number"
+          class="form-input"
+          [(ngModel)]="newSession.price"
+          data-testid="input-session-price">
+        </ion-input>
+        <ion-select
+          label="Campaña"
+          labelPlacement="floating"
+          class="form-input"
+          [(ngModel)]="newSession.campaignId"
+          data-testid="select-session-campaign">
+          @for (campaign of campaigns; track campaign.id) {
+            <ion-select-option [value]="campaign.id">{{ campaign.name }}</ion-select-option>
+          }
+        </ion-select>
+        <ion-button expand="block" class="submit-btn" (click)="submitSession()" data-testid="btn-crear-sesion">
+          Crear Sesión
+        </ion-button>
+      </div>
+    }
+  </section>
+
+</ion-content>

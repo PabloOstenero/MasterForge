@@ -48,7 +48,7 @@ export const DND_SKILLS = [
 export class CharacterSheetPage implements OnInit {
 
   // Controls which tab we are viewing (Stats, Inventory, Magic)
-  currentTab: string = 'stats'; 
+  currentTab: string = 'stats';
 
   // Skills dictionary
   skills = DND_SKILLS;
