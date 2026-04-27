@@ -1,17 +1,10 @@
 import { Component } from '@angular/core';
-import { IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/angular/standalone';
+import { IonContent } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-config',
-  template: `
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Configuración</ion-title>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content class="ion-padding">Ajustes de cuenta y suscripción.</ion-content>
-  `,
+  templateUrl: './config.page.html',
   standalone: true,
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent],
+  imports: [IonContent],
 })
 export class ConfigPage {}

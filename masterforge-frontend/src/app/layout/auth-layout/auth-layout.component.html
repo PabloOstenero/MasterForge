@@ -5,36 +5,14 @@
     </div>
 
     <ul class="nav-list">
-      <li>
-        <a routerLink="/home" routerLinkActive="active" class="nav-item">
-          <ion-icon name="home-outline"></ion-icon>
-          <span>Inicio</span>
-        </a>
-      </li>
-      <li>
-        <a routerLink="/jugadores" routerLinkActive="active" class="nav-item">
-          <ion-icon name="people-outline"></ion-icon>
-          <span>Jugadores</span>
-        </a>
-      </li>
-      <li>
-        <a routerLink="/campanyas" routerLinkActive="active" class="nav-item">
-          <ion-icon name="shield-outline"></ion-icon>
-          <span>Campañas</span>
-        </a>
-      </li>
-      <li>
-        <a routerLink="/bestiario" routerLinkActive="active" class="nav-item">
-          <ion-icon name="skull-outline"></ion-icon>
-          <span>Bestiario</span>
-        </a>
-      </li>
-      <li>
-        <a routerLink="/config" routerLinkActive="active" class="nav-item">
-          <ion-icon name="settings-outline"></ion-icon>
-          <span>Config</span>
-        </a>
-      </li>
+      @for (item of menuItems$ | async; track item.route) {
+        <li>
+          <a [routerLink]="item.route" routerLinkActive="active" class="nav-item">
+            <ion-icon [name]="item.icon"></ion-icon>
+            <span>{{ item.title }}</span>
+          </a>
+        </li>
+      }
     </ul>
 
     <div class="sidebar-bottom">
