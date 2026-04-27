@@ -1,197 +1,92 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>MasterForge</ion-title>
-  </ion-toolbar>
-  <ion-toolbar>
-    <ion-segment [(ngModel)]="activeRole">
-      <ion-segment-button value="dm">Director de Juego</ion-segment-button>
-      <ion-segment-button value="player">Jugador</ion-segment-button>
-    </ion-segment>
-  </ion-toolbar>
-</ion-header>
+<ion-content [fullscreen]="true" class="char-sheet-content">
+  <div class="dashboard-container ion-padding">
+    
+    <!-- Dashboard Header: Ensuring Row Layout -->
+    <div class="dashboard-header">
+      <h2 class="gold-title ion-no-margin dashboard-title">Dashboard de {{ username }}</h2>
+      
+      <div class="header-actions">
+        <ion-button (click)="toggleRole()" fill="clear" color="warning" class="role-toggle-btn">
+          <ion-icon slot="start" name="swap-horizontal-outline"></ion-icon>
+          <span class="ion-hide-sm-down">{{ activeRole === 'dm' ? 'Modo Jugador' : 'Modo Director' }}</span>
+        </ion-button>
+        
+        <ion-avatar class="ion-margin-start" style="width: 32px; height: 32px;">
+          <img src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="avatar" />
+        </ion-avatar>
+      </div>
+    </div>
 
-<ion-content [fullscreen]="true" class="ion-padding">
+    <!-- DM View -->
+    @if (activeRole === 'dm') {
+      <div data-testid="dm-dashboard">
+        <ion-row class="summary-row">
+          <ion-col size="12" size-md="4">
+            <div class="summary-card">
+              <div class="summary-label">Próxima Sesión</div>
+              <div class="summary-value">{{ nextSessionDate }}</div>
+              <div class="summary-link">Ver Detalles</div>
+            </div>
+          </ion-col>
+          <ion-col size="12" size-md="4">
+            <div class="summary-card">
+              <div class="summary-label">Clientes Totales</div>
+              <div class="summary-value">{{ users.length }} Activos</div>
+              <div class="summary-link">Ver Lista</div>
+            </div>
+          </ion-col>
+          <ion-col size="12" size-md="4">
+            <div class="summary-card">
+              <div class="summary-label">Ingresos (Mes)</div>
+              <div class="summary-value">{{ totalRevenue || 0 }}€</div>
+              <div class="summary-link">Ver Reporte</div>
+            </div>
+          </ion-col>
+        </ion-row>
 
-  <!-- DM Dashboard -->
-  @if (activeRole === 'dm') {
-    <div data-testid="dm-dashboard">
-    <ion-grid>
-      <ion-row>
-
-        <!-- Left column: Campañas + Sesiones -->
-        <ion-col size="12" size-md="7">
-
-          <!-- Campañas section -->
-          <h2>Campañas</h2>
-
-          @if (loadingCampaigns) {
-            <ion-spinner name="crescent"></ion-spinner>
-          }
-
-          @if (errorCampaigns) {
-            <p class="error-msg">{{ errorCampaigns }}</p>
-          }
-
+        <h2 class="section-title">Últimas Misiones Forjadas con IA</h2>
+        <ion-list class="transparent-list">
           @for (campaign of campaigns; track campaign.id) {
-            <ion-card data-testid="campaign-card">
-              <ion-card-header>
-                <ion-card-title>{{ campaign.name }}</ion-card-title>
-              </ion-card-header>
-              <ion-card-content>
-                <p>{{ campaign.description }}</p>
-                <p class="session-count">{{ getSessionCount(campaign.id) }} sesiones</p>
-              </ion-card-content>
-            </ion-card>
+            <ion-item lines="full" class="skill-item list-item-interactive" data-testid="campaign-card">
+              <ion-label>
+                <h3 class="gold-title">Título: "{{ campaign.name }}"</h3>
+                <p class="text-muted">({{ campaign.description || 'SRD' }})</p>
+              </ion-label>
+              <div slot="end" class="view-link">[Ver]</div>
+            </ion-item>
           }
+        </ion-list>
+      </div>
+    }
 
-          <ion-button fill="outline" (click)="toggleCampaignForm()">Nueva Campaña</ion-button>
-
-          @if (showNewCampaignForm) {
-            <div class="inline-form">
-              <ion-input
-                label="Nombre"
-                labelPlacement="floating"
-                [(ngModel)]="newCampaign.name">
-              </ion-input>
-              <ion-input
-                label="Descripción"
-                labelPlacement="floating"
-                [(ngModel)]="newCampaign.description">
-              </ion-input>
-              <ion-button expand="block" class="ion-margin-top" (click)="submitCampaign()">
-                Crear Campaña
-              </ion-button>
-            </div>
-          }
-
-          <!-- Sesiones section -->
-          <h2 class="ion-margin-top">Sesiones</h2>
-
-          @if (loadingSessions) {
-            <ion-spinner name="crescent"></ion-spinner>
-          }
-
-          @if (errorSessions) {
-            <p class="error-msg">{{ errorSessions }}</p>
-          }
-
-          @for (session of sessions; track session.id) {
-            <ion-card data-testid="session-card">
-              <ion-card-content>
-                <p>{{ formatDate(session.scheduledDate) }}</p>
-                <p>{{ session.price }} €</p>
-                <p>{{ session.campaign?.name ?? '—' }}</p>
-              </ion-card-content>
-            </ion-card>
-          }
-
-          <ion-button fill="outline" (click)="toggleSessionForm()">Nueva Sesión</ion-button>
-
-          @if (showNewSessionForm) {
-            <div class="inline-form">
-              <ion-input
-                label="Fecha"
-                labelPlacement="floating"
-                type="datetime-local"
-                [(ngModel)]="newSession.scheduledDate">
-              </ion-input>
-              <ion-input
-                label="Precio"
-                labelPlacement="floating"
-                type="number"
-                [(ngModel)]="newSession.price">
-              </ion-input>
-              <ion-select
-                label="Campaña"
-                labelPlacement="floating"
-                [(ngModel)]="newSession.campaignId">
-                @for (campaign of campaigns; track campaign.id) {
-                  <ion-select-option [value]="campaign.id">{{ campaign.name }}</ion-select-option>
-                }
-              </ion-select>
-              <ion-button expand="block" class="ion-margin-top" (click)="submitSession()">
-                Crear Sesión
-              </ion-button>
-            </div>
-          }
-
-        </ion-col>
-
-        <!-- Right column: Player Roster -->
-        <ion-col size="12" size-md="5">
-          <h2>Jugadores</h2>
-
-          @if (loadingUsers) {
-            <ion-spinner name="crescent"></ion-spinner>
-          }
-
-          @if (errorUsers) {
-            <p class="error-msg">{{ errorUsers }}</p>
-          }
-
-          <ion-list>
-            @for (user of users; track user.id) {
-              <ion-item data-testid="user-row">
-                <ion-avatar slot="start">
-                  <img src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="avatar" />
-                </ion-avatar>
-                <ion-label>
-                  <h2>{{ user.name }}</h2>
-                  <p>{{ user.email }}</p>
-                </ion-label>
-                <ion-badge slot="end" [class]="user.subscriptionTier === 'PRO' ? 'badge-pro' : 'badge-free'">
-                  {{ user.subscriptionTier }}
-                </ion-badge>
-              </ion-item>
-
-              @for (char of user.characters; track char.id) {
-                <ion-card button (click)="goToSheet(char.id)" class="character-card">
+    <!-- Player View -->
+    @if (activeRole === 'player') {
+      <div data-testid="player-dashboard">
+        <h2 class="section-title">Mis Aventureros</h2>
+        <ion-row>
+          @for (user of users; track user.id) {
+            @for (char of user.characters; track char.id) {
+              <ion-col size="12" size-md="6">
+                <ion-card button (click)="goToSheet(char.id)" class="character-card" data-testid="player-character-card">
                   <ion-card-content>
-                    <strong>{{ char.name }}</strong>
+                    <strong class="gold-title" style="font-size: 1.2rem;">{{ char.name }}</strong>
                     <p>{{ char.dndClass }} — Nivel {{ char.level }}</p>
+                    <p class="text-muted">Master: {{ user.name }}</p>
                   </ion-card-content>
                 </ion-card>
-              } @empty {
-                <p class="ion-padding-start text-muted">Sin personajes</p>
-              }
+              </ion-col>
             }
-          </ion-list>
-        </ion-col>
-
-      </ion-row>
-    </ion-grid>
-    </div>
-  }
-
-  <!-- Player Dashboard -->
-  @if (activeRole === 'player') {
-    <div data-testid="player-dashboard">
-    <h2>Mis Personajes</h2>
-
-    @if (loadingUsers) {
-      <ion-spinner name="crescent"></ion-spinner>
+          }
+        </ion-row>
+      </div>
     }
+  </div>
 
-    @if (errorUsers) {
-      <p class="error-msg">{{ errorUsers }}</p>
-    }
-
-    @if (users.length === 0 && !loadingUsers) {
-      <p class="text-muted">La taberna está vacía...</p>
-    }
-
-    @for (user of users; track user.id) {
-      @for (char of user.characters; track char.id) {
-        <ion-card button (click)="goToSheet(char.id)" class="character-card" data-testid="player-character-card">
-          <ion-card-content>
-            <strong>{{ char.name }}</strong>
-            <p>{{ char.dndClass }} — Nivel {{ char.level }}</p>
-            <p class="text-muted">{{ user.name }}</p>
-          </ion-card-content>
-        </ion-card>
-      }
-    }
-    </div>
-  }
-
+  <!-- FAB: Restoring slot="fixed" behavior -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="ion-margin">
+    <ion-fab-button color="warning" class="forge-fab">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+    <div class="fab-label">Forjar</div>
+  </ion-fab>
 </ion-content>

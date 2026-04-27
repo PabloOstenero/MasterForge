@@ -10,6 +10,14 @@ const API_URL = 'http://localhost:8080/api';
 export class AuthService {
   private http = inject(HttpClient);
 
+  // Internal state for the logged-in user
+  private _currentUser: any = null;
+
+  constructor() {
+    const savedUser = localStorage.getItem('mf_user');
+    if (savedUser) this._currentUser = JSON.parse(savedUser);
+  }
+
   login(email: string, password: string): Observable<{ token: string }> {
     return this.http.post<{ token: string }>(`${API_URL}/auth/login`, { email, password });
   }
@@ -18,8 +26,30 @@ export class AuthService {
     localStorage.setItem(TOKEN_KEY, token);
   }
 
+  // Store user profile info (name, id, etc.)
+  storeUser(user: any): void {
+    this._currentUser = user;
+    localStorage.setItem('mf_user', JSON.stringify(user));
+  }
+
   getToken(): string | null {
     return localStorage.getItem(TOKEN_KEY);
+  }
+
+  // Decodes the JWT to get the user ID (subject) stored in the token
+  getUserIdFromToken(): string | null {
+    const token = this.getToken();
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.sub; // The 'sub' claim in your Kotlin backend is the UUID
+    } catch (e) {
+      return null;
+    }
+  }
+
+  getCurrentUser(): any {
+    return this._currentUser;
   }
 
   isAuthenticated(): boolean {
@@ -28,6 +58,8 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem('mf_user');
+    this._currentUser = null;
   }
 }
 

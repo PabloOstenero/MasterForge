@@ -470,7 +470,7 @@ describe('HomePage — Property-Based Tests', () => {
     component.loadingCampaigns = true;
     fixture.detectChanges();
 
-    const spinner = fixture.nativeElement.querySelector('ion-spinner');
+    const spinner = fixture.nativeElement.querySelector('[data-testid="dm-dashboard"] ion-spinner');
     expect(spinner).toBeTruthy();
   });
 

@@ -1,14 +1,65 @@
 @use '../../theme/variables' as *;
 
-// Page background
-ion-content {
-  --background: #{$bg-primary};
+:host {
+  --ion-background-color: #121212 !important;
+  --ion-toolbar-background: #121212 !important;
+  --ion-text-color: #ffffff !important;
 }
 
-// Role toggle
-ion-segment {
-  --background: #{$bg-surface};
+.char-sheet-content {
+  --background: #121212 !important;
+  // Do NOT apply flex to host content, it breaks fixed slot elements
 }
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba($accent-gold, 0.1);
+}
+
+.dashboard-title {
+  font-size: 1.6rem;
+  text-transform: none;
+}
+
+.header-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.role-toggle-btn {
+  --border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.header-toolbar {
+  --background: #121212 !important;
+  border-bottom: 2px solid $accent-gold;
+}
+
+// Thematic titles from character sheet
+.gold-title {
+  color: $accent-gold;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.section-title {
+  color: $accent-gold;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba($accent-gold, 0.3);
+  padding-bottom: 6px;
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
 
 ion-segment-button {
   --color: #{$text-muted};
@@ -16,27 +67,108 @@ ion-segment-button {
   --indicator-color: #{$accent-gold};
 }
 
-// Cards (campaigns, sessions, characters)
+// Summary Stat Cards (from Dashboard image)
+.summary-row {
+  margin-bottom: 20px;
+}
+
+.summary-card {
+  // Anthracite grey surface (#1E1E1E)
+  --background: #1e1e1e !important;
+  background-color: #1e1e1e !important;
+  padding: 16px;
+  border-radius: 8px;
+  border-left: 4px solid $accent-gold;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  height: 100%;
+
+  .summary-label {
+    color: $text-muted;
+    font-size: 0.75rem;
+    text-transform: none;
+    letter-spacing: 0.5px;
+  }
+
+  .summary-value {
+    color: $text-primary;
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin: 8px 0;
+    letter-spacing: 0.5px;
+  }
+
+  .summary-link {
+    color: $accent-gold;
+    font-size: 0.8rem;
+    text-decoration: none;
+    cursor: pointer;
+    &:hover { text-decoration: underline; }
+  }
+}
+
+// Custom List Item Style for Dashboard Look
+.skill-item, .list-item-interactive {
+  --background: #1e1e1e !important;
+  --color: #ffffff;
+}
+
+.list-item-interactive {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  background: #1e1e1e !important;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  margin-bottom: 2px;
+  
+  .view-link {
+    color: $accent-gold;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+  }
+}
+
 ion-card {
-  --background: #{$bg-surface};
-  --color: #{$text-primary};
+  --background: #1e1e1e !important;
+  --color: #ffffff;
+  border-radius: 10px;
+  margin-inline: 0;
 
   ion-card-title {
-    color: $text-primary;
+    color: $accent-gold;
+    font-size: 1.1rem;
   }
 }
 
 // Inline forms
 .inline-form {
-  padding: 12px 0;
-
+  padding: 16px;
+  background: #1e1e1e !important;
+  border: 1px solid rgba($accent-gold, 0.2);
+  border-radius: 8px;
+  margin: 10px 0;
+  
   ion-input,
   ion-select {
-    --background: #{$bg-surface};
+    --background: #121212;
     --color: #{$text-primary};
     --placeholder-color: #{$text-muted};
-    margin-bottom: 8px;
+    margin-bottom: 12px;
   }
+}
+
+// List styling similar to character sheet
+.transparent-list {
+  background: transparent !important;
+  --background: transparent !important;
+}
+
+.skill-item {
+  --background: #1e1e1e !important;
+  --border-radius: 8px;
+  margin-bottom: 8px;
+  border: 1px solid rgba($text-muted, 0.1);
+  transition: transform 0.2s ease;
 }
 
 // Error messages
@@ -61,4 +193,44 @@ ion-card {
 // Muted helper text
 .text-muted {
   color: $text-muted;
+}
+
+.session-count {
+  color: $accent-gold;
+  font-weight: 500;
+}
+
+.character-card {
+  border-right: 3px solid $accent-gold;
+}
+
+// FAB Styling
+ion-fab {
+  // Increase this value to move the button further away from the right edge
+  margin-right: 40px;
+}
+
+.forge-fab {
+  --background: #{$accent-gold};
+  --color: #{$bg-primary};
+  --box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  width: 56px;
+  height: 56px;
+}
+
+.fab-label {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  color: $accent-gold;
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.dashboard-container {
+  width: 100%;
 }
