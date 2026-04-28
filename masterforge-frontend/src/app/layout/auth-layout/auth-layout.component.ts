@@ -1,13 +1,14 @@
 import { Component, inject, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
+import { IonButton, IonIcon, IonAvatar } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { RoleService } from '../../services/role.service';
 
 @Component({
   selector: 'app-auth-layout',
   standalone: true,
-  imports: [RouterModule, AsyncPipe],
+  imports: [RouterModule, AsyncPipe, IonButton, IonIcon, IonAvatar],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './auth-layout.component.html',
   styleUrls: ['./auth-layout.component.scss'],
@@ -18,6 +19,15 @@ export class AuthLayoutComponent {
   private roleService = inject(RoleService);
 
   menuItems$ = this.roleService.menuItems$;
+  activeRole$ = this.roleService.activeRole$;
+
+  get username(): string {
+    return this.authService.getCurrentUser()?.name ?? 'Usuario';
+  }
+
+  toggleRole(): void {
+    this.roleService.toggleRole();
+  }
 
   logout(): void {
     this.authService.logout();

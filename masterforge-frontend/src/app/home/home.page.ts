@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import {
   IonContent, IonGrid, IonRow, IonCol,
   IonSpinner,
@@ -10,10 +10,10 @@ import {
   IonList, IonItem, IonLabel, IonBadge, IonNote,
   IonButton, IonIcon, IonInput, IonFab, IonFabButton
 } from '@ionic/angular/standalone';
-import { Subscription } from 'rxjs';
 import { ApiService } from '../services/api';
 import { AuthService } from '../services/auth.service';
 import { RoleService } from '../services/role.service';
+import { AsyncPipe } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { add } from 'ionicons/icons';
 
@@ -32,15 +32,14 @@ import { add } from 'ionicons/icons';
     IonList, IonItem, IonLabel, IonBadge,
     IonAvatar,
     IonButton, IonIcon, IonInput,
-    IonFab, IonFabButton
+    IonFab, IonFabButton,
+    AsyncPipe
   ],
 })
-export class HomePage implements OnInit, OnDestroy {
+export class HomePage implements OnInit {
 
-  // Role toggle
-  activeRole: 'dm' | 'player' = 'dm';
+  activeRole$ = this.roleService.activeRole$;
   activeTab = 'inicio';
-  private roleSub?: Subscription;
 
   // Data arrays
   users: any[] = [];
@@ -65,19 +64,9 @@ export class HomePage implements OnInit, OnDestroy {
   newCampaign = { name: '', description: '' };
   newSession = { scheduledDate: '', price: '', campaignId: '' };
 
-  get username(): string {
-    const user = this.authService.getCurrentUser();
-    if (user?.name) return user.name;
-
-    // Fallback: Identify the logged-in user from the loaded 'users' list using the token ID
-    const myId = this.authService.getUserIdFromToken();
-    const me = this.users.find(u => u.id === myId);
-    return me?.name || 'Director';
-  }
-
   constructor(
     private apiService: ApiService, 
-    private router: Router, 
+    private router: Router,
     private roleService: RoleService,
     private authService: AuthService
   ) {
@@ -85,16 +74,9 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.roleSub = this.roleService.activeRole$.subscribe(role => {
-      this.activeRole = role;
-    });
     this.loadUsers();
     this.loadCampaigns();
     this.loadSessions();
-  }
-
-  ngOnDestroy() {
-    this.roleSub?.unsubscribe();
   }
 
   get nextSessionDate(): string {
@@ -107,10 +89,6 @@ export class HomePage implements OnInit, OnDestroy {
 
   get totalRevenue(): number {
     return this.sessions.reduce((sum, s) => sum + (Number(s.price) || 0), 0);
-  }
-
-  toggleRole() {
-    this.roleService.toggleRole();
   }
 
   loadUsers() {

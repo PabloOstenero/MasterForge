@@ -1,10 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of, throwError, Subject } from 'rxjs';
+import { of, throwError, Subject, BehaviorSubject } from 'rxjs';
 import * as fc from 'fast-check';
 
 import { HomePage } from './home.page';
 import { ApiService } from '../services/api';
+import { RoleService } from '../services/role.service';
+import { AuthService } from '../services/auth.service';
 
 // ---------------------------------------------------------------------------
 // Arbitraries
@@ -73,13 +75,30 @@ describe('HomePage — Property-Based Tests', () => {
   let fixture: ComponentFixture<HomePage>;
   let component: HomePage;
   let apiSpy: jasmine.SpyObj<ApiService>;
+  let roleSubject: BehaviorSubject<'dm' | 'player'>;
 
   beforeEach(async () => {
     apiSpy = buildApiSpy();
+    roleSubject = new BehaviorSubject<'dm' | 'player'>('dm');
+
+    const roleServiceMock = {
+      activeRole$: roleSubject.asObservable(),
+      menuItems$: of([]),
+      toggleRole: () => roleSubject.next(roleSubject.value === 'dm' ? 'player' : 'dm'),
+    };
+
+    const authServiceMock = {
+      getCurrentUser: () => ({ id: 'user-1', name: 'Test User' }),
+      getUserIdFromToken: () => 'user-1',
+      logout: () => {},
+    };
+
     await TestBed.configureTestingModule({
       imports: [HomePage],
       providers: [
         { provide: ApiService, useValue: apiSpy },
+        { provide: RoleService, useValue: roleServiceMock },
+        { provide: AuthService, useValue: authServiceMock },
         provideRouter([]),
       ],
     }).compileComponents();
@@ -99,7 +118,7 @@ describe('HomePage — Property-Based Tests', () => {
       fc.property(
         fc.constantFrom<'dm' | 'player'>('dm', 'player'),
         (role) => {
-          component.activeRole = role;
+          roleSubject.next(role);
           fixture.detectChanges();
 
           const el: HTMLElement = fixture.nativeElement;
@@ -129,7 +148,7 @@ describe('HomePage — Property-Based Tests', () => {
       fc.property(
         fc.array(campaignArb, { minLength: 0, maxLength: 10 }),
         (campaigns) => {
-          component.activeRole = 'dm';
+          roleSubject.next('dm');
           component.campaigns = campaigns;
           component.loadingCampaigns = false;
           fixture.detectChanges();
@@ -152,7 +171,7 @@ describe('HomePage — Property-Based Tests', () => {
       fc.property(
         fc.array(sessionArb([]), { minLength: 0, maxLength: 10 }),
         (sessions) => {
-          component.activeRole = 'dm';
+          roleSubject.next('dm');
           component.sessions = sessions;
           component.loadingSessions = false;
           fixture.detectChanges();
@@ -175,7 +194,7 @@ describe('HomePage — Property-Based Tests', () => {
       fc.property(
         fc.array(userArb, { minLength: 0, maxLength: 8 }),
         (users) => {
-          component.activeRole = 'dm';
+          roleSubject.next('dm');
           component.users = users;
           component.loadingUsers = false;
           fixture.detectChanges();
@@ -466,7 +485,7 @@ describe('HomePage — Property-Based Tests', () => {
   // Validates: Requirements 7.2
   // -------------------------------------------------------------------------
   it('P12 — when loadingCampaigns is true, spinner is present in DM view', () => {
-    component.activeRole = 'dm';
+    roleSubject.next('dm');
     component.loadingCampaigns = true;
     fixture.detectChanges();
 
@@ -475,7 +494,7 @@ describe('HomePage — Property-Based Tests', () => {
   });
 
   it('P12b — when all loading flags are false and no errors, no spinners are present', () => {
-    component.activeRole = 'dm';
+    roleSubject.next('dm');
     component.loadingCampaigns = false;
     component.loadingSessions = false;
     component.loadingUsers = false;
@@ -541,7 +560,7 @@ describe('HomePage — Property-Based Tests', () => {
       fc.property(
         fc.array(userArb, { minLength: 0, maxLength: 6 }),
         (users) => {
-          component.activeRole = 'player';
+          roleSubject.next('player');
           component.users = users;
           component.loadingUsers = false;
           fixture.detectChanges();

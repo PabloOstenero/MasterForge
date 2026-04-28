@@ -362,19 +362,10 @@ describe('AuthLayoutComponent — Property 2: Preservation (Non-Toggle Interacti
 });
 
 // ---------------------------------------------------------------------------
-// AuthLayoutComponent — Property 1: Bug Condition (Sidebar Ignores Role Toggle)
-// ---------------------------------------------------------------------------
-// These tests MUST FAIL on unfixed code — failure confirms the bug exists.
-// The component never injects RoleService, so the mock has no effect on the DOM.
-// The sidebar stays frozen on hardcoded DM links regardless of toggleRole().
-//
-// Counterexamples documented after running on unfixed code:
-//   - After toggleRole(), sidebar still shows "Jugadores" instead of "Forjar Personaje"
-//   - After toggleRole(), nav item count is 5 (hardcoded DM) instead of 6 (Player menu)
-//   - After toggleRole(), "Jugadores" is still present in the sidebar
+// Shared menu fixtures used by bug condition describe blocks below
 // ---------------------------------------------------------------------------
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { RoleService, MenuItem } from '../../services/role.service';
 
 const DM_MENU: MenuItem[] = [
@@ -393,6 +384,135 @@ const PLAYER_MENU: MenuItem[] = [
   { title: 'Gremio de Campañas', icon: 'search-outline', route: '/buscar-campañas' },
   { title: 'Configuración', icon: 'settings-outline', route: '/config' },
 ];
+
+// ---------------------------------------------------------------------------
+// AuthLayoutComponent — Property 1: Bug Condition - Topbar Absent in AuthLayoutComponent
+// ---------------------------------------------------------------------------
+// These tests MUST FAIL on unfixed code — failure confirms the bug exists.
+// The topbar (role toggle + avatar) only exists in home.page.html, not in AuthLayoutComponent.
+//
+// **Validates: Requirements 1.1, 1.2, 2.1, 2.2**
+//
+// Counterexample to be documented after running on unfixed code:
+//   "AuthLayoutComponent renders no .topbar element; topbar only exists in home.page.html"
+// ---------------------------------------------------------------------------
+
+describe('AuthLayoutComponent — Property 1: Bug Condition - Topbar Absent in AuthLayoutComponent', () => {
+
+  let fixture: ComponentFixture<AuthLayoutComponent>;
+  let authSpy: jasmine.SpyObj<AuthService>;
+  let mockRoleService: {
+    _subject: BehaviorSubject<'dm' | 'player'>;
+    activeRole$: ReturnType<BehaviorSubject<'dm' | 'player'>['asObservable']>;
+    menuItems$: ReturnType<BehaviorSubject<MenuItem[]>['asObservable']>;
+  };
+
+  beforeEach(async () => {
+    const roleSubject = new BehaviorSubject<'dm' | 'player'>('dm');
+    const menuSubject = new BehaviorSubject<MenuItem[]>(DM_MENU);
+    
+    mockRoleService = {
+      _subject: roleSubject,
+      activeRole$: roleSubject.asObservable(),
+      menuItems$: menuSubject.asObservable(),
+    };
+
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
+
+    await TestBed.configureTestingModule({
+      imports: [AuthLayoutComponent],
+      providers: [
+        { provide: AuthService, useValue: authSpy },
+        { provide: RoleService, useValue: mockRoleService },
+        provideRouter([
+          { path: 'home', component: StubPageComponent },
+          { path: 'jugadores', component: StubPageComponent },
+          { path: 'campanyas', component: StubPageComponent },
+          { path: 'bestiario', component: StubPageComponent },
+          { path: 'config', component: StubPageComponent },
+          { path: 'login', component: StubPageComponent },
+        ]),
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(AuthLayoutComponent);
+    fixture.detectChanges();
+  });
+
+  // -------------------------------------------------------------------------
+  // P1-topbar-absent
+  // Validates: Requirements 1.1, 1.2, 2.1, 2.2
+  // **Validates: Requirements 1.1, 1.2, 2.1, 2.2**
+  //
+  // EXPECTED ON UNFIXED CODE: FAILS
+  // Counterexample: AuthLayoutComponent renders no .topbar element; topbar only exists in home.page.html
+  // -------------------------------------------------------------------------
+  it('P1-topbar-absent — AuthLayoutComponent renders .topbar element inside .main-content', () => {
+    const mainContent = fixture.nativeElement.querySelector('.main-content');
+    expect(mainContent).withContext('.main-content should exist').toBeTruthy();
+
+    const topbar = mainContent.querySelector('.topbar');
+    expect(topbar)
+      .withContext(
+        '[BUG COUNTEREXAMPLE] AuthLayoutComponent renders no .topbar element; topbar only exists in home.page.html'
+      )
+      .toBeTruthy();
+  });
+
+  // -------------------------------------------------------------------------
+  // P1-role-toggle-absent
+  // Validates: Requirements 1.1, 1.2, 2.1, 2.2
+  // **Validates: Requirements 1.1, 1.2, 2.1, 2.2**
+  //
+  // EXPECTED ON UNFIXED CODE: FAILS
+  // Counterexample: Role toggle button is not found in AuthLayoutComponent
+  // -------------------------------------------------------------------------
+  it('P1-role-toggle-absent — AuthLayoutComponent renders role toggle ion-button inside .main-content', () => {
+    const mainContent = fixture.nativeElement.querySelector('.main-content');
+    expect(mainContent).withContext('.main-content should exist').toBeTruthy();
+
+    const roleToggleBtn = mainContent.querySelector('ion-button');
+    expect(roleToggleBtn)
+      .withContext(
+        '[BUG COUNTEREXAMPLE] Role toggle ion-button is not found in AuthLayoutComponent .main-content'
+      )
+      .toBeTruthy();
+  });
+
+  // -------------------------------------------------------------------------
+  // P1-avatar-absent
+  // Validates: Requirements 1.1, 1.2, 2.1, 2.2
+  // **Validates: Requirements 1.1, 1.2, 2.1, 2.2**
+  //
+  // EXPECTED ON UNFIXED CODE: FAILS
+  // Counterexample: ion-avatar is not found in AuthLayoutComponent
+  // -------------------------------------------------------------------------
+  it('P1-avatar-absent — AuthLayoutComponent renders ion-avatar inside .main-content', () => {
+    const mainContent = fixture.nativeElement.querySelector('.main-content');
+    expect(mainContent).withContext('.main-content should exist').toBeTruthy();
+
+    const avatar = mainContent.querySelector('ion-avatar');
+    expect(avatar)
+      .withContext(
+        '[BUG COUNTEREXAMPLE] ion-avatar is not found in AuthLayoutComponent .main-content'
+      )
+      .toBeTruthy();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// AuthLayoutComponent — Property 1: Bug Condition (Sidebar Ignores Role Toggle)
+// ---------------------------------------------------------------------------
+// These tests MUST FAIL on unfixed code — failure confirms the bug exists.
+// The component never injects RoleService, so the mock has no effect on the DOM.
+// The sidebar stays frozen on hardcoded DM links regardless of toggleRole().
+//
+// Counterexamples documented after running on unfixed code:
+//   - After toggleRole(), sidebar still shows "Jugadores" instead of "Forjar Personaje"
+//   - After toggleRole(), nav item count is 5 (hardcoded DM) instead of 6 (Player menu)
+//   - After toggleRole(), "Jugadores" is still present in the sidebar
+// ---------------------------------------------------------------------------
 
 describe('AuthLayoutComponent — Property 1: Bug Condition (Sidebar Ignores Role Toggle)', () => {
 
@@ -515,4 +635,147 @@ describe('AuthLayoutComponent — Property 1: Bug Condition (Sidebar Ignores Rol
       )
       .toBeFalse();
   });
+});
+
+// ---------------------------------------------------------------------------
+// Property 2: Preservation — Role Toggle Behavior and Menu Items Unchanged
+// ---------------------------------------------------------------------------
+// These tests MUST PASS on unfixed code — they confirm the baseline behavior
+// that must be preserved after the fix is applied.
+//
+// **Validates: Requirements 3.1, 3.2**
+// ---------------------------------------------------------------------------
+
+describe('RoleService — Property 2: Preservation (Role Toggle and Menu Items)', () => {
+
+  let roleService: RoleService;
+
+  beforeEach(() => {
+    roleService = new RoleService();
+  });
+
+  // -------------------------------------------------------------------------
+  // P2-role-toggle-valid-state
+  // Validates: Requirement 3.1
+  // **Validates: Requirements 3.1**
+  //
+  // For any sequence of toggleRole() calls (arbitrary length ≥ 1),
+  // activeRole$ always emits a value in { 'dm', 'player' }.
+  // EXPECTED ON UNFIXED CODE: PASSES (toggleRole() is already correct)
+  // -------------------------------------------------------------------------
+  it('P2-role-toggle-valid-state — for any sequence of toggleRole() calls, activeRole$ always emits dm or player', () => {
+    fc.assert(
+      fc.property(
+        fc.array(fc.constant(null), { minLength: 1, maxLength: 20 }),
+        (toggles) => {
+          // Reset to a fresh service for each run
+          const svc = new RoleService();
+          let lastEmitted: 'dm' | 'player' | undefined;
+
+          const sub = svc.activeRole$.subscribe(role => {
+            lastEmitted = role;
+          });
+
+          // Perform the sequence of toggles
+          for (const _ of toggles) {
+            svc.toggleRole();
+            // After each toggle, the emitted value must be valid
+            expect(['dm', 'player']).toContain(lastEmitted as string);
+          }
+
+          sub.unsubscribe();
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('P2-role-toggle-alternates — toggleRole() switches between dm and player correctly', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 1, max: 20 }),
+        (numToggles) => {
+          const svc = new RoleService();
+          const emitted: ('dm' | 'player')[] = [];
+
+          const sub = svc.activeRole$.subscribe(role => emitted.push(role));
+
+          for (let i = 0; i < numToggles; i++) {
+            svc.toggleRole();
+          }
+
+          sub.unsubscribe();
+
+          // Every emitted value must be 'dm' or 'player'
+          emitted.forEach(role => {
+            expect(['dm', 'player']).toContain(role);
+          });
+
+          // The final role must be the opposite of the initial role if numToggles is odd,
+          // or the same if numToggles is even
+          const initialRole = emitted[0]; // 'dm' (initial state)
+          const finalRole = emitted[emitted.length - 1];
+          if (numToggles % 2 === 0) {
+            expect(finalRole).toBe(initialRole);
+          } else {
+            expect(finalRole).not.toBe(initialRole);
+          }
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  // -------------------------------------------------------------------------
+  // P2-menu-items-non-empty
+  // Validates: Requirement 3.2
+  // **Validates: Requirements 3.2**
+  //
+  // For any role value ('dm' or 'player'), menuItems$ emits an array with length > 0.
+  // EXPECTED ON UNFIXED CODE: PASSES (menuItems$ always returns non-empty arrays)
+  // -------------------------------------------------------------------------
+  it('P2-menu-items-non-empty — for any role value, menuItems$ emits a non-empty array', async () => {
+    await fc.assert(
+      fc.asyncProperty(
+        fc.constantFrom<'dm' | 'player'>('dm', 'player'),
+        async (role) => {
+          const svc = new RoleService();
+
+          // Set the role by toggling if needed
+          if (svc.activeRole !== role) {
+            svc.toggleRole();
+          }
+
+          const items = await firstValueFrom(svc.menuItems$);
+          expect(items.length).toBeGreaterThan(0);
+        }
+      ),
+      { numRuns: 20 }
+    );
+  });
+
+  it('P2-menu-items-non-empty-sync — menuItems$ emits non-empty array for both roles (synchronous check)', () => {
+    fc.assert(
+      fc.property(
+        fc.constantFrom<'dm' | 'player'>('dm', 'player'),
+        (role) => {
+          const svc = new RoleService();
+          let items: MenuItem[] | undefined;
+
+          // Set the role
+          if (svc.activeRole !== role) {
+            svc.toggleRole();
+          }
+
+          const sub = svc.menuItems$.subscribe(i => { items = i; });
+          sub.unsubscribe();
+
+          expect(items).toBeDefined();
+          expect(items!.length).toBeGreaterThan(0);
+        }
+      ),
+      { numRuns: 20 }
+    );
+  });
+
 });

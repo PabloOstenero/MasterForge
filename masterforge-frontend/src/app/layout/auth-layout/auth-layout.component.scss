@@ -97,3 +97,24 @@
   background-color: var(--mf-bg-primary, #121212);
   min-height: 100vh;
 }
+
+.topbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+}
+
+.topbar-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.role-toggle-btn {
+  --border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}

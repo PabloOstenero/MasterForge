@@ -24,6 +24,17 @@
   </nav>
 
   <main class="main-content">
+    <div class="topbar">
+      <div class="topbar-actions">
+        <ion-button (click)="toggleRole()" fill="clear" color="warning" class="role-toggle-btn">
+          <ion-icon slot="start" name="swap-horizontal-outline"></ion-icon>
+          <span class="ion-hide-sm-down">{{ (activeRole$ | async) === 'dm' ? 'Modo Jugador' : 'Modo Director' }}</span>
+        </ion-button>
+        <ion-avatar class="ion-margin-start" style="width: 32px; height: 32px;">
+          <img src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="avatar" />
+        </ion-avatar>
+      </div>
+    </div>
     <router-outlet></router-outlet>
   </main>
 </div>
