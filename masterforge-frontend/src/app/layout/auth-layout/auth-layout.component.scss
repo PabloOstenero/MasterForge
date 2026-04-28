@@ -75,10 +75,17 @@
 .topbar {
   position: relative;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   padding: 8px 16px;
   border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+}
+
+.topbar-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--mf-accent-gold, #c9a84c);
+  letter-spacing: 0.3px;
 }
 
 .topbar-actions {

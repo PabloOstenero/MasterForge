@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpRequest, HttpHandlerFn, HttpInterceptorFn } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { inject } from '@angular/core';
 
 const TOKEN_KEY = 'mf_token';
@@ -50,6 +51,12 @@ export class AuthService {
 
   getCurrentUser(): any {
     return this._currentUser;
+  }
+
+  fetchAndStoreUser(userId: string): Observable<any> {
+    return this.http.get(`${API_URL}/users/${userId}`).pipe(
+      tap((user: any) => this.storeUser(user))
+    );
   }
 
   isAuthenticated(): boolean {

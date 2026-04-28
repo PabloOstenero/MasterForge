@@ -42,7 +42,15 @@ export class LoginPage {
     this.authService.login(this.email.trim(), this.password.trim()).subscribe({
       next: (res) => {
         this.authService.storeToken(res.token);
-        this.router.navigate(['/home']);
+        const userId = this.authService.getUserIdFromToken();
+        if (userId) {
+          this.authService.fetchAndStoreUser(userId).subscribe({
+            next: () => this.router.navigate(['/home']),
+            error: () => this.router.navigate(['/home'])
+          });
+        } else {
+          this.router.navigate(['/home']);
+        }
       },
       error: (err) => {
         this.errorMessage = err?.error?.message ?? 'Credenciales incorrectas. Inténtalo de nuevo.';
