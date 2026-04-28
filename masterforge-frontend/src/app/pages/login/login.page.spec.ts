@@ -15,6 +15,43 @@ const tokenArb = fc.string({ minLength: 10, maxLength: 200 }).filter(s => s.trim
 const blankStringArb = fc.stringMatching(/^\s*$/);
 
 // ---------------------------------------------------------------------------
+// LoginPage — Unit Tests
+// ---------------------------------------------------------------------------
+
+describe('LoginPage — Unit Tests', () => {
+
+  let fixture: ComponentFixture<LoginPage>;
+  let authSpy: jasmine.SpyObj<AuthService>;
+
+  beforeEach(async () => {
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['login', 'storeToken', 'isAuthenticated', 'getUserIdFromToken', 'fetchAndStoreUser']);
+    authSpy.login.and.returnValue(of({ token: 'test-token' }));
+    authSpy.getUserIdFromToken.and.returnValue(null);
+    authSpy.fetchAndStoreUser.and.returnValue(of({}));
+
+    await TestBed.configureTestingModule({
+      imports: [LoginPage],
+      providers: [
+        { provide: AuthService, useValue: authSpy },
+        provideRouter([]),
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(LoginPage);
+    fixture.detectChanges();
+  });
+
+  // Validates: Requirement 5.1
+  it('should render the "¿No tienes cuenta? Regístrate" navigation link', () => {
+    const compiled: HTMLElement = fixture.nativeElement;
+    const navLink = compiled.querySelector('p.nav-link');
+    expect(navLink).toBeTruthy();
+    expect(navLink!.textContent).toContain('¿No tienes cuenta?');
+    expect(navLink!.textContent).toContain('Regístrate');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // LoginPage — Property-Based Tests
 // ---------------------------------------------------------------------------
 
@@ -26,8 +63,10 @@ describe('LoginPage — Property-Based Tests', () => {
   let router: Router;
 
   beforeEach(async () => {
-    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['login', 'storeToken', 'isAuthenticated']);
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['login', 'storeToken', 'isAuthenticated', 'getUserIdFromToken', 'fetchAndStoreUser']);
     authSpy.login.and.returnValue(of({ token: 'test-token' }));
+    authSpy.getUserIdFromToken.and.returnValue(null);
+    authSpy.fetchAndStoreUser.and.returnValue(of({}));
 
     await TestBed.configureTestingModule({
       imports: [LoginPage],

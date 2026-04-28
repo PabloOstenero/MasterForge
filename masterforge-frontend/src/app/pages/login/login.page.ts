@@ -28,7 +28,7 @@ export class LoginPage {
   errorMessage: string | null = null;
   isLoading = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService, public router: Router) {}
 
   onSubmit() {
     this.errorMessage = null;

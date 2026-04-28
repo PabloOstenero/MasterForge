@@ -58,6 +58,7 @@ class SecurityConfig(private val jwtAuthFilter: JwtAuthFilter) {
                 auth
                     .requestMatchers(org.springframework.web.cors.CorsUtils::isPreFlightRequest).permitAll()
                     .requestMatchers("/api/auth/login").permitAll()
+                    .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/users").permitAll()
                     .requestMatchers("/api/**").authenticated()
                     .anyRequest().permitAll()
             }

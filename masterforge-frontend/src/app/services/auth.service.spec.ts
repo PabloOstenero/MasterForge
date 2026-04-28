@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient, HttpRequest } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import * as fc from 'fast-check';
 
 import { AuthService, authInterceptor } from './auth.service';
@@ -187,5 +187,50 @@ describe('AuthService — Property-Based Tests', () => {
       ),
       { numRuns: 100 }
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// AuthService.register() — Unit Test
+// Validates: Requirements 4.1
+// ---------------------------------------------------------------------------
+
+describe('AuthService.register()', () => {
+  let service: AuthService;
+  let httpMock: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        AuthService,
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ]
+    });
+    service = TestBed.inject(AuthService);
+    httpMock = TestBed.inject(HttpTestingController);
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+    localStorage.clear();
+  });
+
+  it('should POST to /api/users with the correct body shape', () => {
+    service.register('TestName', 'test@example.com', 'password123').subscribe();
+
+    const req = httpMock.expectOne(r => r.url.endsWith('/api/users'));
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({
+      name: 'TestName',
+      email: 'test@example.com',
+      passwordHash: 'password123',
+      subscriptionTier: 'FREE',
+      balance: 0,
+      isActive: true
+    });
+
+    req.flush({ id: '1', name: 'TestName' });
   });
 });

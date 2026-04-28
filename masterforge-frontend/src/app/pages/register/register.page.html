@@ -1,0 +1,76 @@
+<ion-content class="register-content">
+  <div class="register-wrapper">
+    <ion-card class="register-card">
+      <ion-card-header>
+        <ion-card-title class="register-title">MasterForge</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="form-group">
+          <ion-input
+            label="Nombre"
+            labelPlacement="floating"
+            [(ngModel)]="name"
+            [disabled]="isLoading"
+            data-testid="name-input">
+          </ion-input>
+        </div>
+
+        <div class="form-group">
+          <ion-input
+            label="Correo electrónico"
+            labelPlacement="floating"
+            type="email"
+            [(ngModel)]="email"
+            [disabled]="isLoading"
+            autocomplete="email"
+            data-testid="email-input">
+          </ion-input>
+        </div>
+
+        <div class="form-group">
+          <ion-input
+            label="Contraseña"
+            labelPlacement="floating"
+            [type]="showPassword ? 'text' : 'password'"
+            [(ngModel)]="password"
+            [disabled]="isLoading"
+            autocomplete="new-password"
+            data-testid="password-input">
+            <ion-button slot="end" fill="clear" class="toggle-btn" (click)="showPassword = !showPassword" [disabled]="isLoading">
+              <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+            </ion-button>
+          </ion-input>
+        </div>
+
+        <div class="form-group">
+          <ion-input
+            label="Confirmar contraseña"
+            labelPlacement="floating"
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            [(ngModel)]="confirmPassword"
+            [disabled]="isLoading"
+            autocomplete="new-password"
+            data-testid="confirm-password-input">
+            <ion-button slot="end" fill="clear" class="toggle-btn" (click)="showConfirmPassword = !showConfirmPassword" [disabled]="isLoading">
+              <ion-icon [name]="showConfirmPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+            </ion-button>
+          </ion-input>
+        </div>
+
+        @if (errorMessage) {
+          <p class="error-msg" data-testid="error-message">{{ errorMessage }}</p>
+        }
+
+        <ion-button
+          expand="block"
+          class="register-btn ion-margin-top"
+          [disabled]="isLoading"
+          (click)="onSubmit()"
+          data-testid="submit-button">
+          {{ isLoading ? 'Registrando...' : 'Registrarse' }}
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

@@ -23,6 +23,17 @@ export class AuthService {
     return this.http.post<{ token: string }>(`${API_URL}/auth/login`, { email, password });
   }
 
+  register(name: string, email: string, passwordHash: string): Observable<any> {
+    return this.http.post(`${API_URL}/users`, {
+      name,
+      email,
+      passwordHash,
+      subscriptionTier: 'FREE',
+      balance: 0.0,
+      isActive: true
+    });
+  }
+
   storeToken(token: string): void {
     localStorage.setItem(TOKEN_KEY, token);
   }
