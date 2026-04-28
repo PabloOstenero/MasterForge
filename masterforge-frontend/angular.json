@@ -130,6 +130,12 @@
                 "src/app/pages/login/login.page.spec.ts",
                 "src/app/home/home.page.spec.ts"
               ]
+            },
+            "bugtest": {
+              "tsConfig": "tsconfig.bugtest.json",
+              "include": [
+                "src/app/pages/inicio/inicio.page.spec.ts"
+              ]
             }
           }
         },

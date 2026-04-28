@@ -15,7 +15,15 @@
           <ion-col size="12" size-md="4">
             <div class="summary-card">
               <div class="summary-label">Clientes Totales</div>
-              <div class="summary-value">{{ users.length }} Activos</div>
+              <div class="summary-value">
+                @if (loadingPlayerCount) {
+                  ...
+                } @else if (errorPlayerCount) {
+                  Error
+                } @else {
+                  {{ playerCount }} jugadores
+                }
+              </div>
               <div class="summary-link">Ver Lista</div>
             </div>
           </ion-col>

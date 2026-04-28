@@ -50,11 +50,15 @@ export class HomePage implements OnInit {
   loadingUsers = false;
   loadingCampaigns = false;
   loadingSessions = false;
+  loadingPlayerCount = false;
 
   // Error strings
   errorUsers: string | null = null;
   errorCampaigns: string | null = null;
   errorSessions: string | null = null;
+  errorPlayerCount: string | null = null;
+
+  playerCount = 0;
 
   // Form visibility flags
   showNewCampaignForm = false;
@@ -77,6 +81,7 @@ export class HomePage implements OnInit {
     this.loadUsers();
     this.loadCampaigns();
     this.loadSessions();
+    this.loadPlayerCount();
   }
 
   get nextSessionDate(): string {
@@ -103,6 +108,22 @@ export class HomePage implements OnInit {
         console.error('Error al cargar usuarios', err);
         this.errorUsers = err?.message ?? 'Error al cargar usuarios';
         this.loadingUsers = false;
+      }
+    });
+  }
+
+  loadPlayerCount() {
+    this.loadingPlayerCount = true;
+    this.errorPlayerCount = null;
+    this.apiService.getPlayerCount().subscribe({
+      next: (data) => {
+        this.playerCount = data.playerCount;
+        this.loadingPlayerCount = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar conteo de jugadores', err);
+        this.errorPlayerCount = err?.message ?? 'Error al cargar jugadores';
+        this.loadingPlayerCount = false;
       }
     });
   }

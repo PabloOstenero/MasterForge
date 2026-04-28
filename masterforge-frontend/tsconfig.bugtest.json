@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/bugtest",
+    "types": ["jasmine"]
+  },
+  "files": [
+    "src/test.ts",
+    "src/polyfills.ts"
+  ],
+  "include": [
+    "src/app/pages/inicio/inicio.page.spec.ts",
+    "src/app/pages/inicio/inicio.page.ts",
+    "src/app/services/api.ts",
+    "src/**/*.d.ts"
+  ]
+}

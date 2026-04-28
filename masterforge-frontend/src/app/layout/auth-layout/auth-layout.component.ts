@@ -61,6 +61,10 @@ export class AuthLayoutComponent {
     this.isDropdownOpen = false;
   }
 
+  toggleDropdown(): void {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
   navigateToSettings(): void {
     this.closeDropdown();
     this.router.navigate(['/config']);

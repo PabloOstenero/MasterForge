@@ -106,4 +106,9 @@ updateTempHp(characterId: string, tempHp: number): Observable<any> {
     return this.http.get<any[]>(`${this.apiUrl}/monsters`);
   }
 
+  // Fetch the unique player count for the authenticated DM
+  getPlayerCount(): Observable<{ playerCount: number }> {
+    return this.http.get<{ playerCount: number }>(`${this.apiUrl}/users/me/player-count`);
+  }
+
 }

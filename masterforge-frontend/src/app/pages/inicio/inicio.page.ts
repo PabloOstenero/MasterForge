@@ -39,14 +39,17 @@ export class InicioPage implements OnInit {
   sessions: any[] = [];
   users: any[] = [];
   monsters: any[] = [];
+  playerCount: number = 0;
 
   loadingSessions = true;
   loadingUsers = true;
   loadingMonsters = true;
+  loadingPlayerCount = true;
 
   errorSessions: string | null = null;
   errorUsers: string | null = null;
   errorMonsters: string | null = null;
+  errorPlayerCount: string | null = null;
 
   constructor(private router: Router, private api: ApiService) {}
 
@@ -55,23 +58,28 @@ export class InicioPage implements OnInit {
       sessions: this.api.getSessions(),
       users: this.api.getUsers(),
       monsters: this.api.getMonsters(),
+      playerCount: this.api.getPlayerCount(),
     }).subscribe({
-      next: ({ sessions, users, monsters }) => {
+      next: ({ sessions, users, monsters, playerCount }) => {
         this.sessions = sessions;
         this.users = users;
         this.monsters = monsters;
+        this.playerCount = playerCount.playerCount;
         this.loadingSessions = false;
         this.loadingUsers = false;
         this.loadingMonsters = false;
+        this.loadingPlayerCount = false;
       },
       error: (err) => {
         const msg = err?.message ?? 'Error al cargar datos';
         this.errorSessions = msg;
         this.errorUsers = msg;
         this.errorMonsters = msg;
+        this.errorPlayerCount = msg;
         this.loadingSessions = false;
         this.loadingUsers = false;
         this.loadingMonsters = false;
+        this.loadingPlayerCount = false;
       },
     });
   }
@@ -82,14 +90,6 @@ export class InicioPage implements OnInit {
       .filter(s => new Date(s.scheduledDate) > now)
       .sort((a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime());
     return future.length > 0 ? future[0] : null;
-  }
-
-  get totalActiveClients(): number {
-    return this.users.filter(u => u.isActive === true).length;
-  }
-
-  get totalPendingClients(): number {
-    return this.users.filter(u => u.isActive === false).length;
   }
 
   get monthlyRevenue(): number {
