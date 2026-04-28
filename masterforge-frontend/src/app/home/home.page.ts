@@ -14,6 +14,8 @@ import { Subscription } from 'rxjs';
 import { ApiService } from '../services/api';
 import { AuthService } from '../services/auth.service';
 import { RoleService } from '../services/role.service';
+import { addIcons } from 'ionicons';
+import { add } from 'ionicons/icons';
 
 @Component({
   selector: 'app-home',
@@ -78,7 +80,9 @@ export class HomePage implements OnInit, OnDestroy {
     private router: Router, 
     private roleService: RoleService,
     private authService: AuthService
-  ) {}
+  ) {
+    addIcons({ add });
+  }
 
   ngOnInit() {
     this.roleSub = this.roleService.activeRole$.subscribe(role => {
