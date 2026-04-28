@@ -143,9 +143,9 @@ describe('AuthLayoutComponent — Property-Based Tests', () => {
     expect(title.textContent.trim()).toBe('MasterForge');
   });
 
-  it('P11d — logout button is always present in sidebar', () => {
-    const logoutBtn = fixture.nativeElement.querySelector('.logout-btn');
-    expect(logoutBtn).toBeTruthy();
+  it('P11d — avatar button is always present in topbar', () => {
+    const avatarBtn = fixture.nativeElement.querySelector('.avatar-btn');
+    expect(avatarBtn).toBeTruthy();
   });
 
   it('P11e — router-outlet is present in main content area', () => {
@@ -356,7 +356,6 @@ describe('AuthLayoutComponent — Property 2: Preservation (Non-Toggle Interacti
     expect(fixture.nativeElement.querySelector('.sidebar')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.main-content')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('router-outlet')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('.logout-btn')).toBeTruthy();
   });
 
 });
@@ -488,14 +487,14 @@ describe('AuthLayoutComponent — Property 1: Bug Condition - Topbar Absent in A
   // EXPECTED ON UNFIXED CODE: FAILS
   // Counterexample: ion-avatar is not found in AuthLayoutComponent
   // -------------------------------------------------------------------------
-  it('P1-avatar-absent — AuthLayoutComponent renders ion-avatar inside .main-content', () => {
+  it('P1-avatar-absent — AuthLayoutComponent renders avatar button inside .main-content', () => {
     const mainContent = fixture.nativeElement.querySelector('.main-content');
     expect(mainContent).withContext('.main-content should exist').toBeTruthy();
 
-    const avatar = mainContent.querySelector('ion-avatar');
+    const avatar = mainContent.querySelector('.avatar-btn');
     expect(avatar)
       .withContext(
-        '[BUG COUNTEREXAMPLE] ion-avatar is not found in AuthLayoutComponent .main-content'
+        '[BUG COUNTEREXAMPLE] .avatar-btn is not found in AuthLayoutComponent .main-content'
       )
       .toBeTruthy();
   });
@@ -775,6 +774,467 @@ describe('RoleService — Property 2: Preservation (Role Toggle and Menu Items)'
         }
       ),
       { numRuns: 20 }
+    );
+  });
+
+});
+
+// ---------------------------------------------------------------------------
+// Task 1 — Property Tests: Dropdown State
+// ---------------------------------------------------------------------------
+
+describe('AuthLayoutComponent — Task 1 Property Tests: Dropdown State', () => {
+
+  let fixture: ComponentFixture<AuthLayoutComponent>;
+  let component: AuthLayoutComponent;
+  let authSpy: jasmine.SpyObj<AuthService>;
+
+  beforeEach(async () => {
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
+
+    await TestBed.configureTestingModule({
+      imports: [AuthLayoutComponent],
+      providers: [
+        { provide: AuthService, useValue: authSpy },
+        provideRouter([
+          { path: 'home', component: StubPageComponent },
+          { path: 'login', component: StubPageComponent },
+          { path: 'settings', component: StubPageComponent },
+        ]),
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(AuthLayoutComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  // -------------------------------------------------------------------------
+  // Subtask 1.1 — Property 1: Dropdown toggle is idempotent per click
+  // Validates: Requirements 1.3
+  // **Validates: Requirements 1.3**
+  // -------------------------------------------------------------------------
+  it('Property 1: dropdown toggle is idempotent per click', () => {
+    // Feature: profile-avatar-dropdown-menu, Property 1: toggle flips state
+    fc.assert(
+      fc.property(fc.boolean(), (initialState) => {
+        component.isDropdownOpen = initialState;
+        component.toggleDropdown();
+        component.toggleDropdown();
+        expect(component.isDropdownOpen).toBe(initialState);
+      }),
+      { numRuns: 100 }
+    );
+  });
+
+  // -------------------------------------------------------------------------
+  // Subtask 1.2 — Property 3: Escape key always closes the dropdown
+  // Validates: Requirements 2.4
+  // **Validates: Requirements 2.4**
+  // -------------------------------------------------------------------------
+  it('Property 3: Escape key always closes the dropdown', () => {
+    // Feature: profile-avatar-dropdown-menu, Property 3: Escape key always closes the dropdown
+    fc.assert(
+      fc.property(fc.constant(true), (openState) => {
+        component.isDropdownOpen = openState;
+        component.onEscape();
+        expect(component.isDropdownOpen).toBeFalse();
+      }),
+      { numRuns: 100 }
+    );
+  });
+
+});
+
+// ---------------------------------------------------------------------------
+// Task 2 — Subtask 2.1: Property 2: Overlay click always closes the dropdown
+// ---------------------------------------------------------------------------
+
+describe('AuthLayoutComponent — Task 2 Subtask 2.1: Overlay Click Closes Dropdown', () => {
+  // Feature: profile-avatar-dropdown-menu, Property 2: Overlay click always closes the dropdown
+
+  let fixture: ComponentFixture<AuthLayoutComponent>;
+  let component: AuthLayoutComponent;
+  let authSpy: jasmine.SpyObj<AuthService>;
+
+  beforeEach(async () => {
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
+
+    await TestBed.configureTestingModule({
+      imports: [AuthLayoutComponent],
+      providers: [
+        { provide: AuthService, useValue: authSpy },
+        provideRouter([
+          { path: 'home', component: StubPageComponent },
+          { path: 'login', component: StubPageComponent },
+          { path: 'settings', component: StubPageComponent },
+        ]),
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(AuthLayoutComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  // -------------------------------------------------------------------------
+  // Subtask 2.1 — Property 2: Overlay click always closes the dropdown
+  // Validates: Requirements 2.3
+  // **Validates: Requirements 2.3**
+  // -------------------------------------------------------------------------
+  it('Property 2: overlay click always closes the dropdown', () => {
+    // Feature: profile-avatar-dropdown-menu, Property 2: Overlay click always closes the dropdown
+    fc.assert(
+      fc.property(fc.constant(true), (openState) => {
+        component.isDropdownOpen = openState;
+        fixture.detectChanges();
+
+        const overlay = fixture.nativeElement.querySelector('.dropdown-overlay');
+        expect(overlay).withContext('dropdown-overlay should be present when isDropdownOpen is true').toBeTruthy();
+
+        overlay.click();
+        fixture.detectChanges();
+
+        expect(component.isDropdownOpen).toBeFalse();
+      }),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Task 2 — Subtask 2.2: Property 6: Sidebar nav items are fully preserved
+// ---------------------------------------------------------------------------
+
+import { BehaviorSubject as BehaviorSubject2 } from 'rxjs';
+import { RoleService as RoleService2, MenuItem as MenuItem2 } from '../../services/role.service';
+
+describe('AuthLayoutComponent — Task 2 Subtask 2.2: Sidebar Nav Items Preserved', () => {
+  // Feature: profile-avatar-dropdown-menu, Property 6: Sidebar nav items are fully preserved
+
+  let fixture: ComponentFixture<AuthLayoutComponent>;
+  let authSpy: jasmine.SpyObj<AuthService>;
+  let menuSubject: BehaviorSubject2<MenuItem2[]>;
+
+  const itemArbitrary = fc.record({
+    title: fc.string({ minLength: 1, maxLength: 20 }),
+    icon: fc.constantFrom('home-outline', 'people-outline', 'map-outline', 'skull-outline', 'settings-outline'),
+    route: fc.string({ minLength: 1, maxLength: 20 }).map(s => '/' + s.replace(/\//g, '')),
+  });
+
+  beforeEach(async () => {
+    menuSubject = new BehaviorSubject2<MenuItem2[]>([]);
+
+    const mockRoleService = {
+      menuItems$: menuSubject.asObservable(),
+      activeRole$: new BehaviorSubject2<'dm' | 'player'>('dm').asObservable(),
+      toggleRole: () => {},
+    };
+
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
+
+    await TestBed.configureTestingModule({
+      imports: [AuthLayoutComponent],
+      providers: [
+        { provide: AuthService, useValue: authSpy },
+        { provide: RoleService2, useValue: mockRoleService },
+        provideRouter([
+          { path: 'home', component: StubPageComponent },
+          { path: 'login', component: StubPageComponent },
+        ]),
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(AuthLayoutComponent);
+    fixture.detectChanges();
+  });
+
+  // -------------------------------------------------------------------------
+  // Subtask 2.2 — Property 6: Sidebar nav items are fully preserved
+  // Validates: Requirements 4.1, 4.2
+  // **Validates: Requirements 4.1, 4.2**
+  // -------------------------------------------------------------------------
+  it('Property 6: sidebar nav items are fully preserved and no .sidebar-bottom is present', () => {
+    // Feature: profile-avatar-dropdown-menu, Property 6: Sidebar nav items are fully preserved
+    fc.assert(
+      fc.property(fc.array(itemArbitrary, { minLength: 1, maxLength: 10 }), (items) => {
+        menuSubject.next(items);
+        fixture.detectChanges();
+
+        const liElements: NodeListOf<HTMLElement> = fixture.nativeElement.querySelectorAll('.nav-list li');
+        expect(liElements.length)
+          .withContext(`Expected ${items.length} <li> elements but got ${liElements.length}`)
+          .toBe(items.length);
+
+        const sidebarBottom = fixture.nativeElement.querySelector('.sidebar-bottom');
+        expect(sidebarBottom)
+          .withContext('.sidebar-bottom should NOT be present in the sidebar')
+          .toBeNull();
+      }),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Task 5.1 — Structural Unit Tests
+// ---------------------------------------------------------------------------
+
+describe('AuthLayoutComponent — Task 5.1: Structural Unit Tests', () => {
+
+  let fixture: ComponentFixture<AuthLayoutComponent>;
+  let component: AuthLayoutComponent;
+  let authSpy: jasmine.SpyObj<AuthService>;
+
+  beforeEach(async () => {
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
+
+    await TestBed.configureTestingModule({
+      imports: [AuthLayoutComponent],
+      providers: [
+        { provide: AuthService, useValue: authSpy },
+        provideRouter([
+          { path: 'home', component: StubPageComponent },
+          { path: 'login', component: StubPageComponent },
+          { path: 'settings', component: StubPageComponent },
+        ]),
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(AuthLayoutComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  // Req 1.1 — Avatar button is present in the topbar
+  it('should render button.avatar-btn inside .topbar', () => {
+    const topbar = fixture.nativeElement.querySelector('.topbar');
+    expect(topbar).withContext('.topbar should exist').toBeTruthy();
+
+    const avatarBtn = topbar.querySelector('button.avatar-btn');
+    expect(avatarBtn).withContext('button.avatar-btn should be present inside .topbar').toBeTruthy();
+  });
+
+  // Req 1.4 — Avatar button is a native <button> (keyboard accessible)
+  it('should use a native <button> element for avatar-btn (keyboard accessible)', () => {
+    const avatarBtn = fixture.nativeElement.querySelector('.avatar-btn');
+    expect(avatarBtn).toBeTruthy();
+    expect(avatarBtn.tagName.toLowerCase())
+      .withContext('avatar-btn must be a native <button> element for keyboard accessibility')
+      .toBe('button');
+  });
+
+  // Req 3.1 — Dropdown contains "Configuración" item when open
+  it('should render a "Configuración" dropdown item when dropdown is open', () => {
+    component.isDropdownOpen = true;
+    fixture.detectChanges();
+
+    const items: HTMLButtonElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('.dropdown-item')
+    );
+    const labels = items.map(el => el.textContent?.trim() ?? '');
+    const hasConfig = labels.some(t => t.includes('Configuración'));
+    expect(hasConfig)
+      .withContext(`Expected a "Configuración" dropdown item. Found: [${labels.join(', ')}]`)
+      .toBeTrue();
+  });
+
+  // Req 3.2 — Dropdown contains "Cerrar Sesión" item when open
+  it('should render a "Cerrar Sesión" dropdown item when dropdown is open', () => {
+    component.isDropdownOpen = true;
+    fixture.detectChanges();
+
+    const items: HTMLButtonElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('.dropdown-item')
+    );
+    const labels = items.map(el => el.textContent?.trim() ?? '');
+    const hasCerrarSesion = labels.some(t => t.includes('Cerrar Sesión'));
+    expect(hasCerrarSesion)
+      .withContext(`Expected a "Cerrar Sesión" dropdown item. Found: [${labels.join(', ')}]`)
+      .toBeTrue();
+  });
+
+  // Req 3.5 — Each dropdown item has an ion-icon child
+  it('should render an ion-icon inside each dropdown item', () => {
+    component.isDropdownOpen = true;
+    fixture.detectChanges();
+
+    const items: HTMLButtonElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('.dropdown-item')
+    );
+    expect(items.length).withContext('There should be at least one dropdown item').toBeGreaterThan(0);
+
+    items.forEach((item, i) => {
+      const icon = item.querySelector('ion-icon');
+      expect(icon)
+        .withContext(`dropdown-item[${i}] should contain an ion-icon child`)
+        .toBeTruthy();
+    });
+  });
+
+  // Req 4.1 — .sidebar-bottom is absent from the rendered template
+  it('should NOT render .sidebar-bottom in the sidebar', () => {
+    const sidebarBottom = fixture.nativeElement.querySelector('.sidebar-bottom');
+    expect(sidebarBottom)
+      .withContext('.sidebar-bottom should be absent from the rendered template')
+      .toBeNull();
+  });
+
+  // Dropdown is hidden on initial render
+  it('should hide the dropdown menu on initial render', () => {
+    const dropdownMenu = fixture.nativeElement.querySelector('.dropdown-menu');
+    expect(dropdownMenu)
+      .withContext('.dropdown-menu should not be rendered when isDropdownOpen is false')
+      .toBeNull();
+  });
+
+});
+
+// ---------------------------------------------------------------------------
+// Task 5.2 — Property 4: Logout action closes dropdown and calls AuthService
+// ---------------------------------------------------------------------------
+
+describe('AuthLayoutComponent — Task 5.2: Property 4 — Logout Closes Dropdown and Calls AuthService', () => {
+  // Feature: profile-avatar-dropdown-menu, Property 4: Logout action closes dropdown and calls AuthService
+
+  let fixture: ComponentFixture<AuthLayoutComponent>;
+  let component: AuthLayoutComponent;
+  let authSpy: jasmine.SpyObj<AuthService>;
+  let router: Router;
+
+  beforeEach(async () => {
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
+
+    await TestBed.configureTestingModule({
+      imports: [AuthLayoutComponent],
+      providers: [
+        { provide: AuthService, useValue: authSpy },
+        provideRouter([
+          { path: 'home', component: StubPageComponent },
+          { path: 'login', component: StubPageComponent },
+          { path: 'settings', component: StubPageComponent },
+        ]),
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(AuthLayoutComponent);
+    component = fixture.componentInstance;
+    router = TestBed.inject(Router);
+    fixture.detectChanges();
+  });
+
+  // -------------------------------------------------------------------------
+  // Property 4: Logout action closes dropdown and calls AuthService
+  // Validates: Requirements 3.3
+  // -------------------------------------------------------------------------
+  it('Property 4: for any open dropdown state, clicking "Cerrar Sesión" calls AuthService.logout() once and closes the dropdown', () => {
+    // Feature: profile-avatar-dropdown-menu, Property 4: Logout action closes dropdown and calls AuthService
+    const navigateSpy = spyOn(router, 'navigate');
+
+    fc.assert(
+      fc.property(fc.constant(true), (openState) => {
+        component.isDropdownOpen = openState;
+        fixture.detectChanges();
+
+        authSpy.logout.calls.reset();
+        navigateSpy.calls.reset();
+
+        const logoutBtn = fixture.nativeElement.querySelector('.dropdown-item.danger');
+        expect(logoutBtn)
+          .withContext('"Cerrar Sesión" button (.dropdown-item.danger) should be present when dropdown is open')
+          .toBeTruthy();
+
+        logoutBtn.click();
+        fixture.detectChanges();
+
+        expect(authSpy.logout)
+          .withContext('AuthService.logout() should be called exactly once')
+          .toHaveBeenCalledTimes(1);
+
+        expect(component.isDropdownOpen)
+          .withContext('isDropdownOpen should be false after clicking "Cerrar Sesión"')
+          .toBeFalse();
+      }),
+      { numRuns: 100 }
+    );
+  });
+
+});
+
+// ---------------------------------------------------------------------------
+// Task 5.3 — Property 5: Settings action closes dropdown and navigates
+// ---------------------------------------------------------------------------
+
+describe('AuthLayoutComponent — Task 5.3: Property 5 — Settings Closes Dropdown and Navigates', () => {
+  // Feature: profile-avatar-dropdown-menu, Property 5: Settings action closes dropdown and navigates
+
+  let fixture: ComponentFixture<AuthLayoutComponent>;
+  let component: AuthLayoutComponent;
+  let authSpy: jasmine.SpyObj<AuthService>;
+  let router: Router;
+
+  beforeEach(async () => {
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
+
+    await TestBed.configureTestingModule({
+      imports: [AuthLayoutComponent],
+      providers: [
+        { provide: AuthService, useValue: authSpy },
+        provideRouter([
+          { path: 'home', component: StubPageComponent },
+          { path: 'login', component: StubPageComponent },
+          { path: 'settings', component: StubPageComponent },
+        ]),
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(AuthLayoutComponent);
+    component = fixture.componentInstance;
+    router = TestBed.inject(Router);
+    fixture.detectChanges();
+  });
+
+  // -------------------------------------------------------------------------
+  // Property 5: Settings action closes dropdown and navigates
+  // Validates: Requirements 3.4
+  // -------------------------------------------------------------------------
+  it('Property 5: for any open dropdown state, clicking "Configuración" calls Router.navigate(["/settings"]) and closes the dropdown', () => {
+    // Feature: profile-avatar-dropdown-menu, Property 5: Settings action closes dropdown and navigates
+    const navigateSpy = spyOn(router, 'navigate');
+
+    fc.assert(
+      fc.property(fc.constant(true), (openState) => {
+        component.isDropdownOpen = openState;
+        fixture.detectChanges();
+
+        navigateSpy.calls.reset();
+
+        const settingsBtn: HTMLButtonElement | null = Array.from<HTMLButtonElement>(
+          fixture.nativeElement.querySelectorAll('.dropdown-item')
+        ).find(el => el.textContent?.includes('Configuración')) ?? null;
+
+        expect(settingsBtn)
+          .withContext('"Configuración" button should be present when dropdown is open')
+          .toBeTruthy();
+
+        settingsBtn!.click();
+        fixture.detectChanges();
+
+        expect(navigateSpy)
+          .withContext('Router.navigate should be called with ["/settings"]')
+          .toHaveBeenCalledWith(['/settings']);
+
+        expect(component.isDropdownOpen)
+          .withContext('isDropdownOpen should be false after clicking "Configuración"')
+          .toBeFalse();
+      }),
+      { numRuns: 100 }
     );
   });
 

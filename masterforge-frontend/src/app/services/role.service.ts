@@ -25,16 +25,14 @@ export class RoleService {
     { title: 'Jugadores', icon: 'people-outline', route: '/jugadores' },
     { title: 'Campañas', icon: 'map-outline', route: '/campanyas' },
     { title: 'Bestiario IA', icon: 'skull-outline', route: '/bestiario' },
-    { title: 'Configuración', icon: 'settings-outline', route: '/config' },
   ];
 
   private playerMenu: MenuItem[] = [
     { title: 'Inicio', icon: 'home-outline', route: '/home' },
     { title: 'Forjar Personaje', icon: 'person-add-outline', route: '/forjar-personaje' },
-    { title: 'Mis Personajes', icon: 'book-outline', route: '/mis-personajes' }, // Assuming a route for this
+    { title: 'Mis Personajes', icon: 'book-outline', route: '/mis-personajes' },
     { title: 'Homebrew (IA)', icon: 'color-wand-outline', sublabel: 'Clases, Subclases, Razas', route: '/homebrew' },
     { title: 'Gremio de Campañas', icon: 'search-outline', route: '/buscar-campañas' },
-    { title: 'Configuración', icon: 'settings-outline', route: '/config' },
   ];
 
   menuItems$: Observable<MenuItem[]> = this.activeRole$.pipe(

@@ -14,13 +14,6 @@
         </li>
       }
     </ul>
-
-    <div class="sidebar-bottom">
-      <button class="logout-btn" (click)="logout()">
-        <ion-icon name="log-out-outline"></ion-icon>
-        <span>Cerrar Sesión</span>
-      </button>
-    </div>
   </nav>
 
   <main class="main-content">
@@ -30,10 +23,23 @@
           <ion-icon slot="start" name="swap-horizontal-outline"></ion-icon>
           <span class="ion-hide-sm-down">{{ (activeRole$ | async) === 'dm' ? 'Modo Jugador' : 'Modo Director' }}</span>
         </ion-button>
-        <ion-avatar class="ion-margin-start" style="width: 32px; height: 32px;">
+        <button class="avatar-btn" (click)="openDropdown()" aria-label="Menú de usuario" type="button">
           <img src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="avatar" />
-        </ion-avatar>
+        </button>
       </div>
+      @if (isDropdownOpen) {
+        <div class="dropdown-overlay" (click)="closeDropdown()"></div>
+        <div class="dropdown-menu">
+          <button class="dropdown-item" type="button" (click)="navigateToSettings()">
+            <ion-icon name="settings-outline"></ion-icon>
+            <span>Configuración</span>
+          </button>
+          <button class="dropdown-item danger" type="button" (click)="logout()">
+            <ion-icon name="log-out-outline"></ion-icon>
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
+      }
     </div>
     <router-outlet></router-outlet>
   </main>
