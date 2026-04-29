@@ -5,7 +5,8 @@ import { ActivatedRoute } from '@angular/router';
 import { 
   IonHeader, IonToolbar, IonTitle, IonContent, IonSegment, IonSegmentButton, IonLabel, 
   IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardTitle, IonCardContent, 
-  IonItem, IonBadge, IonList, IonIcon, IonButton, IonFooter, AlertController
+  IonItem, IonBadge, IonList, IonIcon, IonButton, IonFooter, IonBackButton, IonButtons,
+  AlertController
 } from '@ionic/angular/standalone';
 import { ApiService } from '../../services/api';
 import { addIcons } from 'ionicons';
@@ -41,7 +42,7 @@ export const DND_SKILLS = [
     CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent, 
     IonSegment, IonSegmentButton, IonLabel, IonGrid, IonRow, IonCol,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonBadge, IonList,
-    IonIcon, IonButton, IonFooter
+    IonIcon, IonButton, IonFooter, IonBackButton, IonButtons
   ],
   encapsulation: ViewEncapsulation.None // Re-enabled to allow styling the Alert pop-ups
 })
