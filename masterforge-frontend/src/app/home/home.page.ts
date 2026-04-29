@@ -92,8 +92,8 @@ export class HomePage implements OnInit {
     return this.formatDate(sorted[0].scheduledDate);
   }
 
-  get totalRevenue(): number {
-    return this.sessions.reduce((sum, s) => sum + (Number(s.price) || 0), 0);
+  get balance(): number {
+    return this.authService.getCurrentUser()?.balance ?? 0;
   }
 
   loadUsers() {

@@ -29,25 +29,32 @@
           </ion-col>
           <ion-col size="12" size-md="4">
             <div class="summary-card">
-              <div class="summary-label">Ingresos (Mes)</div>
-              <div class="summary-value">{{ totalRevenue || 0 }}€</div>
-              <div class="summary-link">Ver Reporte</div>
+              <div class="summary-label">Saldo</div>
+              <div class="summary-value">€{{ balance.toFixed(2) }}</div>
+              <div class="summary-link">Ver Detalles</div>
             </div>
           </ion-col>
         </ion-row>
 
         <h2 class="section-title">Últimas Misiones Forjadas con IA</h2>
-        <ion-list class="transparent-list">
-          @for (campaign of campaigns; track campaign.id) {
-            <ion-item lines="full" class="skill-item list-item-interactive" data-testid="campaign-card">
-              <ion-label>
-                <h3 class="gold-title">Título: "{{ campaign.name }}"</h3>
-                <p class="text-muted">({{ campaign.description || 'SRD' }})</p>
-              </ion-label>
-              <div slot="end" class="view-link">[Ver]</div>
-            </ion-item>
-          }
-        </ion-list>
+        @if (loadingCampaigns) {
+          <ion-spinner name="crescent"></ion-spinner>
+        } @else if (errorCampaigns) {
+          <p class="text-muted">{{ errorCampaigns }}</p>
+        } @else {
+          <ion-list class="transparent-list">
+            @for (campaign of campaigns; track campaign.id) {
+              <ion-item lines="full" class="skill-item list-item-interactive" data-testid="campaign-card">
+                <ion-label>
+                  <h3 class="gold-title">Título: "{{ campaign.name }}"</h3>
+                  <p class="text-muted">({{ campaign.description || 'SRD' }})</p>
+                </ion-label>
+                <div slot="end" class="view-link">[Ver]</div>
+              </ion-item>
+            }
+          </ion-list>
+        }
+
       </div>
     }
 

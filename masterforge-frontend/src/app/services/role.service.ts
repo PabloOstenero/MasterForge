@@ -25,6 +25,7 @@ export class RoleService {
     { title: 'Jugadores', icon: 'people-outline', route: '/players' },
     { title: 'Campañas', icon: 'map-outline', route: '/campaigns' },
     { title: 'Bestiario IA', icon: 'skull-outline', route: '/bestiary' },
+    { title: 'Config', icon: 'settings-outline', route: '/config' },
   ];
 
   private playerMenu: MenuItem[] = [
@@ -33,6 +34,7 @@ export class RoleService {
     { title: 'Mis Personajes', icon: 'book-outline', route: '/my-characters' },
     { title: 'Homebrew (IA)', icon: 'color-wand-outline', sublabel: 'Clases, Subclases, Razas', route: '/homebrew' },
     { title: 'Gremio de Campañas', icon: 'search-outline', route: '/search-campaigns' },
+    { title: 'Config', icon: 'settings-outline', route: '/config' },
   ];
 
   menuItems$: Observable<MenuItem[]> = this.activeRole$.pipe(

@@ -1,0 +1,2232 @@
+﻿[33m>[39m Building...
+[32mÔêÜ[39m Building...
+[1mInitial chunk files[22m               [2m | [22m[1mNames[22m                          [2m | [22m [1mRaw size[22m
+[32mchunk-LDQ7B44V.js[39m                 [2m | [22m[2m-[22m                              [2m | [22m  [36m2.63 MB[39m[2m | [22m
+[32mspec-auth-layout.component.spec.js[39m[2m | [22m[2mspec-auth-layout.component.spec[22m[2m | [22m  [36m2.28 MB[39m[2m | [22m
+[32mpolyfills.js[39m                      [2m | [22m[2mpolyfills[22m                      [2m | [22m  [36m1.04 MB[39m[2m | [22m
+[32mtest_main.js[39m                      [2m | [22m[2mtest_main[22m                      [2m | [22m [36m93.58 kB[39m[2m | [22m
+[32mchunk-JGZ5DDUY.js[39m                 [2m | [22m[2m-[22m                              [2m | [22m [36m57.92 kB[39m[2m | [22m
+[32mstyles.css[39m                        [2m | [22m[2mstyles[22m                         [2m | [22m [36m56.97 kB[39m[2m | [22m
+[32mchunk-MCIZ7YJ7.js[39m                 [2m | [22m[2m-[22m                              [2m | [22m [36m14.88 kB[39m[2m | [22m
+[32mchunk-YFJ27WLX.js[39m                 [2m | [22m[2m-[22m                              [2m | [22m [36m14.12 kB[39m[2m | [22m
+[32mchunk-AYU26FMF.js[39m                 [2m | [22m[2m-[22m                              [2m | [22m  [36m9.99 kB[39m[2m | [22m
+[32mchunk-T377UMIQ.js[39m                 [2m | [22m[2m-[22m                              [2m | [22m  [36m4.96 kB[39m[2m | [22m
+[32mchunk-HDYTGFVW.js[39m                 [2m | [22m[2m-[22m                              [2m | [22m  [36m3.56 kB[39m[2m | [22m
+[32mchunk-CSFHMO5H.js[39m                 [2m | [22m[2m-[22m                              [2m | [22m  [36m2.22 kB[39m[2m | [22m
+[32mchunk-KUFTAT2V.js[39m                 [2m | [22m[2m-[22m                              [2m | [22m  [36m1.96 kB[39m[2m | [22m
+[32mchunk-QOVBBIR7.js[39m                 [2m | [22m[2m-[22m                              [2m | [22m  [36m1.68 kB[39m[2m | [22m
+[32mchunk-HUN62PZ6.js[39m                 [2m | [22m[2m-[22m                              [2m | [22m  [36m1.67 kB[39m[2m | [22m
+[32mchunk-LKT4RF2P.js[39m                 [2m | [22m[2m-[22m                              [2m | [22m  [36m1.65 kB[39m[2m | [22m
+[32mchunk-TC66TMVS.js[39m                 [2m | [22m[2m-[22m                              [2m | [22m  [36m1.48 kB[39m[2m | [22m
+[32mchunk-5UU2KHYD.js[39m                 [2m | [22m[2m-[22m                              [2m | [22m[36m606 bytes[39m[2m | [22m
+[32mchunk-J5L5FOZL.js[39m                 [2m | [22m[2m-[22m                              [2m | [22m[36m567 bytes[39m[2m | [22m
+[32mjasmine-cleanup-0.js[39m              [2m | [22m[2mjasmine-cleanup-0[22m              [2m | [22m[36m519 bytes[39m[2m | [22m
+
+[1m [22m                                 [2m | [22m[1mInitial total[22m                  [2m | [22m  [1m6.22 MB[22m
+
+[1mLazy chunk files[22m                  [2m | [22m[1mNames[22m                          [2m | [22m [1mRaw size[22m
+[32mchunk-3BGU36QT.js[39m                 [2m | [22m[2mp-Cwv-vmkN[22m                     [2m | [22m  [36m8.30 kB[39m[2m | [22m
+[32mchunk-57LHF7IA.js[39m                 [2m | [22m[2mp-BgwEQWW6[22m                     [2m | [22m  [36m3.04 kB[39m[2m | [22m
+[32mchunk-PIBQ2DW6.js[39m                 [2m | [22m[2mp-Cz5nLPGT[22m                     [2m | [22m  [36m1.60 kB[39m[2m | [22m
+[32mchunk-KFCJNV7G.js[39m                 [2m | [22m[2mp-CneGxKsZ[22m                     [2m | [22m  [36m1.26 kB[39m[2m | [22m
+[32mchunk-G3M3QT63.js[39m                 [2m | [22m[2mp-D6Ynv7Xh[22m                     [2m | [22m[36m564 bytes[39m[2m | [22m
+[32mchunk-3VX73IKZ.js[39m                 [2m | [22m[2mp-vEbVo2hO[22m                     [2m | [22m[36m410 bytes[39m[2m | [22m
+[32mchunk-4XFTHIRI.js[39m                 [2m | [22m[2mp-CBzELu-H[22m                     [2m | [22m[36m336 bytes[39m[2m | [22m
+[32mchunk-CHYI2OQO.js[39m                 [2m | [22m[2mp-CU1SSH8_[22m                     [2m | [22m[36m313 bytes[39m[2m | [22m
+[32mchunk-CHUYXFYQ.js[39m                 [2m | [22m[2mp-Cl0B-RWe[22m                     [2m | [22m[36m219 bytes[39m[2m | [22m
+[32mchunk-XMBGAKEJ.js[39m                 [2m | [22m[2mp-BmVRXR1y[22m                     [2m | [22m[36m191 bytes[39m[2m | [22m
+
+Application bundle generation complete. [2.864 seconds] - 2026-04-29T09:41:18.644Z
+
+node.exe : [1m[33mIgnoring framework "@angular-devkit/build-angular" from karma config file because it's not 
+compatible with the application builder.[39m[22m
+En línea: 1 Carácter: 1
++ & "C:\nvm4w\nodejs/node.exe" "C:\nvm4w\nodejs/node_modules/npm/bin/np ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([1m[33mIgnori...lder.[39m[22m:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+[32m29 04 2026 11:41:19.410:INFO [karma-server]: [39mKarma v6.4.4 server started at http://localhost:9876/
+[32m29 04 2026 11:41:19.411:INFO [launcher]: [39mLaunching browsers ChromeHeadless with concurrency unlimited
+[32m29 04 2026 11:41:19.429:INFO [launcher]: [39mStarting browser ChromeHeadless
+[32m29 04 2026 11:41:20.076:INFO [Chrome Headless 147.0.0.0 (Windows 10)]: [39mConnected on socket 87PhdsYEBbhkidANAAAB with id 7779537
+Chrome Headless 147.0.0.0 (Windows 10): Executed 0 of 47[32m SUCCESS[39m (0 secs / 0 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 1 of 47[32m SUCCESS[39m (0 secs / 0.097 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 2 of 47[32m SUCCESS[39m (0 secs / 0.115 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 3 of 47[32m SUCCESS[39m (0 secs / 0.152 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 4 of 47[32m SUCCESS[39m (0 secs / 0.158 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 5 of 47[32m SUCCESS[39m (0 secs / 0.166 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 6 of 47[32m SUCCESS[39m (0 secs / 0.172 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 7 of 47[32m SUCCESS[39m (0 secs / 0.181 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 8 of 47[32m SUCCESS[39m (0 secs / 0.189 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 9 of 47[32m SUCCESS[39m (0 secs / 0.194 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 10 of 47[32m SUCCESS[39m (0 secs / 0.203 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 11 of 47[32m SUCCESS[39m (0 secs / 0.208 secs)
+[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) AuthLayoutComponent ÔÇö Property 1: Bug Condition (Sidebar Ignores Role Toggle) P1-bug-condition-player-menu-count ÔÇö after toggleRole() from dm to player, sidebar has 6 nav items FAILED[39m
+	TypeError: this.authService.getCurrentUser is not a function
+	    at _a2.get username [as username] (src/app/layout/auth-layout/auth-layout.component.ts:49:29)
+	    at _a2_Template (ng:///_a2.js:108:55)
+	    at executeTemplate (node_modules/@angular/core/fesm2022/debug_node.mjs:9132:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10168:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+	    at detectChangesInViewIfAttached (node_modules/@angular/core/fesm2022/debug_node.mjs:10348:5)
+	    at detectChangesInComponent (node_modules/@angular/core/fesm2022/debug_node.mjs:10336:5)
+	    at detectChangesInChildComponents (node_modules/@angular/core/fesm2022/debug_node.mjs:10414:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10223:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+Chrome Headless 147.0.0.0 (Windows 10): Executed 12 of 47[31m (1 FAILED)[39m (0 secs / 0.598 secs)
+[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) AuthLayoutComponent ÔÇö Property 1: Bug Condition (Sidebar Ignores Role Toggle) P1-bug-condition-toggle-to-player ÔÇö after toggleRole() from dm to player, sidebar contains "Forjar Personaje" FAILED[39m
+	TypeError: this.authService.getCurrentUser is not a function
+	    at _a2.get username [as username] (src/app/layout/auth-layout/auth-layout.component.ts:49:29)
+	    at _a2_Template (ng:///_a2.js:108:55)
+	    at executeTemplate (node_modules/@angular/core/fesm2022/debug_node.mjs:9132:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10168:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+	    at detectChangesInViewIfAttached (node_modules/@angular/core/fesm2022/debug_node.mjs:10348:5)
+	    at detectChangesInComponent (node_modules/@angular/core/fesm2022/debug_node.mjs:10336:5)
+	    at detectChangesInChildComponents (node_modules/@angular/core/fesm2022/debug_node.mjs:10414:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10223:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+Chrome Headless 147.0.0.0 (Windows 10): Executed 13 of 47[31m (2 FAILED)[39m (0 secs / 0.602 secs)
+[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) AuthLayoutComponent ÔÇö Property 1: Bug Condition (Sidebar Ignores Role Toggle) P1-bug-condition-no-jugadores-after-toggle ÔÇö after toggleRole() from dm to player, sidebar does NOT contain "Jugadores" FAILED[39m
+	TypeError: this.authService.getCurrentUser is not a function
+	    at _a2.get username [as username] (src/app/layout/auth-layout/auth-layout.component.ts:49:29)
+	    at _a2_Template (ng:///_a2.js:108:55)
+	    at executeTemplate (node_modules/@angular/core/fesm2022/debug_node.mjs:9132:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10168:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+	    at detectChangesInViewIfAttached (node_modules/@angular/core/fesm2022/debug_node.mjs:10348:5)
+	    at detectChangesInComponent (node_modules/@angular/core/fesm2022/debug_node.mjs:10336:5)
+	    at detectChangesInChildComponents (node_modules/@angular/core/fesm2022/debug_node.mjs:10414:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10223:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+Chrome Headless 147.0.0.0 (Windows 10): Executed 14 of 47[31m (3 FAILED)[39m (0 secs / 0.608 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 15 of 47[31m (3 FAILED)[39m (0 secs / 0.613 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 16 of 47[31m (3 FAILED)[39m (0 secs / 0.618 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 17 of 47[31m (3 FAILED)[39m (0 secs / 0.622 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 18 of 47[31m (3 FAILED)[39m (0 secs / 0.625 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 19 of 47[31m (3 FAILED)[39m (0 secs / 0.63 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 20 of 47[31m (3 FAILED)[39m (0 secs / 0.634 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 21 of 47[31m (3 FAILED)[39m (0 secs / 0.638 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 22 of 47[31m (3 FAILED)[39m (0 secs / 0.675 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 23 of 47[31m (3 FAILED)[39m (0 secs / 0.801 secs)
+[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) AuthLayoutComponent ÔÇö Task 5.2: Property 4 ÔÇö Logout Closes Dropdown and Calls AuthService Property 4: for any open dropdown state, clicking "Cerrar Sesi├│n" calls AuthService.logout() once and closes the dropdown FAILED[39m
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	isDropdownOpen should be false after clicking "Cerrar Sesi├│n": Expected true to be false.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1161:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+Chrome Headless 147.0.0.0 (Windows 10): Executed 24 of 47[31m (4 FAILED)[39m (0 secs / 0.826 secs)
+[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) AuthLayoutComponent ÔÇö Task 5.3: Property 5 ÔÇö Settings Closes Dropdown and Navigates Property 5: for any open dropdown state, clicking "Configuraci├│n" calls Router.navigate(["/settings"]) and closes the dropdown FAILED[39m
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+	Router.navigate should be called with ["/settings"]:
+	    Expected spy navigate to have been called with:
+	      [ [ '/settings' ] ]
+	    but actual calls were:
+	      [ [ '/config' ] ].
+	    
+	    Call 0:
+	      Expected $[0][0] = '/config' to equal '/settings'.
+	    at <Jasmine>
+	    at p (src/app/layout/auth-layout/auth-layout.component.spec.ts:1231:12)
+	    at Property.predicate (node_modules/fast-check/lib/fast-check.js:1329:99)
+	    at Property.run (node_modules/fast-check/lib/fast-check.js:1298:24)
+	    at runIt (node_modules/fast-check/lib/fast-check.js:2477:24)
+Chrome Headless 147.0.0.0 (Windows 10): Executed 25 of 47[31m (5 FAILED)[39m (0 secs / 0.881 secs)
+[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) AuthLayoutComponent ÔÇö Property-Based Tests P11c ÔÇö sidebar title "MasterForge" is always present FAILED[39m
+	TypeError: this.authService.getCurrentUser is not a function
+	    at _a2.get username [as username] (src/app/layout/auth-layout/auth-layout.component.ts:49:29)
+	    at _a2_Template (ng:///_a2.js:108:55)
+	    at executeTemplate (node_modules/@angular/core/fesm2022/debug_node.mjs:9132:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10168:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+	    at detectChangesInViewIfAttached (node_modules/@angular/core/fesm2022/debug_node.mjs:10348:5)
+	    at detectChangesInComponent (node_modules/@angular/core/fesm2022/debug_node.mjs:10336:5)
+	    at detectChangesInChildComponents (node_modules/@angular/core/fesm2022/debug_node.mjs:10414:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10223:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+Chrome Headless 147.0.0.0 (Windows 10): Executed 26 of 47[31m (6 FAILED)[39m (0 secs / 0.886 secs)
+[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) AuthLayoutComponent ÔÇö Property-Based Tests P11-active-correct-item ÔÇö for any active route, the active nav item href matches that route FAILED[39m
+	TypeError: this.authService.getCurrentUser is not a function
+	    at _a2.get username [as username] (src/app/layout/auth-layout/auth-layout.component.ts:49:29)
+	    at _a2_Template (ng:///_a2.js:108:55)
+	    at executeTemplate (node_modules/@angular/core/fesm2022/debug_node.mjs:9132:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10168:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+	    at detectChangesInViewIfAttached (node_modules/@angular/core/fesm2022/debug_node.mjs:10348:5)
+	    at detectChangesInComponent (node_modules/@angular/core/fesm2022/debug_node.mjs:10336:5)
+	    at detectChangesInChildComponents (node_modules/@angular/core/fesm2022/debug_node.mjs:10414:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10223:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+Chrome Headless 147.0.0.0 (Windows 10): Executed 27 of 47[31m (7 FAILED)[39m (0 secs / 0.889 secs)
+[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) AuthLayoutComponent ÔÇö Property-Based Tests P11d ÔÇö avatar button is always present in topbar FAILED[39m
+	TypeError: this.authService.getCurrentUser is not a function
+	    at _a2.get username [as username] (src/app/layout/auth-layout/auth-layout.component.ts:49:29)
+	    at _a2_Template (ng:///_a2.js:108:55)
+	    at executeTemplate (node_modules/@angular/core/fesm2022/debug_node.mjs:9132:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10168:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+	    at detectChangesInViewIfAttached (node_modules/@angular/core/fesm2022/debug_node.mjs:10348:5)
+	    at detectChangesInComponent (node_modules/@angular/core/fesm2022/debug_node.mjs:10336:5)
+	    at detectChangesInChildComponents (node_modules/@angular/core/fesm2022/debug_node.mjs:10414:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10223:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+Chrome Headless 147.0.0.0 (Windows 10): Executed 28 of 47[31m (8 FAILED)[39m (0 secs / 0.892 secs)
+[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) AuthLayoutComponent ÔÇö Property-Based Tests P11-active ÔÇö for any active route, exactly one sidebar nav item has the active class FAILED[39m
+	TypeError: this.authService.getCurrentUser is not a function
+	    at _a2.get username [as username] (src/app/layout/auth-layout/auth-layout.component.ts:49:29)
+	    at _a2_Template (ng:///_a2.js:108:55)
+	    at executeTemplate (node_modules/@angular/core/fesm2022/debug_node.mjs:9132:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10168:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+	    at detectChangesInViewIfAttached (node_modules/@angular/core/fesm2022/debug_node.mjs:10348:5)
+	    at detectChangesInComponent (node_modules/@angular/core/fesm2022/debug_node.mjs:10336:5)
+	    at detectChangesInChildComponents (node_modules/@angular/core/fesm2022/debug_node.mjs:10414:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10223:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+Chrome Headless 147.0.0.0 (Windows 10): Executed 29 of 47[31m (9 FAILED)[39m (0 secs / 0.895 secs)
+[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) AuthLayoutComponent ÔÇö Property-Based Tests P4 ÔÇö for any authenticated state (non-empty token), logout() calls AuthService.logout and navigates to /login FAILED[39m
+	TypeError: this.authService.getCurrentUser is not a function
+	    at _a2.get username [as username] (src/app/layout/auth-layout/auth-layout.component.ts:49:29)
+	    at _a2_Template (ng:///_a2.js:108:55)
+	    at executeTemplate (node_modules/@angular/core/fesm2022/debug_node.mjs:9132:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10168:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+	    at detectChangesInViewIfAttached (node_modules/@angular/core/fesm2022/debug_node.mjs:10348:5)
+	    at detectChangesInComponent (node_modules/@angular/core/fesm2022/debug_node.mjs:10336:5)
+	    at detectChangesInChildComponents (node_modules/@angular/core/fesm2022/debug_node.mjs:10414:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10223:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+Chrome Headless 147.0.0.0 (Windows 10): Executed 30 of 47[31m (10 FAILED)[39m (0 secs / 0.899 secs)
+[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) AuthLayoutComponent ÔÇö Property-Based Tests P11e ÔÇö router-outlet is present in main content area FAILED[39m
+	TypeError: this.authService.getCurrentUser is not a function
+	    at _a2.get username [as username] (src/app/layout/auth-layout/auth-layout.component.ts:49:29)
+	    at _a2_Template (ng:///_a2.js:108:55)
+	    at executeTemplate (node_modules/@angular/core/fesm2022/debug_node.mjs:9132:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10168:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+	    at detectChangesInViewIfAttached (node_modules/@angular/core/fesm2022/debug_node.mjs:10348:5)
+	    at detectChangesInComponent (node_modules/@angular/core/fesm2022/debug_node.mjs:10336:5)
+	    at detectChangesInChildComponents (node_modules/@angular/core/fesm2022/debug_node.mjs:10414:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10223:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+Chrome Headless 147.0.0.0 (Windows 10): Executed 31 of 47[31m (11 FAILED)[39m (0 secs / 0.903 secs)
+[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) AuthLayoutComponent ÔÇö Property-Based Tests P11b ÔÇö sidebar contains routerLinks for all authenticated routes FAILED[39m
+	TypeError: this.authService.getCurrentUser is not a function
+	    at _a2.get username [as username] (src/app/layout/auth-layout/auth-layout.component.ts:49:29)
+	    at _a2_Template (ng:///_a2.js:108:55)
+	    at executeTemplate (node_modules/@angular/core/fesm2022/debug_node.mjs:9132:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10168:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+	    at detectChangesInViewIfAttached (node_modules/@angular/core/fesm2022/debug_node.mjs:10348:5)
+	    at detectChangesInComponent (node_modules/@angular/core/fesm2022/debug_node.mjs:10336:5)
+	    at detectChangesInChildComponents (node_modules/@angular/core/fesm2022/debug_node.mjs:10414:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10223:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+Chrome Headless 147.0.0.0 (Windows 10): Executed 32 of 47[31m (12 FAILED)[39m (0 secs / 0.906 secs)
+[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) AuthLayoutComponent ÔÇö Property-Based Tests P11 ÔÇö sidebar always renders exactly 5 navigation items FAILED[39m
+	TypeError: this.authService.getCurrentUser is not a function
+	    at _a2.get username [as username] (src/app/layout/auth-layout/auth-layout.component.ts:49:29)
+	    at _a2_Template (ng:///_a2.js:108:55)
+	    at executeTemplate (node_modules/@angular/core/fesm2022/debug_node.mjs:9132:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10168:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+	    at detectChangesInViewIfAttached (node_modules/@angular/core/fesm2022/debug_node.mjs:10348:5)
+	    at detectChangesInComponent (node_modules/@angular/core/fesm2022/debug_node.mjs:10336:5)
+	    at detectChangesInChildComponents (node_modules/@angular/core/fesm2022/debug_node.mjs:10414:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10223:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+Chrome Headless 147.0.0.0 (Windows 10): Executed 33 of 47[31m (13 FAILED)[39m (0 secs / 0.909 secs)
+[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) AuthLayoutComponent ÔÇö Property 2: Preservation (Non-Toggle Interactions Unchanged) P2-layout-structure ÔÇö sidebar and main content layout are always present FAILED[39m
+	TypeError: this.authService.getCurrentUser is not a function
+	    at _a2.get username [as username] (src/app/layout/auth-layout/auth-layout.component.ts:49:29)
+	    at _a2_Template (ng:///_a2.js:108:55)
+	    at executeTemplate (node_modules/@angular/core/fesm2022/debug_node.mjs:9132:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10168:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+	    at detectChangesInViewIfAttached (node_modules/@angular/core/fesm2022/debug_node.mjs:10348:5)
+	    at detectChangesInComponent (node_modules/@angular/core/fesm2022/debug_node.mjs:10336:5)
+	    at detectChangesInChildComponents (node_modules/@angular/core/fesm2022/debug_node.mjs:10414:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10223:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+Chrome Headless 147.0.0.0 (Windows 10): Executed 34 of 47[31m (14 FAILED)[39m (0 secs / 0.913 secs)
+[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) AuthLayoutComponent ÔÇö Property 2: Preservation (Non-Toggle Interactions Unchanged) P2-routerLinkActive-config ÔÇö navigating to /config applies active class to the Config anchor FAILED[39m
+	TypeError: this.authService.getCurrentUser is not a function
+	    at _a2.get username [as username] (src/app/layout/auth-layout/auth-layout.component.ts:49:29)
+	    at _a2_Template (ng:///_a2.js:108:55)
+	    at executeTemplate (node_modules/@angular/core/fesm2022/debug_node.mjs:9132:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10168:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+	    at detectChangesInViewIfAttached (node_modules/@angular/core/fesm2022/debug_node.mjs:10348:5)
+	    at detectChangesInComponent (node_modules/@angular/core/fesm2022/debug_node.mjs:10336:5)
+	    at detectChangesInChildComponents (node_modules/@angular/core/fesm2022/debug_node.mjs:10414:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10223:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+Chrome Headless 147.0.0.0 (Windows 10): Executed 35 of 47[31m (15 FAILED)[39m (0 secs / 0.916 secs)
+[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) AuthLayoutComponent ÔÇö Property 2: Preservation (Non-Toggle Interactions Unchanged) P2-logout-preservation-pbt ÔÇö for any token value, logout() always calls AuthService.logout() and navigates to /login FAILED[39m
+	TypeError: this.authService.getCurrentUser is not a function
+	    at _a2.get username [as username] (src/app/layout/auth-layout/auth-layout.component.ts:49:29)
+	    at _a2_Template (ng:///_a2.js:108:55)
+	    at executeTemplate (node_modules/@angular/core/fesm2022/debug_node.mjs:9132:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10168:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+	    at detectChangesInViewIfAttached (node_modules/@angular/core/fesm2022/debug_node.mjs:10348:5)
+	    at detectChangesInComponent (node_modules/@angular/core/fesm2022/debug_node.mjs:10336:5)
+	    at detectChangesInChildComponents (node_modules/@angular/core/fesm2022/debug_node.mjs:10414:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10223:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+Chrome Headless 147.0.0.0 (Windows 10): Executed 36 of 47[31m (16 FAILED)[39m (0 secs / 0.919 secs)
+[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) AuthLayoutComponent ÔÇö Property 2: Preservation (Non-Toggle Interactions Unchanged) P2-logout-preservation ÔÇö logout() calls AuthService.logout() and navigates to /login FAILED[39m
+	TypeError: this.authService.getCurrentUser is not a function
+	    at _a2.get username [as username] (src/app/layout/auth-layout/auth-layout.component.ts:49:29)
+	    at _a2_Template (ng:///_a2.js:108:55)
+	    at executeTemplate (node_modules/@angular/core/fesm2022/debug_node.mjs:9132:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10168:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+	    at detectChangesInViewIfAttached (node_modules/@angular/core/fesm2022/debug_node.mjs:10348:5)
+	    at detectChangesInComponent (node_modules/@angular/core/fesm2022/debug_node.mjs:10336:5)
+	    at detectChangesInChildComponents (node_modules/@angular/core/fesm2022/debug_node.mjs:10414:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10223:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+Chrome Headless 147.0.0.0 (Windows 10): Executed 37 of 47[31m (17 FAILED)[39m (0 secs / 0.922 secs)
+[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) AuthLayoutComponent ÔÇö Property 2: Preservation (Non-Toggle Interactions Unchanged) P2-routerLinkActive-at-most-one ÔÇö for any route, at most one nav item has the active class FAILED[39m
+	TypeError: this.authService.getCurrentUser is not a function
+	    at _a2.get username [as username] (src/app/layout/auth-layout/auth-layout.component.ts:49:29)
+	    at _a2_Template (ng:///_a2.js:108:55)
+	    at executeTemplate (node_modules/@angular/core/fesm2022/debug_node.mjs:9132:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10168:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+	    at detectChangesInViewIfAttached (node_modules/@angular/core/fesm2022/debug_node.mjs:10348:5)
+	    at detectChangesInComponent (node_modules/@angular/core/fesm2022/debug_node.mjs:10336:5)
+	    at detectChangesInChildComponents (node_modules/@angular/core/fesm2022/debug_node.mjs:10414:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10223:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+Chrome Headless 147.0.0.0 (Windows 10): Executed 38 of 47[31m (18 FAILED)[39m (0 secs / 0.932 secs)
+[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) AuthLayoutComponent ÔÇö Property 2: Preservation (Non-Toggle Interactions Unchanged) P2-non-toggle-stability ÔÇö rendered items are stable across arbitrary navigation sequences (no role toggle) FAILED[39m
+	TypeError: this.authService.getCurrentUser is not a function
+	    at _a2.get username [as username] (src/app/layout/auth-layout/auth-layout.component.ts:49:29)
+	    at _a2_Template (ng:///_a2.js:108:55)
+	    at executeTemplate (node_modules/@angular/core/fesm2022/debug_node.mjs:9132:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10168:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+	    at detectChangesInViewIfAttached (node_modules/@angular/core/fesm2022/debug_node.mjs:10348:5)
+	    at detectChangesInComponent (node_modules/@angular/core/fesm2022/debug_node.mjs:10336:5)
+	    at detectChangesInChildComponents (node_modules/@angular/core/fesm2022/debug_node.mjs:10414:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10223:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+Chrome Headless 147.0.0.0 (Windows 10): Executed 39 of 47[31m (19 FAILED)[39m (0 secs / 0.935 secs)
+[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) AuthLayoutComponent ÔÇö Property 2: Preservation (Non-Toggle Interactions Unchanged) P2-initial-dm-titles ÔÇö on init, sidebar contains all expected DM item titles FAILED[39m
+	TypeError: this.authService.getCurrentUser is not a function
+	    at _a2.get username [as username] (src/app/layout/auth-layout/auth-layout.component.ts:49:29)
+	    at _a2_Template (ng:///_a2.js:108:55)
+	    at executeTemplate (node_modules/@angular/core/fesm2022/debug_node.mjs:9132:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10168:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+	    at detectChangesInViewIfAttached (node_modules/@angular/core/fesm2022/debug_node.mjs:10348:5)
+	    at detectChangesInComponent (node_modules/@angular/core/fesm2022/debug_node.mjs:10336:5)
+	    at detectChangesInChildComponents (node_modules/@angular/core/fesm2022/debug_node.mjs:10414:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10223:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+Chrome Headless 147.0.0.0 (Windows 10): Executed 40 of 47[31m (20 FAILED)[39m (0 secs / 0.938 secs)
+[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) AuthLayoutComponent ÔÇö Property 2: Preservation (Non-Toggle Interactions Unchanged) P2-initial-dm-render ÔÇö on init, sidebar renders exactly 5 DM nav items FAILED[39m
+	TypeError: this.authService.getCurrentUser is not a function
+	    at _a2.get username [as username] (src/app/layout/auth-layout/auth-layout.component.ts:49:29)
+	    at _a2_Template (ng:///_a2.js:108:55)
+	    at executeTemplate (node_modules/@angular/core/fesm2022/debug_node.mjs:9132:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10168:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+	    at detectChangesInViewIfAttached (node_modules/@angular/core/fesm2022/debug_node.mjs:10348:5)
+	    at detectChangesInComponent (node_modules/@angular/core/fesm2022/debug_node.mjs:10336:5)
+	    at detectChangesInChildComponents (node_modules/@angular/core/fesm2022/debug_node.mjs:10414:9)
+	    at refreshView (node_modules/@angular/core/fesm2022/debug_node.mjs:10223:13)
+	    at detectChangesInView (node_modules/@angular/core/fesm2022/debug_node.mjs:10388:9)
+Chrome Headless 147.0.0.0 (Windows 10): Executed 41 of 47[31m (21 FAILED)[39m (0 secs / 0.942 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 42 of 47[31m (21 FAILED)[39m (0 secs / 0.945 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 43 of 47[31m (21 FAILED)[39m (0 secs / 0.948 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 44 of 47[31m (21 FAILED)[39m (0 secs / 0.948 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 45 of 47[31m (21 FAILED)[39m (0 secs / 0.949 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 46 of 47[31m (21 FAILED)[39m (0 secs / 0.954 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 47 of 47[31m (21 FAILED)[39m (0 secs / 0.958 secs)
+[1A[2KChrome Headless 147.0.0.0 (Windows 10): Executed 47 of 47[31m (21 FAILED)[39m (1.102 secs / 0.958 secs)
+[31mTOTAL: 21 FAILED, 26 SUCCESS[39m

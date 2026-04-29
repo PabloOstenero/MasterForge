@@ -25,7 +25,8 @@ describe('AuthLayoutComponent — Property-Based Tests', () => {
   const NAV_ROUTES = ['/home', '/players', '/campaigns', '/bestiary', '/config'];
 
   beforeEach(async () => {
-    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated']);
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
@@ -175,7 +176,8 @@ describe('AuthLayoutComponent — Property 2: Preservation (Non-Toggle Interacti
   const DM_ROUTES = ['/home', '/players', '/campaigns', '/bestiary', '/config'];
 
   beforeEach(async () => {
-    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated']);
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
@@ -537,7 +539,8 @@ describe('AuthLayoutComponent — Property 1: Bug Condition (Sidebar Ignores Rol
       },
     };
 
-    const authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated']);
+    const authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
@@ -1204,7 +1207,7 @@ describe('AuthLayoutComponent — Task 5.3: Property 5 — Settings Closes Dropd
   // Property 5: Settings action closes dropdown and navigates
   // Validates: Requirements 3.4
   // -------------------------------------------------------------------------
-  it('Property 5: for any open dropdown state, clicking "Configuración" calls Router.navigate(["/settings"]) and closes the dropdown', () => {
+  it('Property 5: for any open dropdown state, clicking "Configuración" calls Router.navigate(["/config"]) and closes the dropdown', () => {
     // Feature: profile-avatar-dropdown-menu, Property 5: Settings action closes dropdown and navigates
     const navigateSpy = spyOn(router, 'navigate');
 
@@ -1227,14 +1230,319 @@ describe('AuthLayoutComponent — Task 5.3: Property 5 — Settings Closes Dropd
         fixture.detectChanges();
 
         expect(navigateSpy)
-          .withContext('Router.navigate should be called with ["/settings"]')
-          .toHaveBeenCalledWith(['/settings']);
+          .withContext('Router.navigate should be called with ["/config"]')
+          .toHaveBeenCalledWith(['/config']);
 
         expect(component.isDropdownOpen)
           .withContext('isDropdownOpen should be false after clicking "Configuración"')
           .toBeFalse();
       }),
       { numRuns: 100 }
+    );
+  });
+
+});
+
+// ---------------------------------------------------------------------------
+// Task 2 — Preservation Property Tests (BEFORE implementing fix)
+// ---------------------------------------------------------------------------
+// These tests MUST PASS on unfixed code — they confirm the baseline behavior
+// that must be preserved after the fix is applied.
+//
+// **Validates: Requirements 3.1, 3.2, 3.3, 3.4**
+// ---------------------------------------------------------------------------
+
+describe('AuthLayoutComponent — Task 2: Preservation — Username and Behavior Unchanged', () => {
+
+  let fixture: ComponentFixture<AuthLayoutComponent>;
+  let component: AuthLayoutComponent;
+  let authSpy: jasmine.SpyObj<AuthService>;
+  let roleSubject: BehaviorSubject2<'dm' | 'player'>;
+
+  function buildTestBed(user: any) {
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    authSpy.getCurrentUser.and.returnValue(user);
+
+    roleSubject = new BehaviorSubject2<'dm' | 'player'>('dm');
+
+    const roleServiceMock = {
+      activeRole$: roleSubject.asObservable(),
+      menuItems$: new BehaviorSubject2<MenuItem2[]>(DM_MENU).asObservable(),
+      toggleRole: () => roleSubject.next(roleSubject.value === 'dm' ? 'player' : 'dm'),
+    };
+
+    return TestBed.configureTestingModule({
+      imports: [AuthLayoutComponent],
+      providers: [
+        { provide: AuthService, useValue: authSpy },
+        { provide: RoleService2, useValue: roleServiceMock },
+        provideRouter([
+          { path: 'home', component: StubPageComponent },
+          { path: 'login', component: StubPageComponent },
+        ]),
+      ],
+    }).compileComponents();
+  }
+
+  // -------------------------------------------------------------------------
+  // PBT — Username preservation: for any name, get username() returns that name
+  // Validates: Requirement 3.1
+  // **Validates: Requirements 3.1**
+  //
+  // EXPECTED ON UNFIXED CODE: PASSES (username getter is already correct)
+  // -------------------------------------------------------------------------
+  it('PBT — username preservation: for any name, get username() returns that name when getCurrentUser() returns { name }', async () => {
+    await buildTestBed({ name: 'Test User' });
+    fixture = TestBed.createComponent(AuthLayoutComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    fc.assert(
+      fc.property(
+        fc.string({ minLength: 1, maxLength: 30 }),
+        (name) => {
+          authSpy.getCurrentUser.and.returnValue({ name });
+          expect(component.username).toBe(name);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('PBT — username preservation: when getCurrentUser() returns null, username is "Usuario"', async () => {
+    await buildTestBed(null);
+    fixture = TestBed.createComponent(AuthLayoutComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    authSpy.getCurrentUser.and.returnValue(null);
+    expect(component.username).toBe('Usuario');
+  });
+
+  // -------------------------------------------------------------------------
+  // PBT — Balance getter safety: for any user object, accessing balance never throws
+  // Validates: Requirement 3.1
+  // **Validates: Requirements 3.1**
+  //
+  // EXPECTED ON UNFIXED CODE: PASSES (accessing undefined property doesn't throw)
+  // On fixed code: balance getter always returns a number
+  // -------------------------------------------------------------------------
+  it('PBT — balance getter safety: for any user object, accessing balance never throws and returns a number (or undefined on unfixed code)', async () => {
+    await buildTestBed({ name: 'Test User' });
+    fixture = TestBed.createComponent(AuthLayoutComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    fc.assert(
+      fc.property(
+        fc.oneof(
+          fc.constant(null),
+          fc.record({ name: fc.string({ minLength: 1 }), balance: fc.float({ noNaN: true }) })
+        ),
+        (user) => {
+          authSpy.getCurrentUser.and.returnValue(user);
+          
+          // Accessing balance should never throw
+          let didThrow = false;
+          let value: any;
+          try {
+            value = (component as any).balance;
+          } catch (e) {
+            didThrow = true;
+          }
+          expect(didThrow).toBeFalse();
+
+          // If balance getter exists (fixed code), it should return a number
+          // If it doesn't exist (unfixed code), value will be undefined
+          // Using nullish coalescing to handle both cases: undefined ?? 0 = 0 (number)
+          const safeValue = value ?? 0;
+          expect(typeof safeValue).toBe('number');
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  // -------------------------------------------------------------------------
+  // PBT — Role toggle stability: username display unaffected by role toggle
+  // Validates: Requirement 3.3
+  // **Validates: Requirements 3.3**
+  //
+  // EXPECTED ON UNFIXED CODE: PASSES (username is independent of role)
+  // -------------------------------------------------------------------------
+  it('PBT — role toggle stability: for any sequence of toggleRole() calls, username display is unaffected', async () => {
+    await buildTestBed({ name: 'Test User' });
+    fixture = TestBed.createComponent(AuthLayoutComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    fc.assert(
+      fc.property(
+        fc.string({ minLength: 1, maxLength: 20 }).filter(s => /^[\w\s\-\.]+$/.test(s)),
+        fc.array(fc.constant(null), { minLength: 0, maxLength: 10 }),
+        (name, toggles) => {
+          authSpy.getCurrentUser.and.returnValue({ name });
+          fixture.detectChanges();
+
+          // Perform sequence of role toggles
+          for (const _ of toggles) {
+            roleSubject.next(roleSubject.value === 'dm' ? 'player' : 'dm');
+            fixture.detectChanges();
+          }
+
+          // Username getter should still return the correct name
+          expect(component.username).toBe(name);
+
+          // Username should be visible in the topbar
+          const topbar: HTMLElement | null = fixture.nativeElement.querySelector('.topbar');
+          expect(topbar).toBeTruthy();
+          const topbarText = topbar!.textContent ?? '';
+          expect(topbarText).toContain(name);
+        }
+      ),
+      { numRuns: 50 }
+    );
+  });
+
+  // -------------------------------------------------------------------------
+  // Logout preservation: logout() calls AuthService.logout() and navigates to /login
+  // Validates: Requirement 3.4
+  // **Validates: Requirements 3.4**
+  //
+  // EXPECTED ON UNFIXED CODE: PASSES (logout is already wired correctly)
+  // -------------------------------------------------------------------------
+  it('Logout preservation: logout() calls AuthService.logout() and navigates to /login', async () => {
+    await buildTestBed({ name: 'Test User' });
+    fixture = TestBed.createComponent(AuthLayoutComponent);
+    component = fixture.componentInstance;
+    const router = TestBed.inject(Router);
+    const navigateSpy = spyOn(router, 'navigate');
+    fixture.detectChanges();
+
+    component.logout();
+    expect(authSpy.logout).toHaveBeenCalledTimes(1);
+    expect(navigateSpy).toHaveBeenCalledWith(['/login']);
+  });
+
+});
+
+// ---------------------------------------------------------------------------
+// Task 1 — Bug Condition Exploration: Balance NOT Rendered in Topbar
+// ---------------------------------------------------------------------------
+// These tests MUST FAIL on unfixed code — failure confirms the bug exists.
+//
+// Bug condition: user is authenticated, getCurrentUser() returns an object
+// with `balance`, but the topbar does NOT render the formatted balance string.
+//
+// **Validates: Requirements 1.1, 1.2**
+// ---------------------------------------------------------------------------
+
+describe('AuthLayoutComponent — Task 1: Bug Condition — Balance Not Rendered in Topbar', () => {
+
+  let fixture: ComponentFixture<AuthLayoutComponent>;
+  let component: AuthLayoutComponent;
+  let authSpy: jasmine.SpyObj<AuthService>;
+
+  function buildTestBed(user: any) {
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    authSpy.getCurrentUser.and.returnValue(user);
+
+    return TestBed.configureTestingModule({
+      imports: [AuthLayoutComponent],
+      providers: [
+        { provide: AuthService, useValue: authSpy },
+        provideRouter([
+          { path: 'home', component: StubPageComponent },
+          { path: 'login', component: StubPageComponent },
+        ]),
+      ],
+    }).compileComponents();
+  }
+
+  // -------------------------------------------------------------------------
+  // Test 1 — Topbar balance absent for user with balance: 42.5
+  // EXPECTED ON UNFIXED CODE: FAILS
+  // Counterexample: topbar contains no element with "42.50" or "€42.50"
+  // **Validates: Requirements 1.1**
+  // -------------------------------------------------------------------------
+  it('Test 1 — topbar should contain "42.50" or "€42.50" when user has balance 42.5', async () => {
+    await buildTestBed({ name: 'Ana', balance: 42.5 });
+    fixture = TestBed.createComponent(AuthLayoutComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const topbar: HTMLElement | null = fixture.nativeElement.querySelector('.topbar');
+    expect(topbar).withContext('.topbar should exist').toBeTruthy();
+
+    const topbarText = topbar!.textContent ?? '';
+    const hasBalance = topbarText.includes('42.50') || topbarText.includes('€42.50');
+    expect(hasBalance)
+      .withContext(
+        `[BUG COUNTEREXAMPLE] topbar text is "${topbarText.trim()}" — does not contain "42.50" or "€42.50"`
+      )
+      .toBeTrue();
+  });
+
+  // -------------------------------------------------------------------------
+  // Test 3 — Zero balance: balance = 0 → "€0.00" should appear in topbar
+  // EXPECTED ON UNFIXED CODE: FAILS
+  // Counterexample: topbar contains no element with "0.00" or "€0.00"
+  // **Validates: Requirements 1.1**
+  // -------------------------------------------------------------------------
+  it('Test 3 — topbar should contain "€0.00" when user has balance 0', async () => {
+    await buildTestBed({ name: 'Ana', balance: 0 });
+    fixture = TestBed.createComponent(AuthLayoutComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const topbar: HTMLElement | null = fixture.nativeElement.querySelector('.topbar');
+    expect(topbar).withContext('.topbar should exist').toBeTruthy();
+
+    const topbarText = topbar!.textContent ?? '';
+    const hasBalance = topbarText.includes('0.00') || topbarText.includes('€0.00');
+    expect(hasBalance)
+      .withContext(
+        `[BUG COUNTEREXAMPLE] topbar text is "${topbarText.trim()}" — does not contain "0.00" or "€0.00"`
+      )
+      .toBeTrue();
+  });
+
+  // -------------------------------------------------------------------------
+  // Test 4 (PBT) — For any arbitrary balance value, topbar contains €X.XX
+  // EXPECTED ON UNFIXED CODE: FAILS
+  // Counterexample: topbar never contains the formatted balance string
+  // **Validates: Requirements 1.1**
+  // -------------------------------------------------------------------------
+  it('Test 4 (PBT) — for any balance value, topbar should contain the formatted €X.XX string', async () => {
+    // We need a fresh TestBed for each run, so we use a single user and
+    // verify the getter + DOM binding together.
+    await buildTestBed({ name: 'Ana', balance: 42.5 });
+    fixture = TestBed.createComponent(AuthLayoutComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    fc.assert(
+      fc.property(
+        fc.float({ min: 0, max: 9999, noNaN: true }),
+        (balance) => {
+          // Update the spy to return the new balance
+          authSpy.getCurrentUser.and.returnValue({ name: 'Ana', balance });
+          fixture.detectChanges();
+
+          const topbar: HTMLElement | null = fixture.nativeElement.querySelector('.topbar');
+          expect(topbar).withContext('.topbar should exist').toBeTruthy();
+
+          const expected = `€${balance.toFixed(2)}`;
+          const topbarText = topbar!.textContent ?? '';
+          const hasBalance = topbarText.includes(balance.toFixed(2)) || topbarText.includes(expected);
+          expect(hasBalance)
+            .withContext(
+              `[BUG COUNTEREXAMPLE] For balance=${balance}, expected topbar to contain "${expected}" but got: "${topbarText.trim()}"`
+            )
+            .toBeTrue();
+        }
+      ),
+      { numRuns: 50 }
     );
   });
 

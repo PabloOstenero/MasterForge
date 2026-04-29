@@ -76,6 +76,7 @@ export class AuthLayoutComponent {
   }
 
   logout(): void {
+    this.closeDropdown();
     this.authService.logout();
     this.router.navigate(['/login']);
   }
