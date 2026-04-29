@@ -111,4 +111,24 @@ updateTempHp(characterId: string, tempHp: number): Observable<any> {
     return this.http.get<{ playerCount: number }>(`${this.apiUrl}/users/me/player-count`);
   }
 
+  // Fetch all available D&D races
+  getRaces(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/dnd-races`);
+  }
+
+  // Fetch all available D&D classes
+  getClasses(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/dnd-classes`);
+  }
+
+  // Fetch all available D&D subclasses
+  getSubclasses(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/dnd-subclasses`);
+  }
+
+  // Create a new character
+  createCharacter(dto: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/characters`, dto);
+  }
+
 }

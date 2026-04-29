@@ -1,0 +1,651 @@
+// ─── Theme variables ──────────────────────────────────────────────────────────
+:root {
+  --bg-dark: #121212;
+  --bg-card: #1E1E1E;
+  --gold: #C5A059;
+}
+
+// ─── Header & toolbar ─────────────────────────────────────────────────────────
+.header-toolbar {
+  --background: #121212;
+  --color: #C5A059;
+  --border-width: 0;
+}
+
+.gold-title {
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.6rem;
+  margin-top: 10px;
+}
+
+// ─── Step indicator ───────────────────────────────────────────────────────────
+.step-indicator {
+  background: #121212;
+  padding: 8px 16px 12px;
+  border-bottom: 1px solid #333;
+}
+
+.step-progress {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #333;
+  border: 1px solid #555;
+  transition: background 0.2s, border-color 0.2s;
+
+  &.active {
+    background: #C5A059;
+    border-color: #C5A059;
+  }
+
+  &.completed {
+    background: #7a6030;
+    border-color: #C5A059;
+  }
+}
+
+.step-label {
+  text-align: center;
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.step-name {
+  color: #C5A059;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+// ─── Content ──────────────────────────────────────────────────────────────────
+.forge-content {
+  --background: #121212;
+}
+
+// ─── Section title (reused from character-sheet.page.scss) ───────────────────
+.section-title {
+  color: #C5A059;
+  margin-bottom: 20px;
+  font-size: 1.4rem;
+}
+
+// ─── Info box (reused from character-sheet.page.scss) ────────────────────────
+.info-box {
+  background: #1E1E1E;
+  color: white;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #333;
+  font-weight: 500;
+  text-align: center;
+}
+
+// ─── Stat card (reused from character-sheet.page.scss) ───────────────────────
+.stat-card {
+  background: #1E1E1E;
+  margin: 5px;
+  padding: 20px 5px;
+  border-radius: 10px;
+  text-align: center;
+  border: 1px solid #333;
+
+  .stat-label {
+    color: #888;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+
+  .stat-value {
+    color: white;
+    font-size: 2rem;
+    font-weight: bold;
+  }
+
+  .stat-mod {
+    color: #C5A059;
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-top: 5px;
+  }
+}
+
+// ─── Skill item (reused from character-sheet.page.scss) ──────────────────────
+.skill-item {
+  --background: #1E1E1E;
+  --border-radius: 10px;
+  margin-bottom: 12px;
+  --padding-start: 15px;
+  border: 1px solid #333;
+
+  h2 { color: white; font-weight: bold; }
+  p { color: #888; }
+  .skill-mod { color: white; font-size: 1.3rem; font-weight: bold; }
+  .accent-text { color: #C5A059; font-size: 0.8rem; margin-left: 5px; }
+}
+
+// ─── Transparent list (reused from character-sheet.page.scss) ────────────────
+.transparent-list {
+  background: transparent;
+}
+
+// ─── Footer toolbar ───────────────────────────────────────────────────────────
+.footer-toolbar {
+  --background: #1E1E1E;
+  border-top: 1px solid #333;
+}
+
+// ─── Navigation buttons ───────────────────────────────────────────────────────
+.nav-buttons {
+  display: flex;
+  gap: 10px;
+  padding: 8px 16px;
+  align-items: center;
+}
+
+.nav-btn-prev {
+  flex-shrink: 0;
+}
+
+.nav-btn-next {
+  flex: 1;
+}
+
+.btn-gold {
+  --background: #C5A059;
+  --color: #121212;
+  --border-radius: 12px;
+  font-weight: bold;
+}
+
+// ─── Identity step fields ─────────────────────────────────────────────────────
+.field-group {
+  margin-bottom: 20px;
+}
+
+.field-label {
+  display: block;
+  color: #888;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+  font-weight: bold;
+
+  .required {
+    color: #C5A059;
+  }
+}
+
+.forge-input {
+  --background: #1E1E1E;
+  --color: white;
+  --placeholder-color: #555;
+  --border-radius: 8px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  border: 1px solid #333;
+  border-radius: 8px;
+
+  &.input-error {
+    border-color: #C62828;
+  }
+}
+
+.forge-select {
+  --background: #1E1E1E;
+  --color: white;
+  --placeholder-color: #555;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 8px 12px;
+
+  &.input-error {
+    border-color: #C62828;
+  }
+}
+
+// ─── Step placeholder (temporary, removed in later tasks) ────────────────────
+.step-placeholder {
+  background: #1E1E1E;
+  border: 1px dashed #333;
+  border-radius: 10px;
+  padding: 40px 20px;
+  text-align: center;
+  color: #555;
+  font-style: italic;
+}
+
+// ─── Selectable card (used in race/class steps) ───────────────────────────────
+.selectable-card {
+  background: #1E1E1E;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+
+  &.selected {
+    border: 2px solid #C5A059;
+    background: #252010;
+  }
+
+  &:active {
+    background: #2a2a2a;
+  }
+
+  .card-title {
+    color: white;
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+  }
+
+  .card-subtitle {
+    color: #888;
+    font-size: 0.85rem;
+  }
+
+  .card-bonus {
+    color: #C5A059;
+    font-size: 0.85rem;
+    margin-top: 6px;
+    font-weight: 500;
+  }
+}
+
+// ─── Error message ────────────────────────────────────────────────────────────
+.error-message {
+  color: #C62828;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  padding-left: 4px;
+}
+
+// ─── Loading state ────────────────────────────────────────────────────────────
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  gap: 12px;
+}
+
+.loading-text {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+// ─── Error container ──────────────────────────────────────────────────────────
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
+  gap: 12px;
+  background: #1E1E1E;
+  border: 1px solid #333;
+  border-radius: 10px;
+}
+
+// ─── Empty message ────────────────────────────────────────────────────────────
+.empty-message {
+  color: #555;
+  text-align: center;
+  font-style: italic;
+  padding: 20px;
+}
+
+// ─── Races grid ───────────────────────────────────────────────────────────────
+.races-grid {
+  padding: 0;
+}
+
+// ─── Ion segment (reused from character-sheet.page.scss) ─────────────────────
+ion-segment {
+  --background: #1E1E1E;
+}
+
+ion-segment-button {
+  --color: #888;
+  --color-checked: #C5A059;
+  --indicator-color: transparent;
+
+  ion-label {
+    color: inherit;
+  }
+}
+
+// ─── Subclasses section ───────────────────────────────────────────────────────
+.subclasses-section {
+  margin-top: 24px;
+}
+
+.subsection-title {
+  color: #888;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+  font-weight: bold;
+}
+
+.selectable-card--small {
+  padding: 10px 14px;
+
+  .card-title {
+    font-size: 0.95rem;
+  }
+}
+
+// ─── Ability Scores step ──────────────────────────────────────────────────────
+
+.score-mode-segment {
+  margin-bottom: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.mode-hint {
+  color: #888;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+  font-style: italic;
+}
+
+// Token pool (standard array chips)
+.token-pool {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  min-height: 48px;
+  padding: 8px;
+  background: #1E1E1E;
+  border: 1px solid #333;
+  border-radius: 10px;
+}
+
+.score-token {
+  background: #2a2a2a;
+  color: white;
+  border: 1px solid #555;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+
+  &.token-selected {
+    background: #3a2e10;
+    border-color: #C5A059;
+    color: #C5A059;
+  }
+
+  &:active {
+    background: #3a3a3a;
+  }
+}
+
+// Ability slot rows
+.ability-slots,
+.manual-entry-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ability-slot-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ability-slot-label {
+  color: #888;
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  width: 36px;
+  flex-shrink: 0;
+}
+
+.ability-slot {
+  background: #1E1E1E;
+  color: #555;
+  border: 1px dashed #444;
+  border-radius: 8px;
+  width: 52px;
+  height: 40px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  flex-shrink: 0;
+
+  &.slot-filled {
+    color: white;
+    border-style: solid;
+    border-color: #555;
+  }
+
+  &.slot-active {
+    border-color: #C5A059;
+    border-style: solid;
+  }
+
+  &:active {
+    background: #2a2a2a;
+  }
+}
+
+.racial-bonus {
+  color: #C5A059;
+  font-size: 0.9rem;
+  font-weight: 500;
+  width: 32px;
+  flex-shrink: 0;
+}
+
+.final-score-preview {
+  color: #555;
+  font-size: 0.9rem;
+
+  &.final-score-ready {
+    color: #888;
+  }
+
+  .final-value {
+    color: #C5A059;
+    font-weight: bold;
+    font-size: 1rem;
+  }
+}
+
+// Manual entry inputs
+.manual-score-input {
+  --background: #1E1E1E;
+  --color: white;
+  --placeholder-color: #555;
+  --border-radius: 8px;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  border: 1px solid #333;
+  border-radius: 8px;
+  width: 72px;
+  flex-shrink: 0;
+  text-align: center;
+
+  &.input-error {
+    border-color: #C62828;
+  }
+}
+
+.error-message--indent {
+  padding-left: 46px;
+  margin-top: -4px;
+}
+
+// HP preview row
+.hp-preview-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 12px 16px;
+  background: #1E1E1E;
+  border: 1px solid #333;
+  border-radius: 10px;
+}
+
+.hp-preview-label {
+  color: #888;
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hp-preview-value {
+  color: #C5A059;
+  font-size: 1.6rem;
+  font-weight: bold;
+}
+
+// ─── Skills step ──────────────────────────────────────────────────────────────
+.skills-count {
+  text-align: center;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  color: #888;
+
+  &--complete {
+    color: #C5A059;
+    font-weight: bold;
+  }
+}
+
+.skills-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skill-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 12px 16px;
+  background: #1E1E1E;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  transition: border-color 0.2s, opacity 0.2s;
+  text-align: left;
+
+  &.skill-selected {
+    border-color: #C5A059;
+    background: rgba(197, 160, 89, 0.1);
+  }
+
+  &.skill-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .skill-name {
+    font-size: 0.95rem;
+  }
+
+  .skill-stat {
+    font-size: 0.8rem;
+    color: #C5A059;
+    font-weight: bold;
+  }
+}
+
+// ─── Review step ──────────────────────────────────────────────────────────────
+.review-hp-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #1E1E1E;
+  border: 2px solid #C5A059;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  text-align: center;
+
+  .review-hp-label {
+    color: #aaa;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+
+  .review-hp-value {
+    color: #C5A059;
+    font-size: 2.5rem;
+    font-weight: bold;
+  }
+}
+
+.review-card {
+  background: #1E1E1E;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+
+  .review-card-header {
+    color: #C5A059;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 6px;
+  }
+
+  .review-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+
+    .review-key {
+      color: #aaa;
+      font-size: 0.9rem;
+    }
+
+    .review-val {
+      color: #e0e0e0;
+      font-size: 0.9rem;
+      text-align: right;
+
+      &--gold {
+        color: #C5A059;
+        font-weight: bold;
+      }
+    }
+  }
+}
+
+.submit-error {
+  margin-top: 8px;
+  text-align: center;
+}

@@ -1,0 +1,479 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar class="header-toolbar">
+    <ion-buttons slot="start">
+      <!-- On step 0, back button navigates to /home; on other steps it goes back a step -->
+      @if (currentStep === 0) {
+        <ion-back-button defaultHref="/home" color="warning"></ion-back-button>
+      } @else {
+        <ion-button fill="clear" color="warning" (click)="prevStep()">
+          <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+        </ion-button>
+      }
+    </ion-buttons>
+    <ion-title class="gold-title">Forjar Personaje</ion-title>
+  </ion-toolbar>
+
+  <!-- Step indicator -->
+  <div class="step-indicator">
+    <div class="step-progress">
+      @for (step of steps; track step; let i = $index) {
+        <div class="step-dot" [class.active]="i === currentStep" [class.completed]="i < currentStep"></div>
+      }
+    </div>
+    <div class="step-label">
+      Paso {{ currentStep + 1 }} de {{ steps.length }}: <span class="step-name">{{ currentStepLabel }}</span>
+    </div>
+  </div>
+</ion-header>
+
+<ion-content class="forge-content">
+  <div class="ion-padding">
+
+    <!-- ── Step 0: Identity ─────────────────────────────────────────────── -->
+    @if (currentStep === 0) {
+      <div class="step-section">
+        <h2 class="section-title">Identidad del Personaje</h2>
+
+        <!-- Name -->
+        <div class="field-group">
+          <label class="field-label">Nombre <span class="required">*</span></label>
+          <ion-input
+            class="forge-input"
+            [(ngModel)]="formData.name"
+            placeholder="Nombre del personaje"
+            maxlength="50"
+            [class.input-error]="validationErrors['name']">
+          </ion-input>
+          @if (validationErrors['name']) {
+            <p class="error-message">{{ validationErrors['name'] }}</p>
+          }
+        </div>
+
+        <!-- Background -->
+        <div class="field-group">
+          <label class="field-label">Trasfondo <span class="required">*</span></label>
+          <ion-input
+            class="forge-input"
+            [(ngModel)]="formData.background"
+            placeholder="Ej: Soldado, Erudito, Forajido..."
+            [class.input-error]="validationErrors['background']">
+          </ion-input>
+          @if (validationErrors['background']) {
+            <p class="error-message">{{ validationErrors['background'] }}</p>
+          }
+        </div>
+
+        <!-- Alignment -->
+        <div class="field-group">
+          <label class="field-label">Alineamiento <span class="required">*</span></label>
+          <ion-select
+            class="forge-select"
+            [(ngModel)]="formData.alignment"
+            placeholder="Selecciona un alineamiento"
+            interface="action-sheet"
+            [class.input-error]="validationErrors['alignment']">
+            @for (alignment of alignments; track alignment) {
+              <ion-select-option [value]="alignment">{{ alignment }}</ion-select-option>
+            }
+          </ion-select>
+          @if (validationErrors['alignment']) {
+            <p class="error-message">{{ validationErrors['alignment'] }}</p>
+          }
+        </div>
+
+        <!-- XP -->
+        <div class="field-group">
+          <label class="field-label">Puntos de Experiencia (XP)</label>
+          <ion-input
+            class="forge-input"
+            type="number"
+            [(ngModel)]="formData.xp"
+            placeholder="0"
+            min="0"
+            [class.input-error]="validationErrors['xp']">
+          </ion-input>
+          @if (validationErrors['xp']) {
+            <p class="error-message">{{ validationErrors['xp'] }}</p>
+          }
+        </div>
+
+      </div>
+    }
+
+    <!-- ── Step 1: Race ─────────────────────────────────────────────────── -->
+    @if (currentStep === 1) {
+      <div class="step-section">
+        <h2 class="section-title">Selecciona tu Raza</h2>
+
+        @if (racesLoading) {
+          <div class="loading-container">
+            <ion-spinner name="crescent" color="warning"></ion-spinner>
+            <p class="loading-text">Cargando razas...</p>
+          </div>
+        }
+
+        @if (racesError) {
+          <div class="error-container">
+            <p class="error-message">No se pudieron cargar las razas. Inténtalo de nuevo.</p>
+            <ion-button fill="outline" color="warning" (click)="loadRaces()">
+              Reintentar
+            </ion-button>
+          </div>
+        }
+
+        @if (!racesLoading && !racesError) {
+          <ion-grid class="races-grid">
+            <ion-row>
+              @for (race of races; track race.id) {
+                <ion-col size="12" size-md="6">
+                  <div
+                    class="selectable-card"
+                    [class.selected]="formData.selectedRace?.id === race.id"
+                    (click)="selectRace(race)">
+                    <div class="card-title">{{ race.name }}</div>
+                    @if (formatRaceBonuses(race)) {
+                      <div class="card-bonus">{{ formatRaceBonuses(race) }}</div>
+                    }
+                  </div>
+                </ion-col>
+              }
+            </ion-row>
+          </ion-grid>
+
+          @if (races.length === 0 && !racesLoading) {
+            <p class="empty-message">No hay razas disponibles.</p>
+          }
+
+          @if (validationErrors['race']) {
+            <p class="error-message">{{ validationErrors['race'] }}</p>
+          }
+        }
+      </div>
+    }
+
+    <!-- ── Step 2: Class ────────────────────────────────────────────────── -->
+    @if (currentStep === 2) {
+      <div class="step-section">
+        <h2 class="section-title">Selecciona tu Clase</h2>
+
+        @if (classesLoading) {
+          <div class="loading-container">
+            <ion-spinner name="crescent" color="warning"></ion-spinner>
+            <p class="loading-text">Cargando clases...</p>
+          </div>
+        }
+
+        @if (classesError) {
+          <div class="error-container">
+            <p class="error-message">No se pudieron cargar las clases. Inténtalo de nuevo.</p>
+            <ion-button fill="outline" color="warning" (click)="loadClasses()">
+              Reintentar
+            </ion-button>
+          </div>
+        }
+
+        @if (!classesLoading && !classesError) {
+          <ion-grid class="races-grid">
+            <ion-row>
+              @for (cls of classes; track cls.id) {
+                <ion-col size="12" size-md="6">
+                  <div
+                    class="selectable-card"
+                    [class.selected]="formData.selectedClass?.id === cls.id"
+                    (click)="selectClass(cls)">
+                    <div class="card-title">{{ cls.name }}</div>
+                    <div class="card-subtitle">d{{ cls.hitDie }}</div>
+                    @if (formatSavingThrows(cls)) {
+                      <div class="card-bonus">{{ formatSavingThrows(cls) }}</div>
+                    }
+                  </div>
+                </ion-col>
+              }
+            </ion-row>
+          </ion-grid>
+
+          @if (classes.length === 0 && !classesLoading) {
+            <p class="empty-message">No hay clases disponibles.</p>
+          }
+
+          @if (formData.selectedClass && filteredSubclasses.length > 0) {
+            <div class="subclasses-section">
+              <h3 class="subsection-title">Subclase (opcional)</h3>
+              <ion-grid class="races-grid">
+                <ion-row>
+                  @for (sc of filteredSubclasses; track sc.id) {
+                    <ion-col size="12" size-md="6">
+                      <div
+                        class="selectable-card selectable-card--small"
+                        [class.selected]="formData.selectedSubclass?.id === sc.id"
+                        (click)="selectSubclass(sc)">
+                        <div class="card-title">{{ sc.name }}</div>
+                      </div>
+                    </ion-col>
+                  }
+                </ion-row>
+              </ion-grid>
+            </div>
+          }
+
+          @if (validationErrors['class']) {
+            <p class="error-message">{{ validationErrors['class'] }}</p>
+          }
+        }
+      </div>
+    }
+
+    <!-- ── Step 3: Ability Scores ───────────────────────────────────────── -->
+    @if (currentStep === 3) {
+      <div class="step-section">
+        <h2 class="section-title">Puntuaciones de Habilidad</h2>
+
+        <!-- Mode toggle -->
+        <ion-segment [value]="formData.scoreMode" (ionChange)="onScoreModeChange($event)" class="score-mode-segment">
+          <ion-segment-button value="standard">
+            <ion-label>Array Estándar</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="manual">
+            <ion-label>Entrada Manual</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+
+        <!-- ── Standard Array mode ── -->
+        @if (formData.scoreMode === 'standard') {
+          <div class="standard-array-section">
+            <p class="mode-hint">Selecciona un token y luego asígnalo a una habilidad.</p>
+
+            <!-- Token pool -->
+            <div class="token-pool">
+              @for (token of standardArray; track token) {
+                @if (!isTokenAssigned(token)) {
+                  <button
+                    class="score-token"
+                    [class.token-selected]="selectedToken === token"
+                    (click)="onTokenClick(token)">
+                    {{ token }}
+                  </button>
+                }
+              }
+            </div>
+
+            <!-- Ability slots -->
+            <div class="ability-slots">
+              @for (key of abilityKeys; track key) {
+                <div class="ability-slot-row">
+                  <span class="ability-slot-label">{{ abilityLabels[key] }}</span>
+                  <button
+                    class="ability-slot"
+                    [class.slot-filled]="formData.tokenAssignments[key] !== null"
+                    [class.slot-active]="selectedToken !== null"
+                    (click)="onSlotClick(key)">
+                    {{ formData.tokenAssignments[key] !== null ? formData.tokenAssignments[key] : '—' }}
+                  </button>
+                  @if (getRacialBonus(key) !== 0) {
+                    <span class="racial-bonus">{{ getRacialBonus(key) > 0 ? '+' : '' }}{{ getRacialBonus(key) }}</span>
+                  }
+                  <span class="final-score-preview" [class.final-score-ready]="getFinalScore(key) !== null">
+                    = <span class="final-value">{{ getFinalScore(key) !== null ? getFinalScore(key) : '?' }}</span>
+                  </span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- ── Manual Entry mode ── -->
+        @if (formData.scoreMode === 'manual') {
+          <div class="manual-entry-section">
+            <p class="mode-hint">Introduce un valor entre 1 y 20 para cada habilidad.</p>
+            @for (key of abilityKeys; track key) {
+              <div class="ability-slot-row">
+                <span class="ability-slot-label">{{ abilityLabels[key] }}</span>
+                <ion-input
+                  class="manual-score-input"
+                  type="number"
+                  [value]="formData.manualScores[key]"
+                  min="1"
+                  max="20"
+                  [class.input-error]="validationErrors[key]"
+                  (ionChange)="onManualScoreChange(key, $event)">
+                </ion-input>
+                @if (getRacialBonus(key) !== 0) {
+                  <span class="racial-bonus">{{ getRacialBonus(key) > 0 ? '+' : '' }}{{ getRacialBonus(key) }}</span>
+                }
+                <span class="final-score-preview" [class.final-score-ready]="getFinalScore(key) !== null">
+                  = <span class="final-value">{{ getFinalScore(key) !== null ? getFinalScore(key) : '?' }}</span>
+                </span>
+              </div>
+              @if (validationErrors[key]) {
+                <p class="error-message error-message--indent">{{ validationErrors[key] }}</p>
+              }
+            }
+          </div>
+        }
+
+        <!-- Global validation error -->
+        @if (validationErrors['scores']) {
+          <p class="error-message">{{ validationErrors['scores'] }}</p>
+        }
+
+        <!-- HP preview (shown when class is selected and CON is assigned) -->
+        @if (previewHp !== null) {
+          <div class="hp-preview-row">
+            <span class="hp-preview-label">HP estimado:</span>
+            <span class="hp-preview-value">{{ previewHp }}</span>
+          </div>
+        }
+
+      </div>
+    }
+
+    <!-- ── Step 4: Skills ───────────────────────────────────────────────── -->
+    @if (currentStep === 4) {
+      <div class="step-section">
+        <h2 class="section-title">Competencias de Habilidad</h2>
+        <p class="mode-hint">Selecciona exactamente 2 habilidades en las que tu personaje sea competente.</p>
+
+        <div class="skills-count">
+          <span [class.skills-count--complete]="formData.selectedSkills.length === 2">
+            {{ formData.selectedSkills.length }} / 2 seleccionadas
+          </span>
+        </div>
+
+        <div class="skills-list">
+          @for (skill of dndSkills; track skill.id) {
+            <button
+              class="skill-option"
+              [class.skill-selected]="formData.selectedSkills.includes(skill.id)"
+              [class.skill-disabled]="isSkillDisabled(skill.id)"
+              [disabled]="isSkillDisabled(skill.id)"
+              (click)="toggleSkill(skill.id)">
+              <span class="skill-name">{{ skill.name }}</span>
+              <span class="skill-stat">{{ abilityLabels[skill.stat] }}</span>
+            </button>
+          }
+        </div>
+
+        @if (validationErrors['skills']) {
+          <p class="error-message">{{ validationErrors['skills'] }}</p>
+        }
+      </div>
+    }
+
+    <!-- ── Step 5: Review ───────────────────────────────────────────────── -->
+    @if (currentStep === 5) {
+      <div class="step-section">
+        <h2 class="section-title">Revisión Final</h2>
+
+        <!-- HP prominente -->
+        @if (previewHp !== null) {
+          <div class="review-hp-banner">
+            <span class="review-hp-label">Puntos de Vida Iniciales</span>
+            <span class="review-hp-value">{{ previewHp }}</span>
+          </div>
+        }
+
+        <!-- Identidad -->
+        <div class="review-card">
+          <div class="review-card-header">Identidad</div>
+          <div class="review-row"><span class="review-key">Nombre</span><span class="review-val">{{ formData.name }}</span></div>
+          <div class="review-row"><span class="review-key">Trasfondo</span><span class="review-val">{{ formData.background }}</span></div>
+          <div class="review-row"><span class="review-key">Alineamiento</span><span class="review-val">{{ formData.alignment }}</span></div>
+          <div class="review-row"><span class="review-key">XP</span><span class="review-val">{{ formData.xp }}</span></div>
+        </div>
+
+        <!-- Raza -->
+        @if (formData.selectedRace) {
+          <div class="review-card">
+            <div class="review-card-header">Raza</div>
+            <div class="review-row"><span class="review-key">Raza</span><span class="review-val">{{ formData.selectedRace.name }}</span></div>
+            @if (formatRaceBonuses(formData.selectedRace)) {
+              <div class="review-row"><span class="review-key">Bonos</span><span class="review-val review-val--gold">{{ formatRaceBonuses(formData.selectedRace) }}</span></div>
+            }
+          </div>
+        }
+
+        <!-- Clase -->
+        @if (formData.selectedClass) {
+          <div class="review-card">
+            <div class="review-card-header">Clase</div>
+            <div class="review-row"><span class="review-key">Clase</span><span class="review-val">{{ formData.selectedClass.name }}</span></div>
+            <div class="review-row"><span class="review-key">Dado de Golpe</span><span class="review-val review-val--gold">d{{ formData.selectedClass.hitDie }}</span></div>
+            @if (formatSavingThrows(formData.selectedClass)) {
+              <div class="review-row"><span class="review-key">Tiradas de Salvación</span><span class="review-val">{{ formatSavingThrows(formData.selectedClass) }}</span></div>
+            }
+            @if (formData.selectedSubclass) {
+              <div class="review-row"><span class="review-key">Subclase</span><span class="review-val">{{ formData.selectedSubclass.name }}</span></div>
+            }
+          </div>
+        }
+
+        <!-- Puntuaciones finales -->
+        <div class="review-card">
+          <div class="review-card-header">Puntuaciones de Habilidad</div>
+          @for (key of abilityKeys; track key) {
+            <div class="review-row">
+              <span class="review-key">{{ abilityLabels[key] }}</span>
+              <span class="review-val review-val--gold">{{ getFinalScore(key) ?? '—' }}</span>
+            </div>
+          }
+        </div>
+
+        <!-- Habilidades seleccionadas -->
+        <div class="review-card">
+          <div class="review-card-header">Competencias de Habilidad</div>
+          @for (skill of dndSkills; track skill.id) {
+            @if (formData.selectedSkills.includes(skill.id)) {
+              <div class="review-row">
+                <span class="review-key">{{ skill.name }}</span>
+                <span class="review-val">{{ abilityLabels[skill.stat] }}</span>
+              </div>
+            }
+          }
+          @if (formData.selectedSkills.length === 0) {
+            <div class="review-row"><span class="review-val">Ninguna seleccionada</span></div>
+          }
+        </div>
+
+        <!-- Error de envío -->
+        @if (submitError) {
+          <p class="error-message submit-error">Error al crear el personaje. Inténtalo de nuevo.</p>
+        }
+
+      </div>
+    }
+
+  </div>
+</ion-content>
+
+<!-- ── Navigation footer ──────────────────────────────────────────────────── -->
+<ion-footer class="ion-no-border">
+  <ion-toolbar class="footer-toolbar">
+    <div class="nav-buttons">
+
+      <!-- "Anterior" button: hidden on step 0 -->
+      @if (currentStep > 0) {
+        <ion-button fill="outline" color="medium" (click)="prevStep()" class="nav-btn-prev">
+          Anterior
+        </ion-button>
+      }
+
+      <!-- "Siguiente" button: visible on steps 0–4 -->
+      @if (currentStep < 5) {
+        <ion-button expand="block" class="nav-btn-next btn-gold" (click)="nextStep()">
+          Siguiente
+        </ion-button>
+      }
+
+      <!-- "Forjar Personaje" button: only on step 5 -->
+      @if (currentStep === 5) {
+        <ion-button expand="block" class="nav-btn-next btn-gold" [disabled]="isSubmitting" (click)="submitCharacter()">
+          @if (isSubmitting) {
+            <ion-spinner name="crescent" slot="start"></ion-spinner>
+          }
+          Forjar Personaje
+        </ion-button>
+      }
+
+    </div>
+  </ion-toolbar>
+</ion-footer>
