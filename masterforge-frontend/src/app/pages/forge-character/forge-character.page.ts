@@ -6,7 +6,7 @@ import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonButtons, IonBackButton,
   IonIcon, IonItem, IonLabel, IonInput, IonSelect, IonSelectOption,
   IonGrid, IonRow, IonCol, IonSpinner, IonBadge, IonList,
-  IonSegment, IonSegmentButton, IonFooter
+  IonSegment, IonSegmentButton
 } from '@ionic/angular/standalone';
 import { ApiService } from '../../services/api';
 import { AuthService } from '../../services/auth.service';
@@ -104,7 +104,7 @@ export interface CharacterFormData {
     IonButton, IonButtons, IonBackButton,
     IonIcon, IonItem, IonLabel, IonInput, IonSelect, IonSelectOption,
     IonGrid, IonRow, IonCol, IonSpinner, IonBadge, IonList,
-    IonSegment, IonSegmentButton, IonFooter
+    IonSegment, IonSegmentButton
   ],
   encapsulation: ViewEncapsulation.None
 })
