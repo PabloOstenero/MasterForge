@@ -1,2 +1,0 @@
-﻿
-[32m29 04 2026 11:30:37.742:INFO [Chrome Headless 147.0.0.0 (Windows 10)]: [39mConnected on socket BGAKV04NxMfIcbWJAAAB with id 84324707

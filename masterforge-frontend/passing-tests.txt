@@ -1,4 +1,0 @@
-﻿
-[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) HomePage ÔÇö Property-Based Tests P10b ÔÇö after successful submitSession, form is hidden and list is re-fetched FAILED[39m
-
-[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) HomePage ÔÇö Property-Based Tests P10 ÔÇö after successful submitCampaign, form is hidden and list is re-fetched FAILED[39m
