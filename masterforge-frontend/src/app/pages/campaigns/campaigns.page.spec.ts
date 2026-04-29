@@ -3,7 +3,7 @@ import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import * as fc from 'fast-check';
 
-import { CampanyasPage } from './campanyas.page';
+import { CampaignsPage } from './campaigns.page';
 import { ApiService } from '../../services/api';
 
 // ---------------------------------------------------------------------------
@@ -47,24 +47,24 @@ function buildApiSpy(): jasmine.SpyObj<ApiService> {
 // CampanyasPage — Property-Based Tests
 // ---------------------------------------------------------------------------
 
-describe('CampanyasPage — Property-Based Tests', () => {
+describe('CampaignsPage — Property-Based Tests', () => {
 
-  let fixture: ComponentFixture<CampanyasPage>;
-  let component: CampanyasPage;
+  let fixture: ComponentFixture<CampaignsPage>;
+  let component: CampaignsPage;
   let apiSpy: jasmine.SpyObj<ApiService>;
 
   beforeEach(async () => {
     apiSpy = buildApiSpy();
 
     await TestBed.configureTestingModule({
-      imports: [CampanyasPage],
+      imports: [CampaignsPage],
       providers: [
         { provide: ApiService, useValue: apiSpy },
         provideRouter([]),
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(CampanyasPage);
+    fixture = TestBed.createComponent(CampaignsPage);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

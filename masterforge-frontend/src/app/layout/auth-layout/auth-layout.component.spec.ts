@@ -22,7 +22,7 @@ describe('AuthLayoutComponent — Property-Based Tests', () => {
   let authSpy: jasmine.SpyObj<AuthService>;
   let router: Router;
 
-  const NAV_ROUTES = ['/home', '/jugadores', '/campanyas', '/bestiario', '/config'];
+  const NAV_ROUTES = ['/home', '/players', '/campaigns', '/bestiary', '/config'];
 
   beforeEach(async () => {
     authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated']);
@@ -33,9 +33,9 @@ describe('AuthLayoutComponent — Property-Based Tests', () => {
         { provide: AuthService, useValue: authSpy },
         provideRouter([
           { path: 'home', component: StubPageComponent },
-          { path: 'jugadores', component: StubPageComponent },
-          { path: 'campanyas', component: StubPageComponent },
-          { path: 'bestiario', component: StubPageComponent },
+          { path: 'players', component: StubPageComponent },
+          { path: 'campaigns', component: StubPageComponent },
+          { path: 'bestiary', component: StubPageComponent },
           { path: 'config', component: StubPageComponent },
           { path: 'login', component: StubPageComponent },
         ]),
@@ -172,7 +172,7 @@ describe('AuthLayoutComponent — Property 2: Preservation (Non-Toggle Interacti
 
   // The 5 DM items as rendered by the hardcoded template (unfixed code)
   const DM_ITEM_TITLES = ['Inicio', 'Jugadores', 'Campañas', 'Bestiario', 'Config'];
-  const DM_ROUTES = ['/home', '/jugadores', '/campanyas', '/bestiario', '/config'];
+  const DM_ROUTES = ['/home', '/players', '/campaigns', '/bestiary', '/config'];
 
   beforeEach(async () => {
     authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated']);
@@ -183,9 +183,9 @@ describe('AuthLayoutComponent — Property 2: Preservation (Non-Toggle Interacti
         { provide: AuthService, useValue: authSpy },
         provideRouter([
           { path: 'home', component: StubPageComponent },
-          { path: 'jugadores', component: StubPageComponent },
-          { path: 'campanyas', component: StubPageComponent },
-          { path: 'bestiario', component: StubPageComponent },
+          { path: 'players', component: StubPageComponent },
+          { path: 'campaigns', component: StubPageComponent },
+          { path: 'bestiary', component: StubPageComponent },
           { path: 'config', component: StubPageComponent },
           { path: 'login', component: StubPageComponent },
         ]),
@@ -369,19 +369,19 @@ import { RoleService, MenuItem } from '../../services/role.service';
 
 const DM_MENU: MenuItem[] = [
   { title: 'Inicio', icon: 'home-outline', route: '/home' },
-  { title: 'Jugadores', icon: 'people-outline', route: '/jugadores' },
-  { title: 'Campañas', icon: 'map-outline', route: '/campanyas' },
-  { title: 'Bestiario IA', icon: 'skull-outline', route: '/bestiario' },
-  { title: 'Configuración', icon: 'settings-outline', route: '/config' },
+  { title: 'Jugadores', icon: 'people-outline', route: '/players' },
+  { title: 'Campañas', icon: 'map-outline', route: '/campaigns' },
+  { title: 'Bestiario IA', icon: 'skull-outline', route: '/bestiary' },
+  { title: 'Config', icon: 'settings-outline', route: '/config' },
 ];
 
 const PLAYER_MENU: MenuItem[] = [
   { title: 'Inicio', icon: 'home-outline', route: '/home' },
-  { title: 'Forjar Personaje', icon: 'person-add-outline', route: '/forjar-personaje' },
-  { title: 'Mis Personajes', icon: 'book-outline', route: '/mis-personajes' },
+  { title: 'Forjar Personaje', icon: 'person-add-outline', route: '/forge-character' },
+  { title: 'Mis Personajes', icon: 'book-outline', route: '/my-characters' },
   { title: 'Homebrew (IA)', icon: 'color-wand-outline', sublabel: 'Clases, Subclases, Razas', route: '/homebrew' },
-  { title: 'Gremio de Campañas', icon: 'search-outline', route: '/buscar-campañas' },
-  { title: 'Configuración', icon: 'settings-outline', route: '/config' },
+  { title: 'Gremio de Campañas', icon: 'search-outline', route: '/search-campaigns' },
+  { title: 'Config', icon: 'settings-outline', route: '/config' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -426,9 +426,9 @@ describe('AuthLayoutComponent — Property 1: Bug Condition - Topbar Absent in A
         { provide: RoleService, useValue: mockRoleService },
         provideRouter([
           { path: 'home', component: StubPageComponent },
-          { path: 'jugadores', component: StubPageComponent },
-          { path: 'campanyas', component: StubPageComponent },
-          { path: 'bestiario', component: StubPageComponent },
+          { path: 'players', component: StubPageComponent },
+          { path: 'campaigns', component: StubPageComponent },
+          { path: 'bestiary', component: StubPageComponent },
           { path: 'config', component: StubPageComponent },
           { path: 'login', component: StubPageComponent },
         ]),
@@ -546,13 +546,13 @@ describe('AuthLayoutComponent — Property 1: Bug Condition (Sidebar Ignores Rol
         { provide: RoleService, useValue: mockRoleService },
         provideRouter([
           { path: 'home', component: StubPageComponent },
-          { path: 'jugadores', component: StubPageComponent },
-          { path: 'campanyas', component: StubPageComponent },
-          { path: 'bestiario', component: StubPageComponent },
+          { path: 'players', component: StubPageComponent },
+          { path: 'campaigns', component: StubPageComponent },
+          { path: 'bestiary', component: StubPageComponent },
           { path: 'config', component: StubPageComponent },
           { path: 'login', component: StubPageComponent },
-          { path: 'forjar-personaje', component: StubPageComponent },
-          { path: 'mis-personajes', component: StubPageComponent },
+          { path: 'forge-character', component: StubPageComponent },
+          { path: 'my-characters', component: StubPageComponent },
           { path: 'homebrew', component: StubPageComponent },
         ]),
       ]

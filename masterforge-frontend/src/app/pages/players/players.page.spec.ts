@@ -3,7 +3,7 @@ import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import * as fc from 'fast-check';
 
-import { JugadoresPage } from './jugadores.page';
+import { PlayersPage } from './players.page';
 import { ApiService } from '../../services/api';
 
 // ---------------------------------------------------------------------------
@@ -30,10 +30,10 @@ const userArb = fc.record({
 // JugadoresPage — Property-Based Tests
 // ---------------------------------------------------------------------------
 
-describe('JugadoresPage — Property-Based Tests', () => {
+describe('PlayersPage — Property-Based Tests', () => {
 
-  let fixture: ComponentFixture<JugadoresPage>;
-  let component: JugadoresPage;
+  let fixture: ComponentFixture<PlayersPage>;
+  let component: PlayersPage;
   let apiSpy: jasmine.SpyObj<ApiService>;
   let router: Router;
 
@@ -42,14 +42,14 @@ describe('JugadoresPage — Property-Based Tests', () => {
     apiSpy.getUsers.and.returnValue(of([]));
 
     await TestBed.configureTestingModule({
-      imports: [JugadoresPage],
+      imports: [PlayersPage],
       providers: [
         { provide: ApiService, useValue: apiSpy },
         provideRouter([]),
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(JugadoresPage);
+    fixture = TestBed.createComponent(PlayersPage);
     component = fixture.componentInstance;
     router = TestBed.inject(Router);
     fixture.detectChanges();

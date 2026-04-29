@@ -9,9 +9,9 @@ import {
 import { ApiService } from '../../services/api';
 
 @Component({
-  selector: 'app-jugadores',
-  templateUrl: './jugadores.page.html',
-  styleUrls: ['./jugadores.page.scss'],
+  selector: 'app-players',
+  templateUrl: './players.page.html',
+  styleUrls: ['./players.page.scss'],
   standalone: true,
   imports: [
     CommonModule,
@@ -20,7 +20,7 @@ import { ApiService } from '../../services/api';
     IonAvatar, IonBadge, IonCard, IonCardContent,
   ],
 })
-export class JugadoresPage implements OnInit {
+export class PlayersPage implements OnInit {
 
   users: any[] = [];
   loading = false;

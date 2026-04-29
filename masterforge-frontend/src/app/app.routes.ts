@@ -17,14 +17,14 @@ export const routes: Routes = [
     children: [
       // Fix: Point to the refactored HomePage instead of InicioPage
       { path: 'home', loadComponent: () => import('./home/home.page').then(m => m.HomePage) },
-      { path: 'jugadores', loadComponent: () => import('./pages/jugadores/jugadores.page').then(m => m.JugadoresPage) },
-      { path: 'campanyas', loadComponent: () => import('./pages/campanyas/campanyas.page').then(m => m.CampanyasPage) },
-      { path: 'bestiario', loadComponent: () => import('./pages/bestiario/bestiario.page').then(m => m.BestiarioPage) },
+      { path: 'players', loadComponent: () => import('./pages/players/players.page').then(m => m.PlayersPage) },
+      { path: 'campaigns', loadComponent: () => import('./pages/campaigns/campaigns.page').then(m => m.CampaignsPage) },
+      { path: 'bestiary', loadComponent: () => import('./pages/bestiary/bestiary.page').then(m => m.BestiaryPage) },
       { path: 'config', loadComponent: () => import('./pages/config/config.page').then(m => m.ConfigPage) },
       // New routes for Player features (Assuming components will be generated)
-      { path: 'forjar-personaje', loadComponent: () => import('./pages/character-sheet/character-sheet.page').then(m => m.CharacterSheetPage) },
+      { path: 'forge-character', loadComponent: () => import('./pages/character-sheet/character-sheet.page').then(m => m.CharacterSheetPage) },
       { path: 'homebrew', loadComponent: () => import('./pages/homebrew/homebrew.page').then(m => m.HomebrewPage) },
-      { path: 'buscar-campañas', loadComponent: () => import('./pages/campanyas/campanyas.page').then(m => m.CampanyasPage) },
+      { path: 'search-campaigns', loadComponent: () => import('./pages/campaigns/campaigns.page').then(m => m.CampaignsPage) },
       { path: '', redirectTo: 'home', pathMatch: 'full' },
     ]
   },

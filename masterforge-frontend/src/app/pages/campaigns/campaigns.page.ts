@@ -10,9 +10,9 @@ import {
 import { ApiService } from '../../services/api';
 
 @Component({
-  selector: 'app-campanyas',
-  templateUrl: './campanyas.page.html',
-  styleUrls: ['./campanyas.page.scss'],
+  selector: 'app-campaigns',
+  templateUrl: './campaigns.page.html',
+  styleUrls: ['./campaigns.page.scss'],
   standalone: true,
   imports: [
     CommonModule,
@@ -23,7 +23,7 @@ import { ApiService } from '../../services/api';
     IonButton, IonInput, IonSelect, IonSelectOption,
   ],
 })
-export class CampanyasPage implements OnInit {
+export class CampaignsPage implements OnInit {
 
   campaigns: any[] = [];
   sessions: any[] = [];
