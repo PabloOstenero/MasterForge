@@ -70,6 +70,8 @@
           data-testid="submit-button">
           {{ isLoading ? 'Registrando...' : 'Registrarse' }}
         </ion-button>
+
+        <p class="nav-link">¿Ya tienes cuenta? <span (click)="router.navigate(['/login'])">Inicia sesión</span></p>
       </ion-card-content>
     </ion-card>
   </div>

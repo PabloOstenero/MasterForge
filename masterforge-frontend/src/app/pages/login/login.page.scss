@@ -66,3 +66,11 @@
     cursor: pointer;
   }
 }
+
+.toggle-btn {
+  --color: #{$text-muted};
+  --padding-start: 8px;
+  --padding-end: 0;
+  margin: 0;
+  height: 100%;
+}

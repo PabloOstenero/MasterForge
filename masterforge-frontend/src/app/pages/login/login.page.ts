@@ -5,8 +5,10 @@ import { Router } from '@angular/router';
 import {
   IonContent,
   IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-  IonInput, IonButton, IonLabel
+  IonInput, IonButton, IonLabel, IonIcon
 } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { eyeOutline, eyeOffOutline } from 'ionicons/icons';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -19,7 +21,7 @@ import { AuthService } from '../../services/auth.service';
     FormsModule,
     IonContent,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-    IonInput, IonButton, IonLabel
+    IonInput, IonButton, IonLabel, IonIcon
   ]
 })
 export class LoginPage {
@@ -27,8 +29,11 @@ export class LoginPage {
   password = '';
   errorMessage: string | null = null;
   isLoading = false;
+  showPassword = false;
 
-  constructor(private authService: AuthService, public router: Router) {}
+  constructor(private authService: AuthService, public router: Router) {
+    addIcons({ eyeOutline, eyeOffOutline });
+  }
 
   onSubmit() {
     this.errorMessage = null;

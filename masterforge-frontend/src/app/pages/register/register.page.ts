@@ -34,7 +34,7 @@ export class RegisterPage {
   showPassword = false;
   showConfirmPassword = false;
 
-  constructor(private authService: AuthService, private router: Router) {
+  constructor(private authService: AuthService, public router: Router) {
     addIcons({ eyeOutline, eyeOffOutline });
   }
 

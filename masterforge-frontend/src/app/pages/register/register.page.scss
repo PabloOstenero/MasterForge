@@ -63,3 +63,15 @@
   margin: 0;
   height: 100%;
 }
+
+.nav-link {
+  color: $text-muted;
+  text-align: center;
+  margin-top: 16px;
+  font-size: 0.875rem;
+
+  span {
+    color: $accent-gold;
+    cursor: pointer;
+  }
+}

@@ -22,11 +22,14 @@
           <ion-input
             label="Contraseña"
             labelPlacement="floating"
-            type="password"
+            [type]="showPassword ? 'text' : 'password'"
             [(ngModel)]="password"
             [disabled]="isLoading"
             autocomplete="current-password"
             data-testid="password-input">
+            <ion-button slot="end" fill="clear" class="toggle-btn" (click)="showPassword = !showPassword" [disabled]="isLoading">
+              <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+            </ion-button>
           </ion-input>
         </div>
 
