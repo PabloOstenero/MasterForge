@@ -69,7 +69,8 @@
   flex: 1;
   overflow-y: auto;
   background-color: var(--mf-bg-primary, #121212);
-  min-height: 100vh;
+  height: 100vh;
+  box-sizing: border-box;
 }
 
 .topbar {
