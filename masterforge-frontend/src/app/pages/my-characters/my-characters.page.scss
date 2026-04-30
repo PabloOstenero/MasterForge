@@ -1,0 +1,89 @@
+@use '../../../theme/variables' as *;
+
+// ── Page background ──────────────────────────────────────────────────────────
+
+:host {
+  display: block;
+}
+
+.page-container {
+  background: #121212;
+  min-height: 100%;
+}
+
+.section-title {
+  color: $accent-gold;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba($accent-gold, 0.3);
+  padding-bottom: 6px;
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+// ── Loading / Error / Empty states ──────────────────────────────────────────
+
+.loading-container,
+.error-container,
+.empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  text-align: center;
+  gap: 1rem;
+}
+
+.loading-text {
+  color: var(--ion-color-medium);
+  font-size: 0.95rem;
+}
+
+.error-msg {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.empty-msg {
+  color: var(--ion-color-medium);
+  font-size: 1rem;
+  margin: 0;
+}
+
+// ── Characters grid ──────────────────────────────────────────────────────────
+// ── Character card ───────────────────────────────────────────────────────────
+
+ion-card {
+  --background: #1e1e1e !important;
+  --color: #ffffff;
+  border-radius: 10px;
+  margin-inline: 0;
+}
+
+.gold-title {
+  color: $accent-gold;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.text-muted {
+  color: $text-muted;
+}
+
+.character-card {
+  cursor: pointer;
+  border-right: 3px solid $accent-gold;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  margin: 0;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+

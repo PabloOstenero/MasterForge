@@ -12,5 +12,8 @@ interface CharacterRepository : JpaRepository<Character, UUID> {
 
     @Query("SELECT COUNT(DISTINCT c.user.id) FROM Character c WHERE c.campaign.owner.email = :ownerEmail")
     fun countDistinctPlayersByOwnerEmail(@Param("ownerEmail") ownerEmail: String): Long
+
+    @Query("SELECT c FROM Character c WHERE c.user.id = :userId")
+    fun findByUserId(@Param("userId") userId: UUID): List<Character>
 }
 

@@ -25,6 +25,7 @@ export const routes: Routes = [
       { path: 'forge-character', loadComponent: () => import('./pages/forge-character/forge-character.page').then(m => m.ForgeCharacterPage) },
       { path: 'homebrew', loadComponent: () => import('./pages/homebrew/homebrew.page').then(m => m.HomebrewPage) },
       { path: 'search-campaigns', loadComponent: () => import('./pages/campaigns/campaigns.page').then(m => m.CampaignsPage) },
+      { path: 'my-characters', loadComponent: () => import('./pages/my-characters/my-characters.page').then(m => m.MyCharactersPage) },
       { path: '', redirectTo: 'home', pathMatch: 'full' },
     ]
   },
@@ -35,3 +36,5 @@ export const routes: Routes = [
   },
   { path: '**', redirectTo: 'login' }
 ];
+
+

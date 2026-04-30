@@ -131,4 +131,19 @@ updateTempHp(characterId: string, tempHp: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/characters`, dto);
   }
 
+  // Fetch all characters for the authenticated user
+  getCharactersByUser(userId: string): Observable<CharacterSummary[]> {
+    return this.http.get<CharacterSummary[]>(`${this.apiUrl}/characters/user/${userId}`);
+  }
+
+}
+
+// Interface for character summary (used in My Characters page)
+export interface CharacterSummary {
+  id: string;
+  name: string;
+  level: number;
+  dndClass: string;
+  dndRace: string;
+  subclass?: string;  // opcional, solo presente si el personaje tiene subclase
 }

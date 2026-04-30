@@ -1,0 +1,47 @@
+<div class="page-container ion-padding">
+
+  @if (loading) {
+    <div class="loading-container" data-testid="loading-container">
+      <ion-spinner name="crescent" data-testid="spinner"></ion-spinner>
+      <p class="loading-text">Cargando tus personajes...</p>
+    </div>
+  }
+
+  @if (error && !loading) {
+    <div class="error-container" data-testid="error-container">
+      <ion-text color="danger">
+        <p class="error-msg">{{ error }}</p>
+      </ion-text>
+      <ion-button expand="block" (click)="loadCharacters()" data-testid="retry-btn">
+        Reintentar
+      </ion-button>
+    </div>
+  }
+
+  @if (!loading && !error && characters.length === 0) {
+    <div class="empty-container" data-testid="empty-container">
+      <p class="empty-msg">Aún no has creado ningún personaje.</p>
+      <ion-button expand="block" routerLink="/forge-character" data-testid="create-char-btn">
+        Crear Personaje
+      </ion-button>
+    </div>
+  }
+
+  @if (!loading && !error && characters.length > 0) {
+    <h2 class="section-title">Mis Personajes</h2>
+    <ion-row data-testid="characters-list">
+      @for (char of characters; track char.id) {
+        <ion-col size="12" size-md="6">
+          <ion-card button (click)="goToSheet(char.id)" class="character-card" data-testid="character-card">
+            <ion-card-content>
+              <strong class="gold-title" style="font-size: 1.2rem;">{{ char.name }}</strong>
+              <p>{{ char.dndClass }}{{ char.subclass ? ' (' + char.subclass + ')' : '' }} — Nivel {{ char.level }}</p>
+              <p class="text-muted">{{ char.dndRace }}</p>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      }
+    </ion-row>
+  }
+
+</div>

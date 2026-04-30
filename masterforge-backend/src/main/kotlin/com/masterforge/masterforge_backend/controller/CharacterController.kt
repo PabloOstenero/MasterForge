@@ -4,6 +4,7 @@ import com.masterforge.masterforge_backend.model.dto.CharacterDto
 import com.masterforge.masterforge_backend.model.entity.Character
 import com.masterforge.masterforge_backend.model.entity.InventorySlot
 import com.masterforge.masterforge_backend.model.dto.CharacterResponseDto
+import com.masterforge.masterforge_backend.model.dto.CharacterSummaryDto
 import com.masterforge.masterforge_backend.repository.*
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -33,6 +34,23 @@ class CharacterController(
     @Transactional // Ensure lazy-loaded relationships are fetched for DTO mapping
     fun getAllCharacters(): List<CharacterResponseDto> {
         return characterRepository.findAll().map { CharacterResponseDto.fromEntity(it) }
+    }
+
+    @GetMapping("/user/{userId}")
+    @Transactional // Ensure lazy-loaded relationships are fetched for DTO mapping
+    fun getCharactersByUser(@PathVariable userId: UUID): ResponseEntity<List<CharacterSummaryDto>> {
+        val characters = characterRepository.findByUserId(userId)
+        val summaries = characters.map { character ->
+            CharacterSummaryDto(
+                id = character.id!!,
+                name = character.name,
+                level = character.level,
+                dndClass = character.dndClass.name,
+                dndRace = character.dndRace.name,
+                subclass = character.subclass?.name
+            )
+        }
+        return ResponseEntity.ok(summaries)
     }
 
     @PostMapping
