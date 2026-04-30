@@ -61,22 +61,55 @@
     <!-- Player View -->
     @if ((activeRole$ | async) === 'player') {
       <div data-testid="player-dashboard">
-        <h2 class="section-title">Mis Aventureros</h2>
-        <ion-row>
-          @for (user of users; track user.id) {
-            @for (char of user.characters; track char.id) {
-              <ion-col size="12" size-md="6">
-                <ion-card button (click)="goToSheet(char.id)" class="character-card" data-testid="player-character-card">
-                  <ion-card-content>
-                    <strong class="gold-title" style="font-size: 1.2rem;">{{ char.name }}</strong>
-                    <p>{{ char.dndClass }} — Nivel {{ char.level }}</p>
-                    <p class="text-muted">Master: {{ user.name }}</p>
-                  </ion-card-content>
-                </ion-card>
-              </ion-col>
-            }
-          }
+        <ion-row class="summary-row" data-testid="player-summary-row">
+          <ion-col size="12" size-md="4">
+            <div class="summary-card">
+              <div class="summary-label">Próxima Sesión</div>
+              <div class="summary-value">
+                @if (loadingPlayerSummary) {
+                  ...
+                } @else if (errorPlayerSummary) {
+                  Error
+                } @else {
+                  {{ nextPlayerSessionLabel }}
+                }
+              </div>
+              <div class="summary-link">Ver Detalles</div>
+            </div>
+          </ion-col>
+          <ion-col size="12" size-md="4">
+            <div class="summary-card">
+              <div class="summary-label">Campañas Activas</div>
+              <div class="summary-value">
+                @if (loadingPlayerSummary) {
+                  ...
+                } @else if (errorPlayerSummary) {
+                  Error
+                } @else {
+                  {{ activeCampaigns?.activeCampaigns }}
+                }
+              </div>
+              <div class="summary-link">Ver Lista</div>
+            </div>
+          </ion-col>
+          <ion-col size="12" size-md="4">
+            <div class="summary-card">
+              <div class="summary-label">Aventureros Activos</div>
+              <div class="summary-value">
+                @if (loadingPlayerSummary) {
+                  ...
+                } @else if (errorPlayerSummary) {
+                  Error
+                } @else {
+                  {{ activeCharacters?.activeCharacters }}
+                }
+              </div>
+              <div class="summary-link">Ver Lista</div>
+            </div>
+          </ion-col>
         </ion-row>
+
+
       </div>
     }
   </div>

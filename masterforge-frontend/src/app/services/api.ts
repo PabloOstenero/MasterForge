@@ -136,6 +136,34 @@ updateTempHp(characterId: string, tempHp: number): Observable<any> {
     return this.http.get<CharacterSummary[]>(`${this.apiUrl}/characters/user/${userId}`);
   }
 
+  // Fetch the player's next scheduled session date
+  getNextSession(): Observable<NextSessionDto> {
+    return this.http.get<NextSessionDto>(`${this.apiUrl}/users/me/next-session`);
+  }
+
+  // Fetch the count of campaigns the player is enrolled in
+  getActiveCampaigns(): Observable<ActiveCampaignsDto> {
+    return this.http.get<ActiveCampaignsDto>(`${this.apiUrl}/users/me/active-campaigns`);
+  }
+
+  // Fetch the count of characters owned by the player
+  getActiveCharacters(): Observable<ActiveCharactersDto> {
+    return this.http.get<ActiveCharactersDto>(`${this.apiUrl}/users/me/active-characters`);
+  }
+
+}
+
+// Interfaces for player summary cards
+export interface NextSessionDto {
+  nextSessionDate: string | null;
+}
+
+export interface ActiveCampaignsDto {
+  activeCampaigns: number;
+}
+
+export interface ActiveCharactersDto {
+  activeCharacters: number;
 }
 
 // Interface for character summary (used in My Characters page)

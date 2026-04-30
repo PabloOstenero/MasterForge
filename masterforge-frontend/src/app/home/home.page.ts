@@ -10,7 +10,8 @@ import {
   IonList, IonItem, IonLabel, IonBadge, IonNote,
   IonButton, IonIcon, IonInput, IonFab, IonFabButton
 } from '@ionic/angular/standalone';
-import { ApiService } from '../services/api';
+import { forkJoin } from 'rxjs';
+import { ApiService, NextSessionDto, ActiveCampaignsDto, ActiveCharactersDto } from '../services/api';
 import { AuthService } from '../services/auth.service';
 import { RoleService } from '../services/role.service';
 import { AsyncPipe } from '@angular/common';
@@ -60,6 +61,13 @@ export class HomePage implements OnInit {
 
   playerCount = 0;
 
+  // Player summary state
+  nextSession: NextSessionDto | null = null;
+  activeCampaigns: ActiveCampaignsDto | null = null;
+  activeCharacters: ActiveCharactersDto | null = null;
+  loadingPlayerSummary = false;
+  errorPlayerSummary: string | null = null;
+
   // Form visibility flags
   showNewCampaignForm = false;
   showNewSessionForm = false;
@@ -82,6 +90,7 @@ export class HomePage implements OnInit {
     this.loadCampaigns();
     this.loadSessions();
     this.loadPlayerCount();
+    this.loadPlayerSummary();
   }
 
   get nextSessionDate(): string {
@@ -94,6 +103,36 @@ export class HomePage implements OnInit {
 
   get balance(): number {
     return this.authService.getCurrentUser()?.balance ?? 0;
+  }
+
+  loadPlayerSummary(): void {
+    this.loadingPlayerSummary = true;
+    this.errorPlayerSummary = null;
+    forkJoin([
+      this.apiService.getNextSession(),
+      this.apiService.getActiveCampaigns(),
+      this.apiService.getActiveCharacters(),
+    ]).subscribe({
+      next: ([nextSession, activeCampaigns, activeCharacters]) => {
+        this.nextSession = nextSession;
+        this.activeCampaigns = activeCampaigns;
+        this.activeCharacters = activeCharacters;
+        this.loadingPlayerSummary = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar resumen del jugador', err);
+        this.errorPlayerSummary = err?.message ?? 'Error al cargar resumen';
+        this.loadingPlayerSummary = false;
+      }
+    });
+  }
+
+  get nextPlayerSessionLabel(): string {
+    const raw = this.nextSession?.nextSessionDate;
+    if (!raw) return 'Sin sesiones';
+    const date = new Date(raw);
+    if (isNaN(date.getTime())) return 'Sin sesiones';
+    return this.formatDate(raw);
   }
 
   loadUsers() {

@@ -15,5 +15,8 @@ interface CharacterRepository : JpaRepository<Character, UUID> {
 
     @Query("SELECT c FROM Character c WHERE c.user.id = :userId")
     fun findByUserId(@Param("userId") userId: UUID): List<Character>
+
+    @Query("SELECT COUNT(c) FROM Character c WHERE c.user.email = :email")
+    fun countByUserEmail(@Param("email") email: String): Long
 }
 
