@@ -1,15 +1,5 @@
 <ion-header [translucent]="true" class="ion-no-border">
   <ion-toolbar class="header-toolbar">
-    <ion-buttons slot="start">
-      <!-- On step 0, back button navigates to /home; on other steps it goes back a step -->
-      @if (currentStep === 0) {
-        <ion-back-button defaultHref="/home" color="warning"></ion-back-button>
-      } @else {
-        <ion-button fill="clear" color="warning" (click)="prevStep()">
-          <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
-        </ion-button>
-      }
-    </ion-buttons>
     <ion-title class="gold-title">Forjar Personaje</ion-title>
   </ion-toolbar>
 
