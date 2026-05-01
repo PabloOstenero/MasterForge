@@ -4,7 +4,7 @@ import { of, throwError, Subject, BehaviorSubject } from 'rxjs';
 import * as fc from 'fast-check';
 
 import { HomePage } from './home.page';
-import { ApiService, NextSessionDto, ActiveCampaignsDto, ActiveCharactersDto } from '../services/api';
+import { ApiService, NextSessionDto, ActiveCampaignsDto, ActiveCharactersDto, PlayerCampaignSummary } from '../services/api';
 import { RoleService } from '../services/role.service';
 import { AuthService } from '../services/auth.service';
 
@@ -57,7 +57,7 @@ const sessionArb = (campaignIds: string[]) =>
 function buildApiSpy(): jasmine.SpyObj<ApiService> {
   const spy = jasmine.createSpyObj<ApiService>('ApiService', [
     'getUsers', 'getCampaigns', 'getSessions', 'createCampaign', 'createSession', 'getPlayerCount',
-    'getNextSession', 'getActiveCampaigns', 'getActiveCharacters',
+    'getNextSession', 'getActiveCampaigns', 'getActiveCharacters', 'getPlayerCampaigns',
   ]);
   spy.getUsers.and.returnValue(of([]));
   spy.getCampaigns.and.returnValue(of([]));
@@ -68,6 +68,7 @@ function buildApiSpy(): jasmine.SpyObj<ApiService> {
   spy.getNextSession.and.returnValue(of({ nextSessionDate: null }));
   spy.getActiveCampaigns.and.returnValue(of({ activeCampaigns: 0 }));
   spy.getActiveCharacters.and.returnValue(of({ activeCharacters: 0 }));
+  spy.getPlayerCampaigns.and.returnValue(of([]));
   return spy;
 }
 
@@ -835,6 +836,355 @@ describe('HomePage — Property-Based Tests', () => {
       ),
       { numRuns: 100 }
     );
+  });
+
+  // =========================================================================
+  // Task 5 — loadPlayerCampaigns() state management (Req 4.1, 4.2, 4.3)
+  // =========================================================================
+
+  // -------------------------------------------------------------------------
+  // Req 4.1: loadingPlayerCampaigns = true while API is in flight
+  // -------------------------------------------------------------------------
+  it('PCL-1 — loadPlayerCampaigns sets loadingPlayerCampaigns=true before API resolves', () => {
+    const subject = new Subject<PlayerCampaignSummary[]>();
+    apiSpy.getPlayerCampaigns.and.returnValue(subject.asObservable());
+
+    component.loadingPlayerCampaigns = false;
+    component.loadPlayerCampaigns();
+
+    expect(component.loadingPlayerCampaigns).toBeTrue();
+  });
+
+  // -------------------------------------------------------------------------
+  // Req 4.1: loadingPlayerCampaigns = false after API resolves successfully
+  // -------------------------------------------------------------------------
+  it('PCL-2 — loadPlayerCampaigns clears loadingPlayerCampaigns and populates playerCampaigns on success', () => {
+    const campaigns: PlayerCampaignSummary[] = [
+      { campaignId: 'c1', campaignName: 'Campaign One', dmName: 'DM Alice', nextSessionDate: '2025-10-01T18:00:00Z' },
+      { campaignId: 'c2', campaignName: 'Campaign Two', dmName: 'DM Bob', nextSessionDate: null },
+    ];
+    apiSpy.getPlayerCampaigns.and.returnValue(of(campaigns));
+
+    component.loadPlayerCampaigns();
+
+    expect(component.loadingPlayerCampaigns).toBeFalse();
+    expect(component.errorPlayerCampaigns).toBeNull();
+    expect(component.playerCampaigns).toEqual(campaigns);
+  });
+
+  // -------------------------------------------------------------------------
+  // Req 4.2: errorPlayerCampaigns is set and loading cleared on API error
+  // -------------------------------------------------------------------------
+  it('PCL-3 — loadPlayerCampaigns sets errorPlayerCampaigns and clears loading on error', () => {
+    apiSpy.getPlayerCampaigns.and.returnValue(throwError(() => new Error('network error')));
+
+    component.loadPlayerCampaigns();
+
+    expect(component.loadingPlayerCampaigns).toBeFalse();
+    expect(component.errorPlayerCampaigns).toBeTruthy();
+    expect(component.playerCampaigns).toEqual([]);
+  });
+
+  // -------------------------------------------------------------------------
+  // Req 4.3: error in loadPlayerCampaigns does NOT affect loadPlayerSummary state
+  // -------------------------------------------------------------------------
+  it('PCL-4 — error in loadPlayerCampaigns does not affect player summary state', () => {
+    const nextSessionDto: NextSessionDto = { nextSessionDate: '2025-09-15T18:00:00.000Z' };
+    const activeCampaignsDto: ActiveCampaignsDto = { activeCampaigns: 3 };
+    const activeCharactersDto: ActiveCharactersDto = { activeCharacters: 2 };
+
+    apiSpy.getNextSession.and.returnValue(of(nextSessionDto));
+    apiSpy.getActiveCampaigns.and.returnValue(of(activeCampaignsDto));
+    apiSpy.getActiveCharacters.and.returnValue(of(activeCharactersDto));
+    apiSpy.getPlayerCampaigns.and.returnValue(throwError(() => new Error('campaigns error')));
+
+    component.loadPlayerSummary();
+    component.loadPlayerCampaigns();
+
+    // Summary state is intact
+    expect(component.loadingPlayerSummary).toBeFalse();
+    expect(component.errorPlayerSummary).toBeNull();
+    expect(component.nextSession).toEqual(nextSessionDto);
+    expect(component.activeCampaigns).toEqual(activeCampaignsDto);
+    expect(component.activeCharacters).toEqual(activeCharactersDto);
+
+    // Campaign list state reflects the error
+    expect(component.errorPlayerCampaigns).toBeTruthy();
+    expect(component.loadingPlayerCampaigns).toBeFalse();
+  });
+
+  // -------------------------------------------------------------------------
+  // Req 4.3: error in loadPlayerSummary does NOT affect loadPlayerCampaigns state
+  // -------------------------------------------------------------------------
+  it('PCL-5 — error in loadPlayerSummary does not affect player campaign list state', () => {
+    const campaigns: PlayerCampaignSummary[] = [
+      { campaignId: 'c1', campaignName: 'Campaign One', dmName: 'DM Alice', nextSessionDate: null },
+    ];
+
+    apiSpy.getNextSession.and.returnValue(throwError(() => new Error('summary error')));
+    apiSpy.getActiveCampaigns.and.returnValue(of({ activeCampaigns: 0 }));
+    apiSpy.getActiveCharacters.and.returnValue(of({ activeCharacters: 0 }));
+    apiSpy.getPlayerCampaigns.and.returnValue(of(campaigns));
+
+    component.loadPlayerSummary();
+    component.loadPlayerCampaigns();
+
+    // Summary state reflects the error
+    expect(component.errorPlayerSummary).toBeTruthy();
+    expect(component.loadingPlayerSummary).toBeFalse();
+
+    // Campaign list state is intact
+    expect(component.errorPlayerCampaigns).toBeNull();
+    expect(component.loadingPlayerCampaigns).toBeFalse();
+    expect(component.playerCampaigns).toEqual(campaigns);
+  });
+
+  // -------------------------------------------------------------------------
+  // Req 4.3: ngOnInit calls both loaders independently
+  // -------------------------------------------------------------------------
+  it('PCL-6 — ngOnInit calls loadPlayerCampaigns independently from loadPlayerSummary', () => {
+    // Both should have been called during beforeEach fixture.detectChanges() → ngOnInit
+    expect(apiSpy.getPlayerCampaigns).toHaveBeenCalled();
+    expect(apiSpy.getNextSession).toHaveBeenCalled();
+    expect(apiSpy.getActiveCampaigns).toHaveBeenCalled();
+    expect(apiSpy.getActiveCharacters).toHaveBeenCalled();
+  });
+
+  // =========================================================================
+  // Task 6 — Campaign_List HTML rendering tests
+  // =========================================================================
+
+  // -------------------------------------------------------------------------
+  // Property 1: El número de ítems renderizados coincide con la longitud de la lista de la API
+  // Feature: player-campaign-list, Property 1: rendered item count equals API list length
+  // Validates: Requirement 1.3
+  // -------------------------------------------------------------------------
+  it('PCL-P1 — for any N player campaigns, exactly N campaign items are rendered', () => {
+    const playerCampaignArb = fc.record({
+      campaignId: fc.uuid(),
+      campaignName: fc.string({ minLength: 1, maxLength: 40 }),
+      dmName: fc.string({ minLength: 1, maxLength: 30 }),
+      nextSessionDate: fc.oneof(
+        fc.constant(null),
+        fc.date({ min: new Date('2024-01-01'), max: new Date('2030-12-31') })
+          .filter(d => !isNaN(d.getTime()))
+          .map(d => d.toISOString())
+      ),
+    });
+
+    fc.assert(
+      fc.property(
+        fc.array(playerCampaignArb, { minLength: 1, maxLength: 10 }),
+        (campaigns) => {
+          roleSubject.next('player');
+          component.playerCampaigns = campaigns;
+          component.loadingPlayerCampaigns = false;
+          component.errorPlayerCampaigns = null;
+          fixture.detectChanges();
+
+          const items = fixture.nativeElement.querySelectorAll('[data-testid="player-campaign-item"]');
+          expect(items.length).toBe(campaigns.length);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  // -------------------------------------------------------------------------
+  // Property 2: Cada ítem renderizado contiene todos los campos y clases requeridos
+  // Feature: player-campaign-list, Property 2: each item renders all required fields and CSS classes
+  // Validates: Requirements 2.1, 2.2, 2.5, 2.6
+  // -------------------------------------------------------------------------
+  it('PCL-P2 — each rendered item contains all required fields and CSS classes', () => {
+    const playerCampaignArb = fc.record({
+      campaignId: fc.uuid(),
+      campaignName: fc.string({ minLength: 1, maxLength: 40 }),
+      dmName: fc.string({ minLength: 1, maxLength: 30 }),
+      nextSessionDate: fc.oneof(
+        fc.constant(null),
+        fc.date({ min: new Date('2024-01-01'), max: new Date('2030-12-31') })
+          .filter(d => !isNaN(d.getTime()))
+          .map(d => d.toISOString())
+      ),
+    });
+
+    fc.assert(
+      fc.property(
+        fc.array(playerCampaignArb, { minLength: 1, maxLength: 5 }),
+        (campaigns) => {
+          roleSubject.next('player');
+          component.playerCampaigns = campaigns;
+          component.loadingPlayerCampaigns = false;
+          component.errorPlayerCampaigns = null;
+          fixture.detectChanges();
+
+          const items = fixture.nativeElement.querySelectorAll('[data-testid="player-campaign-item"]');
+          expect(items.length).toBe(campaigns.length);
+
+          items.forEach((item: Element, index: number) => {
+            const campaign = campaigns[index];
+
+            // Req 2.5: skill-item and list-item-interactive classes on container
+            expect(item.classList.contains('skill-item')).toBeTrue();
+            expect(item.classList.contains('list-item-interactive')).toBeTrue();
+
+            // Req 2.1: campaignName with gold-title class
+            const goldTitle = item.querySelector('.gold-title');
+            expect(goldTitle).toBeTruthy();
+            expect(goldTitle!.textContent?.trim()).toBe(campaign.campaignName.trim());
+
+            // Req 2.2: dmName with text-muted class
+            const dmLabel = item.querySelector('ion-label .text-muted');
+            expect(dmLabel).toBeTruthy();
+            expect(dmLabel!.textContent?.trim()).toBe(campaign.dmName.trim());
+
+            // Req 2.6: [Ver] link with view-link class
+            const viewLink = item.querySelector('.view-link');
+            expect(viewLink).toBeTruthy();
+            expect(viewLink!.textContent?.trim()).toBe('[Ver]');
+          });
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  // -------------------------------------------------------------------------
+  // Property 3: El formateador produce siempre el patrón DD/MM/YYYY HH:mm
+  // Feature: player-campaign-list, Property 3: date formatter always produces DD/MM/YYYY HH:mm pattern
+  // Validates: Requirement 2.3
+  // -------------------------------------------------------------------------
+  it('PCL-P3 — formatDate always produces DD/MM/YYYY HH:mm pattern for any valid ISO timestamp', () => {
+    fc.assert(
+      fc.property(
+        fc.date({ min: new Date('2000-01-01'), max: new Date('2099-12-31') })
+          .filter(d => !isNaN(d.getTime())),
+        (date) => {
+          const iso = date.toISOString();
+          const result = component.formatDate(iso);
+
+          // Must match DD/MM/YYYY HH:mm pattern
+          expect(result).toMatch(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/);
+
+          // Verify each component matches the original date
+          const [datePart, timePart] = result.split(' ');
+          const [day, month, year] = datePart.split('/').map(Number);
+          const [hours, minutes] = timePart.split(':').map(Number);
+
+          const parsed = new Date(iso);
+          expect(day).toBe(parsed.getDate());
+          expect(month).toBe(parsed.getMonth() + 1);
+          expect(year).toBe(parsed.getFullYear());
+          expect(hours).toBe(parsed.getHours());
+          expect(minutes).toBe(parsed.getMinutes());
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  // =========================================================================
+  // Task 6.5 — Unit tests for Campaign_List states
+  // =========================================================================
+
+  // -------------------------------------------------------------------------
+  // Req 4.1: loadingPlayerCampaigns = true → ion-spinner visible
+  // -------------------------------------------------------------------------
+  it('PCL-U1 — loadingPlayerCampaigns=true shows ion-spinner in player view', () => {
+    roleSubject.next('player');
+    component.loadingPlayerCampaigns = true;
+    component.errorPlayerCampaigns = null;
+    fixture.detectChanges();
+
+    const spinner = fixture.nativeElement.querySelector('[data-testid="player-campaigns-spinner"]');
+    expect(spinner).toBeTruthy();
+  });
+
+  // -------------------------------------------------------------------------
+  // Req 4.2: errorPlayerCampaigns set → error message visible
+  // -------------------------------------------------------------------------
+  it('PCL-U2 — errorPlayerCampaigns set shows error message with text-muted class', () => {
+    roleSubject.next('player');
+    component.loadingPlayerCampaigns = false;
+    component.errorPlayerCampaigns = 'Error al cargar campañas';
+    fixture.detectChanges();
+
+    const errorEl = fixture.nativeElement.querySelector('[data-testid="player-campaigns-error"]');
+    expect(errorEl).toBeTruthy();
+    expect(errorEl.classList.contains('text-muted')).toBeTrue();
+    expect(errorEl.textContent?.trim()).toBe('Error al cargar campañas');
+  });
+
+  // -------------------------------------------------------------------------
+  // Req 1.4: empty list → "No estás inscrito..." message visible
+  // -------------------------------------------------------------------------
+  it('PCL-U3 — empty playerCampaigns shows "No estás inscrito en ninguna campaña activa." with text-muted', () => {
+    roleSubject.next('player');
+    component.loadingPlayerCampaigns = false;
+    component.errorPlayerCampaigns = null;
+    component.playerCampaigns = [];
+    fixture.detectChanges();
+
+    const emptyEl = fixture.nativeElement.querySelector('[data-testid="player-campaigns-empty"]');
+    expect(emptyEl).toBeTruthy();
+    expect(emptyEl.classList.contains('text-muted')).toBeTrue();
+    expect(emptyEl.textContent?.trim()).toBe('No estás inscrito en ninguna campaña activa.');
+  });
+
+  // -------------------------------------------------------------------------
+  // Req 4.3: error in getPlayerCampaigns() does not affect summary cards
+  // -------------------------------------------------------------------------
+  it('PCL-U4 — error in getPlayerCampaigns does not affect summary cards visibility', () => {
+    const nextSessionDto: NextSessionDto = { nextSessionDate: '2025-09-15T18:00:00.000Z' };
+    const activeCampaignsDto: ActiveCampaignsDto = { activeCampaigns: 3 };
+    const activeCharactersDto: ActiveCharactersDto = { activeCharacters: 2 };
+
+    apiSpy.getNextSession.and.returnValue(of(nextSessionDto));
+    apiSpy.getActiveCampaigns.and.returnValue(of(activeCampaignsDto));
+    apiSpy.getActiveCharacters.and.returnValue(of(activeCharactersDto));
+    apiSpy.getPlayerCampaigns.and.returnValue(throwError(() => new Error('campaigns error')));
+
+    component.loadPlayerSummary();
+    component.loadPlayerCampaigns();
+
+    roleSubject.next('player');
+    component.loadingPlayerSummary = false;
+    component.errorPlayerSummary = null;
+    fixture.detectChanges();
+
+    // Summary cards are still visible
+    const summaryRow = fixture.nativeElement.querySelector('[data-testid="player-summary-row"]');
+    expect(summaryRow).toBeTruthy();
+    const cards = summaryRow.querySelectorAll('.summary-card');
+    expect(cards.length).toBe(3);
+
+    // Campaign list shows error
+    const errorEl = fixture.nativeElement.querySelector('[data-testid="player-campaigns-error"]');
+    expect(errorEl).toBeTruthy();
+  });
+
+  // -------------------------------------------------------------------------
+  // Req 2.4: nextSessionDate: null → shows "Sin sesiones" with text-muted
+  // -------------------------------------------------------------------------
+  it('PCL-U5 — nextSessionDate null renders "Sin sesiones" with text-muted class', () => {
+    roleSubject.next('player');
+    component.loadingPlayerCampaigns = false;
+    component.errorPlayerCampaigns = null;
+    component.playerCampaigns = [
+      { campaignId: 'c1', campaignName: 'Test Campaign', dmName: 'DM Test', nextSessionDate: null },
+    ];
+    fixture.detectChanges();
+
+    const item = fixture.nativeElement.querySelector('[data-testid="player-campaign-item"]');
+    expect(item).toBeTruthy();
+
+    const sinSesiones = item.querySelector('.text-muted');
+    // Find the "Sin sesiones" span specifically (not the dmName one)
+    const allMuted = item.querySelectorAll('.text-muted');
+    const sinSesionesEl = Array.from(allMuted).find(
+      (el: any) => el.textContent?.trim() === 'Sin sesiones'
+    );
+    expect(sinSesionesEl).toBeTruthy();
   });
 
 });

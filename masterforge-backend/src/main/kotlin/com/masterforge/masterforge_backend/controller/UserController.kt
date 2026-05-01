@@ -3,6 +3,7 @@ package com.masterforge.masterforge_backend.controller
 import com.masterforge.masterforge_backend.model.dto.ActiveCampaignsDto
 import com.masterforge.masterforge_backend.model.dto.ActiveCharactersDto
 import com.masterforge.masterforge_backend.model.dto.NextSessionDto
+import com.masterforge.masterforge_backend.model.dto.PlayerCampaignSummaryDto
 import com.masterforge.masterforge_backend.model.dto.UserDto
 import com.masterforge.masterforge_backend.model.dto.UserResponseDto
 import com.masterforge.masterforge_backend.model.entity.User
@@ -68,6 +69,15 @@ class UserController(
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         val count = characterRepository.countByUserEmail(email)
         return ResponseEntity.ok(ActiveCharactersDto(activeCharacters = count))
+    }
+
+    @GetMapping("/me/player-campaigns")
+    @Transactional(readOnly = true)
+    fun getPlayerCampaigns(): ResponseEntity<List<PlayerCampaignSummaryDto>> {
+        val email = SecurityContextHolder.getContext().authentication?.name
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        val campaigns = sessionAttendeeRepository.findPlayerCampaignsByUserEmail(email)
+        return ResponseEntity.ok(campaigns)
     }
 
     @PostMapping

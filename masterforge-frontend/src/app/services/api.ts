@@ -151,6 +151,11 @@ updateTempHp(characterId: string, tempHp: number): Observable<any> {
     return this.http.get<ActiveCharactersDto>(`${this.apiUrl}/users/me/active-characters`);
   }
 
+  // Fetch the list of campaigns the player is enrolled in as an attendee
+  getPlayerCampaigns(): Observable<PlayerCampaignSummary[]> {
+    return this.http.get<PlayerCampaignSummary[]>(`${this.apiUrl}/users/me/player-campaigns`);
+  }
+
 }
 
 // Interfaces for player summary cards
@@ -174,4 +179,13 @@ export interface CharacterSummary {
   dndClass: string;
   dndRace: string;
   subclass?: string;  // opcional, solo presente si el personaje tiene subclase
+}
+
+// Interface for player campaign summary (used in Player Dashboard Campaign_List)
+// Validates: Requirement 5.2
+export interface PlayerCampaignSummary {
+  campaignId: string;
+  campaignName: string;
+  dmName: string;
+  nextSessionDate: string | null;
 }

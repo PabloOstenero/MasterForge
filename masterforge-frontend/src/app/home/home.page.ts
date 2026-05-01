@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   IonContent, IonGrid, IonRow, IonCol,
   IonSpinner,
@@ -11,7 +11,7 @@ import {
   IonButton, IonIcon, IonInput, IonFab, IonFabButton
 } from '@ionic/angular/standalone';
 import { forkJoin } from 'rxjs';
-import { ApiService, NextSessionDto, ActiveCampaignsDto, ActiveCharactersDto } from '../services/api';
+import { ApiService, NextSessionDto, ActiveCampaignsDto, ActiveCharactersDto, PlayerCampaignSummary } from '../services/api';
 import { AuthService } from '../services/auth.service';
 import { RoleService } from '../services/role.service';
 import { AsyncPipe } from '@angular/common';
@@ -34,7 +34,8 @@ import { add } from 'ionicons/icons';
     IonAvatar,
     IonButton, IonIcon, IonInput,
     IonFab, IonFabButton,
-    AsyncPipe
+    AsyncPipe,
+    RouterLink
   ],
 })
 export class HomePage implements OnInit {
@@ -68,6 +69,11 @@ export class HomePage implements OnInit {
   loadingPlayerSummary = false;
   errorPlayerSummary: string | null = null;
 
+  // Player campaign list state (Req 4.1, 4.2, 4.3)
+  playerCampaigns: PlayerCampaignSummary[] = [];
+  loadingPlayerCampaigns = false;
+  errorPlayerCampaigns: string | null = null;
+
   // Form visibility flags
   showNewCampaignForm = false;
   showNewSessionForm = false;
@@ -91,6 +97,7 @@ export class HomePage implements OnInit {
     this.loadSessions();
     this.loadPlayerCount();
     this.loadPlayerSummary();
+    this.loadPlayerCampaigns();
   }
 
   get nextSessionDate(): string {
@@ -123,6 +130,23 @@ export class HomePage implements OnInit {
         console.error('Error al cargar resumen del jugador', err);
         this.errorPlayerSummary = err?.message ?? 'Error al cargar resumen';
         this.loadingPlayerSummary = false;
+      }
+    });
+  }
+
+  // Req 4.1, 4.2, 4.3 — loads player campaign list independently from loadPlayerSummary()
+  loadPlayerCampaigns(): void {
+    this.loadingPlayerCampaigns = true;
+    this.errorPlayerCampaigns = null;
+    this.apiService.getPlayerCampaigns().subscribe({
+      next: (data) => {
+        this.playerCampaigns = data;
+        this.loadingPlayerCampaigns = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar campañas del jugador', err);
+        this.errorPlayerCampaigns = err?.message ?? 'Error al cargar campañas';
+        this.loadingPlayerCampaigns = false;
       }
     });
   }

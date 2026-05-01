@@ -54,6 +54,9 @@ class SecurityConfig(private val jwtAuthFilter: JwtAuthFilter) {
             .csrf { it.disable() }
             .cors { } // delegate to WebConfig CorsConfigurationSource
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+            .exceptionHandling { it.authenticationEntryPoint { _, response, _ ->
+                response.sendError(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
+            }}
             .authorizeHttpRequests { auth ->
                 auth
                     .requestMatchers(org.springframework.web.cors.CorsUtils::isPreFlightRequest).permitAll()

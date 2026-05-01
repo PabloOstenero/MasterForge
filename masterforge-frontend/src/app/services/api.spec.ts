@@ -183,3 +183,116 @@ describe('ApiService — Character Creation Methods', () => {
     req.flush({ id: 'new-char-id', ...mockDto });
   });
 });
+
+// ---------------------------------------------------------------------------
+// ApiService — getPlayerCampaigns() Unit Tests
+// Validates: Requirements 5.1, 5.2
+// ---------------------------------------------------------------------------
+
+describe('ApiService — getPlayerCampaigns()', () => {
+  let service: ApiService;
+  let httpMock: HttpTestingController;
+
+  const BASE_URL = 'http://localhost:8080/api';
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        ApiService,
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ]
+    });
+    service = TestBed.inject(ApiService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  // -------------------------------------------------------------------------
+  // Requirement 5.1: getPlayerCampaigns() calls GET /api/users/me/player-campaigns
+  // -------------------------------------------------------------------------
+  it('should call GET /api/users/me/player-campaigns and return Observable<PlayerCampaignSummary[]>', () => {
+    const mockCampaigns = [
+      {
+        campaignId: 'camp-1',
+        campaignName: 'La Mina de los Goblins',
+        dmName: 'Gandalf',
+        nextSessionDate: '2025-08-01T18:00:00'
+      },
+      {
+        campaignId: 'camp-2',
+        campaignName: 'El Dragón de Hielo',
+        dmName: 'Saruman',
+        nextSessionDate: null
+      }
+    ];
+
+    service.getPlayerCampaigns().subscribe(campaigns => {
+      expect(campaigns).toEqual(mockCampaigns);
+      expect(campaigns.length).toBe(2);
+    });
+
+    const req = httpMock.expectOne(`${BASE_URL}/users/me/player-campaigns`);
+    expect(req.request.method).toBe('GET');
+    req.flush(mockCampaigns);
+  });
+
+  // -------------------------------------------------------------------------
+  // Requirement 5.1: getPlayerCampaigns() returns empty array when no campaigns
+  // -------------------------------------------------------------------------
+  it('should return an empty array when the API returns no campaigns', () => {
+    service.getPlayerCampaigns().subscribe(campaigns => {
+      expect(campaigns).toEqual([]);
+    });
+
+    const req = httpMock.expectOne(`${BASE_URL}/users/me/player-campaigns`);
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+  });
+
+  // -------------------------------------------------------------------------
+  // Requirement 5.2: response items conform to PlayerCampaignSummary interface
+  // (campaignId, campaignName, dmName, nextSessionDate: string | null)
+  // -------------------------------------------------------------------------
+  it('should return items with all required PlayerCampaignSummary fields', () => {
+    const mockCampaign = {
+      campaignId: 'camp-abc',
+      campaignName: 'Aventura Épica',
+      dmName: 'El Gran DM',
+      nextSessionDate: '2025-09-15T20:00:00'
+    };
+
+    service.getPlayerCampaigns().subscribe(campaigns => {
+      expect(campaigns.length).toBe(1);
+      const item = campaigns[0];
+      expect(item.campaignId).toBe('camp-abc');
+      expect(item.campaignName).toBe('Aventura Épica');
+      expect(item.dmName).toBe('El Gran DM');
+      expect(item.nextSessionDate).toBe('2025-09-15T20:00:00');
+    });
+
+    const req = httpMock.expectOne(`${BASE_URL}/users/me/player-campaigns`);
+    expect(req.request.method).toBe('GET');
+    req.flush([mockCampaign]);
+  });
+
+  it('should handle nextSessionDate as null when no future sessions exist', () => {
+    const mockCampaign = {
+      campaignId: 'camp-xyz',
+      campaignName: 'Campaña Sin Sesiones',
+      dmName: 'DM Inactivo',
+      nextSessionDate: null
+    };
+
+    service.getPlayerCampaigns().subscribe(campaigns => {
+      expect(campaigns[0].nextSessionDate).toBeNull();
+    });
+
+    const req = httpMock.expectOne(`${BASE_URL}/users/me/player-campaigns`);
+    expect(req.request.method).toBe('GET');
+    req.flush([mockCampaign]);
+  });
+});
