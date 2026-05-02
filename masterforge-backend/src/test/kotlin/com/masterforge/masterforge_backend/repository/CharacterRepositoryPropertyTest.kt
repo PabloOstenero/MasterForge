@@ -1,5 +1,6 @@
 package com.masterforge.masterforge_backend.repository
 
+import com.masterforge.masterforge_backend.model.entity.Campaign
 import com.masterforge.masterforge_backend.model.entity.Character
 import com.masterforge.masterforge_backend.model.entity.DndClass
 import com.masterforge.masterforge_backend.model.entity.DndRace
@@ -44,6 +45,9 @@ class CharacterRepositoryPropertyTest : StringSpec() {
 
     @Autowired
     lateinit var dndRaceRepository: DndRaceRepository
+
+    @Autowired
+    lateinit var campaignRepository: CampaignRepository
 
     init {
         /**
@@ -260,6 +264,139 @@ class CharacterRepositoryPropertyTest : StringSpec() {
                 }
             }
         }
+
+        // Feature: dm-players-campaign-filter, Property 3: character list is filtered to DM campaigns only
+        /**
+         * Property 3: Character list is filtered to DM campaigns only
+         * Validates: Requirements 1.3, 3.3
+         *
+         * For any DM user and any set of characters distributed across owned and non-owned campaigns
+         * (including characters with null campaign_id), findCharactersByDmId(dmId) must return only
+         * characters whose campaign.owner.id == dmId and whose campaign != null.
+         */
+        "Property 3: findCharactersByDmId returns only characters in DM-owned campaigns" {
+            checkAll(100, Arb.int(1, 3), Arb.int(0, 3), Arb.int(0, 3)) {
+                numDmChars, numOtherCampaignChars, numNoCampaignChars ->
+
+                // Clean up before each iteration
+                characterRepository.deleteAll()
+                campaignRepository.deleteAll()
+                userRepository.deleteAll()
+                dndClassRepository.deleteAll()
+                dndRaceRepository.deleteAll()
+
+                val dndClass = dndClassRepository.save(
+                    DndClass(
+                        name = "Paladin",
+                        price = BigDecimal.ZERO,
+                        hitDie = 10,
+                        savingThrows = emptyMap()
+                    )
+                )
+                val dndRace = dndRaceRepository.save(
+                    DndRace(
+                        name = "Dwarf",
+                        price = BigDecimal.ZERO,
+                        bonusStr = 0, bonusDex = 0, bonusCon = 2,
+                        bonusInt = 0, bonusWis = 0, bonusCha = 0
+                    )
+                )
+
+                // Create the DM user (the one whose campaigns we filter by)
+                val dmUser = userRepository.save(
+                    User(
+                        name = "DmUser",
+                        email = "dm_${UUID.randomUUID()}@test.com",
+                        passwordHash = "hash"
+                    )
+                )
+
+                // Create a campaign owned by the DM
+                val dmCampaign = campaignRepository.save(
+                    Campaign(
+                        name = "DM Campaign",
+                        description = "A campaign owned by the DM",
+                        owner = dmUser
+                    )
+                )
+
+                // Create another user who owns a different campaign
+                val otherDm = userRepository.save(
+                    User(
+                        name = "OtherDm",
+                        email = "otherdm_${UUID.randomUUID()}@test.com",
+                        passwordHash = "hash"
+                    )
+                )
+                val otherCampaign = campaignRepository.save(
+                    Campaign(
+                        name = "Other Campaign",
+                        description = "A campaign owned by another DM",
+                        owner = otherDm
+                    )
+                )
+
+                // Create a player user whose characters will be distributed
+                val player = userRepository.save(
+                    User(
+                        name = "Player",
+                        email = "player_${UUID.randomUUID()}@test.com",
+                        passwordHash = "hash"
+                    )
+                )
+
+                // Characters in the DM's campaign — these SHOULD appear in results
+                repeat(numDmChars) { i ->
+                    characterRepository.save(
+                        buildCharacter(
+                            name = "DmChar$i",
+                            user = player,
+                            dndClass = dndClass,
+                            dndRace = dndRace,
+                            campaign = dmCampaign
+                        )
+                    )
+                }
+
+                // Characters in another campaign — these should NOT appear
+                repeat(numOtherCampaignChars) { i ->
+                    characterRepository.save(
+                        buildCharacter(
+                            name = "OtherCampaignChar$i",
+                            user = player,
+                            dndClass = dndClass,
+                            dndRace = dndRace,
+                            campaign = otherCampaign
+                        )
+                    )
+                }
+
+                // Characters with no campaign (null) — these should NOT appear
+                repeat(numNoCampaignChars) { i ->
+                    characterRepository.save(
+                        buildCharacter(
+                            name = "NoCampaignChar$i",
+                            user = player,
+                            dndClass = dndClass,
+                            dndRace = dndRace,
+                            campaign = null
+                        )
+                    )
+                }
+
+                // Execute the query under test
+                val result = characterRepository.findCharactersByDmId(dmUser.id!!)
+
+                // Property: result count matches exactly the number of DM-campaign characters
+                result.size shouldBe numDmChars
+
+                // Property: every returned character has campaign != null and campaign.owner.id == dmId
+                result.forEach { character ->
+                    character.campaign shouldBe dmCampaign
+                    character.campaign!!.owner.id shouldBe dmUser.id
+                }
+            }
+        }
     }
 }
 
@@ -267,7 +404,8 @@ private fun buildCharacter(
     name: String,
     user: User,
     dndClass: DndClass,
-    dndRace: DndRace
+    dndRace: DndRace,
+    campaign: Campaign? = null
 ): Character = Character(
     name = name,
     level = 1,
@@ -290,5 +428,6 @@ private fun buildCharacter(
     dndClass = dndClass,
     dndRace = dndRace,
     subclass = null,
+    campaign = campaign,
     choicesJson = emptyMap()
 )

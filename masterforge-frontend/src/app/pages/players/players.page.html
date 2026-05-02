@@ -44,7 +44,10 @@
 
     } @empty {
       @if (!loading) {
-        <p class="text-muted" data-testid="empty-jugadores">No hay jugadores todavía.</p>
+        <div class="empty-container" data-testid="empty-jugadores">
+          <ion-icon name="people-outline" class="empty-icon"></ion-icon>
+          <p class="empty-msg">No hay jugadores en tus campañas todavía.</p>
+        </div>
       }
     }
   </ion-list>

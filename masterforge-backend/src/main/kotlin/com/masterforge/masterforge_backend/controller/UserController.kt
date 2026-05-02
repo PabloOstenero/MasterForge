@@ -2,6 +2,8 @@ package com.masterforge.masterforge_backend.controller
 
 import com.masterforge.masterforge_backend.model.dto.ActiveCampaignsDto
 import com.masterforge.masterforge_backend.model.dto.ActiveCharactersDto
+import com.masterforge.masterforge_backend.model.dto.CampaignPlayerDto
+import com.masterforge.masterforge_backend.model.dto.CharacterSimpleDto
 import com.masterforge.masterforge_backend.model.dto.NextSessionDto
 import com.masterforge.masterforge_backend.model.dto.PlayerCampaignSummaryDto
 import com.masterforge.masterforge_backend.model.dto.UserDto
@@ -78,6 +80,39 @@ class UserController(
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         val campaigns = sessionAttendeeRepository.findPlayerCampaignsByUserEmail(email)
         return ResponseEntity.ok(campaigns)
+    }
+
+    @GetMapping("/me/campaign-players")
+    @Transactional(readOnly = true)
+    fun getCampaignPlayers(): ResponseEntity<List<CampaignPlayerDto>> {
+        val authentication = SecurityContextHolder.getContext().authentication
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+        val dmId = UUID.fromString(authentication.name)
+
+        val characters = characterRepository.findCharactersByDmId(dmId)
+
+        val campaignPlayers = characters
+            .groupBy { it.user }
+            .map { (user, userCharacters) ->
+                CampaignPlayerDto(
+                    id = user.id!!,
+                    name = user.name,
+                    email = user.email,
+                    subscriptionTier = user.subscriptionTier,
+                    characters = userCharacters.map { character ->
+                        CharacterSimpleDto(
+                            id = character.id!!,
+                            name = character.name,
+                            level = character.level,
+                            dndClass = character.dndClass.name,
+                            dndRace = character.dndRace.name
+                        )
+                    }
+                )
+            }
+
+        return ResponseEntity.ok(campaignPlayers)
     }
 
     @PostMapping

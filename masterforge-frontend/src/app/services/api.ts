@@ -156,6 +156,12 @@ updateTempHp(characterId: string, tempHp: number): Observable<any> {
     return this.http.get<PlayerCampaignSummary[]>(`${this.apiUrl}/users/me/player-campaigns`);
   }
 
+  // Fetch the list of players (and their characters) in campaigns owned by the authenticated DM
+  // Validates: Requirements 2.1
+  getCampaignPlayers(): Observable<CampaignPlayerDto[]> {
+    return this.http.get<CampaignPlayerDto[]>(`${this.apiUrl}/users/me/campaign-players`);
+  }
+
 }
 
 // Interfaces for player summary cards
@@ -188,4 +194,22 @@ export interface PlayerCampaignSummary {
   campaignName: string;
   dmName: string;
   nextSessionDate: string | null;
+}
+
+// Interfaces for DM campaign players (used in DM Players page)
+// Validates: Requirements 2.1
+export interface CharacterSimpleDto {
+  id: string;
+  name: string;
+  level: number;
+  dndClass: string;
+  dndRace: string;
+}
+
+export interface CampaignPlayerDto {
+  id: string;
+  name: string;
+  email: string;
+  subscriptionTier: string;
+  characters: CharacterSimpleDto[];
 }

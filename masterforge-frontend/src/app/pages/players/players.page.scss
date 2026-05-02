@@ -81,3 +81,26 @@
   color: $text-muted;
   font-size: 0.9rem;
 }
+
+// ── Empty State ───────────────────────────────────────────────────────────────
+.empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+  gap: 1rem;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  color: $accent-gold;
+  opacity: 0.5;
+}
+
+.empty-msg {
+  color: $text-muted;
+  font-size: 1rem;
+  margin: 0;
+}
