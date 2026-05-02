@@ -7,6 +7,8 @@ import com.masterforge.masterforge_backend.repository.CampaignRepository
 import com.masterforge.masterforge_backend.repository.UserRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import java.math.BigDecimal
@@ -22,6 +24,15 @@ class CampaignController(
     @GetMapping
     fun getAllCampaigns(): List<Campaign> {
         return campaignRepository.findAll()
+    }
+
+    @GetMapping("/my")
+    @Transactional(readOnly = true)
+    fun getMyCampaigns(): ResponseEntity<List<Campaign>> {
+        val authentication = SecurityContextHolder.getContext().authentication
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        val dmId = UUID.fromString(authentication.name)
+        return ResponseEntity.ok(campaignRepository.findByOwnerId(dmId))
     }
 
     @PostMapping

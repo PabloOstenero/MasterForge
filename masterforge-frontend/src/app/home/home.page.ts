@@ -194,7 +194,7 @@ export class HomePage implements OnInit {
   loadCampaigns() {
     this.loadingCampaigns = true;
     this.errorCampaigns = null;
-    this.apiService.getCampaigns().subscribe({
+    this.apiService.getDmCampaigns().subscribe({
       next: (data) => {
         this.campaigns = data;
         this.loadingCampaigns = false;

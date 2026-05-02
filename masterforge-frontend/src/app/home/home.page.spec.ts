@@ -56,11 +56,12 @@ const sessionArb = (campaignIds: string[]) =>
 
 function buildApiSpy(): jasmine.SpyObj<ApiService> {
   const spy = jasmine.createSpyObj<ApiService>('ApiService', [
-    'getUsers', 'getCampaigns', 'getSessions', 'createCampaign', 'createSession', 'getPlayerCount',
+    'getUsers', 'getCampaigns', 'getDmCampaigns', 'getSessions', 'createCampaign', 'createSession', 'getPlayerCount',
     'getNextSession', 'getActiveCampaigns', 'getActiveCharacters', 'getPlayerCampaigns',
   ]);
   spy.getUsers.and.returnValue(of([]));
   spy.getCampaigns.and.returnValue(of([]));
+  spy.getDmCampaigns.and.returnValue(of([]));
   spy.getSessions.and.returnValue(of([]));
   spy.createCampaign.and.returnValue(of({}));
   spy.createSession.and.returnValue(of({}));
@@ -334,14 +335,14 @@ describe('HomePage — Property-Based Tests', () => {
       fc.property(
         fc.string({ minLength: 1, maxLength: 40 }).filter(s => s.trim().length > 0),
         (name) => {
-          apiSpy.getCampaigns.calls.reset();
+          apiSpy.getDmCampaigns.calls.reset();
           component.users = [{ id: 'user-1' }];
           component.showNewCampaignForm = true;
           component.newCampaign = { name, description: '', maxPlayers: 1, joinPrice: 0, visibility: 'PRIVATE' };
-          const callsBefore = apiSpy.getCampaigns.calls.count();
+          const callsBefore = apiSpy.getDmCampaigns.calls.count();
           component.submitCampaign();
           expect(component.showNewCampaignForm).toBeFalse();
-          expect(apiSpy.getCampaigns.calls.count()).toBeGreaterThan(callsBefore);
+          expect(apiSpy.getDmCampaigns.calls.count()).toBeGreaterThan(callsBefore);
         }
       ),
       { numRuns: 50 }
@@ -382,8 +383,8 @@ describe('HomePage — Property-Based Tests', () => {
     expect(component.errorUsers).toBeTruthy();
   });
 
-  it('P11b — GET /api/campaigns error sets errorCampaigns and clears loadingCampaigns', () => {
-    apiSpy.getCampaigns.and.returnValue(throwError(() => new Error('campaigns error')));
+  it('P11b — GET /api/campaigns/my error sets errorCampaigns and clears loadingCampaigns', () => {
+    apiSpy.getDmCampaigns.and.returnValue(throwError(() => new Error('campaigns error')));
     component.loadCampaigns();
     expect(component.loadingCampaigns).toBeFalse();
     expect(component.errorCampaigns).toBeTruthy();

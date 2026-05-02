@@ -81,6 +81,11 @@ updateTempHp(characterId: string, tempHp: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/campaigns`);
   }
 
+  // Fetch only the campaigns owned by the authenticated DM
+  getDmCampaigns(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/campaigns/my`);
+  }
+
   // Create a new campaign
   createCampaign(dto: {
     name: string;

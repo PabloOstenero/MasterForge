@@ -12,5 +12,7 @@ interface CampaignRepository : JpaRepository<Campaign, UUID> {
 
     @Query("SELECT COUNT(DISTINCT sa.session.campaign.id) FROM SessionAttendee sa WHERE sa.user.email = :email")
     fun countDistinctCampaignsByUserEmail(@Param("email") email: String): Long
+
+    fun findByOwnerId(ownerId: UUID): List<Campaign>
 }
 
