@@ -2,12 +2,14 @@ package com.masterforge.masterforge_backend.controller
 
 import com.masterforge.masterforge_backend.model.dto.CampaignDto
 import com.masterforge.masterforge_backend.model.entity.Campaign
+import com.masterforge.masterforge_backend.model.entity.CampaignVisibility
 import com.masterforge.masterforge_backend.repository.CampaignRepository
 import com.masterforge.masterforge_backend.repository.UserRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
+import java.math.BigDecimal
 import java.util.UUID
 
 @RestController
@@ -24,6 +26,22 @@ class CampaignController(
 
     @PostMapping
     fun createCampaign(@RequestBody campaignDto: CampaignDto): Campaign {
+        // Validate fields before entity construction
+        if (campaignDto.name.isBlank()) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Campaign name must not be blank")
+        }
+        if (campaignDto.maxPlayers < 1) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "maxPlayers must be at least 1")
+        }
+        if (campaignDto.joinPrice < BigDecimal.ZERO) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "joinPrice must be 0 or greater")
+        }
+        val visibility = try {
+            CampaignVisibility.valueOf(campaignDto.visibility)
+        } catch (e: IllegalArgumentException) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid visibility value: ${campaignDto.visibility}")
+        }
+
         // Find the owner of the campaign. This is a mandatory relationship.
         val owner = userRepository.findById(campaignDto.ownerId)
             .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Owner not found with id ${campaignDto.ownerId}") }
@@ -31,7 +49,10 @@ class CampaignController(
         val campaign = Campaign(
             name = campaignDto.name,
             description = campaignDto.description,
-            owner = owner
+            owner = owner,
+            maxPlayers = campaignDto.maxPlayers,
+            joinPrice = campaignDto.joinPrice,
+            visibility = visibility
         )
 
         return campaignRepository.save(campaign)
@@ -52,13 +73,32 @@ class CampaignController(
         val existingCampaign = campaignRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign not found with id $id") }
 
+        // Validate fields before entity construction
+        if (dto.name.isBlank()) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Campaign name must not be blank")
+        }
+        if (dto.maxPlayers < 1) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "maxPlayers must be at least 1")
+        }
+        if (dto.joinPrice < BigDecimal.ZERO) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "joinPrice must be 0 or greater")
+        }
+        val visibility = try {
+            CampaignVisibility.valueOf(dto.visibility)
+        } catch (e: IllegalArgumentException) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid visibility value: ${dto.visibility}")
+        }
+
         val owner = userRepository.findById(dto.ownerId)
             .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Owner not found with id ${dto.ownerId}") }
 
         val updatedCampaign = existingCampaign.copy(
             name = dto.name,
             description = dto.description,
-            owner = owner
+            owner = owner,
+            maxPlayers = dto.maxPlayers,
+            joinPrice = dto.joinPrice,
+            visibility = visibility
         )
         return campaignRepository.save(updatedCampaign)
     }

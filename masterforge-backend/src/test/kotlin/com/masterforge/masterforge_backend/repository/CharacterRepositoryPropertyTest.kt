@@ -316,7 +316,10 @@ class CharacterRepositoryPropertyTest : StringSpec() {
                     Campaign(
                         name = "DM Campaign",
                         description = "A campaign owned by the DM",
-                        owner = dmUser
+                        owner = dmUser,
+                        maxPlayers = 4,
+                        joinPrice = java.math.BigDecimal.ZERO,
+                        visibility = com.masterforge.masterforge_backend.model.entity.CampaignVisibility.PRIVATE
                     )
                 )
 
@@ -332,7 +335,10 @@ class CharacterRepositoryPropertyTest : StringSpec() {
                     Campaign(
                         name = "Other Campaign",
                         description = "A campaign owned by another DM",
-                        owner = otherDm
+                        owner = otherDm,
+                        maxPlayers = 4,
+                        joinPrice = java.math.BigDecimal.ZERO,
+                        visibility = com.masterforge.masterforge_backend.model.entity.CampaignVisibility.PRIVATE
                     )
                 )
 

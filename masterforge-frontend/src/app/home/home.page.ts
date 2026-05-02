@@ -79,7 +79,7 @@ export class HomePage implements OnInit {
   showNewSessionForm = false;
 
   // Form models
-  newCampaign = { name: '', description: '' };
+  newCampaign = { name: '', description: '', maxPlayers: 1, joinPrice: 0, visibility: 'PRIVATE' as 'PUBLIC' | 'PRIVATE' | 'INVITE_ONLY' };
   newSession = { scheduledDate: '', price: '', campaignId: '' };
 
   constructor(
@@ -233,13 +233,16 @@ export class HomePage implements OnInit {
     const dto = {
       name: trimmedName,
       description: this.newCampaign.description,
+      maxPlayers: this.newCampaign.maxPlayers,
+      joinPrice: this.newCampaign.joinPrice,
+      visibility: this.newCampaign.visibility,
       ownerId: this.authService.getCurrentUser()?.id || this.authService.getUserIdFromToken() || ''
     };
 
     this.apiService.createCampaign(dto).subscribe({
       next: () => {
         this.loadCampaigns();
-        this.newCampaign = { name: '', description: '' };
+        this.newCampaign = { name: '', description: '', maxPlayers: 1, joinPrice: 0, visibility: 'PRIVATE' };
         this.showNewCampaignForm = false;
       },
       error: (err) => {

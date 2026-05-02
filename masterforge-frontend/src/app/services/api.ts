@@ -82,7 +82,14 @@ updateTempHp(characterId: string, tempHp: number): Observable<any> {
   }
 
   // Create a new campaign
-  createCampaign(dto: { name: string; description: string; ownerId: string }): Observable<any> {
+  createCampaign(dto: {
+    name: string;
+    description: string;
+    ownerId: string;
+    maxPlayers: number;
+    joinPrice: number;
+    visibility: 'PUBLIC' | 'PRIVATE' | 'INVITE_ONLY';
+  }): Observable<any> {
     return this.http.post(`${this.apiUrl}/campaigns`, dto);
   }
 

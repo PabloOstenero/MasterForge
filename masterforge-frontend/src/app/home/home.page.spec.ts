@@ -268,7 +268,7 @@ describe('HomePage — Property-Based Tests', () => {
         (name, description) => {
           apiSpy.createCampaign.calls.reset();
           component.users = [{ id: 'user-1' }];
-          component.newCampaign = { name, description };
+          component.newCampaign = { name, description, maxPlayers: 1, joinPrice: 0, visibility: 'PRIVATE' };
           component.submitCampaign();
           expect(apiSpy.createCampaign).toHaveBeenCalledTimes(1);
           expect(apiSpy.createCampaign).toHaveBeenCalledWith(
@@ -314,7 +314,7 @@ describe('HomePage — Property-Based Tests', () => {
         (blankName) => {
           apiSpy.createCampaign.calls.reset();
           component.errorCampaigns = null;
-          component.newCampaign = { name: blankName, description: '' };
+          component.newCampaign = { name: blankName, description: '', maxPlayers: 1, joinPrice: 0, visibility: 'PRIVATE' };
           component.submitCampaign();
           expect(apiSpy.createCampaign).not.toHaveBeenCalled();
           expect(component.errorCampaigns).toBeTruthy();
@@ -337,7 +337,7 @@ describe('HomePage — Property-Based Tests', () => {
           apiSpy.getCampaigns.calls.reset();
           component.users = [{ id: 'user-1' }];
           component.showNewCampaignForm = true;
-          component.newCampaign = { name, description: '' };
+          component.newCampaign = { name, description: '', maxPlayers: 1, joinPrice: 0, visibility: 'PRIVATE' };
           const callsBefore = apiSpy.getCampaigns.calls.count();
           component.submitCampaign();
           expect(component.showNewCampaignForm).toBeFalse();
@@ -405,7 +405,7 @@ describe('HomePage — Property-Based Tests', () => {
           apiSpy.createCampaign.and.returnValue(throwError(() => new Error(errMsg)));
           component.errorCampaigns = null;
           component.users = [{ id: 'user-1' }];
-          component.newCampaign = { name, description: '' };
+          component.newCampaign = { name, description: '', maxPlayers: 1, joinPrice: 0, visibility: 'PRIVATE' };
           component.submitCampaign();
           expect(component.errorCampaigns).toBeTruthy();
           // Reset for next iteration

@@ -172,7 +172,14 @@ class CampaignPlayersEndpointTest {
     )
 
     private fun saveCampaign(owner: User): Campaign = campaignRepository.save(
-        Campaign(name = "Campaign_${UUID.randomUUID()}", description = "desc", owner = owner)
+        Campaign(
+            name = "Campaign_${UUID.randomUUID()}",
+            description = "desc",
+            owner = owner,
+            maxPlayers = 4,
+            joinPrice = java.math.BigDecimal.ZERO,
+            visibility = com.masterforge.masterforge_backend.model.entity.CampaignVisibility.PRIVATE
+        )
     )
 
     private fun saveCharacter(owner: User, campaign: Campaign?): Character = characterRepository.save(

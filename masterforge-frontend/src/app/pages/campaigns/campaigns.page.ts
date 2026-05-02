@@ -2,12 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
-  IonHeader, IonToolbar, IonTitle, IonContent,
+  IonContent,
   IonSpinner,
-  IonCard, IonCardHeader, IonCardTitle, IonCardContent,
   IonButton, IonInput, IonSelect, IonSelectOption,
+  IonIcon,
 } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { mapOutline, addCircleOutline, closeOutline, peopleOutline } from 'ionicons/icons';
 import { ApiService } from '../../services/api';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-campaigns',
@@ -17,41 +20,47 @@ import { ApiService } from '../../services/api';
   imports: [
     CommonModule,
     FormsModule,
-    IonHeader, IonToolbar, IonTitle, IonContent,
+    IonContent,
     IonSpinner,
-    IonCard, IonCardHeader, IonCardTitle, IonCardContent,
     IonButton, IonInput, IonSelect, IonSelectOption,
+    IonIcon,
   ],
 })
 export class CampaignsPage implements OnInit {
 
   campaigns: any[] = [];
-  sessions: any[] = [];
 
   loadingCampaigns = false;
-  loadingSessions = false;
-
   errorCampaigns: string | null = null;
-  errorSessions: string | null = null;
-
   validationErrorCampaign: string | null = null;
-  validationErrorSession: string | null = null;
 
   showNewCampaignForm = false;
-  showNewSessionForm = false;
 
-  newCampaign: { name: string; description: string } = { name: '', description: '' };
-  newSession: { scheduledDate: string; price: string; campaignId: string } = { scheduledDate: '', price: '', campaignId: '' };
+  newCampaign: {
+    name: string;
+    description: string;
+    maxPlayers: number;
+    joinPrice: number;
+    visibility: 'PUBLIC' | 'PRIVATE' | 'INVITE_ONLY';
+  } = {
+    name: '',
+    description: '',
+    maxPlayers: 1,
+    joinPrice: 0,
+    visibility: 'PRIVATE',
+  };
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private authService: AuthService) {
+    addIcons({ mapOutline, addCircleOutline, closeOutline, peopleOutline });
+  }
 
   ngOnInit() {
     this.loadCampaigns();
-    this.loadSessions();
   }
 
   loadCampaigns() {
     this.loadingCampaigns = true;
+    this.errorCampaigns = null;
     this.api.getCampaigns().subscribe({
       next: (data: any[]) => {
         this.campaigns = data;
@@ -64,29 +73,53 @@ export class CampaignsPage implements OnInit {
     });
   }
 
-  loadSessions() {
-    this.loadingSessions = true;
-    this.api.getSessions().subscribe({
-      next: (data: any[]) => {
-        this.sessions = data;
-        this.loadingSessions = false;
-      },
-      error: (err: any) => {
-        this.errorSessions = err?.message ?? 'Error al cargar sesiones';
-        this.loadingSessions = false;
-      },
-    });
+  toggleCampaignForm() {
+    this.showNewCampaignForm = !this.showNewCampaignForm;
+    if (!this.showNewCampaignForm) {
+      this.validationErrorCampaign = null;
+    }
   }
 
   submitCampaign() {
+    const ownerId = this.authService.getUserIdFromToken();
+    if (ownerId === null) {
+      this.validationErrorCampaign = 'No se pudo obtener el usuario autenticado. Por favor, inicia sesión de nuevo.';
+      return;
+    }
+
     if (!this.newCampaign.name.trim()) {
       this.validationErrorCampaign = 'El nombre de la campaña es obligatorio';
       return;
     }
+
+    if (this.newCampaign.maxPlayers < 1 || !Number.isInteger(this.newCampaign.maxPlayers)) {
+      this.validationErrorCampaign = 'El número máximo de jugadores debe ser un entero mayor o igual a 1';
+      return;
+    }
+
+    if (this.newCampaign.joinPrice < 0) {
+      this.validationErrorCampaign = 'El precio de entrada no puede ser negativo';
+      return;
+    }
+
     this.validationErrorCampaign = null;
-    this.api.createCampaign({ ...this.newCampaign, name: this.newCampaign.name.trim(), ownerId: '' }).subscribe({
+    this.api.createCampaign({
+      name: this.newCampaign.name.trim(),
+      description: this.newCampaign.description,
+      maxPlayers: this.newCampaign.maxPlayers,
+      joinPrice: this.newCampaign.joinPrice,
+      visibility: this.newCampaign.visibility,
+      ownerId,
+    }).subscribe({
       next: () => {
         this.showNewCampaignForm = false;
+        this.newCampaign = {
+          name: '',
+          description: '',
+          maxPlayers: 1,
+          joinPrice: 0,
+          visibility: 'PRIVATE',
+        };
         this.loadCampaigns();
       },
       error: (err: any) => {
@@ -95,41 +128,11 @@ export class CampaignsPage implements OnInit {
     });
   }
 
-  submitSession() {
-    this.api.createSession({
-      ...this.newSession,
-      price: Number(this.newSession.price),
-    }).subscribe({
-      next: () => {
-        this.showNewSessionForm = false;
-        this.loadSessions();
-      },
-      error: (err: any) => {
-        this.errorSessions = err?.message ?? 'Error al crear sesión';
-      },
-    });
-  }
-
-  toggleCampaignForm() {
-    this.showNewCampaignForm = !this.showNewCampaignForm;
-  }
-
-  toggleSessionForm() {
-    this.showNewSessionForm = !this.showNewSessionForm;
-  }
-
-  getSessionCount(campaignId: string): number {
-    return this.sessions.filter(s => s.campaign?.id === campaignId).length;
-  }
-
-  formatDate(ts: string): string {
-    if (!ts) return '—';
-    const date = new Date(ts);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${day}/${month}/${year} ${hours}:${minutes}`;
+  visibilityLabel(v: string): string {
+    switch (v) {
+      case 'PUBLIC':      return 'Pública';
+      case 'INVITE_ONLY': return 'Solo invitación';
+      default:            return 'Privada';
+    }
   }
 }

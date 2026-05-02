@@ -2,6 +2,7 @@ package com.masterforge.masterforge_backend.model.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import jakarta.persistence.*
+import java.math.BigDecimal
 import java.util.UUID
 
 /**
@@ -25,5 +26,15 @@ data class Campaign(
     // Each campaign must have a single user as its owner (Game Master).
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
-    val owner: User
+    val owner: User,
+
+    @Column(name = "max_players", nullable = false)
+    val maxPlayers: Int,
+
+    @Column(name = "join_price", nullable = false, precision = 10, scale = 2)
+    val joinPrice: BigDecimal,
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "visibility", nullable = false)
+    val visibility: CampaignVisibility
 )

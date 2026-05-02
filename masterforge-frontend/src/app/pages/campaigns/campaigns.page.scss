@@ -1,119 +1,267 @@
 @use 'src/theme/variables' as *;
 
-// ── Toolbar ───────────────────────────────────────────────────────────────────
-.campanyas-toolbar {
+// ── Content background ────────────────────────────────────────────────────────
+.campaigns-content {
   --background: #{$bg-primary};
-  --color: #{$text-primary};
+}
 
-  ion-title {
-    color: $accent-gold;
-    font-weight: 700;
+.page-container {
+  background: $bg-primary;
+  min-height: 100%;
+}
+
+// ── Page header ───────────────────────────────────────────────────────────────
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.page-icon {
+  font-size: 1.8rem;
+  color: $accent-gold;
+}
+
+.page-title {
+  color: $accent-gold;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+// ── Loading ───────────────────────────────────────────────────────────────────
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  gap: 12px;
+}
+
+.loading-text {
+  color: $text-muted;
+  font-size: 0.9rem;
+}
+
+// ── Campaign list ─────────────────────────────────────────────────────────────
+.campaigns-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+// ── Campaign card ─────────────────────────────────────────────────────────────
+.campaign-card {
+  background: $bg-surface;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-left: 3px solid $accent-gold;
+  border-radius: 10px;
+  padding: 14px 16px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
   }
 }
 
-// ── Section ───────────────────────────────────────────────────────────────────
-.section {
-  margin-bottom: 32px;
+.campaign-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
 }
 
-.section-title {
-  color: $text-primary;
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin: 0 0 12px;
-}
-
-// ── Campaign Card ─────────────────────────────────────────────────────────────
-.campaign-card {
-  --background: #{$bg-surface};
-  --color: #{$text-primary};
-  border-radius: 10px;
-  margin: 0 0 10px;
-}
-
-.card-title {
+.campaign-card__name {
   color: $accent-gold;
-  font-size: 1rem;
   font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
 }
 
-.card-description {
+.campaign-card__description {
   color: $text-primary;
-  font-size: 0.9rem;
-  margin: 4px 0;
+  font-size: 0.88rem;
+  margin: 0 0 10px;
+  opacity: 0.85;
+  line-height: 1.4;
 }
 
-.session-count {
+.campaign-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   color: $text-muted;
-  font-size: 0.85rem;
-  margin: 4px 0 0;
+  font-size: 0.82rem;
+
+  ion-icon {
+    font-size: 0.95rem;
+  }
+
+  &--gold {
+    color: $accent-gold;
+    font-weight: 600;
+  }
 }
 
-// ── Session Card ──────────────────────────────────────────────────────────────
-.session-card {
-  --background: #{$bg-surface};
-  --color: #{$text-primary};
-  border-radius: 10px;
-  margin: 0 0 10px;
-}
-
-.session-date {
-  color: $text-primary;
-  font-weight: 600;
-  font-size: 0.95rem;
-  margin: 0 0 4px;
-}
-
-.session-price {
-  color: $accent-gold;
-  font-size: 0.9rem;
-  margin: 0 0 4px;
-}
-
-.session-campaign {
-  font-size: 0.85rem;
-}
-
-// ── Buttons ───────────────────────────────────────────────────────────────────
-.new-btn {
-  --color: #{$accent-gold};
-  --border-color: #{$accent-gold};
-  margin: 8px 0 16px;
-}
-
-.submit-btn {
-  --background: #{$accent-gold};
-  --color: #{$bg-primary};
-  --background-activated: #b8922e;
-  margin-top: 12px;
+// ── Visibility badges ─────────────────────────────────────────────────────────
+.campaign-card__badge {
+  font-size: 0.72rem;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 20px;
+  flex-shrink: 0;
+
+  &--public {
+    background: rgba($accent-gold, 0.15);
+    color: $accent-gold;
+    border: 1px solid rgba($accent-gold, 0.4);
+  }
+
+  &--private {
+    background: rgba($text-muted, 0.12);
+    color: $text-muted;
+    border: 1px solid rgba($text-muted, 0.3);
+  }
+
+  &--invite_only {
+    background: rgba(100, 149, 237, 0.12);
+    color: #6495ed;
+    border: 1px solid rgba(100, 149, 237, 0.35);
+  }
 }
 
-// ── Inline Form ───────────────────────────────────────────────────────────────
-.inline-form {
+// ── Empty state ───────────────────────────────────────────────────────────────
+.empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+  gap: 1rem;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  color: $accent-gold;
+  opacity: 0.4;
+}
+
+.empty-msg {
+  color: $text-muted;
+  font-size: 1rem;
+  margin: 0;
+}
+
+// ── Form card ─────────────────────────────────────────────────────────────────
+.form-card {
   background: $bg-surface;
-  border-radius: 10px;
-  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 20px 16px;
   margin-bottom: 16px;
 }
 
-.form-input {
+.form-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba($accent-gold, 0.25);
+}
+
+.form-card__title {
+  color: $accent-gold;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.form-card__close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: $text-muted;
+  display: flex;
+  align-items: center;
+  font-size: 1.3rem;
+  transition: color 0.15s;
+
+  &:hover {
+    color: $text-primary;
+  }
+}
+
+// ── Field group (matches forge-character pattern) ─────────────────────────────
+.field-group {
+  margin-bottom: 18px;
+}
+
+.field-label {
+  display: block;
+  color: $text-muted;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+  font-weight: 700;
+
+  .required {
+    color: $accent-gold;
+  }
+}
+
+.forge-input {
   --background: #{$bg-primary};
   --color: #{$text-primary};
   --placeholder-color: #{$text-muted};
-  --border-color: rgba(255, 255, 255, 0.12);
-  margin-bottom: 10px;
-  border-radius: 6px;
+  --border-radius: 8px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
 }
 
-// ── Shared ────────────────────────────────────────────────────────────────────
+.forge-select {
+  --background: #{$bg-primary};
+  --color: #{$text-primary};
+  --placeholder-color: #{$text-muted};
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+// ── Gold button ───────────────────────────────────────────────────────────────
+.btn-gold {
+  --background: #{$accent-gold};
+  --color: #{$bg-primary};
+  --background-activated: #b8922e;
+  --border-radius: 10px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+// ── Error ─────────────────────────────────────────────────────────────────────
 .error-msg {
   color: $accent-crimson;
-  font-size: 0.9rem;
-  margin: 8px 0;
-}
-
-.text-muted {
-  color: $text-muted;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  margin: 0 0 12px;
 }
