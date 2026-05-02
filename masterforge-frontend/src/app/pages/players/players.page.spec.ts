@@ -192,7 +192,7 @@ describe('PlayersPage — Unit Tests', () => {
     const nativeEl: HTMLElement = fixture.nativeElement;
     const emptyMsg = nativeEl.querySelector('[data-testid="empty-jugadores"]');
     expect(emptyMsg).toBeTruthy();
-    expect(emptyMsg?.textContent?.trim()).toBe('No hay jugadores todavía.');
+    expect(emptyMsg?.textContent?.trim()).toBe('No hay jugadores en tus campañas todavía.');
   });
 
   // -------------------------------------------------------------------------

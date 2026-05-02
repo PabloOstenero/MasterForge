@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient, HttpRequest } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
+import { runInInjectionContext } from '@angular/core';
 import * as fc from 'fast-check';
 
 import { AuthService, authInterceptor } from './auth.service';
@@ -25,6 +27,7 @@ describe('AuthService — Property-Based Tests', () => {
         AuthService,
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideRouter([]), // Add router provider for injection context
       ]
     });
     service = TestBed.inject(AuthService);
@@ -140,7 +143,11 @@ describe('AuthService — Property-Based Tests', () => {
         };
 
         const mockReq = new HttpRequest('GET', 'http://localhost:8080/api/sessions');
-        authInterceptor(mockReq, mockNext as any);
+        
+        // Run interceptor in proper injection context
+        runInInjectionContext(TestBed.inject(TestBed), () => {
+          authInterceptor(mockReq, mockNext as any);
+        });
 
         expect(capturedReq).not.toBeNull();
         expect((capturedReq as any).headers.get('Authorization')).toBe(`Bearer ${token}`);
@@ -160,7 +167,11 @@ describe('AuthService — Property-Based Tests', () => {
     };
 
     const mockReq = new HttpRequest('GET', 'http://localhost:8080/api/sessions');
-    authInterceptor(mockReq, mockNext as any);
+    
+    // Run interceptor in proper injection context
+    runInInjectionContext(TestBed.inject(TestBed), () => {
+      authInterceptor(mockReq, mockNext as any);
+    });
 
     expect(capturedReq).not.toBeNull();
     expect((capturedReq as any).headers.get('Authorization')).toBeNull();
@@ -179,7 +190,12 @@ describe('AuthService — Property-Based Tests', () => {
             return { subscribe: () => {} } as any;
           };
           const mockReq = new HttpRequest(method as any, url);
-          authInterceptor(mockReq, mockNext as any);
+          
+          // Run interceptor in proper injection context
+          runInInjectionContext(TestBed.inject(TestBed), () => {
+            authInterceptor(mockReq, mockNext as any);
+          });
+          
           // Without a token the interceptor passes the original request through unchanged
           expect(capturedReq).not.toBeNull();
           expect((capturedReq as unknown as HttpRequest<unknown>).url).toBe(url);

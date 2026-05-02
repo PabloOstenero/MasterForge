@@ -61,7 +61,7 @@ export class CampaignsPage implements OnInit {
   loadCampaigns() {
     this.loadingCampaigns = true;
     this.errorCampaigns = null;
-    this.api.getCampaigns().subscribe({
+    this.api.getDmCampaigns().subscribe({
       next: (data: any[]) => {
         this.campaigns = data;
         this.loadingCampaigns = false;
