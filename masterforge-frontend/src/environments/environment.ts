@@ -3,7 +3,14 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  apiBaseUrl: 'http://localhost:8080',
+  wsBaseUrl: 'ws://localhost:8080',
+  campaignCacheTtlMs: 5 * 60 * 1000,   // 5 minutes per Req 8.5
+  searchDebounceMs: 300,
+  requestTimeoutMs: 10_000,             // 10 s per Req 7.5
+  enableMockPaymentDisclaimer: true,
+  logLevel: 'debug',
 };
 
 /*

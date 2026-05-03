@@ -42,6 +42,8 @@ class PlayerCampaignRepositoryPropertyTest : StringSpec() {
     @Autowired lateinit var sessionAttendeeRepository: SessionAttendeeRepository
     @Autowired lateinit var sessionRepository: SessionRepository
     @Autowired lateinit var campaignRepository: CampaignRepository
+    @Autowired lateinit var characterRepository: CharacterRepository
+    @Autowired lateinit var enrollmentRepository: CampaignEnrollmentRepository
 
     init {
 
@@ -239,6 +241,8 @@ class PlayerCampaignRepositoryPropertyTest : StringSpec() {
     private fun cleanup() {
         sessionAttendeeRepository.deleteAll()
         sessionRepository.deleteAll()
+        enrollmentRepository.deleteAll()
+        characterRepository.deleteAll()
         campaignRepository.deleteAll()
         userRepository.deleteAll()
     }

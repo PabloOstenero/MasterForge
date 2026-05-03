@@ -1,0 +1,533 @@
+@use 'src/theme/variables' as *;
+
+// ── Host ──────────────────────────────────────────────────────────────────────
+:host {
+  display: block;
+}
+
+// ── Container ─────────────────────────────────────────────────────────────────
+.payment-processor {
+  background: $bg-surface;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+// ── Academic disclaimer banner (Req 5.7) ──────────────────────────────────────
+.disclaimer-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba($accent-gold, 0.08);
+  border-bottom: 1px solid rgba($accent-gold, 0.2);
+  padding: 12px 16px;
+}
+
+.disclaimer-icon {
+  color: $accent-gold;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.disclaimer-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+
+  strong {
+    color: $accent-gold;
+    font-size: 0.8rem;
+  }
+
+  span {
+    color: $text-muted;
+  }
+}
+
+// ── Payment form container ────────────────────────────────────────────────────
+.payment-form-container {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// ── Price summary (Req 5.1) ───────────────────────────────────────────────────
+.price-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba($bg-primary, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 12px 14px;
+  gap: 12px;
+}
+
+.price-summary__campaign {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.price-icon {
+  color: $accent-gold;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.price-summary__details {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.price-summary__label {
+  color: $text-muted;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.price-summary__campaign-name {
+  color: $text-primary;
+  font-size: 0.9rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.price-summary__amount {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+.price-summary__price {
+  color: $accent-gold;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.price-summary__note {
+  color: $text-muted;
+  font-size: 0.68rem;
+}
+
+// ── Scenario selector (Req 5.8) ───────────────────────────────────────────────
+.scenario-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scenario-selector__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: $text-muted;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  ion-icon {
+    font-size: 0.9rem;
+    color: $accent-gold;
+  }
+}
+
+.scenario-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.scenario-chip {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  border: 1px solid transparent;
+
+  &--success {
+    background: rgba(46, 160, 67, 0.08);
+    border-color: rgba(46, 160, 67, 0.3);
+    color: #2ea043;
+
+    &.scenario-chip--active {
+      background: rgba(46, 160, 67, 0.2);
+      border-color: #2ea043;
+    }
+  }
+
+  &--failure {
+    background: rgba($accent-crimson, 0.08);
+    border-color: rgba($accent-crimson, 0.3);
+    color: lighten($accent-crimson, 15%);
+
+    &.scenario-chip--active {
+      background: rgba($accent-crimson, 0.2);
+      border-color: $accent-crimson;
+    }
+  }
+
+  &:hover:not(.scenario-chip--active) {
+    opacity: 0.85;
+  }
+}
+
+.scenario-warning {
+  color: lighten($accent-crimson, 10%);
+  font-size: 0.75rem;
+  margin: 0;
+  padding: 6px 10px;
+  background: rgba($accent-crimson, 0.08);
+  border-radius: 6px;
+  border-left: 2px solid $accent-crimson;
+}
+
+// ── Card form (Req 5.2) ───────────────────────────────────────────────────────
+.card-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+
+.form-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.form-header-icon {
+  color: $accent-gold;
+  font-size: 1.1rem;
+}
+
+.form-header-title {
+  color: $text-primary;
+  font-size: 0.85rem;
+  font-weight: 600;
+  flex: 1;
+}
+
+.form-header-lock {
+  color: $text-muted;
+  font-size: 0.9rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  &--half {
+    flex: 1;
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.form-label {
+  color: $text-muted;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.form-input {
+  background: rgba($bg-primary, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: $text-primary;
+  font-size: 0.9rem;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: rgba($text-muted, 0.5);
+  }
+
+  &:focus {
+    border-color: rgba($accent-gold, 0.5);
+  }
+
+  &--error {
+    border-color: rgba($accent-crimson, 0.6);
+
+    &:focus {
+      border-color: $accent-crimson;
+    }
+  }
+
+  &--card {
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.1em;
+  }
+}
+
+.form-error {
+  color: lighten($accent-crimson, 10%);
+  font-size: 0.72rem;
+}
+
+// ── Processing overlay ────────────────────────────────────────────────────────
+.processing-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba($bg-surface, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-radius: 8px;
+  z-index: 10;
+}
+
+.processing-spinner {
+  --color: #{$accent-gold};
+  width: 36px;
+  height: 36px;
+}
+
+.processing-text {
+  color: $accent-gold;
+  font-size: 0.88rem;
+  font-weight: 600;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+// ── Form actions ──────────────────────────────────────────────────────────────
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.btn-pay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba($accent-gold, 0.15);
+  border: 1px solid rgba($accent-gold, 0.5);
+  color: $accent-gold;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  width: 100%;
+
+  ion-icon {
+    font-size: 1rem;
+  }
+
+  &:hover:not(:disabled) {
+    background: rgba($accent-gold, 0.25);
+    border-color: rgba($accent-gold, 0.8);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &--failure {
+    background: rgba($accent-crimson, 0.12);
+    border-color: rgba($accent-crimson, 0.4);
+    color: lighten($accent-crimson, 15%);
+
+    &:hover:not(:disabled) {
+      background: rgba($accent-crimson, 0.22);
+      border-color: rgba($accent-crimson, 0.7);
+    }
+  }
+}
+
+.btn-spinner {
+  --color: #{$accent-gold};
+  width: 16px;
+  height: 16px;
+}
+
+.btn-cancel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: $text-muted;
+  font-size: 0.85rem;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  width: 100%;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: $text-primary;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+// ── Result screen (Req 5.4, 5.5) ─────────────────────────────────────────────
+.result-screen {
+  padding: 32px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+
+  &--success {
+    background: rgba(46, 160, 67, 0.04);
+  }
+
+  &--failure {
+    background: rgba($accent-crimson, 0.04);
+  }
+}
+
+.result-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+
+  &--success {
+    background: rgba(46, 160, 67, 0.15);
+    border: 2px solid rgba(46, 160, 67, 0.4);
+  }
+
+  &--failure {
+    background: rgba($accent-crimson, 0.15);
+    border: 2px solid rgba($accent-crimson, 0.4);
+  }
+}
+
+.result-icon {
+  font-size: 2.2rem;
+
+  .result-icon-wrapper--success & {
+    color: #2ea043;
+  }
+
+  .result-icon-wrapper--failure & {
+    color: lighten($accent-crimson, 10%);
+  }
+}
+
+.result-title {
+  color: $text-primary;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.result-message {
+  color: $text-primary;
+  font-size: 0.88rem;
+  margin: 0;
+  opacity: 0.9;
+
+  strong {
+    color: $accent-gold;
+  }
+
+  &--error {
+    color: lighten($accent-crimson, 15%);
+  }
+}
+
+.result-transaction-id {
+  color: $text-muted;
+  font-size: 0.75rem;
+  margin: 0;
+
+  code {
+    background: rgba($bg-primary, 0.6);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: $accent-gold;
+  }
+}
+
+.result-disclaimer {
+  color: $text-muted;
+  font-size: 0.72rem;
+  margin: 0;
+  font-style: italic;
+}
+
+.result-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 280px;
+  margin-top: 8px;
+}
+
+.btn-retry {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba($accent-gold, 0.12);
+  border: 1px solid rgba($accent-gold, 0.4);
+  color: $accent-gold;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+  width: 100%;
+
+  ion-icon {
+    font-size: 0.95rem;
+  }
+
+  &:hover {
+    background: rgba($accent-gold, 0.22);
+  }
+}

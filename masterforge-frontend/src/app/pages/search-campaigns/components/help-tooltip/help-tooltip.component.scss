@@ -1,0 +1,61 @@
+.help-tooltip-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.help-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  color: var(--ion-color-medium, #92949c);
+  font-size: 18px;
+  line-height: 1;
+  transition: color 0.15s ease;
+
+  &:hover,
+  &:focus {
+    color: var(--ion-color-primary, #3880ff);
+    outline: none;
+  }
+
+  ion-icon {
+    font-size: 18px;
+  }
+}
+
+.tooltip-bubble {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ion-color-dark, #222428);
+  color: var(--ion-color-light, #f4f5f8);
+  font-size: 12px;
+  line-height: 1.4;
+  padding: 6px 10px;
+  border-radius: 6px;
+  white-space: normal;
+  width: 220px;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+
+  // Small arrow pointing down
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--ion-color-dark, #222428);
+  }
+}

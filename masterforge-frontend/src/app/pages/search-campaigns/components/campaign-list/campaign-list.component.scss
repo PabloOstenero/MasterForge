@@ -1,0 +1,289 @@
+@use 'src/theme/variables' as *;
+
+// ── List container ────────────────────────────────────────────────────────────
+.campaign-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// ── Scrollable modifier (CSS virtual scrolling via containment) ───────────────
+// Req 8.1, 8.3, 8.4: Fixed-height scrollable container with CSS containment
+// reduces layout recalculations for large campaign lists without requiring
+// additional dependencies.
+.campaign-list--scrollable {
+  max-height: 70vh;
+  overflow-y: auto;
+  contain: layout style;
+  scroll-behavior: smooth;
+
+  // Custom scrollbar styling
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+  }
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+.empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+  gap: 8px;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  color: $accent-gold;
+  opacity: 0.35;
+}
+
+.empty-title {
+  color: $text-primary;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.empty-subtitle {
+  color: $text-muted;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+// ── Campaign card ─────────────────────────────────────────────────────────────
+.campaign-card {
+  background: $bg-surface;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-left: 3px solid $accent-gold;
+  border-radius: 10px;
+  padding: 14px 16px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  // Req 8.3: Defer rendering of off-screen cards to reduce initial render time.
+  // The browser skips layout/paint for cards outside the viewport.
+  content-visibility: auto;
+  // Estimated card height so the browser can reserve space and avoid layout shifts.
+  contain-intrinsic-size: 0 120px;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  &--full {
+    border-left-color: $text-muted;
+    opacity: 0.75;
+
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+}
+
+// ── Card header ───────────────────────────────────────────────────────────────
+.campaign-card__header {
+  margin-bottom: 8px;
+}
+
+.campaign-card__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.campaign-card__name {
+  color: $accent-gold;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.campaign-card__owner {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: $text-muted;
+  font-size: 0.8rem;
+}
+
+// ── Badges ────────────────────────────────────────────────────────────────────
+.campaign-card__badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 20px;
+  flex-shrink: 0;
+
+  &--available {
+    background: rgba(46, 160, 67, 0.15);
+    color: #2ea043;
+    border: 1px solid rgba(46, 160, 67, 0.4);
+  }
+
+  &--full {
+    background: rgba($text-muted, 0.12);
+    color: $text-muted;
+    border: 1px solid rgba($text-muted, 0.3);
+  }
+}
+
+// ── Description ───────────────────────────────────────────────────────────────
+.campaign-card__description {
+  color: $text-primary;
+  font-size: 0.88rem;
+  margin: 0 0 10px;
+  opacity: 0.85;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+.campaign-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.campaign-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: $text-muted;
+  font-size: 0.82rem;
+
+  &--price {
+    color: $accent-gold;
+    font-weight: 600;
+  }
+}
+
+.meta-icon {
+  font-size: 0.95rem;
+}
+
+// ── Join button ───────────────────────────────────────────────────────────────
+.btn-join {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba($accent-gold, 0.15);
+  border: 1px solid rgba($accent-gold, 0.5);
+  color: $accent-gold;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+
+  ion-icon {
+    font-size: 0.95rem;
+  }
+
+  &:hover:not(:disabled) {
+    background: rgba($accent-gold, 0.25);
+    border-color: rgba($accent-gold, 0.8);
+  }
+
+  &--disabled,
+  &:disabled {
+    background: rgba($text-muted, 0.08);
+    border-color: rgba($text-muted, 0.25);
+    color: $text-muted;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+}
+
+// ── Load more ─────────────────────────────────────────────────────────────────
+.load-more-container {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 4px;
+}
+
+.btn-load-more {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: $text-muted;
+  font-size: 0.82rem;
+  padding: 7px 18px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+
+  ion-icon {
+    font-size: 0.9rem;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: $text-primary;
+  }
+}
+
+// ── Loading more ──────────────────────────────────────────────────────────────
+.loading-more-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px;
+}
+
+.loading-spinner {
+  --color: #{$accent-gold};
+  width: 20px;
+  height: 20px;
+}
+
+.loading-more-text {
+  color: $text-muted;
+  font-size: 0.82rem;
+}
+
+// ── Search highlight ──────────────────────────────────────────────────────────
+// Req 2.5: Highlight matching text in search results
+:host ::ng-deep .search-highlight {
+  background: rgba($accent-gold, 0.25);
+  color: $accent-gold;
+  border-radius: 2px;
+  padding: 0 1px;
+  font-weight: 700;
+}

@@ -1,0 +1,212 @@
+@use 'src/theme/variables' as *;
+
+// ── Content background ────────────────────────────────────────────────────────
+.search-campaigns-content {
+  --background: #{$bg-primary};
+}
+
+.page-container {
+  background: $bg-primary;
+  min-height: 100%;
+}
+
+// ── Page header ───────────────────────────────────────────────────────────────
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.page-icon {
+  font-size: 1.8rem;
+  color: $accent-gold;
+}
+
+.page-title {
+  color: $accent-gold;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+// ── Search bar ────────────────────────────────────────────────────────────────
+.search-bar-wrapper {
+  margin-bottom: 16px;
+}
+
+.search-form {
+  width: 100%;
+}
+
+.search-input-container {
+  display: flex;
+  align-items: center;
+  background: $bg-surface;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px 14px;
+  gap: 10px;
+  transition: border-color 0.2s;
+
+  &:focus-within {
+    border-color: rgba($accent-gold, 0.5);
+  }
+}
+
+.search-icon {
+  color: $text-muted;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: $text-primary;
+  font-size: 0.95rem;
+
+  &::placeholder {
+    color: $text-muted;
+  }
+}
+
+// ── Results count ─────────────────────────────────────────────────────────────
+.results-count {
+  color: $text-muted;
+  font-size: 0.82rem;
+  margin-bottom: 12px;
+  padding: 0 2px;
+}
+
+// ── Loading ───────────────────────────────────────────────────────────────────
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  gap: 12px;
+}
+
+.loading-text {
+  color: $text-muted;
+  font-size: 0.9rem;
+}
+
+// ── Error ─────────────────────────────────────────────────────────────────────
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 20px;
+  gap: 12px;
+  text-align: center;
+}
+
+.error-icon {
+  font-size: 2.5rem;
+  color: $accent-crimson;
+  opacity: 0.8;
+}
+
+.error-msg {
+  color: $accent-crimson;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.btn-retry {
+  --color: #{$accent-gold};
+  --border-color: #{$accent-gold};
+  margin-top: 4px;
+}
+
+// ── Payment modal overlay (Req 4.2) ───────────────────────────────────────────
+.payment-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+
+.payment-modal {
+  background: $bg-surface;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.payment-modal__header {
+  padding: 16px 16px 0;
+}
+
+.payment-modal__title {
+  color: $accent-gold;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+// ── Refresh prompt (Req 10.4) ─────────────────────────────────────────────
+.refresh-prompt {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #7c5c00;
+  border: 1px solid #c9a84c;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  color: #f0e6d3;
+  font-size: 0.88rem;
+
+  span {
+    flex: 1;
+  }
+
+  ion-button {
+    --color: #{$accent-gold};
+    --padding-start: 8px;
+    --padding-end: 8px;
+    font-size: 0.82rem;
+  }
+}
+
+// ── Connection status indicator (Req 10.6) ────────────────────────────────
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  margin-bottom: 8px;
+
+  ion-icon {
+    font-size: 0.9rem;
+  }
+
+  &.polling {
+    background: rgba(255, 255, 255, 0.06);
+    color: $text-muted;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+}

@@ -1,0 +1,111 @@
+<!-- Toast notification (Req 4.6, 16) -->
+<app-toast-notification></app-toast-notification>
+
+<ion-content
+  class="search-campaigns-content"
+  (click)="onUserInteraction()"
+  (keydown)="onUserInteraction()">
+  <div class="page-container ion-padding">
+
+    <!-- ── Page header ── -->
+    <div class="page-header">
+      <ion-icon name="search-outline" class="page-icon"></ion-icon>
+      <h1 class="page-title">Buscar Campañas</h1>
+      <app-help-tooltip text="Explora las campañas disponibles, filtra por precio o capacidad y únete con un solo clic."></app-help-tooltip>
+    </div>
+
+    <!-- ── Inactivity refresh prompt (Req 10.4) ── -->
+    @if (showRefreshPrompt) {
+      <div class="refresh-prompt" data-testid="refresh-prompt">
+        <span>Los datos pueden estar desactualizados.</span>
+        <ion-button fill="clear" size="small" (click)="onManualRefresh()" data-testid="btn-manual-refresh">
+          Actualizar ahora
+        </ion-button>
+        <ion-button fill="clear" size="small" (click)="dismissRefreshPrompt()" data-testid="btn-dismiss-refresh">
+          ×
+        </ion-button>
+      </div>
+    }
+
+    <!-- ── Payment processor modal (Req 4.2, 5.1, 5.2, 5.7, 5.8) ── -->
+    @if (paymentCampaign) {
+      <div class="payment-modal-overlay" data-testid="payment-modal-overlay" (click)="onPaymentCancelled()">
+        <div class="payment-modal" data-testid="payment-modal" (click)="$event.stopPropagation()">
+          <div class="payment-modal__header">
+            <h2 class="payment-modal__title">Unirse a campaña de pago</h2>
+          </div>
+          <app-payment-processor
+            [campaign]="paymentCampaign"
+            (paymentComplete)="onPaymentComplete($event)"
+            (paymentCancelled)="onPaymentCancelled()"
+            data-testid="payment-processor-component">
+          </app-payment-processor>
+        </div>
+      </div>
+    }
+
+    <!-- ── Search input ── -->
+    <div class="search-bar-wrapper">
+      <app-help-tooltip text="Busca por nombre o descripción de la campaña. La búsqueda no distingue mayúsculas."></app-help-tooltip>
+      <app-search-input
+        placeholder="Buscar por nombre o descripción..."
+        [loading]="loading"
+        (searchChange)="onSearchChange($event)"
+        data-testid="search-input-component">
+      </app-search-input>
+    </div>
+
+    <!-- ── Filters ── -->
+    <app-campaign-filter
+      (filtersChanged)="onFilterChange($event)"
+      data-testid="campaign-filter">
+    </app-campaign-filter>
+
+    <!-- ── Results count ── -->
+    @if (!loading && !error) {
+      <div class="results-count" data-testid="results-count">
+        <span>{{ totalElements }} campaña{{ totalElements !== 1 ? 's' : '' }} encontrada{{ totalElements !== 1 ? 's' : '' }}</span>
+      </div>
+    }
+
+    <!-- ── Error ── -->
+    @if (error) {
+      <div class="error-container" data-testid="error-container">
+        <ion-icon name="alert-circle-outline" class="error-icon"></ion-icon>
+        <p class="error-msg">{{ error }}</p>
+        <ion-button fill="outline" class="btn-retry" (click)="onRetry()" data-testid="btn-retry">
+          <ion-icon name="refresh-outline" slot="start"></ion-icon>
+          Reintentar
+        </ion-button>
+      </div>
+    }
+
+    <!-- ── Loading (initial) ── -->
+    @if (loading) {
+      <div class="loading-container" data-testid="loading-spinner">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p class="loading-text">Cargando campañas...</p>
+      </div>
+    }
+
+    <!-- ── Campaign list ── -->
+    @if (!loading) {
+      <app-campaign-list
+        [campaigns]="campaigns"
+        [loading]="loadingMore"
+        [searchText]="currentSearchText"
+        (joinCampaign)="onJoinCampaign($event)"
+        (loadMore)="onLoadMore()"
+        data-testid="campaign-list">
+      </app-campaign-list>
+
+      <!-- ── Loading more overlay ── -->
+      <app-loading-overlay
+        [loading]="loadingMore"
+        message="Cargando más campañas..."
+        data-testid="loading-more-overlay">
+      </app-loading-overlay>
+    }
+
+  </div>
+</ion-content>

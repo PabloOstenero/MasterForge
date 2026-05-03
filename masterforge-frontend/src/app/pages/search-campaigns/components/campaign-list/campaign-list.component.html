@@ -1,0 +1,121 @@
+<!-- ── Campaign list ── -->
+<div class="campaign-list" [class.campaign-list--scrollable]="scrollable" data-testid="campaign-list-container">
+
+  <!-- ── Empty state ── -->
+  <!-- Req 2.6: Display "No campaigns found" when no campaigns match -->
+  @if (campaigns.length === 0 && !loading) {
+    <div class="empty-container" data-testid="empty-campaigns">
+      <ion-icon name="people-outline" class="empty-icon"></ion-icon>
+      <p class="empty-title" data-testid="no-campaigns-message">No se encontraron campañas</p>
+      <p class="empty-subtitle">Prueba a cambiar los filtros o el texto de búsqueda</p>
+    </div>
+  }
+
+  <!-- ── Campaign cards ── -->
+  @for (campaign of campaigns; track trackByCampaignId($index, campaign)) {
+    <div
+      class="campaign-card"
+      [class.campaign-card--full]="isFull(campaign)"
+      [attr.data-testid]="'campaign-card-' + campaign.id"
+      data-testid="campaign-card">
+
+      <!-- Card header -->
+      <div class="campaign-card__header">
+        <div class="campaign-card__title-row">
+          <!-- Req 2.5: Highlight matching text in campaign name -->
+          <span
+            class="campaign-card__name"
+            data-testid="campaign-name"
+            [innerHTML]="campaign.name | searchHighlight:searchText">
+          </span>
+          <!-- Req 1.4: "Full" badge when no available slots -->
+          @if (isFull(campaign)) {
+            <span class="campaign-card__badge campaign-card__badge--full" data-testid="full-badge">
+              Completa
+            </span>
+          } @else {
+            <span class="campaign-card__badge campaign-card__badge--available" data-testid="available-badge">
+              Disponible
+            </span>
+          }
+        </div>
+
+        <!-- Req 1.3: Owner name -->
+        <div class="campaign-card__owner" data-testid="campaign-owner">
+          <ion-icon name="person-outline" class="meta-icon"></ion-icon>
+          <span>{{ campaign.owner.name }}</span>
+        </div>
+      </div>
+
+      <!-- Req 1.3: Description -->
+      @if (campaign.description) {
+        <!-- Req 2.5: Highlight matching text in campaign description -->
+        <p
+          class="campaign-card__description"
+          data-testid="campaign-description"
+          [innerHTML]="campaign.description | searchHighlight:searchText">
+        </p>
+      }
+
+      <!-- Card footer: meta + join button -->
+      <div class="campaign-card__footer">
+        <div class="campaign-card__meta">
+          <!-- Req 1.3: Current/max players -->
+          <span class="meta-item" data-testid="campaign-players">
+            <ion-icon name="people-outline" class="meta-icon"></ion-icon>
+            {{ formatPlayerCount(campaign) }}
+          </span>
+
+          <!-- Req 1.3: Join price -->
+          <span class="meta-item meta-item--price" data-testid="campaign-price">
+            <ion-icon name="cash-outline" class="meta-icon"></ion-icon>
+            {{ formatPrice(campaign) }}
+          </span>
+        </div>
+
+        <!-- Req 1.4: Join button — disabled when campaign is full -->
+        <button
+          class="btn-join"
+          [class.btn-join--disabled]="isFull(campaign)"
+          [disabled]="isFull(campaign)"
+          (click)="onJoinClick(campaign)"
+          [attr.data-testid]="'btn-join-' + campaign.id"
+          data-testid="btn-join"
+          [attr.aria-label]="isFull(campaign) ? 'Campaña completa' : 'Unirse a ' + campaign.name"
+          type="button">
+          @if (isFull(campaign)) {
+            <ion-icon name="lock-closed-outline"></ion-icon>
+            Completa
+          } @else {
+            <ion-icon name="add-circle-outline"></ion-icon>
+            Unirse
+          }
+        </button>
+      </div>
+
+    </div>
+  }
+
+  <!-- ── Load more button ── -->
+  @if (campaigns.length > 0 && !loading) {
+    <div class="load-more-container">
+      <button
+        class="btn-load-more"
+        (click)="onLoadMoreClick()"
+        data-testid="btn-load-more"
+        type="button">
+        <ion-icon name="chevron-down-outline"></ion-icon>
+        Cargar más campañas
+      </button>
+    </div>
+  }
+
+  <!-- ── Loading more spinner ── -->
+  @if (loading) {
+    <div class="loading-more-container" data-testid="loading-more-spinner">
+      <ion-spinner name="crescent" class="loading-spinner"></ion-spinner>
+      <span class="loading-more-text">Cargando más...</span>
+    </div>
+  }
+
+</div>

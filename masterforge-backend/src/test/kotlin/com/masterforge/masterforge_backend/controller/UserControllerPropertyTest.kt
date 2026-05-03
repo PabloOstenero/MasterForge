@@ -12,6 +12,7 @@ import com.masterforge.masterforge_backend.repository.CampaignRepository
 import com.masterforge.masterforge_backend.repository.CharacterRepository
 import com.masterforge.masterforge_backend.repository.DndClassRepository
 import com.masterforge.masterforge_backend.repository.DndRaceRepository
+import com.masterforge.masterforge_backend.repository.CampaignEnrollmentRepository
 import com.masterforge.masterforge_backend.repository.SessionAttendeeRepository
 import com.masterforge.masterforge_backend.repository.SessionRepository
 import com.masterforge.masterforge_backend.repository.UserRepository
@@ -56,6 +57,7 @@ class UserControllerPropertyTest : StringSpec() {
     @Autowired lateinit var sessionAttendeeRepository: SessionAttendeeRepository
     @Autowired lateinit var sessionRepository: SessionRepository
     @Autowired lateinit var campaignRepository: CampaignRepository
+    @Autowired lateinit var enrollmentRepository: CampaignEnrollmentRepository
     @Autowired lateinit var dndClassRepository: DndClassRepository
     @Autowired lateinit var dndRaceRepository: DndRaceRepository
 
@@ -200,8 +202,9 @@ class UserControllerPropertyTest : StringSpec() {
     private fun cleanup() {
         sessionAttendeeRepository.deleteAll()
         sessionRepository.deleteAll()
-        campaignRepository.deleteAll()
+        enrollmentRepository.deleteAll()
         characterRepository.deleteAll()
+        campaignRepository.deleteAll()
         userRepository.deleteAll()
         dndClassRepository.deleteAll()
         dndRaceRepository.deleteAll()

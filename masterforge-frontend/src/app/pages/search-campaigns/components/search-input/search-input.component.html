@@ -1,0 +1,42 @@
+<!-- Search input with debouncing, loading indicator, and clear button -->
+<div class="search-input-container" [class.search-input-container--active]="hasValue">
+  <!-- Search icon (hidden when loading) -->
+  @if (!loading) {
+    <ion-icon name="search-outline" class="search-icon" aria-hidden="true"></ion-icon>
+  }
+
+  <!-- Loading spinner (shown while search results are being fetched) -->
+  @if (loading) {
+    <ion-spinner
+      name="crescent"
+      class="search-spinner"
+      aria-label="Buscando..."
+      data-testid="search-loading-spinner">
+    </ion-spinner>
+  }
+
+  <input
+    type="text"
+    class="search-input"
+    [placeholder]="placeholder"
+    [formControl]="searchControl"
+    data-testid="search-input"
+    aria-label="Buscar campañas"
+    autocomplete="off"
+    autocorrect="off"
+    spellcheck="false"
+  />
+
+  <!-- Clear button — only shown when there is text and not loading -->
+  @if (hasValue && !loading) {
+    <button
+      type="button"
+      class="btn-clear"
+      (click)="clearSearch()"
+      data-testid="btn-clear-search"
+      aria-label="Limpiar búsqueda"
+      title="Limpiar búsqueda">
+      <ion-icon name="close-circle-outline" class="clear-icon"></ion-icon>
+    </button>
+  }
+</div>

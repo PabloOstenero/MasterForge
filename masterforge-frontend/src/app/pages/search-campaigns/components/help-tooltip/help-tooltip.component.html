@@ -1,0 +1,15 @@
+<span class="help-tooltip-wrapper">
+  <button
+    class="help-btn"
+    type="button"
+    aria-label="Ayuda"
+    (click)="toggle($event)">
+    <ion-icon name="help-circle-outline"></ion-icon>
+  </button>
+
+  @if (isOpen) {
+    <span class="tooltip-bubble" role="tooltip">
+      {{ text }}
+    </span>
+  }
+</span>

@@ -49,6 +49,9 @@ class CharacterRepositoryPropertyTest : StringSpec() {
     @Autowired
     lateinit var campaignRepository: CampaignRepository
 
+    @Autowired
+    lateinit var enrollmentRepository: CampaignEnrollmentRepository
+
     init {
         /**
          * Feature: my-characters-page, Property 2: Filtrado de personajes por usuario
@@ -57,7 +60,9 @@ class CharacterRepositoryPropertyTest : StringSpec() {
         "Property 2: findByUserId returns only characters belonging to the given userId" {
             checkAll(100, Arb.int(1, 3), Arb.int(0, 3)) { numTargetChars, numOtherChars ->
                 // Clean up before each iteration
+                enrollmentRepository.deleteAll()
                 characterRepository.deleteAll()
+                campaignRepository.deleteAll()
                 userRepository.deleteAll()
                 dndClassRepository.deleteAll()
                 dndRaceRepository.deleteAll()
@@ -134,7 +139,9 @@ class CharacterRepositoryPropertyTest : StringSpec() {
         "Property 2 (edge case): findByUserId returns empty list for userId with no characters" {
             checkAll(100, Arb.int(1, 3)) { numOtherChars ->
                 // Clean up before each iteration
+                enrollmentRepository.deleteAll()
                 characterRepository.deleteAll()
+                campaignRepository.deleteAll()
                 userRepository.deleteAll()
                 dndClassRepository.deleteAll()
                 dndRaceRepository.deleteAll()
@@ -193,7 +200,9 @@ class CharacterRepositoryPropertyTest : StringSpec() {
         "Property 2 (isolation): findByUserId never returns characters from other users" {
             checkAll(100, Arb.int(1, 3), Arb.int(1, 3)) { numTargetChars, numOtherChars ->
                 // Clean up before each iteration
+                enrollmentRepository.deleteAll()
                 characterRepository.deleteAll()
+                campaignRepository.deleteAll()
                 userRepository.deleteAll()
                 dndClassRepository.deleteAll()
                 dndRaceRepository.deleteAll()
@@ -279,6 +288,7 @@ class CharacterRepositoryPropertyTest : StringSpec() {
                 numDmChars, numOtherCampaignChars, numNoCampaignChars ->
 
                 // Clean up before each iteration
+                enrollmentRepository.deleteAll()
                 characterRepository.deleteAll()
                 campaignRepository.deleteAll()
                 userRepository.deleteAll()

@@ -1,0 +1,127 @@
+<div class="filter-container" [formGroup]="filterForm">
+
+  <!-- ── Filter header ── -->
+  <div class="filter-header" (click)="toggleExpanded()" role="button" [attr.aria-expanded]="isExpanded" tabindex="0" (keydown.enter)="toggleExpanded()" (keydown.space)="toggleExpanded()">
+    <div class="filter-header-left">
+      <ion-icon name="filter-outline" class="filter-icon"></ion-icon>
+      <span class="filter-title">Filtros</span>
+      @if (hasActiveFilters) {
+        <span class="filter-badge" data-testid="active-filters-badge">Activos</span>
+      }
+    </div>
+    <div class="filter-header-right">
+      @if (hasActiveFilters) {
+        <button class="btn-reset" (click)="resetFilters(); $event.stopPropagation()" data-testid="btn-reset-filters" aria-label="Limpiar filtros">
+          <ion-icon name="close-outline"></ion-icon>
+          Limpiar
+        </button>
+      }
+      <ion-icon [name]="isExpanded ? 'chevron-up-outline' : 'chevron-down-outline'" class="chevron-icon"></ion-icon>
+    </div>
+  </div>
+
+  <!-- ── Filter body ── -->
+  @if (isExpanded) {
+    <div class="filter-body" data-testid="filter-body">
+
+      <!-- ── Price range filter (Req 3.1) ── -->
+      <div class="filter-section">
+        <label class="filter-section-label">
+          Precio
+          <app-help-tooltip text="Filtra campañas por precio de entrada. Selecciona un rango predefinido o introduce un rango personalizado."></app-help-tooltip>
+        </label>
+        <div class="filter-chips" data-testid="price-filter-chips">
+          @for (option of priceRangeOptions; track option.value) {
+            <button
+              class="filter-chip"
+              [class.active]="filterForm.get('pricePreset')?.value === option.value"
+              (click)="onPriceRangeChange(option.value)"
+              [attr.data-testid]="'price-chip-' + (option.value ?? 'all')"
+              type="button">
+              {{ option.label }}
+            </button>
+          }
+        </div>
+
+        <!-- Custom price range inputs -->
+        @if (showCustomPriceRange) {
+          <div class="custom-price-range" data-testid="custom-price-range">
+            <div class="price-range-inputs">
+              <div class="price-input-group">
+                <label class="price-input-label">Mínimo ($)</label>
+                <input
+                  type="number"
+                  class="price-input"
+                  formControlName="customPriceMin"
+                  placeholder="0"
+                  min="0"
+                  data-testid="custom-price-min"
+                  aria-label="Precio mínimo"
+                />
+              </div>
+              <span class="price-range-separator">—</span>
+              <div class="price-input-group">
+                <label class="price-input-label">Máximo ($)</label>
+                <input
+                  type="number"
+                  class="price-input"
+                  formControlName="customPriceMax"
+                  placeholder="100"
+                  min="0"
+                  data-testid="custom-price-max"
+                  aria-label="Precio máximo"
+                />
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- ── Capacity filter (Req 3.2) ── -->
+      <div class="filter-section">
+        <label class="filter-section-label">
+          Capacidad
+          <app-help-tooltip text="Pequeña: 1–4 jugadores · Media: 5–6 jugadores · Grande: 7+ jugadores"></app-help-tooltip>
+        </label>
+        <div class="filter-chips" data-testid="capacity-filter-chips">
+          @for (option of capacityOptions; track option.value) {
+            <button
+              class="filter-chip"
+              [class.active]="filterForm.get('capacity')?.value === option.value"
+              (click)="onCapacityChange(option.value)"
+              [attr.data-testid]="'capacity-chip-' + option.value.toLowerCase()"
+              [attr.title]="option.description"
+              type="button">
+              {{ option.label }}
+              @if (option.description) {
+                <span class="chip-description">{{ option.description }}</span>
+              }
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- ── Availability filter (Req 3.3) ── -->
+      <div class="filter-section">
+        <label class="filter-section-label">
+          Disponibilidad
+          <app-help-tooltip text="Muestra solo campañas con plazas libres, campañas completas, o todas."></app-help-tooltip>
+        </label>
+        <div class="filter-chips" data-testid="availability-filter-chips">
+          @for (option of availabilityOptions; track option.value) {
+            <button
+              class="filter-chip"
+              [class.active]="filterForm.get('availability')?.value === option.value"
+              (click)="onAvailabilityChange(option.value)"
+              [attr.data-testid]="'availability-chip-' + option.value.toLowerCase()"
+              type="button">
+              {{ option.label }}
+            </button>
+          }
+        </div>
+      </div>
+
+    </div>
+  }
+
+</div>
