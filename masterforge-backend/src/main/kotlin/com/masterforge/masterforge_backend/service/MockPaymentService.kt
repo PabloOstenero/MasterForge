@@ -26,7 +26,7 @@ import java.util.UUID
 class MockPaymentService(
     private val paymentTransactionRepository: PaymentTransactionRepository,
     @Value("\${mock.payment.delay-ms:100}") private val simulatedDelayMs: Long = 100L
-) {
+) : PaymentService {
 
     /**
      * Process a mock payment request.
@@ -36,7 +36,7 @@ class MockPaymentService(
      * Requirements: 5.2, 5.3, 5.4, 5.5, 5.6
      */
     @Transactional
-    fun processPayment(request: PaymentRequest): PaymentResult {
+    override fun processPayment(request: PaymentRequest): PaymentResult {
         val scenario = request.simulationScenario ?: PaymentScenario.SUCCESS
         return doSimulate(
             campaignId = request.resolvedCampaignId(),
@@ -55,7 +55,7 @@ class MockPaymentService(
      * Requirements: 5.8
      */
     @Transactional
-    fun simulatePaymentScenario(request: PaymentRequest, scenario: PaymentScenario): PaymentResult {
+    override fun simulatePaymentScenario(request: PaymentRequest, scenario: PaymentScenario): PaymentResult {
         return doSimulate(
             campaignId = request.resolvedCampaignId(),
             userId = request.userId ?: UUID.randomUUID(),
@@ -73,7 +73,7 @@ class MockPaymentService(
      * Requirements: 5.6, 5.7
      */
     @Transactional(readOnly = true)
-    fun getTransactionHistory(userId: UUID): List<PaymentTransaction> =
+    override fun getTransactionHistory(userId: UUID): List<PaymentTransaction> =
         paymentTransactionRepository.findByUserId(userId)
 
     // ── private helpers ───────────────────────────────────────────────────────

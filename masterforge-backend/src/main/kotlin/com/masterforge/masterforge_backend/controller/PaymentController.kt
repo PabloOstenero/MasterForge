@@ -1,13 +1,13 @@
 package com.masterforge.masterforge_backend.controller
 
+import com.masterforge.masterforge_backend.config.SecurityUtils
 import com.masterforge.masterforge_backend.model.dto.PaymentRequest
 import com.masterforge.masterforge_backend.model.dto.PaymentResult
 import com.masterforge.masterforge_backend.model.dto.SimulationRequest
 import com.masterforge.masterforge_backend.model.entity.PaymentTransaction
-import com.masterforge.masterforge_backend.service.MockPaymentService
+import com.masterforge.masterforge_backend.service.PaymentService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import java.util.UUID
@@ -26,7 +26,7 @@ import java.util.UUID
 @RestController
 @RequestMapping("/api/payments")
 class PaymentController(
-    private val mockPaymentService: MockPaymentService
+    private val paymentService: PaymentService
 ) {
 
     /**
@@ -49,7 +49,7 @@ class PaymentController(
     fun processPayment(@RequestBody request: PaymentRequest): ResponseEntity<PaymentResult> {
         val userId = getCurrentUserId()
         val resolvedRequest = request.copy(userId = userId)
-        val result = mockPaymentService.processPayment(resolvedRequest)
+        val result = paymentService.processPayment(resolvedRequest)
         return if (result.success) {
             ResponseEntity.ok(result)
         } else {
@@ -82,7 +82,7 @@ class PaymentController(
             mockCardLastFour = request.mockCardLastFour ?: "",
             simulationScenario = null
         )
-        val result = mockPaymentService.simulatePaymentScenario(paymentRequest, request.scenario ?: com.masterforge.masterforge_backend.model.entity.PaymentScenario.SUCCESS)
+        val result = paymentService.simulatePaymentScenario(paymentRequest, request.scenario ?: com.masterforge.masterforge_backend.model.entity.PaymentScenario.SUCCESS)
         return if (result.success) {
             ResponseEntity.ok(result)
         } else {
@@ -106,7 +106,7 @@ class PaymentController(
     @GetMapping("/history")
     fun getPaymentHistory(): ResponseEntity<List<PaymentTransaction>> {
         val userId = getCurrentUserId()
-        val history = mockPaymentService.getTransactionHistory(userId)
+        val history = paymentService.getTransactionHistory(userId)
         return ResponseEntity.ok(history)
     }
 
@@ -115,17 +115,7 @@ class PaymentController(
     /**
      * Extract the authenticated user's UUID from the security context.
      *
-     * The JWT filter stores the user ID as the authentication principal name.
-     *
-     * @throws ResponseStatusException 401 if no authentication is present
+     * Delegates to [SecurityUtils.getCurrentUserId].
      */
-    private fun getCurrentUserId(): UUID {
-        val authentication = SecurityContextHolder.getContext().authentication
-            ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required")
-        return try {
-            UUID.fromString(authentication.name)
-        } catch (ex: IllegalArgumentException) {
-            throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid authentication token")
-        }
-    }
+    private fun getCurrentUserId(): UUID = SecurityUtils.getCurrentUserId()
 }

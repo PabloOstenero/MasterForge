@@ -51,18 +51,12 @@ import {
   cashOutline,
   refreshOutline,
 } from 'ionicons/icons';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-
-import { PaymentService } from '../../../../services/payment.service';
-import { CampaignSearchService } from '../../../../services/campaign-search.service';
 import {
-  Campaign,
   PaymentData,
   PaymentResult,
   PaymentScenario,
-  EnrollmentResult,
-} from '../../models/campaign.models';
+} from '../../../../shared/models/payment.models';
+import { Campaign } from '../../models/campaign.models';
 import { CampaignFormatter } from '../../models/campaign.formatter';
 import { ValidationErrorComponent } from '../validation-error/validation-error.component';
 import { HelpTooltipComponent } from '../help-tooltip/help-tooltip.component';
@@ -105,11 +99,11 @@ export class PaymentProcessorComponent implements OnInit, OnDestroy {
   @Input() campaign!: Campaign;
 
   /**
-   * Emits the PaymentResult when payment processing completes (success or failure).
-   * Req 5.4: On success, parent should enroll the user.
-   * Req 5.5: On failure, parent receives error details.
+   * Emits the PaymentData when the user submits the form.
+   * The parent is responsible for calling the enrollment API and then
+   * calling notifyResult() to show the success/failure screen.
    */
-  @Output() paymentComplete = new EventEmitter<PaymentResult>();
+  @Output() paymentSubmit = new EventEmitter<PaymentData>();
 
   /**
    * Emits when the user cancels the payment flow.
@@ -174,14 +168,10 @@ export class PaymentProcessorComponent implements OnInit, OnDestroy {
 
   // ── Internal ───────────────────────────────────────────────────────────────
 
-  private destroy$ = new Subject<void>();
-
   // ── Constructor ────────────────────────────────────────────────────────────
 
   constructor(
     private fb: FormBuilder,
-    private paymentService: PaymentService,
-    private campaignSearchService: CampaignSearchService,
     private cdr: ChangeDetectorRef,
   ) {
     addIcons({
@@ -216,8 +206,7 @@ export class PaymentProcessorComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    // Nothing to clean up — no subscriptions in this component.
   }
 
   // ── Public methods ─────────────────────────────────────────────────────────
@@ -230,8 +219,8 @@ export class PaymentProcessorComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Req 5.2: Processes the mock payment using the PaymentService.
-   * Req 5.3: Simulates processing within 5 seconds.
+   * Req 5.2: Builds the PaymentData from the form and emits it to the parent.
+   * The parent is responsible for calling the enrollment API.
    */
   processPayment(): void {
     if (this.paymentForm.invalid || this.processing) return;
@@ -239,6 +228,7 @@ export class PaymentProcessorComponent implements OnInit, OnDestroy {
     this.processing = true;
     this.paymentResult = null;
     this.showResult = false;
+    this.cdr.markForCheck();
 
     const formValue = this.paymentForm.value;
     const paymentData: PaymentData = {
@@ -253,34 +243,18 @@ export class PaymentProcessorComponent implements OnInit, OnDestroy {
       simulationScenario: this.selectedScenario,
     };
 
-    // Call join-paid which handles both payment and enrollment in one backend call.
-    // The backend's EnrollmentService.processPaidEnrollment runs payment + enrollment atomically.
-    this.campaignSearchService.joinPaidCampaign(this.campaign.id, paymentData)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (enrollmentResult) => {
-          this.processing = false;
-          const result: PaymentResult = {
-            success: enrollmentResult.success,
-            errorMessage: enrollmentResult.success ? undefined : enrollmentResult.message,
-            enrollmentConfirmed: enrollmentResult.success,
-          };
-          this.paymentResult = result;
-          this.showResult = true;
-          this.cdr.markForCheck();
-          this.paymentComplete.emit(result);
-        },
-        error: (err: Error) => {
-          this.processing = false;
-          this.paymentResult = {
-            success: false,
-            errorMessage: err.message ?? 'Error al procesar el pago. Por favor, inténtalo de nuevo.',
-          };
-          this.showResult = true;
-          this.cdr.markForCheck();
-          this.paymentComplete.emit(this.paymentResult);
-        },
-      });
+    this.paymentSubmit.emit(paymentData);
+  }
+
+  /**
+   * Called by the parent after the enrollment API responds.
+   * Shows the success or failure result screen.
+   */
+  notifyResult(result: PaymentResult): void {
+    this.processing = false;
+    this.paymentResult = result;
+    this.showResult = true;
+    this.cdr.markForCheck();
   }
 
   /**

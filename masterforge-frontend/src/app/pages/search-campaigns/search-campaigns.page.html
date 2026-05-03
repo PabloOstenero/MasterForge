@@ -36,7 +36,7 @@
           </div>
           <app-payment-processor
             [campaign]="paymentCampaign"
-            (paymentComplete)="onPaymentComplete($event)"
+            (paymentSubmit)="onPaymentSubmit($event)"
             (paymentCancelled)="onPaymentCancelled()"
             data-testid="payment-processor-component">
           </app-payment-processor>

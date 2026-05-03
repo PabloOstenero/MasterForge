@@ -18,19 +18,15 @@
  */
 
 import { TestBed, ComponentFixture } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import * as fc from 'fast-check';
 
 import { PaymentProcessorComponent } from './payment-processor.component';
-import { PaymentService } from '../../../../services/payment.service';
 import {
-  Campaign,
-  CampaignVisibility,
   PaymentResult,
   PaymentScenario,
-} from '../../models/campaign.models';
+} from '../../../../shared/models/payment.models';
+import { Campaign, CampaignVisibility } from '../../models/campaign.models';
 
 // ---------------------------------------------------------------------------
 // Arbitraries
@@ -38,7 +34,6 @@ import {
 
 /**
  * Generates a paid campaign (joinPrice > 0).
- * Used for Property 13: any paid campaign should initiate payment.
  */
 const paidCampaignArb = fc.record({
   id: fc.uuid(),
@@ -57,12 +52,11 @@ const paidCampaignArb = fc.record({
   updatedAt: fc.date(),
 }).map((c) => ({
   ...c,
-  currentPlayers: Math.min(c.currentPlayers, c.maxPlayers - 1), // ensure not full
+  currentPlayers: Math.min(c.currentPlayers, c.maxPlayers - 1),
 }));
 
 /**
  * Generates a failure payment scenario (any scenario except SUCCESS).
- * Used for Property 20: failure scenarios should return error messages.
  */
 const failureScenarioArb = fc.constantFrom(
   PaymentScenario.INSUFFICIENT_FUNDS,
@@ -73,7 +67,6 @@ const failureScenarioArb = fc.constantFrom(
 
 /**
  * Generates a PaymentResult representing a failure.
- * The errorMessage is always present for failure results.
  */
 const failureResultArb = fc.record({
   success: fc.constant(false),
@@ -109,23 +102,11 @@ function makePaidCampaign(overrides: Partial<Campaign> = {}): Campaign {
 describe('PaymentProcessorComponent — Property-Based Tests', () => {
   let fixture: ComponentFixture<PaymentProcessorComponent>;
   let component: PaymentProcessorComponent;
-  let httpMock: HttpTestingController;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [PaymentProcessorComponent, ReactiveFormsModule],
-      providers: [
-        PaymentService,
-        provideHttpClient(),
-        provideHttpClientTesting(),
-      ],
     }).compileComponents();
-
-    httpMock = TestBed.inject(HttpTestingController);
-  });
-
-  afterEach(() => {
-    httpMock.verify();
   });
 
   // -------------------------------------------------------------------------
@@ -142,19 +123,15 @@ describe('PaymentProcessorComponent — Property-Based Tests', () => {
    * 2. Show the correct campaign price
    * 3. Have the payment form ready for input
    *
-   * This validates that the payment process is initiated for any paid campaign.
-   *
    * **Validates: Requirements 4.2**
    * Feature: search-campaigns, Property 13: Paid Campaign Payment Initiation
    */
   it('Property 13: For any paid campaign, the payment processor should be ready to initiate payment', () => {
     fc.assert(
       fc.property(paidCampaignArb, (campaign) => {
-        // Create a fresh fixture for each campaign
         const localFixture = TestBed.createComponent(PaymentProcessorComponent);
         const localComponent = localFixture.componentInstance;
 
-        // Set the paid campaign as input
         localComponent.campaign = campaign;
         localFixture.detectChanges();
 
@@ -174,7 +151,6 @@ describe('PaymentProcessorComponent — Property-Based Tests', () => {
         // Property: the formatted price should reflect the campaign's joinPrice
         const formattedPrice = localComponent.formattedPrice;
         expect(formattedPrice).toBeTruthy();
-        // For any positive price, the formatted price should be non-empty
         expect(formattedPrice.length).toBeGreaterThan(0);
 
         // Property: scenario options should include all PaymentScenario values
@@ -192,8 +168,8 @@ describe('PaymentProcessorComponent — Property-Based Tests', () => {
   });
 
   /**
-   * Property 13 (supplementary): For any paid campaign, clicking join should
-   * emit a paymentCancelled event when the user cancels, not an enrollment.
+   * Property 13 (supplementary): For any paid campaign, cancelling payment
+   * should emit paymentCancelled, not paymentSubmit.
    *
    * **Validates: Requirements 4.2**
    * Feature: search-campaigns, Property 13: Paid Campaign Payment Initiation
@@ -207,17 +183,16 @@ describe('PaymentProcessorComponent — Property-Based Tests', () => {
         localFixture.detectChanges();
 
         let cancelledEmitted = false;
-        let completeEmitted = false;
+        let submitEmitted = false;
 
         localComponent.paymentCancelled.subscribe(() => { cancelledEmitted = true; });
-        localComponent.paymentComplete.subscribe(() => { completeEmitted = true; });
+        localComponent.paymentSubmit.subscribe(() => { submitEmitted = true; });
 
-        // Cancel the payment
         localComponent.cancelPayment();
 
-        // Property: cancellation should emit paymentCancelled, not paymentComplete
+        // Property: cancellation should emit paymentCancelled, not paymentSubmit
         expect(cancelledEmitted).toBeTrue();
-        expect(completeEmitted).toBeFalse();
+        expect(submitEmitted).toBeFalse();
 
         localFixture.destroy();
       }),
@@ -233,13 +208,9 @@ describe('PaymentProcessorComponent — Property-Based Tests', () => {
   /**
    * **Property 20: Payment Failure Simulation**
    *
-   * For any payment request with a failure scenario, the system should simulate
-   * the appropriate failure and return the corresponding error message.
-   *
-   * This tests that:
-   * 1. Selecting a failure scenario marks the component as a failure scenario
-   * 2. When a failure result is received, the component shows the error message
-   * 3. The paymentComplete event is emitted with success=false and an errorMessage
+   * For any failure scenario, selecting it should mark the component as a
+   * failure scenario, and calling notifyResult() with a failure result should
+   * display the error message.
    *
    * **Validates: Requirements 5.5**
    * Feature: search-campaigns, Property 20: Payment Failure Simulation
@@ -263,15 +234,8 @@ describe('PaymentProcessorComponent — Property-Based Tests', () => {
           expect(localComponent.isFailureScenario).toBeTrue();
           expect(localComponent.selectedScenario).toBe(scenario);
 
-          // Simulate receiving a failure result (as if from the payment service)
-          const emittedResults: PaymentResult[] = [];
-          localComponent.paymentComplete.subscribe((r) => emittedResults.push(r));
-
-          // Directly trigger the result (simulating what processPayment does on error)
-          (localComponent as any).processing = false;
-          (localComponent as any).paymentResult = failureResult;
-          (localComponent as any).showResult = true;
-          localComponent.paymentComplete.emit(failureResult);
+          // Simulate the parent calling notifyResult() after the API responds
+          localComponent.notifyResult(failureResult);
           localFixture.detectChanges();
 
           // Property: result screen should be shown
@@ -285,10 +249,6 @@ describe('PaymentProcessorComponent — Property-Based Tests', () => {
           expect(localComponent.paymentResult!.errorMessage).toBeTruthy();
           expect(localComponent.paymentResult!.errorMessage!.length).toBeGreaterThan(0);
 
-          // Property: paymentComplete was emitted with success=false
-          expect(emittedResults.length).toBeGreaterThan(0);
-          expect(emittedResults[emittedResults.length - 1].success).toBeFalse();
-
           localFixture.destroy();
         },
       ),
@@ -297,13 +257,13 @@ describe('PaymentProcessorComponent — Property-Based Tests', () => {
   });
 
   /**
-   * Property 20 (supplementary): For any failure scenario, the PaymentService
-   * should be called with the correct scenario parameter.
+   * Property 20 (supplementary): For any failure scenario, processPayment()
+   * should emit paymentSubmit with the correct scenario in the payload.
    *
    * **Validates: Requirements 5.5**
    * Feature: search-campaigns, Property 20: Payment Failure Simulation
    */
-  it('Property 20: For any failure scenario, processPayment should send the scenario to the service', () => {
+  it('Property 20: For any failure scenario, processPayment should emit paymentSubmit with that scenario', () => {
     fc.assert(
       fc.property(failureScenarioArb, (scenario) => {
         const localFixture = TestBed.createComponent(PaymentProcessorComponent);
@@ -311,10 +271,8 @@ describe('PaymentProcessorComponent — Property-Based Tests', () => {
         localComponent.campaign = makePaidCampaign();
         localFixture.detectChanges();
 
-        // Select the failure scenario
         localComponent.simulatePaymentScenario(scenario);
 
-        // Fill in valid form data
         localComponent.paymentForm.patchValue({
           cardholderName: 'Test User',
           cardNumber: '4111 1111 1111 1111',
@@ -322,25 +280,17 @@ describe('PaymentProcessorComponent — Property-Based Tests', () => {
           cvv: '123',
         });
 
-        // Trigger payment processing
+        const submittedData: any[] = [];
+        localComponent.paymentSubmit.subscribe((d) => submittedData.push(d));
+
         localComponent.processPayment();
 
-        // Verify the HTTP request was made with the correct scenario
-        const req = httpMock.expectOne('http://localhost:8080/api/payments/process');
-        expect(req.request.method).toBe('POST');
-        expect(req.request.body.simulationScenario).toBe(scenario);
+        // Property: paymentSubmit should be emitted with the selected scenario
+        expect(submittedData.length).toBe(1);
+        expect(submittedData[0].simulationScenario).toBe(scenario);
 
-        // Simulate failure response
-        const failureResult: PaymentResult = {
-          success: false,
-          errorMessage: `Simulated failure: ${scenario}`,
-        };
-        req.flush(failureResult);
-        localFixture.detectChanges();
-
-        // Property: after failure, result screen should show
-        expect(localComponent.showResult).toBeTrue();
-        expect(localComponent.paymentResult!.success).toBeFalse();
+        // Property: component should be in processing state (waiting for parent)
+        expect(localComponent.processing).toBeTrue();
 
         localFixture.destroy();
       }),
@@ -349,7 +299,7 @@ describe('PaymentProcessorComponent — Property-Based Tests', () => {
   });
 
   // -------------------------------------------------------------------------
-  // Additional unit tests for component behavior
+  // Unit tests
   // -------------------------------------------------------------------------
 
   describe('Unit tests', () => {
@@ -408,22 +358,49 @@ describe('PaymentProcessorComponent — Property-Based Tests', () => {
       expect(cancelled).toBeTrue();
     });
 
-    it('should show success result screen after successful payment', () => {
-      // Simulate a successful payment result
-      component['paymentResult'] = { success: true, transactionId: 'txn-123', enrollmentConfirmed: true };
-      component['showResult'] = true;
-      component['cdr'].markForCheck();
+    it('should emit paymentSubmit with correct data when form is valid', () => {
+      component.paymentForm.patchValue({
+        cardholderName: 'Test User',
+        cardNumber: '4111 1111 1111 1111',
+        expiryDate: '12/26',
+        cvv: '123',
+      });
+
+      const submitted: any[] = [];
+      component.paymentSubmit.subscribe((d) => submitted.push(d));
+
+      component.processPayment();
+
+      expect(submitted.length).toBe(1);
+      expect(submitted[0].campaignId).toBe('camp-paid-1');
+      expect(submitted[0].amount).toBe(9.99);
+      expect(component.processing).toBeTrue();
+    });
+
+    it('should not emit paymentSubmit when form is invalid', () => {
+      component.paymentForm.patchValue({ cardNumber: '', cardholderName: '' });
+
+      const submitted: any[] = [];
+      component.paymentSubmit.subscribe((d) => submitted.push(d));
+
+      component.processPayment();
+
+      expect(submitted.length).toBe(0);
+      expect(component.processing).toBeFalse();
+    });
+
+    it('should show success result screen after notifyResult() with success', () => {
+      component.notifyResult({ success: true, transactionId: 'txn-123', enrollmentConfirmed: true });
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement as HTMLElement;
       const successTitle = compiled.querySelector('[data-testid="payment-success-title"]');
       expect(successTitle).toBeTruthy();
+      expect(component.processing).toBeFalse();
     });
 
-    it('should show failure result screen after failed payment', () => {
-      component['paymentResult'] = { success: false, errorMessage: 'Card declined' };
-      component['showResult'] = true;
-      component['cdr'].markForCheck();
+    it('should show failure result screen after notifyResult() with failure', () => {
+      component.notifyResult({ success: false, errorMessage: 'Card declined' });
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement as HTMLElement;
@@ -435,48 +412,12 @@ describe('PaymentProcessorComponent — Property-Based Tests', () => {
     });
 
     it('should reset result screen when retryPayment() is called', () => {
-      component['paymentResult'] = { success: false, errorMessage: 'Error' };
-      component['showResult'] = true;
+      component.notifyResult({ success: false, errorMessage: 'Error' });
       fixture.detectChanges();
 
       component.retryPayment();
       expect(component.showResult).toBeFalse();
       expect(component.paymentResult).toBeNull();
-    });
-
-    it('should not process payment when form is invalid', () => {
-      component.paymentForm.patchValue({ cardNumber: '', cardholderName: '' });
-      component.processPayment();
-
-      // No HTTP request should be made
-      httpMock.expectNone('http://localhost:8080/api/payments/process');
-      expect(component.processing).toBeFalse();
-    });
-
-    it('should process payment and emit result on success', () => {
-      component.paymentForm.patchValue({
-        cardholderName: 'Test User',
-        cardNumber: '4111 1111 1111 1111',
-        expiryDate: '12/26',
-        cvv: '123',
-      });
-
-      const emittedResults: PaymentResult[] = [];
-      component.paymentComplete.subscribe((r) => emittedResults.push(r));
-
-      component.processPayment();
-      expect(component.processing).toBeTrue();
-
-      const req = httpMock.expectOne('http://localhost:8080/api/payments/process');
-      const successResult: PaymentResult = { success: true, transactionId: 'txn-abc', enrollmentConfirmed: true };
-      req.flush(successResult);
-      fixture.detectChanges();
-
-      expect(component.processing).toBeFalse();
-      expect(component.showResult).toBeTrue();
-      expect(component.paymentResult!.success).toBeTrue();
-      expect(emittedResults.length).toBe(1);
-      expect(emittedResults[0].success).toBeTrue();
     });
   });
 });

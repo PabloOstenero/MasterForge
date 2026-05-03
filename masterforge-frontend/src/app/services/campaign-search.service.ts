@@ -32,11 +32,13 @@ import {
   Campaign,
   CampaignSearchResult,
   SearchCriteria,
-  PaymentData,
   EnrollmentResult,
   CapacityFilterType,
   AvailabilityFilterType,
 } from '../pages/search-campaigns/models/campaign.models';
+import {
+  PaymentData,
+} from '../shared/models/payment.models';
 import { environment } from '../../environments/environment';
 
 // ---------------------------------------------------------------------------

@@ -15,7 +15,7 @@
  * Validates: Requirements 1.1, 1.2, 6.1, 6.2, 6.4, 8.1, 8.4, 10.1, 10.2, 10.3, 10.4, 10.6
  */
 
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -50,8 +50,8 @@ import {
   SearchCriteria,
   CampaignSearchResult,
   AvailabilityFilterType,
-  PaymentResult,
 } from './models/campaign.models';
+import { PaymentData, PaymentResult } from '../../shared/models/payment.models';
 import { CampaignFilterComponent } from './components/campaign-filter/campaign-filter.component';
 import { CampaignListComponent } from './components/campaign-list/campaign-list.component';
 import { SearchInputComponent } from './components/search-input/search-input.component';
@@ -85,6 +85,12 @@ const DEFAULT_PAGE_SIZE = 20;
   ],
 })
 export class SearchCampaignsPage implements OnInit, OnDestroy {
+  // ── ViewChild ──────────────────────────────────────────────────────────────
+
+  /** Reference to the payment processor so we can call notifyResult() on it. */
+  @ViewChild(PaymentProcessorComponent)
+  private paymentProcessor?: PaymentProcessorComponent;
+
   // ── State ──────────────────────────────────────────────────────────────────
 
   campaigns: Campaign[] = [];
@@ -247,16 +253,37 @@ export class SearchCampaignsPage implements OnInit, OnDestroy {
   }
 
   /**
-   * Called by PaymentProcessorComponent when payment + enrollment completes.
-   * Req 5.4: The component already called join-paid which handles both payment and enrollment.
+   * Called by PaymentProcessorComponent when the user submits the payment form.
+   * This is where the enrollment API call lives — the component only collects data.
+   * Req 4.2, 5.4, 5.5
    */
-  onPaymentComplete(result: PaymentResult): void {
-    if (result.success) {
-      this.paymentCampaign = null;
-      this.notificationService.showSuccess('¡Pago procesado y campaña unida exitosamente!');
-      this.refreshCurrentPage();
-    }
-    // On failure, PaymentProcessorComponent shows the error — keep it open.
+  onPaymentSubmit(paymentData: PaymentData): void {
+    if (!this.paymentCampaign) return;
+
+    this.campaignSearchService.joinPaidCampaign(this.paymentCampaign.id, paymentData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (enrollmentResult) => {
+          const result: PaymentResult = {
+            success: enrollmentResult.success,
+            errorMessage: enrollmentResult.success ? undefined : enrollmentResult.message,
+            enrollmentConfirmed: enrollmentResult.success,
+          };
+          this.paymentProcessor?.notifyResult(result);
+          if (result.success) {
+            this.notificationService.showSuccess('¡Pago procesado y campaña unida exitosamente!');
+            this.paymentCampaign = null;
+            this.refreshCurrentPage();
+          }
+        },
+        error: (err: Error) => {
+          const result: PaymentResult = {
+            success: false,
+            errorMessage: err.message ?? 'Error al procesar el pago. Por favor, inténtalo de nuevo.',
+          };
+          this.paymentProcessor?.notifyResult(result);
+        },
+      });
   }
 
   /**

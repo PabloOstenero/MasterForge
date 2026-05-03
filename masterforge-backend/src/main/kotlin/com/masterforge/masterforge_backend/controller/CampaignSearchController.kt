@@ -1,5 +1,6 @@
 package com.masterforge.masterforge_backend.controller
 
+import com.masterforge.masterforge_backend.config.SecurityUtils
 import com.masterforge.masterforge_backend.model.dto.CampaignAvailabilityDto
 import com.masterforge.masterforge_backend.model.dto.CampaignAvailabilityUpdateDto
 import com.masterforge.masterforge_backend.model.dto.CampaignSearchResponseDto
@@ -10,7 +11,6 @@ import com.masterforge.masterforge_backend.service.CampaignSearchService
 import com.masterforge.masterforge_backend.service.EnrollmentService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import java.math.BigDecimal
@@ -176,17 +176,7 @@ class CampaignSearchController(
     /**
      * Extract the authenticated user's UUID from the security context.
      *
-     * The JWT filter stores the user ID as the authentication principal name.
-     *
-     * @throws ResponseStatusException 401 if no authentication is present
+     * Delegates to [SecurityUtils.getCurrentUserId].
      */
-    private fun getCurrentUserId(): UUID {
-        val authentication = SecurityContextHolder.getContext().authentication
-            ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required")
-        return try {
-            UUID.fromString(authentication.name)
-        } catch (ex: IllegalArgumentException) {
-            throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid authentication token")
-        }
-    }
+    private fun getCurrentUserId(): UUID = SecurityUtils.getCurrentUserId()
 }

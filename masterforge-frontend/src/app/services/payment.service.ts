@@ -20,7 +20,7 @@ import {
   PaymentResult,
   PaymentScenario,
   PaymentTransaction,
-} from '../pages/search-campaigns/models/campaign.models';
+} from '../shared/models/payment.models';
 
 // ---------------------------------------------------------------------------
 // Constants

@@ -8,7 +8,6 @@ import com.masterforge.masterforge_backend.repository.CampaignEnrollmentReposito
 import com.masterforge.masterforge_backend.repository.CampaignRepository
 import com.masterforge.masterforge_backend.repository.UserRepository
 import org.springframework.cache.annotation.CacheEvict
-import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -29,7 +28,7 @@ class EnrollmentService(
     private val enrollmentRepository: CampaignEnrollmentRepository,
     private val campaignRepository: CampaignRepository,
     private val userRepository: UserRepository,
-    @Lazy private val mockPaymentService: MockPaymentService
+    private val paymentService: PaymentService
 ) {
 
     /**
@@ -266,7 +265,7 @@ class EnrollmentService(
     }
 
     /**
-     * Delegates payment processing to [MockPaymentService] in a new transaction so that
+     * Delegates payment processing to [PaymentService] in a new transaction so that
      * the payment audit record is persisted independently of the enrollment transaction.
      *
      * ACADEMIC DISCLAIMER: This is a mock payment system for educational purposes only.
@@ -274,5 +273,5 @@ class EnrollmentService(
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun processPaymentInNewTransaction(
         paymentRequest: PaymentRequest
-    ) = mockPaymentService.processPayment(paymentRequest)
+    ) = paymentService.processPayment(paymentRequest)
 }
