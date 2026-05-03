@@ -1,0 +1,183 @@
+<ion-content class="campaign-detail-content">
+  <div class="page-container ion-padding">
+
+    <!-- ── Back navigation ── -->
+    <button class="back-btn" (click)="goBack()" data-testid="btn-back" aria-label="Volver">
+      <ion-icon name="arrow-back-outline"></ion-icon>
+      <span>Volver</span>
+    </button>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         TOP SECTION — Campaign info (always visible)
+    ══════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Campaign loading -->
+    @if (loadingCampaign) {
+      <div class="loading-container" data-testid="spinner-campaign">
+        <ion-spinner name="crescent"></ion-spinner>
+      </div>
+    }
+
+    <!-- Campaign error -->
+    @if (errorCampaign) {
+      <p class="error-msg" data-testid="error-campaign">{{ errorCampaign }}</p>
+    }
+
+    <!-- Campaign info -->
+    @if (!loadingCampaign && campaign) {
+      <div class="campaign-header" data-testid="campaign-header">
+        <h1 class="campaign-title" data-testid="campaign-name">{{ campaign.name }}</h1>
+        @if (campaign.description) {
+          <p class="campaign-description" data-testid="campaign-description">{{ campaign.description }}</p>
+        }
+        <div class="campaign-meta">
+          <span class="meta-item">
+            <ion-icon name="people-outline"></ion-icon>
+            {{ campaign.maxPlayers }} jugadores máx.
+          </span>
+          <span class="meta-item meta-item--gold">
+            <ion-icon name="cash-outline"></ion-icon>
+            {{ formatPrice(campaign.joinPrice) }}
+          </span>
+        </div>
+      </div>
+    }
+
+    <!-- ── Sessions section ── -->
+    <div class="section" data-testid="sessions-section">
+      <h2 class="section-title">
+        <ion-icon name="calendar-outline"></ion-icon>
+        Sesiones
+      </h2>
+
+      @if (loadingSessions) {
+        <div class="loading-container" data-testid="spinner-sessions">
+          <ion-spinner name="crescent"></ion-spinner>
+        </div>
+      }
+
+      @if (errorSessions) {
+        <p class="error-msg" data-testid="error-sessions">{{ errorSessions }}</p>
+      }
+
+      @if (!loadingSessions && !errorSessions) {
+        @if (sessions.length === 0) {
+          <p class="empty-msg" data-testid="empty-sessions">No hay sesiones programadas para esta campaña.</p>
+        } @else {
+          <ion-list class="sessions-list" data-testid="sessions-list">
+            @for (session of sessions; track session.id) {
+              <ion-item class="session-item" data-testid="session-item">
+                <ion-label>
+                  <span class="session-date" data-testid="session-date">{{ formatDate(session.scheduledDate) }}</span>
+                  <span class="session-price" data-testid="session-price">{{ formatPrice(session.price) }}</span>
+                </ion-label>
+              </ion-item>
+            }
+          </ion-list>
+        }
+      }
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         SEGMENTED SECTION — Players / Characters
+    ══════════════════════════════════════════════════════════════════════ -->
+
+    <ion-segment
+      [value]="activeSegment"
+      (ionChange)="segmentChanged($event)"
+      class="detail-segment"
+      data-testid="detail-segment">
+      <ion-segment-button value="jugadores" data-testid="segment-btn-jugadores">
+        <ion-label>Jugadores</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="personajes" data-testid="segment-btn-personajes">
+        <ion-label>Personajes</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
+    <!-- ── Players segment ── -->
+    @if (activeSegment === 'jugadores') {
+      <div class="segment-panel" data-testid="panel-jugadores">
+
+        @if (loadingPlayers) {
+          <div class="loading-container" data-testid="spinner-players">
+            <ion-spinner name="crescent"></ion-spinner>
+          </div>
+        }
+
+        @if (errorPlayers) {
+          <p class="error-msg" data-testid="error-players">{{ errorPlayers }}</p>
+        }
+
+        @if (!loadingPlayers && !errorPlayers) {
+          @if (players.length === 0) {
+            <p class="empty-msg" data-testid="empty-players">No hay jugadores inscritos en esta campaña.</p>
+          } @else {
+            <ion-list class="players-list" data-testid="players-list">
+              @for (player of players; track player.id) {
+                <ion-item class="player-item" data-testid="player-item">
+                  <ion-icon name="person-outline" slot="start" class="player-icon"></ion-icon>
+                  <ion-label>
+                    <h3 class="player-name" data-testid="player-name">{{ player.name }}</h3>
+                    <p class="player-email" data-testid="player-email">{{ player.email }}</p>
+                  </ion-label>
+                </ion-item>
+              }
+            </ion-list>
+          }
+        }
+
+      </div>
+    }
+
+    <!-- ── Characters segment ── -->
+    @if (activeSegment === 'personajes') {
+      <div class="segment-panel" data-testid="panel-personajes">
+
+        @if (loadingPlayers) {
+          <div class="loading-container" data-testid="spinner-characters">
+            <ion-spinner name="crescent"></ion-spinner>
+          </div>
+        }
+
+        @if (errorPlayers) {
+          <p class="error-msg" data-testid="error-characters">{{ errorPlayers }}</p>
+        }
+
+        @if (!loadingPlayers && !errorPlayers) {
+          @if (!hasAnyCharacters) {
+            <p class="empty-msg" data-testid="empty-characters">No hay personajes registrados para esta campaña.</p>
+          } @else {
+            <div class="characters-grouped" data-testid="characters-grouped">
+              @for (player of players; track player.id) {
+                @if (player.characters.length > 0) {
+                  <div class="player-group" data-testid="player-group">
+                    <h3 class="player-group-header" data-testid="player-group-header">{{ player.name }}</h3>
+                    <ion-list class="characters-list">
+                      @for (char of player.characters; track char.id) {
+                        <ion-item class="character-item" data-testid="character-item">
+                          <ion-label>
+                            <span class="char-name" data-testid="char-name">{{ char.name }}</span>
+                            <span class="char-details">
+                              <span data-testid="char-class">{{ char.dndClass }}</span>
+                              &nbsp;·&nbsp;
+                              <span data-testid="char-race">{{ char.dndRace }}</span>
+                              &nbsp;·&nbsp;
+                              Nivel <span data-testid="char-level">{{ char.level }}</span>
+                            </span>
+                          </ion-label>
+                        </ion-item>
+                      }
+                    </ion-list>
+                  </div>
+                }
+              }
+            </div>
+          }
+        }
+
+      </div>
+    }
+
+  </div>
+</ion-content>

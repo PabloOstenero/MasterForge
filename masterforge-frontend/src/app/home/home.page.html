@@ -51,7 +51,7 @@
                   <h3 class="gold-title">Título: "{{ campaign.name }}"</h3>
                   <p class="text-muted">({{ campaign.description || 'SRD' }})</p>
                 </ion-label>
-                <div slot="end" class="view-link">[Ver]</div>
+                <a class="view-link" [routerLink]="['/campaigns', campaign.id]">[Ver]</a>
               </ion-item>
             }
           </ion-list>

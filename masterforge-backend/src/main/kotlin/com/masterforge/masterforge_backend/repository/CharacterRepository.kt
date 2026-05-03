@@ -25,5 +25,7 @@ interface CharacterRepository : JpaRepository<Character, UUID> {
           AND c.campaign.owner.id = :dmId
     """)
     fun findCharactersByDmId(@Param("dmId") dmId: UUID): List<Character>
+
+    fun findByCampaignIdAndUserId(campaignId: UUID, userId: UUID): List<Character>
 }
 

@@ -512,23 +512,35 @@ describe('HomePage — Property-Based Tests', () => {
   });
 
   // -------------------------------------------------------------------------
-  // Property 15: Player dashboard total character count
-  // Feature: home-page-redesign, Property 15: Player dashboard total character count
+  // Property 15: Player dashboard campaign list count
+  // Feature: home-page-redesign, Property 15: Player dashboard campaign list count
   // Validates: Requirements 6.1
   // -------------------------------------------------------------------------
-  it('P15 — player dashboard renders sum of all characters across all users', () => {
+  it('P15 — player dashboard renders the correct number of player campaign items', () => {
+    const playerCampaignArb = fc.record({
+      campaignId: fc.uuid(),
+      campaignName: fc.string({ minLength: 1, maxLength: 40 }),
+      dmName: fc.string({ minLength: 1, maxLength: 30 }),
+      nextSessionDate: fc.oneof(
+        fc.constant(null),
+        fc.date({ min: new Date('2024-01-01'), max: new Date('2030-12-31') })
+          .filter(d => !isNaN(d.getTime()))
+          .map(d => d.toISOString())
+      ),
+    });
+
     fc.assert(
       fc.property(
-        fc.array(userArb, { minLength: 0, maxLength: 6 }),
-        (users) => {
+        fc.array(playerCampaignArb, { minLength: 0, maxLength: 6 }),
+        (campaigns) => {
           roleSubject.next('player');
-          component.users = users;
-          component.loadingUsers = false;
+          component.playerCampaigns = campaigns;
+          component.loadingPlayerCampaigns = false;
+          component.errorPlayerCampaigns = null;
           fixture.detectChanges();
 
-          const totalChars = users.reduce((sum, u) => sum + u.characters.length, 0);
-          const cards = fixture.nativeElement.querySelectorAll('[data-testid="player-character-card"]');
-          expect(cards.length).toBe(totalChars);
+          const items = fixture.nativeElement.querySelectorAll('[data-testid="player-campaign-item"]');
+          expect(items.length).toBe(campaigns.length);
         }
       ),
       { numRuns: 50 }

@@ -5,10 +5,12 @@ import com.masterforge.masterforge_backend.model.entity.Character
 import com.masterforge.masterforge_backend.model.entity.DndClass
 import com.masterforge.masterforge_backend.model.entity.DndRace
 import com.masterforge.masterforge_backend.model.entity.User
+import com.masterforge.masterforge_backend.repository.CampaignEnrollmentRepository
 import com.masterforge.masterforge_backend.repository.CampaignRepository
 import com.masterforge.masterforge_backend.repository.CharacterRepository
 import com.masterforge.masterforge_backend.repository.DndClassRepository
 import com.masterforge.masterforge_backend.repository.DndRaceRepository
+import com.masterforge.masterforge_backend.repository.SessionRepository
 import com.masterforge.masterforge_backend.repository.UserRepository
 import com.masterforge.masterforge_backend.service.JwtService
 import io.kotest.core.spec.style.StringSpec
@@ -49,6 +51,8 @@ class CampaignPlayersControllerPropertyTest : StringSpec() {
     @Autowired lateinit var userRepository: UserRepository
     @Autowired lateinit var characterRepository: CharacterRepository
     @Autowired lateinit var campaignRepository: CampaignRepository
+    @Autowired lateinit var campaignEnrollmentRepository: CampaignEnrollmentRepository
+    @Autowired lateinit var sessionRepository: SessionRepository
     @Autowired lateinit var dndClassRepository: DndClassRepository
     @Autowired lateinit var dndRaceRepository: DndRaceRepository
     @Autowired lateinit var jwtService: JwtService
@@ -202,6 +206,8 @@ class CampaignPlayersControllerPropertyTest : StringSpec() {
 
     private fun cleanup() {
         characterRepository.deleteAll()
+        sessionRepository.deleteAll()
+        campaignEnrollmentRepository.deleteAll()
         campaignRepository.deleteAll()
         userRepository.deleteAll()
         dndClassRepository.deleteAll()

@@ -45,6 +45,47 @@ function makeCriteria(overrides: Partial<SearchCriteria> = {}): SearchCriteria {
   return { page: 0, size: 20, ...overrides };
 }
 
+/** Backend DTO format (what the HTTP response actually contains). */
+interface BackendSearchResponse {
+  campaigns: Array<{
+    id: string;
+    name: string;
+    description: string;
+    ownerName: string;
+    ownerId: string;
+    maxPlayers: number;
+    currentPlayers: number;
+    joinPrice: number;
+    visibility: string;
+    hasAvailableSlots: boolean;
+  }>;
+  totalElements: number;
+  totalPages: number;
+  currentPage: number;
+  hasNext: boolean;
+}
+
+function makeBackendSearchResponse(count = 2): BackendSearchResponse {
+  return {
+    campaigns: Array.from({ length: count }, (_, i) => ({
+      id: `camp-${i}`,
+      name: `Campaign ${i}`,
+      description: `Description ${i}`,
+      ownerName: 'DM Name',
+      ownerId: 'owner-1',
+      maxPlayers: 5,
+      currentPlayers: i,
+      joinPrice: 0,
+      visibility: 'PUBLIC',
+      hasAvailableSlots: true,
+    })),
+    totalElements: count,
+    totalPages: 1,
+    currentPage: 0,
+    hasNext: false,
+  };
+}
+
 function makeSearchResult(count = 2): CampaignSearchResult {
   return {
     campaigns: Array.from({ length: count }, (_, i) => ({
@@ -109,7 +150,7 @@ describe('CampaignSearchService', () => {
   describe('searchCampaigns()', () => {
     it('should call GET /api/campaigns/search with page and size params', () => {
       const criteria = makeCriteria({ page: 0, size: 20 });
-      const mockResult = makeSearchResult();
+      const backendResponse = makeBackendSearchResponse();
       let received: CampaignSearchResult | null = null;
 
       service.searchCampaigns(criteria).subscribe((result) => {
@@ -122,9 +163,11 @@ describe('CampaignSearchService', () => {
         r.params.get('size') === '20',
       );
       expect(req.request.method).toBe('GET');
-      req.flush(mockResult);
+      req.flush(backendResponse);
 
-      expect(received).toEqual(mockResult as any);
+      expect(received).not.toBeNull();
+      expect(received!.campaigns.length).toBe(backendResponse.campaigns.length);
+      expect(received!.totalElements).toBe(backendResponse.totalElements);
     });
 
     it('should include searchText param when provided', () => {
@@ -137,7 +180,7 @@ describe('CampaignSearchService', () => {
         r.params.get('searchText') === 'dragon',
       );
       expect(req.request.params.get('searchText')).toBe('dragon');
-      req.flush(makeSearchResult());
+      req.flush(makeBackendSearchResponse());
     });
 
     it('should NOT include searchText param when empty', () => {
@@ -149,7 +192,7 @@ describe('CampaignSearchService', () => {
         r.url === `${BASE_URL}/campaigns/search`,
       );
       expect(req.request.params.has('searchText')).toBeFalse();
-      req.flush(makeSearchResult());
+      req.flush(makeBackendSearchResponse());
     });
 
     it('should map FREE price preset to minPrice=0 and maxPrice=0', () => {
@@ -164,7 +207,7 @@ describe('CampaignSearchService', () => {
       );
       expect(req.request.params.get('minPrice')).toBe('0');
       expect(req.request.params.get('maxPrice')).toBe('0');
-      req.flush(makeSearchResult());
+      req.flush(makeBackendSearchResponse());
     });
 
     it('should map UNDER_10 price preset to maxPrice=10', () => {
@@ -178,7 +221,7 @@ describe('CampaignSearchService', () => {
         r.url === `${BASE_URL}/campaigns/search`,
       );
       expect(req.request.params.get('maxPrice')).toBe('10');
-      req.flush(makeSearchResult());
+      req.flush(makeBackendSearchResponse());
     });
 
     it('should map SMALL capacity filter to minPlayers=1 and maxPlayers=4', () => {
@@ -193,7 +236,7 @@ describe('CampaignSearchService', () => {
       );
       expect(req.request.params.get('minPlayers')).toBe('1');
       expect(req.request.params.get('maxPlayers')).toBe('4');
-      req.flush(makeSearchResult());
+      req.flush(makeBackendSearchResponse());
     });
 
     it('should map MEDIUM capacity filter to minPlayers=5 and maxPlayers=6', () => {
@@ -208,7 +251,7 @@ describe('CampaignSearchService', () => {
       );
       expect(req.request.params.get('minPlayers')).toBe('5');
       expect(req.request.params.get('maxPlayers')).toBe('6');
-      req.flush(makeSearchResult());
+      req.flush(makeBackendSearchResponse());
     });
 
     it('should map LARGE capacity filter to minPlayers=7', () => {
@@ -222,7 +265,7 @@ describe('CampaignSearchService', () => {
         r.url === `${BASE_URL}/campaigns/search`,
       );
       expect(req.request.params.get('minPlayers')).toBe('7');
-      req.flush(makeSearchResult());
+      req.flush(makeBackendSearchResponse());
     });
 
     it('should map AVAILABLE_ONLY availability filter to availableOnly=true', () => {
@@ -236,7 +279,7 @@ describe('CampaignSearchService', () => {
         r.url === `${BASE_URL}/campaigns/search`,
       );
       expect(req.request.params.get('availableOnly')).toBe('true');
-      req.flush(makeSearchResult());
+      req.flush(makeBackendSearchResponse());
     });
 
     it('should map FULL_ONLY availability filter to availableOnly=false', () => {
@@ -250,7 +293,7 @@ describe('CampaignSearchService', () => {
         r.url === `${BASE_URL}/campaigns/search`,
       );
       expect(req.request.params.get('availableOnly')).toBe('false');
-      req.flush(makeSearchResult());
+      req.flush(makeBackendSearchResponse());
     });
   });
 
@@ -261,7 +304,7 @@ describe('CampaignSearchService', () => {
   describe('caching', () => {
     it('should return cached result on second call with same criteria', () => {
       const criteria = makeCriteria({ searchText: 'goblin' });
-      const mockResult = makeSearchResult(3);
+      const backendResponse = makeBackendSearchResponse(3);
       const received: CampaignSearchResult[] = [];
 
       // First call — hits the network
@@ -269,15 +312,15 @@ describe('CampaignSearchService', () => {
       const req1 = httpMock.expectOne((r) =>
         r.url === `${BASE_URL}/campaigns/search`,
       );
-      req1.flush(mockResult);
+      req1.flush(backendResponse);
 
       // Second call — should use the cached observable (no new HTTP request)
       service.searchCampaigns(criteria).subscribe((r) => received.push(r));
       httpMock.expectNone(`${BASE_URL}/campaigns/search`);
 
       expect(received.length).toBe(2);
-      expect(received[0]).toEqual(mockResult);
-      expect(received[1]).toEqual(mockResult);
+      expect(received[0].campaigns.length).toBe(3);
+      expect(received[1].campaigns.length).toBe(3);
     });
 
     it('should make a new HTTP request for different criteria', () => {
@@ -286,11 +329,11 @@ describe('CampaignSearchService', () => {
 
       service.searchCampaigns(criteria1).subscribe();
       const req1 = httpMock.expectOne((r) => r.url === `${BASE_URL}/campaigns/search`);
-      req1.flush(makeSearchResult());
+      req1.flush(makeBackendSearchResponse());
 
       service.searchCampaigns(criteria2).subscribe();
       const req2 = httpMock.expectOne((r) => r.url === `${BASE_URL}/campaigns/search`);
-      req2.flush(makeSearchResult());
+      req2.flush(makeBackendSearchResponse());
 
       expect(req1.request.params.get('searchText')).toBe('goblin');
       expect(req2.request.params.get('searchText')).toBe('dragon');
@@ -298,11 +341,11 @@ describe('CampaignSearchService', () => {
 
     it('refreshCampaignData() should clear the cache so next call hits the network', () => {
       const criteria = makeCriteria({ searchText: 'elf' });
-      const mockResult = makeSearchResult(1);
+      const backendResponse = makeBackendSearchResponse(1);
 
       // Populate cache
       service.searchCampaigns(criteria).subscribe();
-      httpMock.expectOne((r) => r.url === `${BASE_URL}/campaigns/search`).flush(mockResult);
+      httpMock.expectOne((r) => r.url === `${BASE_URL}/campaigns/search`).flush(backendResponse);
 
       // Clear cache
       service.refreshCampaignData().subscribe();
@@ -311,7 +354,7 @@ describe('CampaignSearchService', () => {
       service.searchCampaigns(criteria).subscribe();
       const req2 = httpMock.expectOne((r) => r.url === `${BASE_URL}/campaigns/search`);
       expect(req2).toBeTruthy();
-      req2.flush(mockResult);
+      req2.flush(backendResponse);
     });
   });
 

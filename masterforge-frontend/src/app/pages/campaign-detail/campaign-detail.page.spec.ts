@@ -1,0 +1,403 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
+import { of } from 'rxjs';
+
+import { CampaignDetailPage } from './campaign-detail.page';
+import {
+  ApiService,
+  CampaignDetailDto,
+  SessionSummaryDto,
+  CampaignPlayerDto,
+} from '../../services/api';
+
+// ---------------------------------------------------------------------------
+// Test data helpers
+// ---------------------------------------------------------------------------
+
+const CAMPAIGN_ID = 'test-campaign-id';
+
+const mockCampaign: CampaignDetailDto = {
+  id: CAMPAIGN_ID,
+  name: 'Test Campaign',
+  description: 'A test campaign description',
+  maxPlayers: 6,
+  joinPrice: 10,
+  visibility: 'PUBLIC',
+};
+
+const mockSessions: SessionSummaryDto[] = [
+  { id: 'session-1', scheduledDate: '2025-06-01T18:00:00.000Z', price: 10 },
+  { id: 'session-2', scheduledDate: '2025-06-15T18:00:00.000Z', price: 10 },
+];
+
+const mockPlayers: CampaignPlayerDto[] = [
+  {
+    id: 'player-1',
+    name: 'Aragorn',
+    email: 'aragorn@example.com',
+    subscriptionTier: 'PREMIUM',
+    characters: [
+      { id: 'char-1', name: 'Strider', level: 5, dndClass: 'Ranger', dndRace: 'Human' },
+    ],
+  },
+  {
+    id: 'player-2',
+    name: 'Legolas',
+    email: 'legolas@example.com',
+    subscriptionTier: 'FREE',
+    characters: [],
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function buildApiSpy(): jasmine.SpyObj<ApiService> {
+  const spy = jasmine.createSpyObj<ApiService>('ApiService', [
+    'getCampaignById',
+    'getCampaignSessions',
+    'getCampaignPlayers',
+  ]);
+  spy.getCampaignById.and.returnValue(of(mockCampaign));
+  spy.getCampaignSessions.and.returnValue(of(mockSessions));
+  spy.getCampaignPlayers.and.returnValue(of(mockPlayers));
+  return spy;
+}
+
+function buildActivatedRouteStub(id: string = CAMPAIGN_ID) {
+  return {
+    snapshot: {
+      paramMap: {
+        get: (key: string) => (key === 'id' ? id : null),
+      },
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// 12.1 — Component initialization and API calls
+// Validates: Requirements 4.2
+// ---------------------------------------------------------------------------
+
+describe('CampaignDetailPage — 12.1 Initialization and API calls', () => {
+
+  let fixture: ComponentFixture<CampaignDetailPage>;
+  let component: CampaignDetailPage;
+  let apiSpy: jasmine.SpyObj<ApiService>;
+
+  beforeEach(async () => {
+    apiSpy = buildApiSpy();
+
+    await TestBed.configureTestingModule({
+      imports: [CampaignDetailPage],
+      providers: [
+        { provide: ApiService, useValue: apiSpy },
+        { provide: ActivatedRoute, useValue: buildActivatedRouteStub() },
+        Location,
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(CampaignDetailPage);
+    component = fixture.componentInstance;
+  });
+
+  describe('ngOnInit', () => {
+    it('should call getCampaignById with the route id', () => {
+      fixture.detectChanges(); // triggers ngOnInit
+      expect(apiSpy.getCampaignById).toHaveBeenCalledWith(CAMPAIGN_ID);
+    });
+
+    it('should call getCampaignSessions with the route id', () => {
+      fixture.detectChanges();
+      expect(apiSpy.getCampaignSessions).toHaveBeenCalledWith(CAMPAIGN_ID);
+    });
+
+    it('should call getCampaignPlayers with the route id', () => {
+      fixture.detectChanges();
+      expect(apiSpy.getCampaignPlayers).toHaveBeenCalledWith(CAMPAIGN_ID);
+    });
+
+    it('should populate campaign, sessions, and players after successful API calls', () => {
+      fixture.detectChanges();
+      expect(component.campaign).toEqual(mockCampaign);
+      expect(component.sessions).toEqual(mockSessions);
+      expect(component.players).toEqual(mockPlayers);
+    });
+
+    it('should set all loading flags to false after successful API calls', () => {
+      fixture.detectChanges();
+      expect(component.loadingCampaign).toBeFalse();
+      expect(component.loadingSessions).toBeFalse();
+      expect(component.loadingPlayers).toBeFalse();
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 12.2 — Loading spinners and empty states
+// Validates: Requirements 4.4, 4.8, 4.9, 4.10
+// ---------------------------------------------------------------------------
+
+describe('CampaignDetailPage — 12.2 Loading spinners and empty states', () => {
+
+  let fixture: ComponentFixture<CampaignDetailPage>;
+  let component: CampaignDetailPage;
+  let apiSpy: jasmine.SpyObj<ApiService>;
+
+  beforeEach(async () => {
+    apiSpy = buildApiSpy();
+
+    await TestBed.configureTestingModule({
+      imports: [CampaignDetailPage],
+      providers: [
+        { provide: ApiService, useValue: apiSpy },
+        { provide: ActivatedRoute, useValue: buildActivatedRouteStub() },
+        Location,
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(CampaignDetailPage);
+    component = fixture.componentInstance;
+    // Run initial change detection so ngOnInit fires and the template is rendered.
+    // The API mocks return synchronously via of(), so loading flags will be false after this.
+    fixture.detectChanges();
+  });
+
+  describe('loading states', () => {
+    it('should show ion-spinner in campaign section while loadingCampaign is true', () => {
+      // Set loading flag AFTER ngOnInit has already cleared it, then re-render
+      component.loadingCampaign = true;
+      fixture.detectChanges();
+
+      const spinner = fixture.nativeElement.querySelector('[data-testid="spinner-campaign"] ion-spinner');
+      expect(spinner).toBeTruthy();
+    });
+
+    it('should show ion-spinner in sessions section while loadingSessions is true', () => {
+      component.loadingSessions = true;
+      fixture.detectChanges();
+
+      const spinner = fixture.nativeElement.querySelector('[data-testid="spinner-sessions"] ion-spinner');
+      expect(spinner).toBeTruthy();
+    });
+
+    it('should show ion-spinner in players section while loadingPlayers is true', () => {
+      component.loadingPlayers = true;
+      component.activeSegment = 'jugadores';
+      fixture.detectChanges();
+
+      const spinner = fixture.nativeElement.querySelector('[data-testid="spinner-players"] ion-spinner');
+      expect(spinner).toBeTruthy();
+    });
+
+    it('should show ion-spinner in characters section while loadingPlayers is true and segment is personajes', () => {
+      component.loadingPlayers = true;
+      component.activeSegment = 'personajes';
+      fixture.detectChanges();
+
+      const spinner = fixture.nativeElement.querySelector('[data-testid="spinner-characters"] ion-spinner');
+      expect(spinner).toBeTruthy();
+    });
+  });
+
+  describe('empty states', () => {
+    it('should show "No hay sesiones programadas para esta campaña." when sessions is empty', () => {
+      component.loadingSessions = false;
+      component.errorSessions = null;
+      component.sessions = [];
+      fixture.detectChanges();
+
+      const emptyMsg: HTMLElement = fixture.nativeElement.querySelector('[data-testid="empty-sessions"]');
+      expect(emptyMsg).toBeTruthy();
+      expect(emptyMsg.textContent).toContain('No hay sesiones programadas para esta campaña.');
+    });
+
+    it('should NOT show empty sessions message when sessions list is non-empty', () => {
+      component.loadingSessions = false;
+      component.errorSessions = null;
+      component.sessions = mockSessions;
+      fixture.detectChanges();
+
+      const emptyMsg = fixture.nativeElement.querySelector('[data-testid="empty-sessions"]');
+      expect(emptyMsg).toBeNull();
+    });
+
+    it('should show "No hay jugadores inscritos en esta campaña." when players is empty', () => {
+      component.loadingPlayers = false;
+      component.errorPlayers = null;
+      component.players = [];
+      component.activeSegment = 'jugadores';
+      fixture.detectChanges();
+
+      const emptyMsg: HTMLElement = fixture.nativeElement.querySelector('[data-testid="empty-players"]');
+      expect(emptyMsg).toBeTruthy();
+      expect(emptyMsg.textContent).toContain('No hay jugadores inscritos en esta campaña.');
+    });
+
+    it('should NOT show empty players message when players list is non-empty', () => {
+      component.loadingPlayers = false;
+      component.errorPlayers = null;
+      component.players = mockPlayers;
+      component.activeSegment = 'jugadores';
+      fixture.detectChanges();
+
+      const emptyMsg = fixture.nativeElement.querySelector('[data-testid="empty-players"]');
+      expect(emptyMsg).toBeNull();
+    });
+
+    it('should show "No hay personajes registrados para esta campaña." when all players have empty characters', () => {
+      const playersWithNoChars: CampaignPlayerDto[] = [
+        { id: 'p1', name: 'Player One', email: 'p1@test.com', subscriptionTier: 'FREE', characters: [] },
+        { id: 'p2', name: 'Player Two', email: 'p2@test.com', subscriptionTier: 'FREE', characters: [] },
+      ];
+      component.loadingPlayers = false;
+      component.errorPlayers = null;
+      component.players = playersWithNoChars;
+      component.activeSegment = 'personajes';
+      fixture.detectChanges();
+
+      const emptyMsg: HTMLElement = fixture.nativeElement.querySelector('[data-testid="empty-characters"]');
+      expect(emptyMsg).toBeTruthy();
+      expect(emptyMsg.textContent).toContain('No hay personajes registrados para esta campaña.');
+    });
+
+    it('should show "No hay personajes registrados para esta campaña." when players array is empty', () => {
+      component.loadingPlayers = false;
+      component.errorPlayers = null;
+      component.players = [];
+      component.activeSegment = 'personajes';
+      fixture.detectChanges();
+
+      const emptyMsg: HTMLElement = fixture.nativeElement.querySelector('[data-testid="empty-characters"]');
+      expect(emptyMsg).toBeTruthy();
+      expect(emptyMsg.textContent).toContain('No hay personajes registrados para esta campaña.');
+    });
+
+    it('should NOT show empty characters message when at least one player has characters', () => {
+      component.loadingPlayers = false;
+      component.errorPlayers = null;
+      component.players = mockPlayers; // mockPlayers[0] has 1 character
+      component.activeSegment = 'personajes';
+      fixture.detectChanges();
+
+      const emptyMsg = fixture.nativeElement.querySelector('[data-testid="empty-characters"]');
+      expect(emptyMsg).toBeNull();
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 12.3 — Back navigation and segment switching
+// Validates: Requirements 4.5, 4.12
+// ---------------------------------------------------------------------------
+
+describe('CampaignDetailPage — 12.3 Back navigation and segment switching', () => {
+
+  let fixture: ComponentFixture<CampaignDetailPage>;
+  let component: CampaignDetailPage;
+  let apiSpy: jasmine.SpyObj<ApiService>;
+  let location: Location;
+
+  beforeEach(async () => {
+    apiSpy = buildApiSpy();
+
+    await TestBed.configureTestingModule({
+      imports: [CampaignDetailPage],
+      providers: [
+        { provide: ApiService, useValue: apiSpy },
+        { provide: ActivatedRoute, useValue: buildActivatedRouteStub() },
+        Location,
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(CampaignDetailPage);
+    component = fixture.componentInstance;
+    location = TestBed.inject(Location);
+    fixture.detectChanges();
+  });
+
+  describe('goBack', () => {
+    it('should call Location.back() when back button is clicked', () => {
+      const backSpy = spyOn(location, 'back');
+
+      const backBtn: HTMLElement = fixture.nativeElement.querySelector('[data-testid="btn-back"]');
+      expect(backBtn).toBeTruthy();
+      backBtn.click();
+
+      expect(backSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call Location.back() when goBack() is called directly', () => {
+      const backSpy = spyOn(location, 'back');
+      component.goBack();
+      expect(backSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('segmentChanged', () => {
+    it('should update activeSegment to "personajes" when segment changes', () => {
+      expect(component.activeSegment).toBe('jugadores'); // default
+
+      component.segmentChanged({ detail: { value: 'personajes' } });
+
+      expect(component.activeSegment).toBe('personajes');
+    });
+
+    it('should update activeSegment back to "jugadores" when segment changes to jugadores', () => {
+      component.activeSegment = 'personajes';
+
+      component.segmentChanged({ detail: { value: 'jugadores' } });
+
+      expect(component.activeSegment).toBe('jugadores');
+    });
+
+    it('should show characters view (panel-personajes) when activeSegment is "personajes"', () => {
+      component.activeSegment = 'personajes';
+      component.loadingPlayers = false;
+      component.errorPlayers = null;
+      component.players = mockPlayers;
+      fixture.detectChanges();
+
+      const panel = fixture.nativeElement.querySelector('[data-testid="panel-personajes"]');
+      expect(panel).toBeTruthy();
+
+      const jugadoresPanel = fixture.nativeElement.querySelector('[data-testid="panel-jugadores"]');
+      expect(jugadoresPanel).toBeNull();
+    });
+
+    it('should show players view (panel-jugadores) when activeSegment is "jugadores"', () => {
+      component.activeSegment = 'jugadores';
+      component.loadingPlayers = false;
+      component.errorPlayers = null;
+      component.players = mockPlayers;
+      fixture.detectChanges();
+
+      const panel = fixture.nativeElement.querySelector('[data-testid="panel-jugadores"]');
+      expect(panel).toBeTruthy();
+
+      const personajesPanel = fixture.nativeElement.querySelector('[data-testid="panel-personajes"]');
+      expect(personajesPanel).toBeNull();
+    });
+
+    it('should switch from jugadores to personajes view after segmentChanged event', () => {
+      // Start on jugadores
+      component.activeSegment = 'jugadores';
+      component.loadingPlayers = false;
+      component.errorPlayers = null;
+      component.players = mockPlayers;
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('[data-testid="panel-jugadores"]')).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('[data-testid="panel-personajes"]')).toBeNull();
+
+      // Switch to personajes
+      component.segmentChanged({ detail: { value: 'personajes' } });
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('[data-testid="panel-personajes"]')).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('[data-testid="panel-jugadores"]')).toBeNull();
+    });
+  });
+});

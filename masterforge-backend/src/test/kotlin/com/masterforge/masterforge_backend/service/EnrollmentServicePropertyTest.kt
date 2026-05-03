@@ -39,7 +39,7 @@ import java.util.UUID
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
-@Import(EnrollmentService::class)
+@Import(EnrollmentService::class, MockPaymentService::class)
 class EnrollmentServicePropertyTest : StringSpec() {
 
     override fun extensions() = listOf(SpringExtension)

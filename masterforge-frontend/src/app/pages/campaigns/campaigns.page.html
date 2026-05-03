@@ -25,7 +25,7 @@
       <div class="campaigns-list" data-testid="campaigns-section">
 
         @for (campaign of campaigns; track campaign.id) {
-          <div class="campaign-card" data-testid="campaign-card">
+          <div class="campaign-card" [routerLink]="['/campaigns', campaign.id]" data-testid="campaign-card">
             <div class="campaign-card__header">
               <span class="campaign-card__name">{{ campaign.name }}</span>
               <span class="campaign-card__badge campaign-card__badge--{{ campaign.visibility?.toLowerCase() }}">

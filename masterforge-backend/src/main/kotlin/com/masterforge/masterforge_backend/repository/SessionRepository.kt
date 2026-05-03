@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface SessionRepository : JpaRepository<Session, UUID>
+interface SessionRepository : JpaRepository<Session, UUID> {
+    fun findByCampaignIdOrderByScheduledDateAsc(campaignId: UUID): List<Session>
+}

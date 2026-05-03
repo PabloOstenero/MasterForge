@@ -12,7 +12,7 @@
 
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError, of } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError, timeout, retry } from 'rxjs/operators';
 
 import {
@@ -104,14 +104,7 @@ export class PaymentService {
       .post<PaymentResult>(`${API_URL}/payments/process`, requestBody)
       .pipe(
         timeout(REQUEST_TIMEOUT_MS),
-        // 402 = payment was processed but failed (e.g. card declined).
-        // Treat it as a valid PaymentResult with success=false, not an HTTP error.
-        catchError((err) => {
-          if (err instanceof HttpErrorResponse && err.status === 402 && err.error) {
-            return of(err.error as PaymentResult);
-          }
-          return this.handleError(err);
-        }),
+        catchError((err) => this.handleError(err)),
       );
   }
 

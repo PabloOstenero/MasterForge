@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { Injector } from '@angular/core';
 import { provideHttpClient, HttpRequest } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
@@ -11,7 +12,23 @@ import { AuthService, authInterceptor } from './auth.service';
 // Helpers
 // ---------------------------------------------------------------------------
 
-const tokenArb = fc.string({ minLength: 10, maxLength: 200 }).filter(s => s.trim().length > 0);
+/**
+ * Builds a minimal valid JWT with a future expiry so that isTokenExpired()
+ * returns false. The payload encodes { sub: <subject>, exp: <future> }.
+ */
+function makeValidJwt(subject: string): string {
+  const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).replace(/=/g, '');
+  const payload = btoa(JSON.stringify({
+    sub: subject,
+    exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
+  })).replace(/=/g, '');
+  const signature = 'fakesignature';
+  return `${header}.${payload}.${signature}`;
+}
+
+const tokenArb = fc.string({ minLength: 3, maxLength: 30 })
+  .filter(s => s.trim().length > 0)
+  .map(s => makeValidJwt(s));
 
 // ---------------------------------------------------------------------------
 // AuthService — Property-Based Tests
@@ -115,7 +132,7 @@ describe('AuthService — Property-Based Tests', () => {
   // -------------------------------------------------------------------------
   it('P4-explicit — for any non-empty token string, logout removes it from localStorage and isAuthenticated returns false', () => {
     fc.assert(
-      fc.property(fc.string({ minLength: 1 }), (token) => {
+      fc.property(fc.string({ minLength: 3, maxLength: 30 }).filter(s => s.trim().length > 0).map(s => makeValidJwt(s)), (token) => {
         localStorage.setItem('mf_token', token);
         expect(service.isAuthenticated()).toBeTrue();
         service.logout();
@@ -139,13 +156,15 @@ describe('AuthService — Property-Based Tests', () => {
         let capturedReq: HttpRequest<unknown> | null = null;
         const mockNext = (req: HttpRequest<unknown>) => {
           capturedReq = req;
-          return { subscribe: () => {} } as any;
+          // Return an observable-like object with pipe() support
+          const obs = { subscribe: () => {}, pipe: (..._args: any[]) => obs } as any;
+          return obs;
         };
 
         const mockReq = new HttpRequest('GET', 'http://localhost:8080/api/sessions');
         
         // Run interceptor in proper injection context
-        runInInjectionContext(TestBed.inject(TestBed), () => {
+        runInInjectionContext(TestBed.inject(Injector), () => {
           authInterceptor(mockReq, mockNext as any);
         });
 
@@ -169,7 +188,7 @@ describe('AuthService — Property-Based Tests', () => {
     const mockReq = new HttpRequest('GET', 'http://localhost:8080/api/sessions');
     
     // Run interceptor in proper injection context
-    runInInjectionContext(TestBed.inject(TestBed), () => {
+    runInInjectionContext(TestBed.inject(Injector), () => {
       authInterceptor(mockReq, mockNext as any);
     });
 
@@ -192,7 +211,7 @@ describe('AuthService — Property-Based Tests', () => {
           const mockReq = new HttpRequest(method as any, url);
           
           // Run interceptor in proper injection context
-          runInInjectionContext(TestBed.inject(TestBed), () => {
+          runInInjectionContext(TestBed.inject(Injector), () => {
             authInterceptor(mockReq, mockNext as any);
           });
           

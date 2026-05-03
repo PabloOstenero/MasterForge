@@ -170,8 +170,27 @@ updateTempHp(characterId: string, tempHp: number): Observable<any> {
 
   // Fetch the list of players (and their characters) in campaigns owned by the authenticated DM
   // Validates: Requirements 2.1
-  getCampaignPlayers(): Observable<CampaignPlayerDto[]> {
+  getCampaignPlayers(): Observable<CampaignPlayerDto[]>;
+  // Fetch the players enrolled in a specific campaign (with their campaign characters)
+  // Validates: Requirements 3.3
+  getCampaignPlayers(id: string): Observable<CampaignPlayerDto[]>;
+  getCampaignPlayers(id?: string): Observable<CampaignPlayerDto[]> {
+    if (id !== undefined) {
+      return this.http.get<CampaignPlayerDto[]>(`${this.apiUrl}/campaigns/${id}/players`);
+    }
     return this.http.get<CampaignPlayerDto[]>(`${this.apiUrl}/users/me/campaign-players`);
+  }
+
+  // Fetch the details of a specific campaign by ID
+  // Validates: Requirements 3.1
+  getCampaignById(id: string): Observable<CampaignDetailDto> {
+    return this.http.get<CampaignDetailDto>(`${this.apiUrl}/campaigns/${id}`);
+  }
+
+  // Fetch the sessions for a specific campaign
+  // Validates: Requirements 3.2
+  getCampaignSessions(id: string): Observable<SessionSummaryDto[]> {
+    return this.http.get<SessionSummaryDto[]>(`${this.apiUrl}/campaigns/${id}/sessions`);
   }
 
 }
@@ -224,4 +243,23 @@ export interface CampaignPlayerDto {
   email: string;
   subscriptionTier: string;
   characters: CharacterSimpleDto[];
+}
+
+// Interface for campaign detail page (used in Campaign Detail Page)
+// Validates: Requirements 3.4
+export interface CampaignDetailDto {
+  id: string;
+  name: string;
+  description: string;
+  maxPlayers: number;
+  joinPrice: number;
+  visibility: string;
+}
+
+// Interface for session summary (used in Campaign Detail Page)
+// Validates: Requirements 3.5
+export interface SessionSummaryDto {
+  id: string;
+  scheduledDate: string;
+  price: number;
 }

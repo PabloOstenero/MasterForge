@@ -1,0 +1,277 @@
+@use 'src/theme/variables' as *;
+
+// ── Content background ────────────────────────────────────────────────────────
+.campaign-detail-content {
+  --background: #{$bg-primary};
+}
+
+.page-container {
+  background: $bg-primary;
+  min-height: 100%;
+}
+
+// ── Back button ───────────────────────────────────────────────────────────────
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: $text-muted;
+  font-size: 0.88rem;
+  padding: 0;
+  margin-bottom: 20px;
+  transition: color 0.15s;
+
+  ion-icon {
+    font-size: 1.1rem;
+  }
+
+  &:hover {
+    color: $accent-gold;
+  }
+}
+
+// ── Campaign header ───────────────────────────────────────────────────────────
+.campaign-header {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba($accent-gold, 0.2);
+}
+
+.campaign-title {
+  color: $accent-gold;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.campaign-description {
+  color: $text-primary;
+  font-size: 0.92rem;
+  margin: 0 0 14px;
+  opacity: 0.85;
+  line-height: 1.5;
+}
+
+.campaign-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: $text-muted;
+  font-size: 0.85rem;
+
+  ion-icon {
+    font-size: 1rem;
+  }
+
+  &--gold {
+    color: $accent-gold;
+    font-weight: 600;
+  }
+}
+
+// ── Section ───────────────────────────────────────────────────────────────────
+.section {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: $accent-gold;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 12px;
+
+  ion-icon {
+    font-size: 1.1rem;
+  }
+}
+
+// ── Sessions list ─────────────────────────────────────────────────────────────
+.sessions-list {
+  background: transparent;
+  padding: 0;
+}
+
+.session-item {
+  --background: #{$bg-surface};
+  --color: #{$text-primary};
+  --border-color: rgba(255, 255, 255, 0.06);
+  --padding-start: 14px;
+  --padding-end: 14px;
+  --inner-padding-end: 0;
+  border-radius: 8px;
+  margin-bottom: 6px;
+
+  ion-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+  }
+}
+
+.session-date {
+  color: $text-primary;
+  font-size: 0.9rem;
+}
+
+.session-price {
+  color: $accent-gold;
+  font-weight: 600;
+  font-size: 0.88rem;
+  flex-shrink: 0;
+}
+
+// ── Segment ───────────────────────────────────────────────────────────────────
+.detail-segment {
+  --background: #{$bg-surface};
+  border-radius: 10px;
+  margin-bottom: 16px;
+
+  ion-segment-button {
+    --color: #{$text-muted};
+    --color-checked: #{$accent-gold};
+    --indicator-color: #{$accent-gold};
+    --indicator-height: 2px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+}
+
+// ── Segment panels ────────────────────────────────────────────────────────────
+.segment-panel {
+  min-height: 80px;
+}
+
+// ── Players list ──────────────────────────────────────────────────────────────
+.players-list {
+  background: transparent;
+  padding: 0;
+}
+
+.player-item {
+  --background: #{$bg-surface};
+  --color: #{$text-primary};
+  --border-color: rgba(255, 255, 255, 0.06);
+  --padding-start: 14px;
+  --padding-end: 14px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
+
+.player-icon {
+  color: $accent-gold;
+  font-size: 1.2rem;
+  margin-right: 4px;
+}
+
+.player-name {
+  color: $text-primary;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin: 0 0 2px;
+}
+
+.player-email {
+  color: $text-muted;
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+// ── Characters grouped by player ──────────────────────────────────────────────
+.characters-grouped {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.player-group {
+  background: $bg-surface;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-left: 3px solid $accent-gold;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.player-group-header {
+  color: $accent-gold;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.characters-list {
+  background: transparent;
+  padding: 0;
+}
+
+.character-item {
+  --background: transparent;
+  --color: #{$text-primary};
+  --border-color: rgba(255, 255, 255, 0.05);
+  --padding-start: 14px;
+  --padding-end: 14px;
+
+  ion-label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 0;
+  }
+}
+
+.char-name {
+  color: $text-primary;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.char-details {
+  color: $text-muted;
+  font-size: 0.82rem;
+}
+
+// ── Loading ───────────────────────────────────────────────────────────────────
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+// ── Empty states ──────────────────────────────────────────────────────────────
+.empty-msg {
+  color: $text-muted;
+  font-size: 0.9rem;
+  margin: 8px 0;
+  font-style: italic;
+}
+
+// ── Error ─────────────────────────────────────────────────────────────────────
+.error-msg {
+  color: $accent-crimson;
+  font-size: 0.88rem;
+  margin: 0 0 12px;
+}
