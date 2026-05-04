@@ -10,14 +10,17 @@ import java.util.UUID
 @Repository
 interface CharacterRepository : JpaRepository<Character, UUID> {
 
+    @Query("SELECT COUNT(DISTINCT c.user.id) FROM Character c WHERE c.campaign.owner.id = :ownerId")
+    fun countDistinctPlayersByOwnerId(@Param("ownerId") ownerId: UUID): Long
+
     @Query("SELECT COUNT(DISTINCT c.user.id) FROM Character c WHERE c.campaign.owner.email = :ownerEmail")
     fun countDistinctPlayersByOwnerEmail(@Param("ownerEmail") ownerEmail: String): Long
 
     @Query("SELECT c FROM Character c WHERE c.user.id = :userId")
     fun findByUserId(@Param("userId") userId: UUID): List<Character>
 
-    @Query("SELECT COUNT(c) FROM Character c WHERE c.user.email = :email")
-    fun countByUserEmail(@Param("email") email: String): Long
+    @Query("SELECT COUNT(c) FROM Character c WHERE c.user.id = :userId")
+    fun countByUserId(@Param("userId") userId: UUID): Long
 
     @Query("""
         SELECT c FROM Character c

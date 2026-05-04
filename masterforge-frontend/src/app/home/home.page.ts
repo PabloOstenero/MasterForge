@@ -11,7 +11,7 @@ import {
   IonButton, IonIcon, IonInput, IonFab, IonFabButton
 } from '@ionic/angular/standalone';
 import { forkJoin } from 'rxjs';
-import { ApiService, NextSessionDto, ActiveCampaignsDto, ActiveCharactersDto, PlayerCampaignSummary } from '../services/api';
+import { ApiService, NextSessionDto, DmNextSessionDto, ActiveCampaignsDto, ActiveCharactersDto, PlayerCampaignSummary } from '../services/api';
 import { AuthService } from '../services/auth.service';
 import { RoleService } from '../services/role.service';
 import { AsyncPipe } from '@angular/common';
@@ -69,6 +69,11 @@ export class HomePage implements OnInit {
   loadingPlayerSummary = false;
   errorPlayerSummary: string | null = null;
 
+  // DM next session state (scoped to DM's own campaigns)
+  dmNextSession: DmNextSessionDto | null = null;
+  loadingDmNextSession = false;
+  errorDmNextSession: string | null = null;
+
   // Player campaign list state (Req 4.1, 4.2, 4.3)
   playerCampaigns: PlayerCampaignSummary[] = [];
   loadingPlayerCampaigns = false;
@@ -94,18 +99,22 @@ export class HomePage implements OnInit {
   ngOnInit() {
     this.loadUsers();
     this.loadCampaigns();
-    this.loadSessions();
+    this.loadDmNextSession();
     this.loadPlayerCount();
     this.loadPlayerSummary();
     this.loadPlayerCampaigns();
   }
 
   get nextSessionDate(): string {
-    if (this.sessions.length === 0) return 'Sin sesiones';
-    const sorted = [...this.sessions].sort((a, b) => 
-      new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime()
-    );
-    return this.formatDate(sorted[0].scheduledDate);
+    const raw = this.dmNextSession?.nextSessionDate;
+    if (!raw) return 'Sin sesiones';
+    const date = new Date(raw);
+    if (isNaN(date.getTime())) return 'Sin sesiones';
+    return this.formatDate(raw);
+  }
+
+  get dmNextSessionCampaignId(): string | null {
+    return this.dmNextSession?.campaignId ?? null;
   }
 
   get balance(): number {
@@ -134,9 +143,25 @@ export class HomePage implements OnInit {
     });
   }
 
+  // Loads the DM's next session from the DM-scoped endpoint
+  loadDmNextSession(): void {
+    this.loadingDmNextSession = true;
+    this.errorDmNextSession = null;
+    this.apiService.getDmNextSession().subscribe({
+      next: (data) => {
+        this.dmNextSession = data;
+        this.loadingDmNextSession = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar próxima sesión del DM', err);
+        this.errorDmNextSession = err?.message ?? 'Error al cargar sesión';
+        this.loadingDmNextSession = false;
+      }
+    });
+  }
+
   // Req 4.1, 4.2, 4.3 — loads player campaign list independently from loadPlayerSummary()
-  loadPlayerCampaigns(): void {
-    this.loadingPlayerCampaigns = true;
+  loadPlayerCampaigns(): void {    this.loadingPlayerCampaigns = true;
     this.errorPlayerCampaigns = null;
     this.apiService.getPlayerCampaigns().subscribe({
       next: (data) => {

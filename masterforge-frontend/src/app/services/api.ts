@@ -153,6 +153,11 @@ updateTempHp(characterId: string, tempHp: number): Observable<any> {
     return this.http.get<NextSessionDto>(`${this.apiUrl}/users/me/next-session`);
   }
 
+  // Fetch the DM's next scheduled session (scoped to the DM's own campaigns)
+  getDmNextSession(): Observable<DmNextSessionDto> {
+    return this.http.get<DmNextSessionDto>(`${this.apiUrl}/users/me/dm-next-session`);
+  }
+
   // Fetch the count of campaigns the player is enrolled in
   getActiveCampaigns(): Observable<ActiveCampaignsDto> {
     return this.http.get<ActiveCampaignsDto>(`${this.apiUrl}/users/me/active-campaigns`);
@@ -207,6 +212,13 @@ updateTempHp(characterId: string, tempHp: number): Observable<any> {
 // Interfaces for player summary cards
 export interface NextSessionDto {
   nextSessionDate: string | null;
+  campaignId: string | null;
+}
+
+// Interface for DM next session (scoped to DM's own campaigns)
+export interface DmNextSessionDto {
+  nextSessionDate: string | null;
+  campaignId: string | null;
 }
 
 export interface ActiveCampaignsDto {

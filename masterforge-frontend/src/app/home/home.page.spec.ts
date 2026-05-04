@@ -4,7 +4,7 @@ import { of, throwError, Subject, BehaviorSubject } from 'rxjs';
 import * as fc from 'fast-check';
 
 import { HomePage } from './home.page';
-import { ApiService, NextSessionDto, ActiveCampaignsDto, ActiveCharactersDto, PlayerCampaignSummary } from '../services/api';
+import { ApiService, NextSessionDto, DmNextSessionDto, ActiveCampaignsDto, ActiveCharactersDto, PlayerCampaignSummary } from '../services/api';
 import { RoleService } from '../services/role.service';
 import { AuthService } from '../services/auth.service';
 
@@ -57,7 +57,7 @@ const sessionArb = (campaignIds: string[]) =>
 function buildApiSpy(): jasmine.SpyObj<ApiService> {
   const spy = jasmine.createSpyObj<ApiService>('ApiService', [
     'getUsers', 'getCampaigns', 'getDmCampaigns', 'getSessions', 'createCampaign', 'createSession', 'getPlayerCount',
-    'getNextSession', 'getActiveCampaigns', 'getActiveCharacters', 'getPlayerCampaigns',
+    'getNextSession', 'getActiveCampaigns', 'getActiveCharacters', 'getPlayerCampaigns', 'getDmNextSession',
   ]);
   spy.getUsers.and.returnValue(of([]));
   spy.getCampaigns.and.returnValue(of([]));
@@ -66,10 +66,11 @@ function buildApiSpy(): jasmine.SpyObj<ApiService> {
   spy.createCampaign.and.returnValue(of({}));
   spy.createSession.and.returnValue(of({}));
   spy.getPlayerCount.and.returnValue(of({ playerCount: 0 }));
-  spy.getNextSession.and.returnValue(of({ nextSessionDate: null }));
+  spy.getNextSession.and.returnValue(of({ nextSessionDate: null, campaignId: null }));
   spy.getActiveCampaigns.and.returnValue(of({ activeCampaigns: 0 }));
   spy.getActiveCharacters.and.returnValue(of({ activeCharacters: 0 }));
   spy.getPlayerCampaigns.and.returnValue(of([]));
+  spy.getDmNextSession.and.returnValue(of({ nextSessionDate: null, campaignId: null }));
   return spy;
 }
 
@@ -585,7 +586,7 @@ describe('HomePage — Property-Based Tests', () => {
   });
 
   it('PSC-2b — error in getActiveCampaigns sets errorPlayerSummary', () => {
-    apiSpy.getNextSession.and.returnValue(of({ nextSessionDate: null }));
+    apiSpy.getNextSession.and.returnValue(of({ nextSessionDate: null, campaignId: null }));
     apiSpy.getActiveCampaigns.and.returnValue(throwError(() => new Error('campaigns error')));
     apiSpy.getActiveCharacters.and.returnValue(of({ activeCharacters: 1 }));
 
@@ -600,7 +601,7 @@ describe('HomePage — Property-Based Tests', () => {
   // Validates: Requirements 3.4
   // -------------------------------------------------------------------------
   it('PSC-3 — nextPlayerSessionLabel returns "Sin sesiones" when nextSessionDate is null', () => {
-    component.nextSession = { nextSessionDate: null };
+    component.nextSession = { nextSessionDate: null, campaignId: null };
     expect(component.nextPlayerSessionLabel).toBe('Sin sesiones');
   });
 
@@ -610,7 +611,7 @@ describe('HomePage — Property-Based Tests', () => {
   });
 
   it('PSC-3c — nextPlayerSessionLabel returns "Sin sesiones" for invalid date string', () => {
-    component.nextSession = { nextSessionDate: 'not-a-date' };
+    component.nextSession = { nextSessionDate: 'not-a-date', campaignId: null };
     expect(component.nextPlayerSessionLabel).toBe('Sin sesiones');
   });
 
@@ -619,7 +620,7 @@ describe('HomePage — Property-Based Tests', () => {
   // Validates: Requirements 3.5
   // -------------------------------------------------------------------------
   it('PSC-4 — success populates all three state fields and clears loading/error', () => {
-    const nextSessionDto: NextSessionDto = { nextSessionDate: '2025-09-15T18:00:00.000Z' };
+    const nextSessionDto: NextSessionDto = { nextSessionDate: '2025-09-15T18:00:00.000Z', campaignId: null };
     const activeCampaignsDto: ActiveCampaignsDto = { activeCampaigns: 3 };
     const activeCharactersDto: ActiveCharactersDto = { activeCharacters: 2 };
 
@@ -637,7 +638,7 @@ describe('HomePage — Property-Based Tests', () => {
   });
 
   it('PSC-4b — nextPlayerSessionLabel formats a valid ISO date correctly', () => {
-    component.nextSession = { nextSessionDate: '2025-09-15T18:00:00.000Z' };
+    component.nextSession = { nextSessionDate: '2025-09-15T18:00:00.000Z', campaignId: null };
     const label = component.nextPlayerSessionLabel;
     expect(label).toMatch(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/);
   });
@@ -683,7 +684,7 @@ describe('HomePage — Property-Based Tests', () => {
           fc.string({ minLength: 1, maxLength: 20 }).filter(s => isNaN(new Date(s).getTime()))
         ),
         (invalidDate) => {
-          component.nextSession = { nextSessionDate: invalidDate };
+          component.nextSession = { nextSessionDate: invalidDate, campaignId: null };
           expect(component.nextPlayerSessionLabel).toBe('Sin sesiones');
         }
       ),
@@ -698,10 +699,10 @@ describe('HomePage — Property-Based Tests', () => {
   // =========================================================================
   it('PSC-P1 — player role renders exactly 3 structured summary cards', () => {
     const nextSessionArb = fc.oneof(
-      fc.constant<NextSessionDto>({ nextSessionDate: null }),
+      fc.constant<NextSessionDto>({ nextSessionDate: null, campaignId: null }),
       fc.date({ min: new Date('2024-01-01'), max: new Date('2030-12-31') })
         .filter(d => !isNaN(d.getTime()))
-        .map(d => ({ nextSessionDate: d.toISOString() }))
+        .map(d => ({ nextSessionDate: d.toISOString(), campaignId: null }))
     );
     const activeCampaignsArb = fc.integer({ min: 0, max: 20 })
       .map(n => ({ activeCampaigns: n }));
@@ -735,8 +736,15 @@ describe('HomePage — Property-Based Tests', () => {
           cards.forEach(card => {
             expect(card.querySelector('.summary-label')).toBeTruthy();
             expect(card.querySelector('.summary-value')).toBeTruthy();
-            expect(card.querySelector('.summary-link')).toBeTruthy();
           });
+
+          // "Campañas Activas" (index 1) and "Aventureros Activos" (index 2) always have summary-links
+          expect(cards[1].querySelector('.summary-link')).toBeTruthy();
+          expect(cards[2].querySelector('.summary-link')).toBeTruthy();
+          // "Próxima Sesión" (index 0) only shows a summary-link when campaignId is non-null
+          if (nextSession.campaignId) {
+            expect(cards[0].querySelector('.summary-link')).toBeTruthy();
+          }
         }
       ),
       { numRuns: 50 }
@@ -750,10 +758,10 @@ describe('HomePage — Property-Based Tests', () => {
   // =========================================================================
   it('PSC-P2 — DM role renders zero player summary cards', () => {
     const nextSessionArb = fc.oneof(
-      fc.constant<NextSessionDto>({ nextSessionDate: null }),
+      fc.constant<NextSessionDto>({ nextSessionDate: null, campaignId: null }),
       fc.date({ min: new Date('2024-01-01'), max: new Date('2030-12-31') })
         .filter(d => !isNaN(d.getTime()))
-        .map(d => ({ nextSessionDate: d.toISOString() }))
+        .map(d => ({ nextSessionDate: d.toISOString(), campaignId: null }))
     );
     const activeCampaignsArb = fc.integer({ min: 0, max: 20 })
       .map(n => ({ activeCampaigns: n }));
@@ -793,10 +801,10 @@ describe('HomePage — Property-Based Tests', () => {
   // =========================================================================
   it('PSC-P3 — each card renders its label and value from fetched data', () => {
     const nextSessionArb = fc.oneof(
-      fc.constant<NextSessionDto>({ nextSessionDate: null }),
+      fc.constant<NextSessionDto>({ nextSessionDate: null, campaignId: null }),
       fc.date({ min: new Date('2024-01-01'), max: new Date('2030-12-31') })
         .filter(d => !isNaN(d.getTime()))
-        .map(d => ({ nextSessionDate: d.toISOString() }))
+        .map(d => ({ nextSessionDate: d.toISOString(), campaignId: null }))
     );
     const activeCampaignsArb = fc.integer({ min: 0, max: 100 })
       .map(n => ({ activeCampaigns: n }));
@@ -902,7 +910,7 @@ describe('HomePage — Property-Based Tests', () => {
   // Req 4.3: error in loadPlayerCampaigns does NOT affect loadPlayerSummary state
   // -------------------------------------------------------------------------
   it('PCL-4 — error in loadPlayerCampaigns does not affect player summary state', () => {
-    const nextSessionDto: NextSessionDto = { nextSessionDate: '2025-09-15T18:00:00.000Z' };
+    const nextSessionDto: NextSessionDto = { nextSessionDate: '2025-09-15T18:00:00.000Z', campaignId: null };
     const activeCampaignsDto: ActiveCampaignsDto = { activeCampaigns: 3 };
     const activeCharactersDto: ActiveCharactersDto = { activeCharacters: 2 };
 
@@ -1097,6 +1105,205 @@ describe('HomePage — Property-Based Tests', () => {
   });
 
   // =========================================================================
+  // Bug Condition Exploration Tests — Home Summary Cards Fix (Task 1)
+  //
+  // These tests are EXPECTED TO FAIL on unfixed code.
+  // Failure confirms the bugs exist. They encode the expected (correct) behavior
+  // and will pass once the fix is implemented.
+  //
+  // COUNTEREXAMPLES DOCUMENTED (observed on unfixed code):
+  //
+  // Test 3 — DM link navigation:
+  //   BUG CONFIRMED: The "Próxima Sesión" summary-link in the DM dashboard is a
+  //   plain <div class="summary-link"> with no routerLink attribute.
+  //   Clicking it does nothing. Expected: <a [routerLink]="['/campaigns', id]">.
+  //
+  // Test 4 — Player link navigation:
+  //   BUG CONFIRMED: The "Campañas Activas" summary-link in the Player dashboard is
+  //   a plain <div class="summary-link"> with no routerLink attribute.
+  //   Expected: <a [routerLink]="['/my-campaigns']" class="summary-link">.
+  //
+  // Test 5 — Saldo card no-link:
+  //   BUG CONFIRMED: The DM "Saldo" card contains a <div class="summary-link">Ver Detalles</div>
+  //   that should not exist. The Saldo card must have NO summary-link element.
+  //
+  // Validates: Requirements 1.2, 1.3, 1.4, 1.5, 1.6, 1.7
+  // =========================================================================
+
+  // -------------------------------------------------------------------------
+  // Test 3 — DM link navigation
+  //
+  // Render HomePage in DM role and assert the "Próxima Sesión" summary-link
+  // element is an <a> with a routerLink attribute.
+  //
+  // EXPECTED FAILURE on unfixed code: it's a plain <div> with no binding.
+  //
+  // Validates: Requirements 1.2, 2.2
+  // -------------------------------------------------------------------------
+  it('BUG-3 — DM "Próxima Sesión" summary-link is an <a> with routerLink (fails on unfixed code)', () => {
+    roleSubject.next('dm');
+    component.loadingCampaigns = false;
+    component.errorCampaigns = null;
+    // Set dmNextSession with a non-null campaignId so the @if block renders the link
+    component.dmNextSession = { nextSessionDate: '2025-09-01T18:00:00Z', campaignId: 'campaign-abc-123' };
+    fixture.detectChanges();
+
+    const dmDashboard: HTMLElement = fixture.nativeElement.querySelector('[data-testid="dm-dashboard"]');
+    expect(dmDashboard).withContext('DM dashboard must be visible').toBeTruthy();
+
+    // Find the "Próxima Sesión" card — it is the first summary-card in the DM dashboard
+    const summaryCards = dmDashboard.querySelectorAll('.summary-card');
+    expect(summaryCards.length).withContext('DM dashboard must have 3 summary cards').toBeGreaterThanOrEqual(1);
+
+    const proximaSesionCard = summaryCards[0];
+    const labelEl = proximaSesionCard.querySelector('.summary-label');
+    expect(labelEl?.textContent?.trim())
+      .withContext('First DM card must be "Próxima Sesión"')
+      .toBe('Próxima Sesión');
+
+    // Bug condition: summary-link is a plain <div> — no routerLink
+    // Expected (fixed) behavior: summary-link is an <a> element with routerLink
+    const summaryLinkEl = proximaSesionCard.querySelector('.summary-link');
+    expect(summaryLinkEl)
+      .withContext('BUG-3: "Próxima Sesión" card must have a summary-link element')
+      .toBeTruthy();
+
+    const tagName = summaryLinkEl!.tagName.toLowerCase();
+    expect(tagName)
+      .withContext(
+        `BUG CONFIRMED (Test 3): "Próxima Sesión" summary-link is a <${tagName}> not an <a>. ` +
+        'Counterexample: the element has no routerLink binding — clicking it does nothing. ' +
+        'Expected: <a [routerLink]="[\'/campaigns\', dmNextSessionCampaignId]" class="summary-link">.'
+      )
+      .toBe('a');
+
+    const hasRouterLink = summaryLinkEl!.hasAttribute('routerlink') ||
+                          summaryLinkEl!.hasAttribute('ng-reflect-router-link') ||
+                          summaryLinkEl!.hasAttribute('href');
+    expect(hasRouterLink)
+      .withContext(
+        'BUG CONFIRMED (Test 3): "Próxima Sesión" summary-link <a> has no routerLink attribute. ' +
+        'Expected: [routerLink]="[\'/campaigns\', dmNextSessionCampaignId]".'
+      )
+      .toBeTrue();
+  });
+
+  // -------------------------------------------------------------------------
+  // Test 4 — Player link navigation
+  //
+  // Render HomePage in Player role and assert the "Campañas Activas" summary-link
+  // navigates to /my-campaigns.
+  //
+  // EXPECTED FAILURE on unfixed code: it's a plain <div> with no binding.
+  //
+  // Validates: Requirements 1.6, 2.6
+  // -------------------------------------------------------------------------
+  it('BUG-4 — Player "Campañas Activas" summary-link navigates to /my-campaigns (fails on unfixed code)', () => {
+    roleSubject.next('player');
+    component.loadingPlayerSummary = false;
+    component.errorPlayerSummary = null;
+    component.nextSession = { nextSessionDate: null, campaignId: null };
+    component.activeCampaigns = { activeCampaigns: 3 };
+    component.activeCharacters = { activeCharacters: 2 };
+    fixture.detectChanges();
+
+    const playerDashboard: HTMLElement = fixture.nativeElement.querySelector('[data-testid="player-dashboard"]');
+    expect(playerDashboard).withContext('Player dashboard must be visible').toBeTruthy();
+
+    const summaryRow = playerDashboard.querySelector('[data-testid="player-summary-row"]');
+    expect(summaryRow).withContext('Player summary row must be present').toBeTruthy();
+
+    const summaryCards = summaryRow!.querySelectorAll('.summary-card');
+    expect(summaryCards.length).withContext('Player dashboard must have 3 summary cards').toBe(3);
+
+    // "Campañas Activas" is the second card (index 1)
+    const campanasCard = summaryCards[1];
+    const labelEl = campanasCard.querySelector('.summary-label');
+    expect(labelEl?.textContent?.trim())
+      .withContext('Second player card must be "Campañas Activas"')
+      .toBe('Campañas Activas');
+
+    // Bug condition: summary-link is a plain <div> — no routerLink
+    // Expected (fixed) behavior: summary-link is an <a> with routerLink="/my-campaigns"
+    const summaryLinkEl = campanasCard.querySelector('.summary-link');
+    expect(summaryLinkEl)
+      .withContext('BUG-4: "Campañas Activas" card must have a summary-link element')
+      .toBeTruthy();
+
+    const tagName = summaryLinkEl!.tagName.toLowerCase();
+    expect(tagName)
+      .withContext(
+        `BUG CONFIRMED (Test 4): "Campañas Activas" summary-link is a <${tagName}> not an <a>. ` +
+        'Counterexample: the element has no routerLink binding — clicking it does nothing. ' +
+        'Expected: <a [routerLink]="[\'/my-campaigns\']" class="summary-link">.'
+      )
+      .toBe('a');
+
+    // Check that the routerLink points to /my-campaigns
+    const routerLinkValue = summaryLinkEl!.getAttribute('ng-reflect-router-link') ||
+                            summaryLinkEl!.getAttribute('routerlink') ||
+                            summaryLinkEl!.getAttribute('href');
+    expect(routerLinkValue)
+      .withContext(
+        'BUG CONFIRMED (Test 4): "Campañas Activas" summary-link has no routerLink pointing to /my-campaigns. ' +
+        'Expected: [routerLink]="[\'/my-campaigns\']".'
+      )
+      .toBeTruthy();
+
+    const navigatesToMyCampaigns =
+      routerLinkValue?.includes('/my-campaigns') === true ||
+      routerLinkValue === '/my-campaigns';
+    expect(navigatesToMyCampaigns)
+      .withContext(
+        `BUG CONFIRMED (Test 4): "Campañas Activas" routerLink value is "${routerLinkValue}", ` +
+        'expected it to navigate to /my-campaigns.'
+      )
+      .toBeTrue();
+  });
+
+  // -------------------------------------------------------------------------
+  // Test 5 — Saldo card no-link
+  //
+  // Render HomePage in DM role and assert the "Saldo" card contains NO
+  // summary-link element.
+  //
+  // EXPECTED FAILURE on unfixed code: the spurious <div class="summary-link">
+  // is present on the Saldo card.
+  //
+  // Validates: Requirements 1.4, 2.4
+  // -------------------------------------------------------------------------
+  it('BUG-5 — DM "Saldo" card has NO summary-link element (fails on unfixed code)', () => {
+    roleSubject.next('dm');
+    component.loadingCampaigns = false;
+    component.errorCampaigns = null;
+    fixture.detectChanges();
+
+    const dmDashboard: HTMLElement = fixture.nativeElement.querySelector('[data-testid="dm-dashboard"]');
+    expect(dmDashboard).withContext('DM dashboard must be visible').toBeTruthy();
+
+    const summaryCards = dmDashboard.querySelectorAll('.summary-card');
+    expect(summaryCards.length).withContext('DM dashboard must have 3 summary cards').toBe(3);
+
+    // "Saldo" is the third card (index 2)
+    const saldoCard = summaryCards[2];
+    const labelEl = saldoCard.querySelector('.summary-label');
+    expect(labelEl?.textContent?.trim())
+      .withContext('Third DM card must be "Saldo"')
+      .toBe('Saldo');
+
+    // Bug condition: Saldo card has a spurious <div class="summary-link">Ver Detalles</div>
+    // Expected (fixed) behavior: Saldo card has NO summary-link element at all
+    const summaryLinkEl = saldoCard.querySelector('.summary-link');
+    expect(summaryLinkEl)
+      .withContext(
+        'BUG CONFIRMED (Test 5): DM "Saldo" card contains a summary-link element that should not exist. ' +
+        `Counterexample: found <${summaryLinkEl?.tagName?.toLowerCase()}> with text "${summaryLinkEl?.textContent?.trim()}". ` +
+        'The Saldo card must have NO summary-link — balance detail pages do not exist in the application.'
+      )
+      .toBeNull();
+  });
+
+  // =========================================================================
   // Task 6.5 — Unit tests for Campaign_List states
   // =========================================================================
 
@@ -1148,7 +1355,7 @@ describe('HomePage — Property-Based Tests', () => {
   // Req 4.3: error in getPlayerCampaigns() does not affect summary cards
   // -------------------------------------------------------------------------
   it('PCL-U4 — error in getPlayerCampaigns does not affect summary cards visibility', () => {
-    const nextSessionDto: NextSessionDto = { nextSessionDate: '2025-09-15T18:00:00.000Z' };
+    const nextSessionDto: NextSessionDto = { nextSessionDate: '2025-09-15T18:00:00.000Z', campaignId: null };
     const activeCampaignsDto: ActiveCampaignsDto = { activeCampaigns: 3 };
     const activeCharactersDto: ActiveCharactersDto = { activeCharacters: 2 };
 

@@ -9,7 +9,9 @@
             <div class="summary-card">
               <div class="summary-label">Próxima Sesión</div>
               <div class="summary-value">{{ nextSessionDate }}</div>
-              <div class="summary-link">Ver Detalles</div>
+              @if (dmNextSessionCampaignId) {
+                <a [routerLink]="['/campaigns', dmNextSessionCampaignId]" class="summary-link">Ver Detalles</a>
+              }
             </div>
           </ion-col>
           <ion-col size="12" size-md="4">
@@ -24,14 +26,13 @@
                   {{ playerCount }} jugadores
                 }
               </div>
-              <div class="summary-link">Ver Lista</div>
+              <a [routerLink]="['/players']" class="summary-link">Ver Lista</a>
             </div>
           </ion-col>
           <ion-col size="12" size-md="4">
             <div class="summary-card">
               <div class="summary-label">Saldo</div>
               <div class="summary-value">{{ balance.toFixed(2) }}€</div>
-              <div class="summary-link">Ver Detalles</div>
             </div>
           </ion-col>
         </ion-row>
@@ -76,7 +77,9 @@
                   {{ nextPlayerSessionLabel }}
                 }
               </div>
-              <div class="summary-link">Ver Detalles</div>
+              @if (nextSession?.campaignId) {
+                <a [routerLink]="['/campaigns', nextSession?.campaignId]" class="summary-link">Ver Detalles</a>
+              }
             </div>
           </ion-col>
           <ion-col size="12" size-md="4">
@@ -91,7 +94,7 @@
                   {{ activeCampaigns?.activeCampaigns }}
                 }
               </div>
-              <div class="summary-link">Ver Lista</div>
+              <a [routerLink]="['/my-campaigns']" class="summary-link">Ver Lista</a>
             </div>
           </ion-col>
           <ion-col size="12" size-md="4">
@@ -106,7 +109,7 @@
                   {{ activeCharacters?.activeCharacters }}
                 }
               </div>
-              <div class="summary-link">Ver Lista</div>
+              <a [routerLink]="['/my-characters']" class="summary-link">Ver Lista</a>
             </div>
           </ion-col>
         </ion-row>

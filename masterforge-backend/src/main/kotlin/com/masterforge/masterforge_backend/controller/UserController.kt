@@ -4,6 +4,7 @@ import com.masterforge.masterforge_backend.model.dto.ActiveCampaignsDto
 import com.masterforge.masterforge_backend.model.dto.ActiveCharactersDto
 import com.masterforge.masterforge_backend.model.dto.CampaignPlayerDto
 import com.masterforge.masterforge_backend.model.dto.CharacterSimpleDto
+import com.masterforge.masterforge_backend.model.dto.DmNextSessionDto
 import com.masterforge.masterforge_backend.model.dto.NextSessionDto
 import com.masterforge.masterforge_backend.model.dto.PlayerCampaignSummaryDto
 import com.masterforge.masterforge_backend.model.dto.UserDto
@@ -13,12 +14,14 @@ import com.masterforge.masterforge_backend.repository.CampaignEnrollmentReposito
 import com.masterforge.masterforge_backend.repository.CampaignRepository
 import com.masterforge.masterforge_backend.repository.CharacterRepository
 import com.masterforge.masterforge_backend.repository.SessionAttendeeRepository
+import com.masterforge.masterforge_backend.repository.SessionRepository
 import com.masterforge.masterforge_backend.repository.UserRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
+import org.springframework.data.domain.PageRequest
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
@@ -29,7 +32,8 @@ class UserController(
     private val characterRepository: CharacterRepository,
     private val sessionAttendeeRepository: SessionAttendeeRepository,
     private val campaignRepository: CampaignRepository,
-    private val campaignEnrollmentRepository: CampaignEnrollmentRepository
+    private val campaignEnrollmentRepository: CampaignEnrollmentRepository,
+    private val sessionRepository: SessionRepository
 ) {
 
     @GetMapping
@@ -41,37 +45,63 @@ class UserController(
     @GetMapping("/me/player-count")
     @Transactional(readOnly = true)
     fun getPlayerCount(): ResponseEntity<Map<String, Long>> {
-        val email = SecurityContextHolder.getContext().authentication?.name
+        val userId = SecurityContextHolder.getContext().authentication?.name
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        val count = characterRepository.countDistinctPlayersByOwnerEmail(email)
+        val count = characterRepository.countDistinctPlayersByOwnerId(UUID.fromString(userId))
         return ResponseEntity.ok(mapOf("playerCount" to count))
     }
 
     @GetMapping("/me/next-session")
     @Transactional(readOnly = true)
     fun getNextSession(): ResponseEntity<NextSessionDto> {
-        val email = SecurityContextHolder.getContext().authentication?.name
+        val userId = SecurityContextHolder.getContext().authentication?.name
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        val timestamp = sessionAttendeeRepository.findNextSessionDateByUserEmail(email)
-        val dto = NextSessionDto(nextSessionDate = timestamp?.toInstant()?.toString())
+        val sessions = sessionRepository.findNextSessionByEnrolledUserId(UUID.fromString(userId), PageRequest.of(0, 1))
+        val next = sessions.firstOrNull()
+        val dto = NextSessionDto(
+            nextSessionDate = next?.scheduledDate?.toInstant()?.toString(),
+            campaignId = next?.campaign?.id?.toString()
+        )
+        return ResponseEntity.ok(dto)
+    }
+
+    @GetMapping("/me/dm-next-session")
+    @Transactional(readOnly = true)
+    fun getDmNextSession(): ResponseEntity<DmNextSessionDto> {
+        val dmId = SecurityContextHolder.getContext().authentication?.name
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        val sessions = sessionRepository.findNextSessionByOwnerId(
+            UUID.fromString(dmId), PageRequest.of(0, 1)
+        )
+        val next = sessions.firstOrNull()
+        val dto = DmNextSessionDto(
+            nextSessionDate = next?.scheduledDate?.toInstant()?.toString(),
+            campaignId = next?.campaign?.id?.toString()
+        )
         return ResponseEntity.ok(dto)
     }
 
     @GetMapping("/me/active-campaigns")
     @Transactional(readOnly = true)
     fun getActiveCampaigns(): ResponseEntity<ActiveCampaignsDto> {
-        val email = SecurityContextHolder.getContext().authentication?.name
+        val userId = SecurityContextHolder.getContext().authentication?.name
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        val count = campaignRepository.countDistinctCampaignsByUserEmail(email)
+        val count = campaignEnrollmentRepository.findByUserId(UUID.fromString(userId)).size.toLong()
         return ResponseEntity.ok(ActiveCampaignsDto(activeCampaigns = count))
     }
 
     @GetMapping("/me/active-characters")
     @Transactional(readOnly = true)
     fun getActiveCharacters(): ResponseEntity<ActiveCharactersDto> {
-        val email = SecurityContextHolder.getContext().authentication?.name
+        val userId = SecurityContextHolder.getContext().authentication?.name
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        val count = characterRepository.countByUserEmail(email)
+        
+        println("DEBUG: getActiveCharacters - userId: $userId")
+        val totalCharacters = characterRepository.count()
+        println("DEBUG: Total characters in database: $totalCharacters")
+        val count = characterRepository.countByUserId(UUID.fromString(userId))
+        println("DEBUG: getActiveCharacters - count for user: $count")
+        
         return ResponseEntity.ok(ActiveCharactersDto(activeCharacters = count))
     }
 
