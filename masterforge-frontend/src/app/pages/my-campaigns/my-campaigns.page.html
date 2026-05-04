@@ -1,0 +1,55 @@
+<div class="page-container ion-padding">
+
+  @if (loading) {
+    <div class="loading-container">
+      <ion-spinner name="crescent" data-testid="spinner-campaigns"></ion-spinner>
+      <p class="loading-text">Cargando tus campañas...</p>
+    </div>
+  }
+
+  @if (error && !loading) {
+    <div class="error-container" data-testid="error-campaigns">
+      <ion-text color="danger">
+        <p class="error-msg">{{ error }}</p>
+      </ion-text>
+      <ion-button expand="block" (click)="loadCampaigns()">
+        Reintentar
+      </ion-button>
+    </div>
+  }
+
+  @if (!loading && !error && campaigns.length === 0) {
+    <div class="empty-container" data-testid="empty-campaigns">
+      <p class="empty-msg">No estás inscrito en ninguna campaña.</p>
+    </div>
+  }
+
+  @if (!loading && !error && campaigns.length > 0) {
+    <h2 class="section-title">Mis Campañas</h2>
+    <ion-row>
+      @for (campaign of campaigns; track campaign.campaignId) {
+        <ion-col size="12" size-md="6">
+          <ion-card
+            button
+            (click)="navigateToCampaign(campaign.campaignId)"
+            class="campaign-card"
+            data-testid="campaign-item"
+          >
+            <ion-card-content>
+              <strong class="gold-title" data-testid="campaign-name">{{ campaign.campaignName }}</strong>
+              <p data-testid="campaign-dm">DM: {{ campaign.dmName }}</p>
+              <p class="text-muted" data-testid="campaign-next-session">
+                @if (campaign.nextSessionDate) {
+                  Próxima sesión: {{ campaign.nextSessionDate }}
+                } @else {
+                  Sin sesión programada
+                }
+              </p>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      }
+    </ion-row>
+  }
+
+</div>

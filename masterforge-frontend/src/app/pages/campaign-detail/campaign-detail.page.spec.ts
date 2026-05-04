@@ -10,6 +10,8 @@ import {
   SessionSummaryDto,
   CampaignPlayerDto,
 } from '../../services/api';
+import { RoleService } from '../../services/role.service';
+import { AuthService } from '../../services/auth.service';
 
 // ---------------------------------------------------------------------------
 // Test data helpers
@@ -59,11 +61,23 @@ function buildApiSpy(): jasmine.SpyObj<ApiService> {
     'getCampaignById',
     'getCampaignSessions',
     'getCampaignPlayers',
+    'getPlayerCampaigns',
+    'getCharactersByUser',
   ]);
   spy.getCampaignById.and.returnValue(of(mockCampaign));
   spy.getCampaignSessions.and.returnValue(of(mockSessions));
   spy.getCampaignPlayers.and.returnValue(of(mockPlayers));
+  spy.getPlayerCampaigns.and.returnValue(of([]));
+  spy.getCharactersByUser.and.returnValue(of([]));
   return spy;
+}
+
+function buildMockRoleService(role: 'dm' | 'player' = 'dm'): Partial<RoleService> {
+  return { activeRole: role };
+}
+
+function buildMockAuthService(): Partial<AuthService> {
+  return { getUserIdFromToken: () => 'test-user-id' };
 }
 
 function buildActivatedRouteStub(id: string = CAMPAIGN_ID) {
@@ -95,6 +109,8 @@ describe('CampaignDetailPage — 12.1 Initialization and API calls', () => {
       providers: [
         { provide: ApiService, useValue: apiSpy },
         { provide: ActivatedRoute, useValue: buildActivatedRouteStub() },
+        { provide: RoleService, useValue: buildMockRoleService('dm') },
+        { provide: AuthService, useValue: buildMockAuthService() },
         Location,
       ],
     }).compileComponents();
@@ -154,6 +170,8 @@ describe('CampaignDetailPage — 12.2 Loading spinners and empty states', () => 
       providers: [
         { provide: ApiService, useValue: apiSpy },
         { provide: ActivatedRoute, useValue: buildActivatedRouteStub() },
+        { provide: RoleService, useValue: buildMockRoleService('dm') },
+        { provide: AuthService, useValue: buildMockAuthService() },
         Location,
       ],
     }).compileComponents();
@@ -308,6 +326,8 @@ describe('CampaignDetailPage — 12.3 Back navigation and segment switching', ()
       providers: [
         { provide: ApiService, useValue: apiSpy },
         { provide: ActivatedRoute, useValue: buildActivatedRouteStub() },
+        { provide: RoleService, useValue: buildMockRoleService('dm') },
+        { provide: AuthService, useValue: buildMockAuthService() },
         Location,
       ],
     }).compileComponents();
@@ -429,6 +449,8 @@ describe('CampaignDetailPage — Session creation form', () => {
       providers: [
         { provide: ApiService, useValue: apiSpy },
         { provide: ActivatedRoute, useValue: buildActivatedRouteStub() },
+        { provide: RoleService, useValue: buildMockRoleService('dm') },
+        { provide: AuthService, useValue: buildMockAuthService() },
         Location,
       ],
     }).compileComponents();

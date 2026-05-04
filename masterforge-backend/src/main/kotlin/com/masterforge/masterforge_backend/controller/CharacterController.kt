@@ -8,6 +8,7 @@ import com.masterforge.masterforge_backend.model.dto.CharacterSummaryDto
 import com.masterforge.masterforge_backend.repository.*
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.transaction.annotation.Transactional
@@ -24,6 +25,7 @@ class CharacterController(
     private val characterRepository: CharacterRepository,
     private val userRepository: UserRepository,
     private val campaignRepository: CampaignRepository,
+    private val campaignEnrollmentRepository: CampaignEnrollmentRepository,
     private val dndRaceRepository: DndRaceRepository,
     private val dndClassRepository: DndClassRepository,
     private val dndSubclassRepository: DndSubclassRepository,
@@ -135,6 +137,35 @@ class CharacterController(
         } else {
             ResponseEntity.notFound().build()
         }
+    }
+
+    @PutMapping("/{characterId}/campaign/{campaignId}")
+    @Transactional
+    fun assignCharacterToCampaign(
+        @PathVariable characterId: UUID,
+        @PathVariable campaignId: UUID
+    ): ResponseEntity<CharacterResponseDto> {
+        val authName = SecurityContextHolder.getContext().authentication?.name
+            ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required")
+        val authenticatedUserId = UUID.fromString(authName)
+
+        val character = characterRepository.findById(characterId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+
+        val campaign = campaignRepository.findById(campaignId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign not found") }
+
+        if (character.user.id != authenticatedUserId) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this character")
+        }
+
+        if (!campaignEnrollmentRepository.existsByCampaignIdAndUserId(campaignId, authenticatedUserId)) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You are not enrolled in this campaign")
+        }
+
+        val updated = character.copy(campaign = campaign)
+        val saved = characterRepository.save(updated)
+        return ResponseEntity.ok(CharacterResponseDto.fromEntity(saved))
     }
 
     @PutMapping("/{id}")

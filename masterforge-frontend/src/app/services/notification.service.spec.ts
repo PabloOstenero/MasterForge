@@ -123,11 +123,15 @@ describe('NotificationService', () => {
       service.activeToast$.subscribe((toast) => {
         if (toast) {
           service.dismiss('non-existent-id');
-          service.activeToast$.subscribe((afterDismiss) => {
-            // Active toast should still be present
-            expect(afterDismiss).not.toBeNull();
-            done();
+          // Check synchronously: activeToast$ is a BehaviorSubject, so we can read its current value
+          let currentToast: AppNotification | null = null;
+          const sub = service.activeToast$.subscribe((afterDismiss) => {
+            currentToast = afterDismiss;
           });
+          sub.unsubscribe();
+          // Active toast should still be present
+          expect(currentToast).not.toBeNull();
+          done();
         }
       });
     });

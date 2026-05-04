@@ -43,212 +43,285 @@
       </div>
     }
 
-    <!-- ── Sessions section ── -->
-    <div class="section" data-testid="sessions-section">
-      <div class="section-header">
-        <h2 class="section-title">
-          <ion-icon name="calendar-outline"></ion-icon>
-          Sesiones
-        </h2>
-        <button class="add-btn" (click)="openSessionForm()" data-testid="btn-nueva-sesion" aria-label="Nueva sesión">
-          <ion-icon name="add-outline"></ion-icon>
-          Nueva Sesión
-        </button>
-      </div>
+    <!-- ── Access denied block ── -->
+    @if (accessDenied) {
+      <p class="error-msg" data-testid="access-denied">No tienes acceso a esta campaña.</p>
+    }
 
-      <!-- Session creation form -->
-      @if (showSessionForm) {
-        <form [formGroup]="sessionForm" (ngSubmit)="submitSession()" class="session-form" data-testid="session-creation-form">
+    <!-- ── Main content (hidden when access denied) ── -->
+    @if (!accessDenied) {
 
-          <div class="form-field">
-            <label class="form-label" for="session-name">Nombre de la sesión</label>
-            <input
-              id="session-name"
-              type="text"
-              formControlName="name"
-              class="form-input"
-              placeholder="Ej: La Cripta Olvidada"
-              data-testid="input-session-name"
-              autocomplete="off"
-            />
-            @if (sessionForm.get('name')?.invalid && sessionForm.get('name')?.touched) {
-              <span class="field-error" data-testid="error-session-name">El nombre es obligatorio.</span>
-            }
-          </div>
-
-          <div class="form-field">
-            <label class="form-label" for="session-date">Fecha y hora</label>
-            <input
-              id="session-date"
-              type="datetime-local"
-              formControlName="scheduledDate"
-              class="form-input"
-              data-testid="input-session-date"
-            />
-            @if (sessionForm.get('scheduledDate')?.invalid && sessionForm.get('scheduledDate')?.touched) {
-              <span class="field-error" data-testid="error-session-date">La fecha es obligatoria.</span>
-            }
-          </div>
-
-          @if (errorSession) {
-            <p class="error-msg" data-testid="error-session-submit">{{ errorSession }}</p>
+      <!-- ── Sessions section ── -->
+      <div class="section" data-testid="sessions-section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <ion-icon name="calendar-outline"></ion-icon>
+            Sesiones
+          </h2>
+          @if (!isPlayer) {
+            <button class="add-btn" (click)="openSessionForm()" data-testid="btn-nueva-sesion" aria-label="Nueva sesión">
+              <ion-icon name="add-outline"></ion-icon>
+              Nueva Sesión
+            </button>
           }
-
-          <div class="form-actions">
-            <button
-              type="submit"
-              class="btn-primary"
-              [disabled]="sessionForm.invalid || submittingSession"
-              data-testid="btn-crear-sesion"
-            >
-              @if (submittingSession) {
-                <ion-spinner name="crescent" class="btn-spinner"></ion-spinner>
-              } @else {
-                Crear
-              }
-            </button>
-            <button
-              type="button"
-              class="btn-secondary"
-              (click)="cancelSessionForm()"
-              data-testid="btn-cancelar-sesion"
-            >
-              Cancelar
-            </button>
-          </div>
-
-        </form>
-      }
-
-      @if (loadingSessions) {
-        <div class="loading-container" data-testid="spinner-sessions">
-          <ion-spinner name="crescent"></ion-spinner>
         </div>
-      }
 
-      @if (errorSessions) {
-        <p class="error-msg" data-testid="error-sessions">{{ errorSessions }}</p>
-      }
+        <!-- Session creation form (DM only) -->
+        @if (!isPlayer && showSessionForm) {
+          <form [formGroup]="sessionForm" (ngSubmit)="submitSession()" class="session-form" data-testid="session-creation-form">
 
-      @if (!loadingSessions && !errorSessions) {
-        @if (sessions.length === 0) {
-          <p class="empty-msg" data-testid="empty-sessions">No hay sesiones programadas para esta campaña.</p>
-        } @else {
-          <ion-list class="sessions-list" data-testid="sessions-list">
-            @for (session of sessions; track session.id) {
-              <ion-item class="session-item" data-testid="session-item">
-                <ion-label>
-                  <span class="session-name" data-testid="session-name">{{ session.name }}</span>
-                  <span class="session-date" data-testid="session-date">{{ formatDate(session.scheduledDate) }}</span>
-                  <span class="session-price" data-testid="session-price">{{ formatPrice(session.price) }}</span>
-                </ion-label>
-              </ion-item>
+            <div class="form-field">
+              <label class="form-label" for="session-name">Nombre de la sesión</label>
+              <input
+                id="session-name"
+                type="text"
+                formControlName="name"
+                class="form-input"
+                placeholder="Ej: La Cripta Olvidada"
+                data-testid="input-session-name"
+                autocomplete="off"
+              />
+              @if (sessionForm.get('name')?.invalid && sessionForm.get('name')?.touched) {
+                <span class="field-error" data-testid="error-session-name">El nombre es obligatorio.</span>
+              }
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="session-date">Fecha y hora</label>
+              <input
+                id="session-date"
+                type="datetime-local"
+                formControlName="scheduledDate"
+                class="form-input"
+                data-testid="input-session-date"
+              />
+              @if (sessionForm.get('scheduledDate')?.invalid && sessionForm.get('scheduledDate')?.touched) {
+                <span class="field-error" data-testid="error-session-date">La fecha es obligatoria.</span>
+              }
+            </div>
+
+            @if (errorSession) {
+              <p class="error-msg" data-testid="error-session-submit">{{ errorSession }}</p>
             }
-          </ion-list>
+
+            <div class="form-actions">
+              <button
+                type="submit"
+                class="btn-primary"
+                [disabled]="sessionForm.invalid || submittingSession"
+                data-testid="btn-crear-sesion"
+              >
+                @if (submittingSession) {
+                  <ion-spinner name="crescent" class="btn-spinner"></ion-spinner>
+                } @else {
+                  Crear
+                }
+              </button>
+              <button
+                type="button"
+                class="btn-secondary"
+                (click)="cancelSessionForm()"
+                data-testid="btn-cancelar-sesion"
+              >
+                Cancelar
+              </button>
+            </div>
+
+          </form>
         }
-      }
-    </div>
 
-    <!-- ══════════════════════════════════════════════════════════════════════
-         SEGMENTED SECTION — Players / Characters
-    ══════════════════════════════════════════════════════════════════════ -->
-
-    <ion-segment
-      [value]="activeSegment"
-      (ionChange)="segmentChanged($event)"
-      class="detail-segment"
-      data-testid="detail-segment">
-      <ion-segment-button value="jugadores" data-testid="segment-btn-jugadores">
-        <ion-label>Jugadores</ion-label>
-      </ion-segment-button>
-      <ion-segment-button value="personajes" data-testid="segment-btn-personajes">
-        <ion-label>Personajes</ion-label>
-      </ion-segment-button>
-    </ion-segment>
-
-    <!-- ── Players segment ── -->
-    @if (activeSegment === 'jugadores') {
-      <div class="segment-panel" data-testid="panel-jugadores">
-
-        @if (loadingPlayers) {
-          <div class="loading-container" data-testid="spinner-players">
+        @if (loadingSessions) {
+          <div class="loading-container" data-testid="spinner-sessions">
             <ion-spinner name="crescent"></ion-spinner>
           </div>
         }
 
-        @if (errorPlayers) {
-          <p class="error-msg" data-testid="error-players">{{ errorPlayers }}</p>
+        @if (errorSessions) {
+          <p class="error-msg" data-testid="error-sessions">{{ errorSessions }}</p>
         }
 
-        @if (!loadingPlayers && !errorPlayers) {
-          @if (players.length === 0) {
-            <p class="empty-msg" data-testid="empty-players">No hay jugadores inscritos en esta campaña.</p>
+        @if (!loadingSessions && !errorSessions) {
+          @if (sessions.length === 0) {
+            <p class="empty-msg" data-testid="empty-sessions">No hay sesiones programadas para esta campaña.</p>
           } @else {
-            <ion-list class="players-list" data-testid="players-list">
-              @for (player of players; track player.id) {
-                <ion-item class="player-item" data-testid="player-item">
-                  <ion-icon name="person-outline" slot="start" class="player-icon"></ion-icon>
+            <ion-list class="sessions-list" data-testid="sessions-list">
+              @for (session of sessions; track session.id) {
+                <ion-item class="session-item" data-testid="session-item">
                   <ion-label>
-                    <h3 class="player-name" data-testid="player-name">{{ player.name }}</h3>
-                    <p class="player-email" data-testid="player-email">{{ player.email }}</p>
+                    <span class="session-name" data-testid="session-name">{{ session.name }}</span>
+                    <span class="session-date" data-testid="session-date">{{ formatDate(session.scheduledDate) }}</span>
+                    <span class="session-price" data-testid="session-price">{{ formatPrice(session.price) }}</span>
                   </ion-label>
                 </ion-item>
               }
             </ion-list>
           }
         }
-
       </div>
-    }
 
-    <!-- ── Characters segment ── -->
-    @if (activeSegment === 'personajes') {
-      <div class="segment-panel" data-testid="panel-personajes">
+      <!-- ══════════════════════════════════════════════════════════════════════
+           SEGMENTED SECTION — Players / Characters
+      ══════════════════════════════════════════════════════════════════════ -->
 
-        @if (loadingPlayers) {
-          <div class="loading-container" data-testid="spinner-characters">
-            <ion-spinner name="crescent"></ion-spinner>
-          </div>
-        }
+      <ion-segment
+        [value]="activeSegment"
+        (ionChange)="segmentChanged($event)"
+        class="detail-segment"
+        data-testid="detail-segment">
+        <ion-segment-button value="jugadores" data-testid="segment-btn-jugadores">
+          <ion-label>Jugadores</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="personajes" data-testid="segment-btn-personajes">
+          <ion-label>Personajes</ion-label>
+        </ion-segment-button>
+      </ion-segment>
 
-        @if (errorPlayers) {
-          <p class="error-msg" data-testid="error-characters">{{ errorPlayers }}</p>
-        }
+      <!-- ── Players segment ── -->
+      @if (activeSegment === 'jugadores') {
+        <div class="segment-panel" data-testid="panel-jugadores">
 
-        @if (!loadingPlayers && !errorPlayers) {
-          @if (!hasAnyCharacters) {
-            <p class="empty-msg" data-testid="empty-characters">No hay personajes registrados para esta campaña.</p>
-          } @else {
-            <div class="characters-grouped" data-testid="characters-grouped">
-              @for (player of players; track player.id) {
-                @if (player.characters.length > 0) {
-                  <div class="player-group" data-testid="player-group">
-                    <h3 class="player-group-header" data-testid="player-group-header">{{ player.name }}</h3>
-                    <ion-list class="characters-list">
-                      @for (char of player.characters; track char.id) {
-                        <ion-item class="character-item" data-testid="character-item">
-                          <ion-label>
-                            <span class="char-name" data-testid="char-name">{{ char.name }}</span>
-                            <span class="char-details">
-                              <span data-testid="char-class">{{ char.dndClass }}</span>
-                              &nbsp;·&nbsp;
-                              <span data-testid="char-race">{{ char.dndRace }}</span>
-                              &nbsp;·&nbsp;
-                              Nivel <span data-testid="char-level">{{ char.level }}</span>
-                            </span>
-                          </ion-label>
-                        </ion-item>
-                      }
-                    </ion-list>
-                  </div>
-                }
-              }
+          @if (loadingPlayers) {
+            <div class="loading-container" data-testid="spinner-players">
+              <ion-spinner name="crescent"></ion-spinner>
             </div>
           }
-        }
 
-      </div>
-    }
+          @if (errorPlayers) {
+            <p class="error-msg" data-testid="error-players">{{ errorPlayers }}</p>
+          }
+
+          @if (!loadingPlayers && !errorPlayers) {
+            @if (players.length === 0) {
+              <p class="empty-msg" data-testid="empty-players">No hay jugadores inscritos en esta campaña.</p>
+            } @else {
+              <ion-list class="players-list" data-testid="players-list">
+                @for (player of players; track player.id) {
+                  <ion-item class="player-item" data-testid="player-item">
+                    <ion-icon name="person-outline" slot="start" class="player-icon"></ion-icon>
+                    <ion-label>
+                      <h3 class="player-name" data-testid="player-name">{{ player.name }}</h3>
+                      <p class="player-email" data-testid="player-email">{{ player.email }}</p>
+                    </ion-label>
+                  </ion-item>
+                }
+              </ion-list>
+            }
+          }
+
+        </div>
+      }
+
+      <!-- ── Characters segment ── -->
+      @if (activeSegment === 'personajes') {
+        <div class="segment-panel" data-testid="panel-personajes">
+
+          @if (loadingPlayers) {
+            <div class="loading-container" data-testid="spinner-characters">
+              <ion-spinner name="crescent"></ion-spinner>
+            </div>
+          }
+
+          @if (errorPlayers) {
+            <p class="error-msg" data-testid="error-characters">{{ errorPlayers }}</p>
+          }
+
+          @if (!loadingPlayers && !errorPlayers) {
+            @if (!hasAnyCharacters) {
+              <p class="empty-msg" data-testid="empty-characters">No hay personajes registrados para esta campaña.</p>
+            } @else {
+              <div class="characters-grouped" data-testid="characters-grouped">
+                @for (player of players; track player.id) {
+                  @if (player.characters.length > 0) {
+                    <div class="player-group" data-testid="player-group">
+                      <h3 class="player-group-header" data-testid="player-group-header">{{ player.name }}</h3>
+                      <ion-list class="characters-list">
+                        @for (char of player.characters; track char.id) {
+                          <ion-item class="character-item" data-testid="character-item">
+                            <ion-label>
+                              <span class="char-name" data-testid="char-name">{{ char.name }}</span>
+                              <span class="char-details">
+                                <span data-testid="char-class">{{ char.dndClass }}</span>
+                                &nbsp;·&nbsp;
+                                <span data-testid="char-race">{{ char.dndRace }}</span>
+                                &nbsp;·&nbsp;
+                                Nivel <span data-testid="char-level">{{ char.level }}</span>
+                              </span>
+                            </ion-label>
+                          </ion-item>
+                        }
+                      </ion-list>
+                    </div>
+                  }
+                }
+              </div>
+            }
+          }
+
+        </div>
+      }
+
+      <!-- ── Assign Character section (player only) ── -->
+      @if (isPlayer) {
+        <div class="section" data-testid="section-assign-character">
+          <h2 class="section-title">Asignar Personaje</h2>
+
+          @if (loadingCharacters) {
+            <div class="loading-container" data-testid="spinner-characters-assign">
+              <ion-spinner name="crescent"></ion-spinner>
+            </div>
+          }
+
+          @if (errorCharacters) {
+            <p class="error-msg" data-testid="error-characters-assign">{{ errorCharacters }}</p>
+          }
+
+          @if (!loadingCharacters && !errorCharacters) {
+            @if (playerCharacters.length === 0) {
+              <p class="empty-msg" data-testid="empty-characters-assign">
+                No tienes personajes. Crea uno en
+                <a [routerLink]="['/forge-character']">Forjar Personaje</a>.
+              </p>
+            } @else {
+              <select
+                [(ngModel)]="selectedCharacterId"
+                class="form-input"
+                data-testid="select-character"
+              >
+                <option value="" disabled selected>Selecciona un personaje</option>
+                @for (char of playerCharacters; track char.id) {
+                  <option [value]="char.id">{{ char.name }} — {{ char.dndClass }} Nv.{{ char.level }}</option>
+                }
+              </select>
+
+              <button
+                class="btn-primary"
+                (click)="assignCharacter()"
+                [disabled]="assigningCharacter || !selectedCharacterId"
+                data-testid="btn-assign-character"
+              >
+                @if (assigningCharacter) {
+                  <ion-spinner name="crescent" class="btn-spinner"></ion-spinner>
+                } @else {
+                  Asignar
+                }
+              </button>
+            }
+          }
+
+          @if (assignSuccess) {
+            <p class="success-msg" data-testid="assign-success">
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+              Personaje asignado correctamente.
+            </p>
+          }
+
+          @if (errorAssign) {
+            <p class="error-msg" data-testid="error-assign">{{ errorAssign }}</p>
+          }
+        </div>
+      }
+
+    } <!-- end @if (!accessDenied) -->
 
   </div>
 </ion-content>

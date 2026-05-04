@@ -97,4 +97,27 @@ interface CampaignEnrollmentRepository : JpaRepository<CampaignEnrollment, UUID>
         ORDER BY e.enrolledAt DESC
     """)
     fun findRecentEnrollments(@Param("sinceDate") sinceDate: java.time.LocalDateTime): List<CampaignEnrollment>
+
+    /**
+     * Fetch a summary of all campaigns a player is enrolled in, including the next future session date.
+     * Uses CampaignEnrollment as the source of truth for enrollment (not SessionAttendee).
+     * Session is joined from the Session side (Session.campaign) since Campaign has no mapped sessions collection.
+     */
+    @Query("""
+        SELECT new com.masterforge.masterforge_backend.model.dto.PlayerCampaignSummaryDto(
+            c.id,
+            c.name,
+            c.owner.name,
+            CAST((
+                SELECT MIN(s.scheduledDate)
+                FROM Session s
+                WHERE s.campaign.id = c.id
+                  AND s.scheduledDate > CURRENT_TIMESTAMP
+            ) AS string)
+        )
+        FROM CampaignEnrollment e
+        JOIN e.campaign c
+        WHERE e.user.id = :userId
+    """)
+    fun findPlayerCampaignsByUserId(@Param("userId") userId: UUID): List<com.masterforge.masterforge_backend.model.dto.PlayerCampaignSummaryDto>
 }

@@ -27,6 +27,7 @@ export const routes: Routes = [
       { path: 'homebrew', loadComponent: () => import('./pages/homebrew/homebrew.page').then(m => m.HomebrewPage) },
       { path: 'search-campaigns', loadComponent: () => import('./pages/search-campaigns/search-campaigns.page').then(m => m.SearchCampaignsPage) },
       { path: 'my-characters', loadComponent: () => import('./pages/my-characters/my-characters.page').then(m => m.MyCharactersPage) },
+      { path: 'my-campaigns', loadComponent: () => import('./pages/my-campaigns/my-campaigns.page').then(m => m.MyCampaignsPage) },
       { path: '', redirectTo: 'home', pathMatch: 'full' },
     ]
   },

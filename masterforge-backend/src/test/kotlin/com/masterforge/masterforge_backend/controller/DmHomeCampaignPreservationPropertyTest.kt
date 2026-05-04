@@ -8,6 +8,7 @@ import com.masterforge.masterforge_backend.model.entity.Session
 import com.masterforge.masterforge_backend.model.entity.SessionAttendee
 import com.masterforge.masterforge_backend.model.entity.SessionAttendeeId
 import com.masterforge.masterforge_backend.model.entity.User
+import com.masterforge.masterforge_backend.repository.CampaignEnrollmentRepository
 import com.masterforge.masterforge_backend.repository.CampaignRepository
 import com.masterforge.masterforge_backend.repository.CharacterRepository
 import com.masterforge.masterforge_backend.repository.SessionAttendeeRepository
@@ -73,6 +74,7 @@ class DmHomeCampaignPreservationPropertyTest : StringSpec() {
     @Autowired lateinit var mockMvc: MockMvc
     @Autowired lateinit var userRepository: UserRepository
     @Autowired lateinit var campaignRepository: CampaignRepository
+    @Autowired lateinit var campaignEnrollmentRepository: CampaignEnrollmentRepository
     @Autowired lateinit var sessionRepository: SessionRepository
     @Autowired lateinit var sessionAttendeeRepository: SessionAttendeeRepository
     @Autowired lateinit var characterRepository: CharacterRepository
@@ -108,6 +110,7 @@ class DmHomeCampaignPreservationPropertyTest : StringSpec() {
         sessionAttendeeRepository.deleteAll()
         sessionRepository.deleteAll()
         characterRepository.deleteAll()
+        campaignEnrollmentRepository.deleteAll()
         campaignRepository.deleteAll()
         userRepository.deleteAll()
     }

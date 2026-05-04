@@ -9,6 +9,7 @@ import com.masterforge.masterforge_backend.model.dto.PlayerCampaignSummaryDto
 import com.masterforge.masterforge_backend.model.dto.UserDto
 import com.masterforge.masterforge_backend.model.dto.UserResponseDto
 import com.masterforge.masterforge_backend.model.entity.User
+import com.masterforge.masterforge_backend.repository.CampaignEnrollmentRepository
 import com.masterforge.masterforge_backend.repository.CampaignRepository
 import com.masterforge.masterforge_backend.repository.CharacterRepository
 import com.masterforge.masterforge_backend.repository.SessionAttendeeRepository
@@ -27,7 +28,8 @@ class UserController(
     private val userRepository: UserRepository,
     private val characterRepository: CharacterRepository,
     private val sessionAttendeeRepository: SessionAttendeeRepository,
-    private val campaignRepository: CampaignRepository
+    private val campaignRepository: CampaignRepository,
+    private val campaignEnrollmentRepository: CampaignEnrollmentRepository
 ) {
 
     @GetMapping
@@ -76,9 +78,9 @@ class UserController(
     @GetMapping("/me/player-campaigns")
     @Transactional(readOnly = true)
     fun getPlayerCampaigns(): ResponseEntity<List<PlayerCampaignSummaryDto>> {
-        val email = SecurityContextHolder.getContext().authentication?.name
+        val userId = SecurityContextHolder.getContext().authentication?.name
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        val campaigns = sessionAttendeeRepository.findPlayerCampaignsByUserEmail(email)
+        val campaigns = campaignEnrollmentRepository.findPlayerCampaignsByUserId(UUID.fromString(userId))
         return ResponseEntity.ok(campaigns)
     }
 

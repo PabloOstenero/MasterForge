@@ -193,6 +193,15 @@ updateTempHp(characterId: string, tempHp: number): Observable<any> {
     return this.http.get<SessionSummaryDto[]>(`${this.apiUrl}/campaigns/${id}/sessions`);
   }
 
+  // Assign a character to a campaign
+  // Validates: Requirements 4.7
+  assignCharacterToCampaign(characterId: string, campaignId: string): Observable<CharacterResponseDto> {
+    return this.http.put<CharacterResponseDto>(
+      `${this.apiUrl}/characters/${characterId}/campaign/${campaignId}`,
+      {}
+    );
+  }
+
 }
 
 // Interfaces for player summary cards
@@ -263,4 +272,12 @@ export interface SessionSummaryDto {
   name: string;
   scheduledDate: string;
   price: number;
+}
+
+// Interface for character assignment response (used in Campaign Detail Page)
+// Validates: Requirements 4.7
+export interface CharacterResponseDto {
+  id: string;
+  name: string;
+  campaign: { id: string } | null;
 }

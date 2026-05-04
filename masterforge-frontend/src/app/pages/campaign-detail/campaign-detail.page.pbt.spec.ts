@@ -25,6 +25,8 @@ import {
   CampaignPlayerDto,
   CharacterSimpleDto,
 } from '../../services/api';
+import { RoleService } from '../../services/role.service';
+import { AuthService } from '../../services/auth.service';
 
 // ---------------------------------------------------------------------------
 // Shared test-bed setup
@@ -35,11 +37,15 @@ function buildMockApiService(): jasmine.SpyObj<ApiService> {
     'getCampaignById',
     'getCampaignSessions',
     'getCampaignPlayers',
+    'getPlayerCampaigns',
+    'getCharactersByUser',
   ]);
   // Return EMPTY so ngOnInit subscriptions never emit — we set state directly.
   spy.getCampaignById.and.returnValue(EMPTY);
   spy.getCampaignSessions.and.returnValue(EMPTY);
   spy.getCampaignPlayers.and.returnValue(EMPTY);
+  spy.getPlayerCampaigns.and.returnValue(EMPTY);
+  spy.getCharactersByUser.and.returnValue(EMPTY);
   return spy;
 }
 
@@ -57,6 +63,8 @@ async function createFixture(): Promise<{
         provide: ActivatedRoute,
         useValue: { snapshot: { paramMap: { get: () => 'test-id' } } },
       },
+      { provide: RoleService, useValue: { activeRole: 'dm' } },
+      { provide: AuthService, useValue: { getUserIdFromToken: () => 'test-user-id' } },
       Location,
     ],
   }).compileComponents();

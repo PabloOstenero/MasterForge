@@ -25,6 +25,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.masterforge.masterforge_backend.model.entity.Campaign
 import com.masterforge.masterforge_backend.model.entity.CampaignVisibility
 import com.masterforge.masterforge_backend.model.entity.User
+import com.masterforge.masterforge_backend.repository.CampaignEnrollmentRepository
 import com.masterforge.masterforge_backend.repository.CampaignRepository
 import com.masterforge.masterforge_backend.repository.CharacterRepository
 import com.masterforge.masterforge_backend.repository.CharacterSpellRepository
@@ -54,6 +55,7 @@ class DmHomeCampaignFilterExplorationTest : StringSpec() {
     @Autowired lateinit var mockMvc: MockMvc
     @Autowired lateinit var userRepository: UserRepository
     @Autowired lateinit var campaignRepository: CampaignRepository
+    @Autowired lateinit var campaignEnrollmentRepository: CampaignEnrollmentRepository
     @Autowired lateinit var sessionAttendeeRepository: SessionAttendeeRepository
     @Autowired lateinit var sessionRepository: SessionRepository
     @Autowired lateinit var characterSpellRepository: CharacterSpellRepository
@@ -71,6 +73,7 @@ class DmHomeCampaignFilterExplorationTest : StringSpec() {
         characterSpellRepository.deleteAll()
         inventorySlotRepository.deleteAll()
         characterRepository.deleteAll()
+        campaignEnrollmentRepository.deleteAll()
         campaignRepository.deleteAll()
         userRepository.deleteAll()
     }

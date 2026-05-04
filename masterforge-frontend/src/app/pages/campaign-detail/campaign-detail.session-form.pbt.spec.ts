@@ -22,6 +22,8 @@ import * as fc from 'fast-check';
 
 import { CampaignDetailPage } from './campaign-detail.page';
 import { ApiService, SessionSummaryDto } from '../../services/api';
+import { RoleService } from '../../services/role.service';
+import { AuthService } from '../../services/auth.service';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -39,6 +41,8 @@ function buildMockApiService(): jasmine.SpyObj<ApiService> {
     'getCampaignSessions',
     'getCampaignPlayers',
     'createSession',
+    'getPlayerCampaigns',
+    'getCharactersByUser',
   ]);
   spy.getCampaignById.and.returnValue(of({
     id: CAMPAIGN_ID,
@@ -51,6 +55,8 @@ function buildMockApiService(): jasmine.SpyObj<ApiService> {
   spy.getCampaignSessions.and.returnValue(of([]));
   spy.getCampaignPlayers.and.returnValue(of([]));
   spy.createSession.and.returnValue(of({ id: 'new-session-id' }));
+  spy.getPlayerCampaigns.and.returnValue(of([]));
+  spy.getCharactersByUser.and.returnValue(of([]));
   return spy;
 }
 
@@ -66,6 +72,8 @@ async function createFixture(apiSpy: jasmine.SpyObj<ApiService>): Promise<{
         provide: ActivatedRoute,
         useValue: { snapshot: { paramMap: { get: () => CAMPAIGN_ID } } },
       },
+      { provide: RoleService, useValue: { activeRole: 'dm' } },
+      { provide: AuthService, useValue: { getUserIdFromToken: () => 'test-user-id' } },
       Location,
     ],
   }).compileComponents();

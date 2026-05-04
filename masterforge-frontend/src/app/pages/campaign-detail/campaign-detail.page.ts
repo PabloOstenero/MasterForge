@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   IonContent,
   IonSpinner,
@@ -13,15 +13,20 @@ import {
   IonButton,
 } from '@ionic/angular/standalone';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
-import { arrowBackOutline, calendarOutline, cashOutline, peopleOutline, personOutline, addOutline } from 'ionicons/icons';
+import { arrowBackOutline, calendarOutline, cashOutline, peopleOutline, personOutline, addOutline, listOutline, checkmarkCircleOutline } from 'ionicons/icons';
 import { catchError, of } from 'rxjs';
 import {
   ApiService,
   CampaignDetailDto,
   SessionSummaryDto,
   CampaignPlayerDto,
+  CharacterSummary,
+  CharacterResponseDto,
 } from '../../services/api';
+import { RoleService } from '../../services/role.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-campaign-detail',
@@ -31,6 +36,8 @@ import {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
+    RouterLink,
     IonContent,
     IonSpinner,
     IonList,
@@ -63,13 +70,27 @@ export class CampaignDetailPage implements OnInit {
   submittingSession = false;
   errorSession: string | null = null;
 
+  // Role-aware state
+  isPlayer = false;
+  accessDenied = false;
+  playerCharacters: CharacterSummary[] = [];
+  loadingCharacters = false;
+  errorCharacters: string | null = null;
+  selectedCharacterId: string | null = null;
+  assigningCharacter = false;
+  assignSuccess = false;
+  errorAssign: string | null = null;
+
   constructor(
     private route: ActivatedRoute,
     private location: Location,
     private api: ApiService,
     private fb: FormBuilder,
+    private roleService: RoleService,
+    private authService: AuthService,
+    private router: Router,
   ) {
-    addIcons({ arrowBackOutline, calendarOutline, cashOutline, peopleOutline, personOutline, addOutline });
+    addIcons({ arrowBackOutline, calendarOutline, cashOutline, peopleOutline, personOutline, addOutline, listOutline, checkmarkCircleOutline });
   }
 
   ngOnInit(): void {
@@ -84,6 +105,36 @@ export class CampaignDetailPage implements OnInit {
       return;
     }
 
+    this.isPlayer = this.roleService.activeRole === 'player';
+
+    if (this.isPlayer) {
+      this.api.getPlayerCampaigns().pipe(
+        catchError(() => {
+          this.accessDenied = true;
+          return of(null);
+        }),
+      ).subscribe((campaigns) => {
+        if (campaigns === null) return;
+
+        const enrolled = campaigns.some((item) => item.campaignId === id);
+        if (!enrolled) {
+          this.accessDenied = true;
+          return;
+        }
+
+        // Enrolled — proceed with normal loading
+        this.loadCampaignData(id);
+
+        const userId = this.authService.getUserIdFromToken() ?? '';
+        this.loadPlayerCharacters(userId);
+      });
+    } else {
+      // DM path — existing behaviour unchanged
+      this.loadCampaignData(id);
+    }
+  }
+
+  private loadCampaignData(id: string): void {
     this.loadingCampaign = true;
     this.loadingSessions = true;
     this.loadingPlayers = true;
@@ -126,6 +177,48 @@ export class CampaignDetailPage implements OnInit {
         this.players = data;
       }
       this.loadingPlayers = false;
+    });
+  }
+
+  loadPlayerCharacters(userId: string): void {
+    this.loadingCharacters = true;
+    this.api.getCharactersByUser(userId).pipe(
+      catchError((err) => {
+        this.errorCharacters = err?.message ?? 'Error al cargar los personajes.';
+        this.loadingCharacters = false;
+        return of(null);
+      }),
+    ).subscribe((data) => {
+      if (data !== null) {
+        this.playerCharacters = data;
+      }
+      this.loadingCharacters = false;
+    });
+  }
+
+  assignCharacter(): void {
+    if (!this.selectedCharacterId || this.assigningCharacter) return;
+    const campaignId = this.route.snapshot.paramMap.get('id')!;
+    this.assigningCharacter = true;
+    this.errorAssign = null;
+    this.assignSuccess = false;
+    this.api.assignCharacterToCampaign(this.selectedCharacterId, campaignId).pipe(
+      catchError((err) => {
+        this.errorAssign = err?.error?.message ?? 'Error al asignar el personaje.';
+        this.assigningCharacter = false;
+        return of(null);
+      }),
+    ).subscribe((result) => {
+      if (result !== null) {
+        this.assignSuccess = true;
+        this.assigningCharacter = false;
+        // Reload players list
+        this.api.getCampaignPlayers(campaignId).pipe(
+          catchError(() => of(null)),
+        ).subscribe((data) => {
+          if (data !== null) this.players = data;
+        });
+      }
     });
   }
 
