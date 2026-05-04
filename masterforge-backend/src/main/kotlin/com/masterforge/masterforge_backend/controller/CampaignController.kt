@@ -152,6 +152,7 @@ class CampaignController(
         val dtos = sessions.map { session ->
             SessionSummaryDto(
                 id = session.id!!,
+                name = session.name,
                 scheduledDate = session.scheduledDate
                     .toInstant()
                     .atOffset(ZoneOffset.UTC)

@@ -10,9 +10,11 @@ import {
   IonIcon,
   IonSegment,
   IonSegmentButton,
+  IonButton,
 } from '@ionic/angular/standalone';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { addIcons } from 'ionicons';
-import { arrowBackOutline, calendarOutline, cashOutline, peopleOutline, personOutline } from 'ionicons/icons';
+import { arrowBackOutline, calendarOutline, cashOutline, peopleOutline, personOutline, addOutline } from 'ionicons/icons';
 import { catchError, of } from 'rxjs';
 import {
   ApiService,
@@ -28,6 +30,7 @@ import {
   standalone: true,
   imports: [
     CommonModule,
+    ReactiveFormsModule,
     IonContent,
     IonSpinner,
     IonList,
@@ -36,6 +39,7 @@ import {
     IonIcon,
     IonSegment,
     IonSegmentButton,
+    IonButton,
   ],
 })
 export class CampaignDetailPage implements OnInit {
@@ -54,15 +58,26 @@ export class CampaignDetailPage implements OnInit {
 
   activeSegment = 'jugadores';
 
+  showSessionForm = false;
+  sessionForm!: FormGroup;
+  submittingSession = false;
+  errorSession: string | null = null;
+
   constructor(
     private route: ActivatedRoute,
     private location: Location,
     private api: ApiService,
+    private fb: FormBuilder,
   ) {
-    addIcons({ arrowBackOutline, calendarOutline, cashOutline, peopleOutline, personOutline });
+    addIcons({ arrowBackOutline, calendarOutline, cashOutline, peopleOutline, personOutline, addOutline });
   }
 
   ngOnInit(): void {
+    this.sessionForm = this.fb.group({
+      name: ['', [Validators.required, Validators.maxLength(255)]],
+      scheduledDate: ['', Validators.required],
+    });
+
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
       this.errorCampaign = 'ID de campaña no encontrado.';
@@ -116,6 +131,63 @@ export class CampaignDetailPage implements OnInit {
 
   goBack(): void {
     this.location.back();
+  }
+
+  openSessionForm(): void {
+    this.showSessionForm = true;
+    this.errorSession = null;
+  }
+
+  cancelSessionForm(): void {
+    this.showSessionForm = false;
+    this.sessionForm.reset();
+    this.errorSession = null;
+  }
+
+  private reloadSessions(campaignId: string): void {
+    this.loadingSessions = true;
+    this.api.getCampaignSessions(campaignId).pipe(
+      catchError((err) => {
+        this.errorSessions = err?.message ?? 'Error al cargar las sesiones.';
+        this.loadingSessions = false;
+        return of(null);
+      }),
+    ).subscribe((data) => {
+      if (data !== null) {
+        this.sessions = data;
+      }
+      this.loadingSessions = false;
+    });
+  }
+
+  submitSession(): void {
+    if (this.sessionForm.invalid || this.submittingSession) return;
+
+    const campaignId = this.route.snapshot.paramMap.get('id')!;
+    const { name, scheduledDate } = this.sessionForm.value;
+
+    this.submittingSession = true;
+    this.errorSession = null;
+
+    this.api.createSession({
+      name,
+      scheduledDate: new Date(scheduledDate).toISOString(),
+      price: 0,
+      campaignId,
+    }).pipe(
+      catchError((err) => {
+        this.errorSession = err?.error?.message ?? 'Error al crear la sesión.';
+        this.submittingSession = false;
+        return of(null);
+      }),
+    ).subscribe((result) => {
+      if (result !== null) {
+        this.showSessionForm = false;
+        this.sessionForm.reset();
+        this.submittingSession = false;
+        this.reloadSessions(campaignId);
+      }
+    });
   }
 
   formatDate(ts: string): string {

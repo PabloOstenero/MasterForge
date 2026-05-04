@@ -5,6 +5,7 @@ import java.sql.Timestamp
 import java.util.UUID
 
 data class SessionDto(
+    val name: String,
     val scheduledDate: Timestamp,
     val price: BigDecimal,
     val campaignId: UUID

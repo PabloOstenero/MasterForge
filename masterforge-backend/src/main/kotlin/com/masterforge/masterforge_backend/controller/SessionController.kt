@@ -29,6 +29,7 @@ class SessionController(
             .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Campaign not found with id ${sessionDto.campaignId}") }
 
         val session = Session(
+            name = sessionDto.name,
             scheduledDate = sessionDto.scheduledDate,
             price = sessionDto.price,
             campaign = campaign
@@ -55,6 +56,7 @@ class SessionController(
             .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Campaign not found with id ${dto.campaignId}") }
 
         val updatedSession = existingSession.copy(
+            name = dto.name,
             scheduledDate = dto.scheduledDate,
             price = dto.price,
             campaign = campaign

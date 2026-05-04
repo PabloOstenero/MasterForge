@@ -17,6 +17,9 @@ data class Session(
     @GeneratedValue(strategy = GenerationType.UUID)
     val id: UUID? = null,
 
+    @Column(name = "name", nullable = false, length = 255)
+    val name: String,
+
     @Column(name = "scheduled_date", nullable = false)
     val scheduledDate: Timestamp,
 

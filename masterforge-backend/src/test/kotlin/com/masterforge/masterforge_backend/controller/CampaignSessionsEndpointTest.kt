@@ -250,6 +250,7 @@ class CampaignSessionsEndpointTest {
         price: BigDecimal = BigDecimal("10.00")
     ): Session = sessionRepository.save(
         Session(
+            name = "Test Session",
             scheduledDate = Timestamp(epochMillis),
             price = price,
             campaign = campaign

@@ -268,7 +268,7 @@ class PlayerCampaignRepositoryPropertyTest : StringSpec() {
         else
             Timestamp.from(Instant.now().minus(offsetDays, ChronoUnit.DAYS))
         return sessionRepository.save(
-            Session(scheduledDate = date, price = BigDecimal.ZERO, campaign = campaign)
+            Session(name = "Test Session", scheduledDate = date, price = BigDecimal.ZERO, campaign = campaign)
         )
     }
 

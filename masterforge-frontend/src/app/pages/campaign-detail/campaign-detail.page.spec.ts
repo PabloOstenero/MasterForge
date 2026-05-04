@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 import { CampaignDetailPage } from './campaign-detail.page';
 import {
@@ -27,8 +27,8 @@ const mockCampaign: CampaignDetailDto = {
 };
 
 const mockSessions: SessionSummaryDto[] = [
-  { id: 'session-1', scheduledDate: '2025-06-01T18:00:00.000Z', price: 10 },
-  { id: 'session-2', scheduledDate: '2025-06-15T18:00:00.000Z', price: 10 },
+  { id: 'session-1', name: 'Test Session 1', scheduledDate: '2025-06-01T18:00:00.000Z', price: 10 },
+  { id: 'session-2', name: 'Test Session 2', scheduledDate: '2025-06-15T18:00:00.000Z', price: 10 },
 ];
 
 const mockPlayers: CampaignPlayerDto[] = [
@@ -399,5 +399,131 @@ describe('CampaignDetailPage — 12.3 Back navigation and segment switching', ()
       expect(fixture.nativeElement.querySelector('[data-testid="panel-personajes"]')).toBeTruthy();
       expect(fixture.nativeElement.querySelector('[data-testid="panel-jugadores"]')).toBeNull();
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Session creation form interactions
+// Validates: Requirements 1.1, 1.2, 1.3, 1.4, 2.3, 2.4, 3.1, 3.3, 4.1, 4.2, 5.1
+// ---------------------------------------------------------------------------
+
+describe('CampaignDetailPage — Session creation form', () => {
+
+  let fixture: ComponentFixture<CampaignDetailPage>;
+  let component: CampaignDetailPage;
+  let apiSpy: jasmine.SpyObj<ApiService>;
+
+  beforeEach(async () => {
+    apiSpy = jasmine.createSpyObj<ApiService>('ApiService', [
+      'getCampaignById',
+      'getCampaignSessions',
+      'getCampaignPlayers',
+      'createSession',
+    ]);
+    apiSpy.getCampaignById.and.returnValue(of(mockCampaign));
+    apiSpy.getCampaignSessions.and.returnValue(of(mockSessions));
+    apiSpy.getCampaignPlayers.and.returnValue(of(mockPlayers));
+
+    await TestBed.configureTestingModule({
+      imports: [CampaignDetailPage],
+      providers: [
+        { provide: ApiService, useValue: apiSpy },
+        { provide: ActivatedRoute, useValue: buildActivatedRouteStub() },
+        Location,
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(CampaignDetailPage);
+    component = fixture.componentInstance;
+    fixture.detectChanges(); // triggers ngOnInit
+  });
+
+  it('"Nueva Sesión" button is present and clicking it sets showSessionForm to true', () => {
+    const btn: HTMLElement = fixture.nativeElement.querySelector('[data-testid="btn-nueva-sesion"]');
+    expect(btn).toBeTruthy();
+
+    btn.click();
+    fixture.detectChanges();
+
+    expect(component.showSessionForm).toBeTrue();
+  });
+
+  it('form is hidden when showSessionForm is false', () => {
+    expect(component.showSessionForm).toBeFalse();
+
+    const form = fixture.nativeElement.querySelector('[data-testid="session-creation-form"]');
+    expect(form).toBeNull();
+  });
+
+  it('"Crear" button is disabled when form is invalid', () => {
+    component.showSessionForm = true;
+    fixture.detectChanges();
+
+    const btn: HTMLButtonElement = fixture.nativeElement.querySelector('[data-testid="btn-crear-sesion"]');
+    expect(btn).toBeTruthy();
+    expect(btn.disabled).toBeTrue();
+  });
+
+  it('"Crear" button is enabled when both fields are filled', () => {
+    component.showSessionForm = true;
+    fixture.detectChanges();
+
+    component.sessionForm.setValue({ name: 'Test Session', scheduledDate: '2025-06-01T18:00' });
+    fixture.detectChanges();
+
+    const btn: HTMLButtonElement = fixture.nativeElement.querySelector('[data-testid="btn-crear-sesion"]');
+    expect(btn).toBeTruthy();
+    expect(btn.disabled).toBeFalse();
+  });
+
+  it('clicking "Cancelar" calls cancelSessionForm() and hides the form', () => {
+    component.showSessionForm = true;
+    fixture.detectChanges();
+
+    const cancelSpy = spyOn(component, 'cancelSessionForm').and.callThrough();
+
+    const cancelBtn: HTMLElement = fixture.nativeElement.querySelector('[data-testid="btn-cancelar-sesion"]');
+    expect(cancelBtn).toBeTruthy();
+    cancelBtn.click();
+
+    expect(cancelSpy).toHaveBeenCalled();
+    expect(component.showSessionForm).toBeFalse();
+  });
+
+  it('successful submit calls createSession with correct payload and then getCampaignSessions', () => {
+    apiSpy.createSession.and.returnValue(of({ id: 'new-session' }));
+    // getCampaignSessions is called once in ngOnInit and once after successful submit
+    apiSpy.getCampaignSessions.and.returnValue(of(mockSessions));
+
+    component.showSessionForm = true;
+    fixture.detectChanges();
+
+    component.sessionForm.setValue({ name: 'La Cripta', scheduledDate: '2025-06-01T18:00' });
+
+    component.submitSession();
+
+    expect(apiSpy.createSession).toHaveBeenCalledOnceWith({
+      name: 'La Cripta',
+      scheduledDate: new Date('2025-06-01T18:00').toISOString(),
+      price: 0,
+      campaignId: CAMPAIGN_ID,
+    });
+    expect(apiSpy.getCampaignSessions).toHaveBeenCalledWith(CAMPAIGN_ID);
+    expect(component.showSessionForm).toBeFalse();
+  });
+
+  it('failed submit sets errorSession and keeps form open', () => {
+    apiSpy.createSession.and.returnValue(throwError(() => ({ error: { message: 'Server error' } })));
+
+    component.showSessionForm = true;
+    fixture.detectChanges();
+
+    component.sessionForm.setValue({ name: 'La Cripta', scheduledDate: '2025-06-01T18:00' });
+
+    component.submitSession();
+
+    expect(component.errorSession).toBe('Server error');
+    expect(component.showSessionForm).toBeTrue();
+    expect(component.submittingSession).toBeFalse();
   });
 });

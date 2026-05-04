@@ -104,7 +104,7 @@ updateTempHp(characterId: string, tempHp: number): Observable<any> {
   }
 
   // Create a new session
-  createSession(dto: { scheduledDate: string; price: number; campaignId: string }): Observable<any> {
+  createSession(dto: { name: string; scheduledDate: string; price: number; campaignId: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/sessions`, dto);
   }
 
@@ -260,6 +260,7 @@ export interface CampaignDetailDto {
 // Validates: Requirements 3.5
 export interface SessionSummaryDto {
   id: string;
+  name: string;
   scheduledDate: string;
   price: number;
 }

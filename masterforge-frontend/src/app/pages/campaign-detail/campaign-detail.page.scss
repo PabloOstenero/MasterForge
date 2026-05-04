@@ -275,3 +275,154 @@
   font-size: 0.88rem;
   margin: 0 0 12px;
 }
+
+// ── Section header (title + action button row) ────────────────────────────────
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+
+  .section-title {
+    margin: 0;
+  }
+}
+
+// ── Add session button ────────────────────────────────────────────────────────
+.add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: 1px solid $accent-gold;
+  border-radius: 6px;
+  color: $accent-gold;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  ion-icon {
+    font-size: 1rem;
+  }
+
+  &:hover {
+    background: rgba($accent-gold, 0.12);
+  }
+}
+
+// ── Session creation form ─────────────────────────────────────────────────────
+.session-form {
+  background: $bg-surface;
+  border: 1px solid rgba($accent-gold, 0.2);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-label {
+  color: $text-muted;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.form-input {
+  background: $bg-primary;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: $text-primary;
+  font-size: 0.92rem;
+  padding: 8px 12px;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+  box-sizing: border-box;
+
+  &:focus {
+    border-color: $accent-gold;
+  }
+
+  // datetime-local color fix for dark theme
+  color-scheme: dark;
+}
+
+.field-error {
+  color: $accent-crimson;
+  font-size: 0.78rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.btn-primary {
+  background: $accent-gold;
+  border: none;
+  border-radius: 6px;
+  color: $bg-primary;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 8px 20px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: opacity 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: $text-muted;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: border-color 0.15s, color 0.15s;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: $text-primary;
+  }
+}
+
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  --color: #{$bg-primary};
+}
+
+// ── Session name in list ──────────────────────────────────────────────────────
+.session-name {
+  color: $text-primary;
+  font-weight: 600;
+  font-size: 0.92rem;
+  display: block;
+  margin-bottom: 2px;
+}

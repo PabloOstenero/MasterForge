@@ -45,10 +45,80 @@
 
     <!-- ── Sessions section ── -->
     <div class="section" data-testid="sessions-section">
-      <h2 class="section-title">
-        <ion-icon name="calendar-outline"></ion-icon>
-        Sesiones
-      </h2>
+      <div class="section-header">
+        <h2 class="section-title">
+          <ion-icon name="calendar-outline"></ion-icon>
+          Sesiones
+        </h2>
+        <button class="add-btn" (click)="openSessionForm()" data-testid="btn-nueva-sesion" aria-label="Nueva sesión">
+          <ion-icon name="add-outline"></ion-icon>
+          Nueva Sesión
+        </button>
+      </div>
+
+      <!-- Session creation form -->
+      @if (showSessionForm) {
+        <form [formGroup]="sessionForm" (ngSubmit)="submitSession()" class="session-form" data-testid="session-creation-form">
+
+          <div class="form-field">
+            <label class="form-label" for="session-name">Nombre de la sesión</label>
+            <input
+              id="session-name"
+              type="text"
+              formControlName="name"
+              class="form-input"
+              placeholder="Ej: La Cripta Olvidada"
+              data-testid="input-session-name"
+              autocomplete="off"
+            />
+            @if (sessionForm.get('name')?.invalid && sessionForm.get('name')?.touched) {
+              <span class="field-error" data-testid="error-session-name">El nombre es obligatorio.</span>
+            }
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="session-date">Fecha y hora</label>
+            <input
+              id="session-date"
+              type="datetime-local"
+              formControlName="scheduledDate"
+              class="form-input"
+              data-testid="input-session-date"
+            />
+            @if (sessionForm.get('scheduledDate')?.invalid && sessionForm.get('scheduledDate')?.touched) {
+              <span class="field-error" data-testid="error-session-date">La fecha es obligatoria.</span>
+            }
+          </div>
+
+          @if (errorSession) {
+            <p class="error-msg" data-testid="error-session-submit">{{ errorSession }}</p>
+          }
+
+          <div class="form-actions">
+            <button
+              type="submit"
+              class="btn-primary"
+              [disabled]="sessionForm.invalid || submittingSession"
+              data-testid="btn-crear-sesion"
+            >
+              @if (submittingSession) {
+                <ion-spinner name="crescent" class="btn-spinner"></ion-spinner>
+              } @else {
+                Crear
+              }
+            </button>
+            <button
+              type="button"
+              class="btn-secondary"
+              (click)="cancelSessionForm()"
+              data-testid="btn-cancelar-sesion"
+            >
+              Cancelar
+            </button>
+          </div>
+
+        </form>
+      }
 
       @if (loadingSessions) {
         <div class="loading-container" data-testid="spinner-sessions">
@@ -68,6 +138,7 @@
             @for (session of sessions; track session.id) {
               <ion-item class="session-item" data-testid="session-item">
                 <ion-label>
+                  <span class="session-name" data-testid="session-name">{{ session.name }}</span>
                   <span class="session-date" data-testid="session-date">{{ formatDate(session.scheduledDate) }}</span>
                   <span class="session-price" data-testid="session-price">{{ formatPrice(session.price) }}</span>
                 </ion-label>

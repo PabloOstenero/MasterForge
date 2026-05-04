@@ -259,6 +259,7 @@ export class HomePage implements OnInit {
     }
 
     const dto = {
+      name: '',
       scheduledDate: this.newSession.scheduledDate,
       price: Number(this.newSession.price),
       campaignId: this.newSession.campaignId

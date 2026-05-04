@@ -287,6 +287,7 @@ class CampaignSessionsControllerPropertyTest : StringSpec() {
         val baseEpoch = 1_700_000_000_000L
         return sessionRepository.save(
             Session(
+                name = "Test Session",
                 scheduledDate = Timestamp(baseEpoch + offsetMillis),
                 price = price,
                 campaign = campaign
@@ -309,6 +310,7 @@ class CampaignSessionsControllerPropertyTest : StringSpec() {
     /** Minimal response shape mirroring SessionSummaryDto for assertions. */
     data class SessionSummaryResponse(
         val id: String,
+        val name: String,
         val scheduledDate: String,
         val price: java.math.BigDecimal
     )
