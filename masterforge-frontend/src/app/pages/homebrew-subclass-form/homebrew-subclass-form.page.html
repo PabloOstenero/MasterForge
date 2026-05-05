@@ -1,0 +1,96 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="cancel()" data-testid="cancel-button">Cancelar</ion-button>
+    </ion-buttons>
+    <ion-title>Nueva Subclase</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="homebrew-form-content">
+  <div class="ion-padding">
+
+    <!-- Error state -->
+    @if (error) {
+      <p class="text-muted" data-testid="form-error">{{ error }}</p>
+    }
+
+    <!-- Classes loading error -->
+    @if (classesError) {
+      <p class="text-muted" data-testid="classes-error">{{ classesError }}</p>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+
+      <!-- Name field -->
+      <div class="field-group">
+        <label class="field-label">Nombre <span class="required">*</span></label>
+        <ion-input
+          class="forge-input"
+          formControlName="name"
+          placeholder="Nombre de la subclase"
+          data-testid="name-input"
+          [class.input-error]="form.get('name')?.invalid && form.get('name')?.touched">
+        </ion-input>
+        @if (form.get('name')?.invalid && form.get('name')?.touched) {
+          <p class="error-message" data-testid="name-error">El nombre es obligatorio.</p>
+        }
+      </div>
+
+      <!-- Description field -->
+      <div class="field-group">
+        <label class="field-label">Descripción <span class="required">*</span></label>
+        <ion-input
+          class="forge-input"
+          formControlName="description"
+          placeholder="Descripción de la subclase"
+          data-testid="description-input"
+          [class.input-error]="form.get('description')?.invalid && form.get('description')?.touched">
+        </ion-input>
+        @if (form.get('description')?.invalid && form.get('description')?.touched) {
+          <p class="error-message" data-testid="description-error">La descripción es obligatoria.</p>
+        }
+      </div>
+
+      <!-- Parent Class selector -->
+      <div class="field-group">
+        <label class="field-label">Clase Padre <span class="required">*</span></label>
+        @if (loadingClasses) {
+          <ion-spinner name="crescent" data-testid="classes-spinner"></ion-spinner>
+        } @else {
+          <ion-select
+            class="forge-input"
+            formControlName="parentClassId"
+            placeholder="Selecciona una clase"
+            data-testid="parent-class-select"
+            [class.input-error]="form.get('parentClassId')?.invalid && form.get('parentClassId')?.touched">
+            @for (cls of availableClasses; track cls.id) {
+              <ion-select-option [value]="cls.id">{{ cls.name }}</ion-select-option>
+            }
+          </ion-select>
+        }
+        @if (form.get('parentClassId')?.invalid && form.get('parentClassId')?.touched) {
+          <p class="error-message" data-testid="parent-class-error">La clase padre es obligatoria.</p>
+        }
+      </div>
+
+      <!-- Form actions -->
+      <div class="form-actions">
+        <ion-button
+          expand="block"
+          type="submit"
+          class="btn-gold"
+          [disabled]="submitting"
+          data-testid="submit-button"
+        >
+          @if (submitting) {
+            <ion-spinner name="crescent" slot="start"></ion-spinner>
+          }
+          Crear Subclase
+        </ion-button>
+      </div>
+
+    </form>
+
+  </div>
+</ion-content>

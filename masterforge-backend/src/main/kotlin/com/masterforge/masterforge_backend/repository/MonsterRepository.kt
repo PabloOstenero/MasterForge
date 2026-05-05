@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface MonsterRepository : JpaRepository<Monster, UUID>
+interface MonsterRepository : JpaRepository<Monster, UUID> {
+    fun findByAuthorId(authorId: UUID): List<Monster>
+}

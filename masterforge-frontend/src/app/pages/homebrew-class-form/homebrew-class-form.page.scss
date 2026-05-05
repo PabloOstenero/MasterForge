@@ -1,0 +1,90 @@
+@use 'src/theme/variables' as *;
+
+:host {
+  display: block;
+}
+
+.homebrew-form-content {
+  --background: #121212;
+}
+
+.text-muted {
+  color: $text-muted;
+}
+
+.form-actions {
+  margin-top: 24px;
+}
+
+.btn-gold {
+  --background: #C5A059;
+  --color: #121212;
+  --border-radius: 12px;
+  font-weight: bold;
+}
+
+// ─── Field group ──────────────────────────────────────────────────────────────
+.field-group {
+  margin-bottom: 20px;
+}
+
+.field-label {
+  display: block;
+  color: #888;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+  font-weight: bold;
+
+  .required {
+    color: #C5A059;
+  }
+}
+
+.forge-input {
+  --background: #1E1E1E;
+  --color: white;
+  --placeholder-color: #555;
+  --border-radius: 8px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  border: 1px solid #333;
+  border-radius: 8px;
+
+  &.input-error {
+    border-color: #C62828;
+  }
+}
+
+// ─── Error message ────────────────────────────────────────────────────────────
+.error-message {
+  color: #C62828;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  padding-left: 4px;
+}
+
+// ─── Saving throws grid ───────────────────────────────────────────────────────
+.saving-throws-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px;
+  background: #1E1E1E;
+  border: 1px solid #333;
+  border-radius: 8px;
+}
+
+.saving-throw-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.saving-throw-label {
+  color: #e0e0e0;
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}

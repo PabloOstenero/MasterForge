@@ -1,5 +1,6 @@
 package com.masterforge.masterforge_backend.controller
 
+import com.masterforge.masterforge_backend.config.SecurityUtils
 import com.masterforge.masterforge_backend.model.dto.MonsterDto
 import com.masterforge.masterforge_backend.model.entity.Monster
 import com.masterforge.masterforge_backend.model.entity.User
@@ -96,9 +97,17 @@ class MonsterController(
 
     @DeleteMapping("/{id}")
     fun deleteMonster(@PathVariable id: UUID): ResponseEntity<Void> {
-        if (!monsterRepository.existsById(id)) {
-            return ResponseEntity.notFound().build()
+        val currentUserId = SecurityUtils.getCurrentUserId()
+        val monster = monsterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Monster not found with id $id") }
+
+        // Official content (no author) and content owned by another user are both forbidden
+        val authorId = monster.author?.id
+            ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot delete official content")
+        if (authorId != currentUserId) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this content")
         }
+
         monsterRepository.deleteById(id)
         return ResponseEntity.noContent().build()
     }

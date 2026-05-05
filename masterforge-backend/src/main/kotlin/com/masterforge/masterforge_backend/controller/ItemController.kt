@@ -1,5 +1,6 @@
 package com.masterforge.masterforge_backend.controller
 
+import com.masterforge.masterforge_backend.config.SecurityUtils
 import com.masterforge.masterforge_backend.model.dto.ItemDto
 import com.masterforge.masterforge_backend.model.entity.Item
 import com.masterforge.masterforge_backend.model.entity.User
@@ -72,9 +73,17 @@ class ItemController(
 
     @DeleteMapping("/{id}")
     fun deleteItem(@PathVariable id: UUID): ResponseEntity<Void> {
-        if (!itemRepository.existsById(id)) {
-            return ResponseEntity.notFound().build()
+        val currentUserId = SecurityUtils.getCurrentUserId()
+        val item = itemRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Item not found with id $id") }
+
+        // Official content (no author) and content owned by another user are both forbidden
+        val authorId = item.author?.id
+            ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot delete official content")
+        if (authorId != currentUserId) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this content")
         }
+
         itemRepository.deleteById(id)
         return ResponseEntity.noContent().build()
     }

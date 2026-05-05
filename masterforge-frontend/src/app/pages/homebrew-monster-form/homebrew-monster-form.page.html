@@ -1,0 +1,210 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="cancel()" data-testid="cancel-button">Cancelar</ion-button>
+    </ion-buttons>
+    <ion-title>Nuevo Monstruo</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="homebrew-form-content">
+  <div class="ion-padding">
+
+    <!-- Error state -->
+    @if (error) {
+      <p class="text-muted" data-testid="form-error">{{ error }}</p>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+
+      <!-- Name field -->
+      <div class="field-group">
+        <label class="field-label">Nombre <span class="required">*</span></label>
+        <ion-input
+          class="forge-input"
+          formControlName="name"
+          placeholder="Nombre del monstruo"
+          data-testid="name-input"
+          [class.input-error]="form.get('name')?.invalid && form.get('name')?.touched">
+        </ion-input>
+        @if (form.get('name')?.invalid && form.get('name')?.touched) {
+          <p class="error-message" data-testid="name-error">El nombre es obligatorio.</p>
+        }
+      </div>
+
+      <!-- Type field -->
+      <div class="field-group">
+        <label class="field-label">Tipo <span class="required">*</span></label>
+        <ion-input
+          class="forge-input"
+          formControlName="type"
+          placeholder="Ej: Humanoide, Bestia, No-muerto"
+          data-testid="type-input"
+          [class.input-error]="form.get('type')?.invalid && form.get('type')?.touched">
+        </ion-input>
+        @if (form.get('type')?.invalid && form.get('type')?.touched) {
+          <p class="error-message" data-testid="type-error">El tipo es obligatorio.</p>
+        }
+      </div>
+
+      <!-- Size field -->
+      <div class="field-group">
+        <label class="field-label">Tamaño <span class="required">*</span></label>
+        <ion-select
+          class="forge-input"
+          formControlName="size"
+          placeholder="Selecciona un tamaño"
+          data-testid="size-input"
+          [class.input-error]="form.get('size')?.invalid && form.get('size')?.touched">
+          @for (size of monsterSizes; track size) {
+            <ion-select-option [value]="size">{{ size }}</ion-select-option>
+          }
+        </ion-select>
+        @if (form.get('size')?.invalid && form.get('size')?.touched) {
+          <p class="error-message" data-testid="size-error">El tamaño es obligatorio.</p>
+        }
+      </div>
+
+      <!-- Armor Class field -->
+      <div class="field-group">
+        <label class="field-label">Clase de Armadura <span class="required">*</span></label>
+        <ion-input
+          class="forge-input"
+          type="number"
+          formControlName="armorClass"
+          placeholder="Ej: 15"
+          data-testid="armor-class-input"
+          [class.input-error]="form.get('armorClass')?.invalid && form.get('armorClass')?.touched">
+        </ion-input>
+        @if (form.get('armorClass')?.invalid && form.get('armorClass')?.touched) {
+          @if (form.get('armorClass')?.errors?.['required']) {
+            <p class="error-message" data-testid="armor-class-error">La clase de armadura es obligatoria.</p>
+          } @else if (form.get('armorClass')?.errors?.['min'] || form.get('armorClass')?.errors?.['max']) {
+            <p class="error-message" data-testid="armor-class-error">La clase de armadura debe estar entre 1 y 30.</p>
+          }
+        }
+      </div>
+
+      <!-- Hit Points field -->
+      <div class="field-group">
+        <label class="field-label">Puntos de Golpe <span class="required">*</span></label>
+        <ion-input
+          class="forge-input"
+          type="number"
+          formControlName="hitPoints"
+          placeholder="Ej: 7"
+          data-testid="hit-points-input"
+          [class.input-error]="form.get('hitPoints')?.invalid && form.get('hitPoints')?.touched">
+        </ion-input>
+        @if (form.get('hitPoints')?.invalid && form.get('hitPoints')?.touched) {
+          @if (form.get('hitPoints')?.errors?.['required']) {
+            <p class="error-message" data-testid="hit-points-error">Los puntos de golpe son obligatorios.</p>
+          } @else if (form.get('hitPoints')?.errors?.['min']) {
+            <p class="error-message" data-testid="hit-points-error">Los puntos de golpe deben ser al menos 1.</p>
+          }
+        }
+      </div>
+
+      <!-- Speed field -->
+      <div class="field-group">
+        <label class="field-label">Velocidad <span class="required">*</span></label>
+        <ion-input
+          class="forge-input"
+          formControlName="speed"
+          placeholder="Ej: 30 ft."
+          data-testid="speed-input"
+          [class.input-error]="form.get('speed')?.invalid && form.get('speed')?.touched">
+        </ion-input>
+        @if (form.get('speed')?.invalid && form.get('speed')?.touched) {
+          <p class="error-message" data-testid="speed-error">La velocidad es obligatoria.</p>
+        }
+      </div>
+
+      <!-- Ability Scores -->
+      <div class="field-group">
+        <label class="field-label">Puntuaciones de Características <span class="required">*</span></label>
+        <p class="field-hint">Cada valor debe estar entre 1 y 30.</p>
+        <div class="ability-scores-grid">
+          @for (key of abilityKeys; track key) {
+            <div class="ability-score-item">
+              <label class="ability-label">{{ abilityLabels[key] }}</label>
+              <ion-input
+                class="forge-input"
+                type="number"
+                [formControlName]="key"
+                placeholder="10"
+                [attr.data-testid]="key + '-input'"
+                [class.input-error]="form.get(key)?.invalid && form.get(key)?.touched">
+              </ion-input>
+              @if (form.get(key)?.invalid && form.get(key)?.touched) {
+                @if (form.get(key)?.errors?.['required']) {
+                  <p class="error-message" [attr.data-testid]="key + '-error'">Este campo es obligatorio.</p>
+                } @else if (form.get(key)?.errors?.['min'] || form.get(key)?.errors?.['max']) {
+                  <p class="error-message" [attr.data-testid]="key + '-error'">El valor debe estar entre 1 y 30.</p>
+                }
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Challenge Rating field -->
+      <div class="field-group">
+        <label class="field-label">Índice de Desafío <span class="required">*</span></label>
+        <ion-input
+          class="forge-input"
+          type="number"
+          formControlName="challengeRating"
+          placeholder="Ej: 0.25"
+          data-testid="challenge-rating-input"
+          [class.input-error]="form.get('challengeRating')?.invalid && form.get('challengeRating')?.touched">
+        </ion-input>
+        @if (form.get('challengeRating')?.invalid && form.get('challengeRating')?.touched) {
+          @if (form.get('challengeRating')?.errors?.['required']) {
+            <p class="error-message" data-testid="challenge-rating-error">El índice de desafío es obligatorio.</p>
+          } @else if (form.get('challengeRating')?.errors?.['min']) {
+            <p class="error-message" data-testid="challenge-rating-error">El índice de desafío no puede ser negativo.</p>
+          }
+        }
+      </div>
+
+      <!-- XP field -->
+      <div class="field-group">
+        <label class="field-label">Experiencia (XP) <span class="required">*</span></label>
+        <ion-input
+          class="forge-input"
+          type="number"
+          formControlName="xp"
+          placeholder="Ej: 50"
+          data-testid="xp-input"
+          [class.input-error]="form.get('xp')?.invalid && form.get('xp')?.touched">
+        </ion-input>
+        @if (form.get('xp')?.invalid && form.get('xp')?.touched) {
+          @if (form.get('xp')?.errors?.['required']) {
+            <p class="error-message" data-testid="xp-error">La experiencia es obligatoria.</p>
+          } @else if (form.get('xp')?.errors?.['min']) {
+            <p class="error-message" data-testid="xp-error">La experiencia no puede ser negativa.</p>
+          }
+        }
+      </div>
+
+      <!-- Form actions -->
+      <div class="form-actions">
+        <ion-button
+          expand="block"
+          type="submit"
+          class="btn-gold"
+          [disabled]="submitting"
+          data-testid="submit-button"
+        >
+          @if (submitting) {
+            <ion-spinner name="crescent" slot="start"></ion-spinner>
+          }
+          Crear Monstruo
+        </ion-button>
+      </div>
+
+    </form>
+
+  </div>
+</ion-content>

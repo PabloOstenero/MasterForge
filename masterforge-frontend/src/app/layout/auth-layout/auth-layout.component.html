@@ -27,7 +27,7 @@
           <span class="ion-hide-sm-down">{{ (activeRole$ | async) === 'dm' ? 'Modo Jugador' : 'Modo Director' }}</span>
         </ion-button>
         <button class="avatar-btn" (click)="openDropdown()" aria-label="Menú de usuario" type="button">
-          <img src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="avatar" />
+          <ion-icon name="person-circle-outline" class="avatar-icon"></ion-icon>
         </button>
       </div>
       @if (isDropdownOpen) {

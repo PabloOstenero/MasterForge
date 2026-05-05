@@ -15,7 +15,8 @@ import {
   bookOutline,
   colorWandOutline,
   searchOutline,
-  listOutline
+  listOutline,
+  personCircleOutline
 } from 'ionicons/icons';
 import { AuthService } from '../../services/auth.service';
 import { RoleService } from '../../services/role.service';
@@ -37,7 +38,8 @@ export class AuthLayoutComponent {
     addIcons({
       settingsOutline, logOutOutline, swapHorizontalOutline,
       homeOutline, peopleOutline, mapOutline, skullOutline,
-      personAddOutline, bookOutline, colorWandOutline, searchOutline, listOutline
+      personAddOutline, bookOutline, colorWandOutline, searchOutline, listOutline,
+      personCircleOutline
     });
   }
 

@@ -1,5 +1,6 @@
 package com.masterforge.masterforge_backend.controller
 
+import com.masterforge.masterforge_backend.config.SecurityUtils
 import com.masterforge.masterforge_backend.model.dto.DndSubclassDto
 import com.masterforge.masterforge_backend.model.entity.DndSubclass
 import com.masterforge.masterforge_backend.model.entity.User
@@ -77,9 +78,17 @@ class DndSubclassController(
 
     @DeleteMapping("/{id}")
     fun deleteDndSubclass(@PathVariable id: Int): ResponseEntity<Void> {
-        if (!dndSubclassRepository.existsById(id)) {
-            return ResponseEntity.notFound().build()
+        val currentUserId = SecurityUtils.getCurrentUserId()
+        val dndSubclass = dndSubclassRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "D&D Subclass not found with id $id") }
+
+        // Official content (no author) and content owned by another user are both forbidden
+        val authorId = dndSubclass.author?.id
+            ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot delete official content")
+        if (authorId != currentUserId) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this content")
         }
+
         dndSubclassRepository.deleteById(id)
         return ResponseEntity.noContent().build()
     }

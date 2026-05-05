@@ -113,12 +113,25 @@
   overflow: hidden;
   margin-left: 8px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
+  }
+
+  .avatar-icon {
+    font-size: 32px;
+    color: var(--mf-text-muted, #8c8c8c);
+    transition: color 0.2s;
+  }
+
+  &:hover .avatar-icon {
+    color: var(--mf-accent-gold, #c9a84c);
   }
 }
 

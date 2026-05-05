@@ -43,7 +43,7 @@ import java.util.UUID
  * Tests the repository queries that back the three UserController endpoints:
  * - GET /api/users/me/next-session       → findNextSessionDateByUserEmail
  * - GET /api/users/me/active-campaigns   → countDistinctCampaignsByUserEmail
- * - GET /api/users/me/active-characters  → countByUserEmail
+ * - GET /api/users/me/active-characters  → countByUserId
  */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -67,21 +67,21 @@ class UserControllerPropertyTest : StringSpec() {
          * Feature: player-summary-cards, Property 4: each endpoint returns the correct response shape and value for any player
          * Validates: Requirement 2.5
          */
-        "Property 4: countByUserEmail returns value equal to characters owned (including 0)" {
+        "Property 4: countByUserId returns value equal to characters owned (including 0)" {
             checkAll(100, Arb.int(0, 5)) { numChars ->
                 cleanup()
                 val (dndClass, dndRace) = saveClassAndRace()
                 val player = savePlayer()
                 repeat(numChars) { saveCharacter(player, dndClass, dndRace) }
 
-                val count = characterRepository.countByUserEmail(player.email)
+                val count = characterRepository.countByUserId(player.id!!)
 
                 count shouldBe numChars.toLong()
                 (count >= 0) shouldBe true
             }
         }
 
-        "Property 4: countByUserEmail is isolated — only counts characters of the queried player" {
+        "Property 4: countByUserId is isolated — only counts characters of the queried player" {
             checkAll(100, Arb.int(0, 3), Arb.int(1, 3)) { myChars, otherChars ->
                 cleanup()
                 val (dndClass, dndRace) = saveClassAndRace()
@@ -91,7 +91,7 @@ class UserControllerPropertyTest : StringSpec() {
                 repeat(myChars) { saveCharacter(player, dndClass, dndRace) }
                 repeat(otherChars) { saveCharacter(other, dndClass, dndRace) }
 
-                val count = characterRepository.countByUserEmail(player.email)
+                val count = characterRepository.countByUserId(player.id!!)
                 count shouldBe myChars.toLong()
             }
         }

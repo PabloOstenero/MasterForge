@@ -25,6 +25,12 @@ export const routes: Routes = [
       // New routes for Player features (Assuming components will be generated)
       { path: 'forge-character', loadComponent: () => import('./pages/forge-character/forge-character.page').then(m => m.ForgeCharacterPage) },
       { path: 'homebrew', loadComponent: () => import('./pages/homebrew/homebrew.page').then(m => m.HomebrewPage) },
+      { path: 'homebrew/class/new', loadComponent: () => import('./pages/homebrew-class-form/homebrew-class-form.page').then(m => m.HomebrewClassFormPage) },
+      { path: 'homebrew/subclass/new', loadComponent: () => import('./pages/homebrew-subclass-form/homebrew-subclass-form.page').then(m => m.HomebrewSubclassFormPage) },
+      { path: 'homebrew/race/new', loadComponent: () => import('./pages/homebrew-race-form/homebrew-race-form.page').then(m => m.HomebrewRaceFormPage) },
+      { path: 'homebrew/monster/new', loadComponent: () => import('./pages/homebrew-monster-form/homebrew-monster-form.page').then(m => m.HomebrewMonsterFormPage) },
+      { path: 'homebrew/spell/new', loadComponent: () => import('./pages/homebrew-spell-form/homebrew-spell-form.page').then(m => m.HomebrewSpellFormPage) },
+      { path: 'homebrew/item/new', loadComponent: () => import('./pages/homebrew-item-form/homebrew-item-form.page').then(m => m.HomebrewItemFormPage) },
       { path: 'search-campaigns', loadComponent: () => import('./pages/search-campaigns/search-campaigns.page').then(m => m.SearchCampaignsPage) },
       { path: 'my-characters', loadComponent: () => import('./pages/my-characters/my-characters.page').then(m => m.MyCharactersPage) },
       { path: 'my-campaigns', loadComponent: () => import('./pages/my-campaigns/my-campaigns.page').then(m => m.MyCampaignsPage) },

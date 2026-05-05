@@ -1,0 +1,102 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="cancel()" data-testid="cancel-button">Cancelar</ion-button>
+    </ion-buttons>
+    <ion-title>Nuevo Objeto</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="homebrew-form-content">
+  <div class="ion-padding">
+
+    <!-- Error state -->
+    @if (error) {
+      <p class="text-muted" data-testid="form-error">{{ error }}</p>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+
+      <!-- Name field -->
+      <div class="field-group">
+        <label class="field-label">Nombre <span class="required">*</span></label>
+        <ion-input
+          class="forge-input"
+          formControlName="name"
+          placeholder="Nombre del objeto"
+          data-testid="name-input"
+          [class.input-error]="form.get('name')?.invalid && form.get('name')?.touched">
+        </ion-input>
+        @if (form.get('name')?.invalid && form.get('name')?.touched) {
+          <p class="error-message" data-testid="name-error">El nombre es obligatorio.</p>
+        }
+      </div>
+
+      <!-- Type field -->
+      <div class="field-group">
+        <label class="field-label">Tipo <span class="required">*</span></label>
+        <ion-input
+          class="forge-input"
+          formControlName="type"
+          placeholder="Ej: Arma, Armadura, Poción"
+          data-testid="type-input"
+          [class.input-error]="form.get('type')?.invalid && form.get('type')?.touched">
+        </ion-input>
+        @if (form.get('type')?.invalid && form.get('type')?.touched) {
+          <p class="error-message" data-testid="type-error">El tipo es obligatorio.</p>
+        }
+      </div>
+
+      <!-- Weight field -->
+      <div class="field-group">
+        <label class="field-label">Peso (kg) <span class="required">*</span></label>
+        <ion-input
+          class="forge-input"
+          type="number"
+          formControlName="weight"
+          placeholder="0.00"
+          data-testid="weight-input"
+          [class.input-error]="form.get('weight')?.invalid && form.get('weight')?.touched">
+        </ion-input>
+        @if (form.get('weight')?.invalid && form.get('weight')?.touched) {
+          @if (form.get('weight')?.errors?.['required']) {
+            <p class="error-message" data-testid="weight-error">El peso es obligatorio.</p>
+          } @else if (form.get('weight')?.errors?.['min']) {
+            <p class="error-message" data-testid="weight-error">El peso no puede ser negativo.</p>
+          }
+        }
+      </div>
+
+      <!-- Properties field (optional) -->
+      <div class="field-group">
+        <label class="field-label">Propiedades (JSON, opcional)</label>
+        <p class="field-hint">Introduce las propiedades como JSON, por ejemplo: {{ '{' }}"daño": "1d6", "bonus_ca": 2{{ '}' }}</p>
+        <ion-textarea
+          class="forge-input"
+          formControlName="properties"
+          placeholder='{"daño": "1d6"}'
+          data-testid="properties-input"
+          [rows]="4">
+        </ion-textarea>
+      </div>
+
+      <!-- Form actions -->
+      <div class="form-actions">
+        <ion-button
+          expand="block"
+          type="submit"
+          class="btn-gold"
+          [disabled]="submitting"
+          data-testid="submit-button"
+        >
+          @if (submitting) {
+            <ion-spinner name="crescent" slot="start"></ion-spinner>
+          }
+          Crear Objeto
+        </ion-button>
+      </div>
+
+    </form>
+
+  </div>
+</ion-content>

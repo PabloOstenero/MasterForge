@@ -1,0 +1,67 @@
+@use 'src/theme/variables' as *;
+
+:host {
+  display: block;
+}
+
+.char-sheet-content {
+  background: #121212;
+}
+
+.dashboard-container {
+  width: 100%;
+}
+
+.section-block {
+  margin-bottom: 32px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.section-title {
+  color: $accent-gold;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba($accent-gold, 0.3);
+  padding-bottom: 6px;
+  margin: 0;
+  flex: 1;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+.text-muted {
+  color: $text-muted;
+}
+
+.gold-title {
+  color: $accent-gold;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.transparent-list {
+  background: transparent !important;
+  --background: transparent !important;
+}
+
+.skill-item,
+.list-item-interactive {
+  --background: #1e1e1e !important;
+  --color: #ffffff;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  margin-bottom: 2px;
+  border: 1px solid rgba($text-muted, 0.1);
+}

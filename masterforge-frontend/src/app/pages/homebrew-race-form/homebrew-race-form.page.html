@@ -1,0 +1,102 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="cancel()" data-testid="cancel-button">Cancelar</ion-button>
+    </ion-buttons>
+    <ion-title>Nueva Raza</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="homebrew-form-content">
+  <div class="ion-padding">
+
+    <!-- Error state -->
+    @if (error) {
+      <p class="text-muted" data-testid="form-error">{{ error }}</p>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+
+      <!-- Name field -->
+      <div class="field-group">
+        <label class="field-label">Nombre <span class="required">*</span></label>
+        <ion-input
+          class="forge-input"
+          formControlName="name"
+          placeholder="Nombre de la raza"
+          data-testid="name-input"
+          [class.input-error]="form.get('name')?.invalid && form.get('name')?.touched">
+        </ion-input>
+        @if (form.get('name')?.invalid && form.get('name')?.touched) {
+          <p class="error-message" data-testid="name-error">El nombre es obligatorio.</p>
+        }
+      </div>
+
+      <!-- Price field -->
+      <div class="field-group">
+        <label class="field-label">Precio <span class="required">*</span></label>
+        <ion-input
+          class="forge-input"
+          type="number"
+          formControlName="price"
+          placeholder="0.00"
+          data-testid="price-input"
+          [class.input-error]="form.get('price')?.invalid && form.get('price')?.touched">
+        </ion-input>
+        @if (form.get('price')?.invalid && form.get('price')?.touched) {
+          @if (form.get('price')?.errors?.['required']) {
+            <p class="error-message" data-testid="price-error">El precio es obligatorio.</p>
+          } @else if (form.get('price')?.errors?.['min']) {
+            <p class="error-message" data-testid="price-error">El precio no puede ser negativo.</p>
+          }
+        }
+      </div>
+
+      <!-- Ability Score Bonuses -->
+      <div class="field-group">
+        <label class="field-label">Bonificaciones de Características <span class="required">*</span></label>
+        <p class="field-hint">Cada valor debe estar entre -10 y 10.</p>
+        <div class="ability-bonuses-grid">
+          @for (key of abilityBonusKeys; track key) {
+            <div class="ability-bonus-item">
+              <label class="ability-label">{{ abilityBonusLabels[key] }}</label>
+              <ion-input
+                class="forge-input"
+                type="number"
+                [formControlName]="key"
+                placeholder="0"
+                [attr.data-testid]="key + '-input'"
+                [class.input-error]="form.get(key)?.invalid && form.get(key)?.touched">
+              </ion-input>
+              @if (form.get(key)?.invalid && form.get(key)?.touched) {
+                @if (form.get(key)?.errors?.['required']) {
+                  <p class="error-message" [attr.data-testid]="key + '-error'">Este campo es obligatorio.</p>
+                } @else if (form.get(key)?.errors?.['min'] || form.get(key)?.errors?.['max']) {
+                  <p class="error-message" [attr.data-testid]="key + '-error'">El valor debe estar entre -10 y 10.</p>
+                }
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Form actions -->
+      <div class="form-actions">
+        <ion-button
+          expand="block"
+          type="submit"
+          class="btn-gold"
+          [disabled]="submitting"
+          data-testid="submit-button"
+        >
+          @if (submitting) {
+            <ion-spinner name="crescent" slot="start"></ion-spinner>
+          }
+          Crear Raza
+        </ion-button>
+      </div>
+
+    </form>
+
+  </div>
+</ion-content>

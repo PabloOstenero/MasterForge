@@ -1,0 +1,7 @@
+@use 'src/theme/variables' as *;
+
+:host { display: block; }
+.homebrew-form-content { --background: #121212; }
+.text-muted { color: $text-muted; }
+.form-actions { margin-top: 24px; }
+.btn-gold { --background: #C5A059; --color: #121212; --border-radius: 12px; font-weight: bold; }

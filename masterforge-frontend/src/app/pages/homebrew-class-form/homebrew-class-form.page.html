@@ -1,0 +1,113 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="cancel()" data-testid="cancel-button">Cancelar</ion-button>
+    </ion-buttons>
+    <ion-title>Nueva Clase</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="homebrew-form-content">
+  <div class="ion-padding">
+
+    <!-- Error state -->
+    @if (error) {
+      <p class="text-muted" data-testid="form-error">{{ error }}</p>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+
+      <!-- Name field -->
+      <div class="field-group">
+        <label class="field-label">Nombre <span class="required">*</span></label>
+        <ion-input
+          class="forge-input"
+          formControlName="name"
+          placeholder="Nombre de la clase"
+          data-testid="name-input"
+          [class.input-error]="form.get('name')?.invalid && form.get('name')?.touched">
+        </ion-input>
+        @if (form.get('name')?.invalid && form.get('name')?.touched) {
+          <p class="error-message" data-testid="name-error">El nombre es obligatorio.</p>
+        }
+      </div>
+
+      <!-- Hit Die field -->
+      <div class="field-group">
+        <label class="field-label">Dado de Golpe <span class="required">*</span></label>
+        <ion-input
+          class="forge-input"
+          type="number"
+          formControlName="hitDie"
+          placeholder="Ej: 8"
+          data-testid="hit-die-input"
+          [class.input-error]="form.get('hitDie')?.invalid && form.get('hitDie')?.touched">
+        </ion-input>
+        @if (form.get('hitDie')?.invalid && form.get('hitDie')?.touched) {
+          @if (form.get('hitDie')?.errors?.['required']) {
+            <p class="error-message" data-testid="hit-die-error">El dado de golpe es obligatorio.</p>
+          } @else if (form.get('hitDie')?.errors?.['min'] || form.get('hitDie')?.errors?.['max']) {
+            <p class="error-message" data-testid="hit-die-error">El dado de golpe debe estar entre 4 y 12.</p>
+          }
+        }
+      </div>
+
+      <!-- Saving Throws field -->
+      <div class="field-group" formGroupName="savingThrows">
+        <label class="field-label">Tiradas de Salvación <span class="required">*</span></label>
+        <div class="saving-throws-grid">
+          @for (key of savingThrowKeys; track key) {
+            <div class="saving-throw-item">
+              <ion-checkbox
+                [formControlName]="key"
+                [attr.data-testid]="'saving-throw-' + key">
+              </ion-checkbox>
+              <span class="saving-throw-label">{{ savingThrowLabels[key] }}</span>
+            </div>
+          }
+        </div>
+        @if (form.get('savingThrows')?.invalid && form.get('savingThrows')?.touched) {
+          <p class="error-message" data-testid="saving-throws-error">Selecciona al menos una tirada de salvación.</p>
+        }
+      </div>
+
+      <!-- Price field -->
+      <div class="field-group">
+        <label class="field-label">Precio <span class="required">*</span></label>
+        <ion-input
+          class="forge-input"
+          type="number"
+          formControlName="price"
+          placeholder="0.00"
+          data-testid="price-input"
+          [class.input-error]="form.get('price')?.invalid && form.get('price')?.touched">
+        </ion-input>
+        @if (form.get('price')?.invalid && form.get('price')?.touched) {
+          @if (form.get('price')?.errors?.['required']) {
+            <p class="error-message" data-testid="price-error">El precio es obligatorio.</p>
+          } @else if (form.get('price')?.errors?.['min']) {
+            <p class="error-message" data-testid="price-error">El precio no puede ser negativo.</p>
+          }
+        }
+      </div>
+
+      <!-- Form actions -->
+      <div class="form-actions">
+        <ion-button
+          expand="block"
+          type="submit"
+          class="btn-gold"
+          [disabled]="submitting"
+          data-testid="submit-button"
+        >
+          @if (submitting) {
+            <ion-spinner name="crescent" slot="start"></ion-spinner>
+          }
+          Crear Clase
+        </ion-button>
+      </div>
+
+    </form>
+
+  </div>
+</ion-content>

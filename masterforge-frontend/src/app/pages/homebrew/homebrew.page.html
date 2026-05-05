@@ -1,1 +1,256 @@
-<ion-content>
+<div class="char-sheet-content">
+  <div class="dashboard-container ion-padding">
+
+    <!-- Loading state -->
+    @if (loading) {
+      <div class="loading-container">
+        <ion-spinner name="crescent" data-testid="homebrew-spinner"></ion-spinner>
+      </div>
+    }
+
+    <!-- Error state -->
+    @if (error) {
+      <p class="text-muted" data-testid="homebrew-error">{{ error }}</p>
+    }
+
+    <!-- Content (only shown when not loading) -->
+    @if (!loading) {
+
+      <!-- Classes -->
+      <div class="section-block" data-testid="section-CLASS">
+        <div class="section-header">
+          <h2 class="section-title">Clases</h2>
+          <ion-button fill="outline" size="small" (click)="navigateToCreate('CLASS')" data-testid="create-CLASS">
+            + Crear Clase
+          </ion-button>
+        </div>
+
+        @if (homebrewItems.classes.length === 0) {
+          <p class="text-muted" data-testid="empty-CLASS">No has creado ninguna clase homebrew aún.</p>
+        } @else {
+          <ion-list class="transparent-list">
+            @for (item of homebrewItems.classes; track item.id) {
+              <ion-item lines="full" class="skill-item list-item-interactive" data-testid="item-row" [attr.data-item-id]="item.id" [attr.data-item-type]="item.contentType">
+                <ion-label>
+                  <h3 class="gold-title">{{ item.name }}</h3>
+                </ion-label>
+                <ion-button
+                  slot="end"
+                  fill="clear"
+                  color="danger"
+                  size="small"
+                  [disabled]="deletingId === item.id"
+                  (click)="confirmDelete(item)"
+                  data-testid="delete-action"
+                >
+                  @if (deletingId === item.id) {
+                    <ion-spinner name="crescent" slot="icon-only"></ion-spinner>
+                  } @else {
+                    Eliminar
+                  }
+                </ion-button>
+              </ion-item>
+            }
+          </ion-list>
+        }
+      </div>
+
+      <!-- Subclasses -->
+      <div class="section-block" data-testid="section-SUBCLASS">
+        <div class="section-header">
+          <h2 class="section-title">Subclases</h2>
+          <ion-button fill="outline" size="small" (click)="navigateToCreate('SUBCLASS')" data-testid="create-SUBCLASS">
+            + Crear Subclase
+          </ion-button>
+        </div>
+
+        @if (homebrewItems.subclasses.length === 0) {
+          <p class="text-muted" data-testid="empty-SUBCLASS">No has creado ninguna subclase homebrew aún.</p>
+        } @else {
+          <ion-list class="transparent-list">
+            @for (item of homebrewItems.subclasses; track item.id) {
+              <ion-item lines="full" class="skill-item list-item-interactive" data-testid="item-row" [attr.data-item-id]="item.id" [attr.data-item-type]="item.contentType">
+                <ion-label>
+                  <h3 class="gold-title">{{ item.name }}</h3>
+                </ion-label>
+                <ion-button
+                  slot="end"
+                  fill="clear"
+                  color="danger"
+                  size="small"
+                  [disabled]="deletingId === item.id"
+                  (click)="confirmDelete(item)"
+                  data-testid="delete-action"
+                >
+                  @if (deletingId === item.id) {
+                    <ion-spinner name="crescent" slot="icon-only"></ion-spinner>
+                  } @else {
+                    Eliminar
+                  }
+                </ion-button>
+              </ion-item>
+            }
+          </ion-list>
+        }
+      </div>
+
+      <!-- Races -->
+      <div class="section-block" data-testid="section-RACE">
+        <div class="section-header">
+          <h2 class="section-title">Razas</h2>
+          <ion-button fill="outline" size="small" (click)="navigateToCreate('RACE')" data-testid="create-RACE">
+            + Crear Raza
+          </ion-button>
+        </div>
+
+        @if (homebrewItems.races.length === 0) {
+          <p class="text-muted" data-testid="empty-RACE">No has creado ninguna raza homebrew aún.</p>
+        } @else {
+          <ion-list class="transparent-list">
+            @for (item of homebrewItems.races; track item.id) {
+              <ion-item lines="full" class="skill-item list-item-interactive" data-testid="item-row" [attr.data-item-id]="item.id" [attr.data-item-type]="item.contentType">
+                <ion-label>
+                  <h3 class="gold-title">{{ item.name }}</h3>
+                </ion-label>
+                <ion-button
+                  slot="end"
+                  fill="clear"
+                  color="danger"
+                  size="small"
+                  [disabled]="deletingId === item.id"
+                  (click)="confirmDelete(item)"
+                  data-testid="delete-action"
+                >
+                  @if (deletingId === item.id) {
+                    <ion-spinner name="crescent" slot="icon-only"></ion-spinner>
+                  } @else {
+                    Eliminar
+                  }
+                </ion-button>
+              </ion-item>
+            }
+          </ion-list>
+        }
+      </div>
+
+      <!-- Monsters -->
+      <div class="section-block" data-testid="section-MONSTER">
+        <div class="section-header">
+          <h2 class="section-title">Monstruos</h2>
+          <ion-button fill="outline" size="small" (click)="navigateToCreate('MONSTER')" data-testid="create-MONSTER">
+            + Crear Monstruo
+          </ion-button>
+        </div>
+
+        @if (homebrewItems.monsters.length === 0) {
+          <p class="text-muted" data-testid="empty-MONSTER">No has creado ningún monstruo homebrew aún.</p>
+        } @else {
+          <ion-list class="transparent-list">
+            @for (item of homebrewItems.monsters; track item.id) {
+              <ion-item lines="full" class="skill-item list-item-interactive" data-testid="item-row" [attr.data-item-id]="item.id" [attr.data-item-type]="item.contentType">
+                <ion-label>
+                  <h3 class="gold-title">{{ item.name }}</h3>
+                </ion-label>
+                <ion-button
+                  slot="end"
+                  fill="clear"
+                  color="danger"
+                  size="small"
+                  [disabled]="deletingId === item.id"
+                  (click)="confirmDelete(item)"
+                  data-testid="delete-action"
+                >
+                  @if (deletingId === item.id) {
+                    <ion-spinner name="crescent" slot="icon-only"></ion-spinner>
+                  } @else {
+                    Eliminar
+                  }
+                </ion-button>
+              </ion-item>
+            }
+          </ion-list>
+        }
+      </div>
+
+      <!-- Spells -->
+      <div class="section-block" data-testid="section-SPELL">
+        <div class="section-header">
+          <h2 class="section-title">Hechizos</h2>
+          <ion-button fill="outline" size="small" (click)="navigateToCreate('SPELL')" data-testid="create-SPELL">
+            + Crear Hechizo
+          </ion-button>
+        </div>
+
+        @if (homebrewItems.spells.length === 0) {
+          <p class="text-muted" data-testid="empty-SPELL">No has creado ningún hechizo homebrew aún.</p>
+        } @else {
+          <ion-list class="transparent-list">
+            @for (item of homebrewItems.spells; track item.id) {
+              <ion-item lines="full" class="skill-item list-item-interactive" data-testid="item-row" [attr.data-item-id]="item.id" [attr.data-item-type]="item.contentType">
+                <ion-label>
+                  <h3 class="gold-title">{{ item.name }}</h3>
+                </ion-label>
+                <ion-button
+                  slot="end"
+                  fill="clear"
+                  color="danger"
+                  size="small"
+                  [disabled]="deletingId === item.id"
+                  (click)="confirmDelete(item)"
+                  data-testid="delete-action"
+                >
+                  @if (deletingId === item.id) {
+                    <ion-spinner name="crescent" slot="icon-only"></ion-spinner>
+                  } @else {
+                    Eliminar
+                  }
+                </ion-button>
+              </ion-item>
+            }
+          </ion-list>
+        }
+      </div>
+
+      <!-- Items -->
+      <div class="section-block" data-testid="section-ITEM">
+        <div class="section-header">
+          <h2 class="section-title">Objetos</h2>
+          <ion-button fill="outline" size="small" (click)="navigateToCreate('ITEM')" data-testid="create-ITEM">
+            + Crear Objeto
+          </ion-button>
+        </div>
+
+        @if (homebrewItems.items.length === 0) {
+          <p class="text-muted" data-testid="empty-ITEM">No has creado ningún objeto homebrew aún.</p>
+        } @else {
+          <ion-list class="transparent-list">
+            @for (item of homebrewItems.items; track item.id) {
+              <ion-item lines="full" class="skill-item list-item-interactive" data-testid="item-row" [attr.data-item-id]="item.id" [attr.data-item-type]="item.contentType">
+                <ion-label>
+                  <h3 class="gold-title">{{ item.name }}</h3>
+                </ion-label>
+                <ion-button
+                  slot="end"
+                  fill="clear"
+                  color="danger"
+                  size="small"
+                  [disabled]="deletingId === item.id"
+                  (click)="confirmDelete(item)"
+                  data-testid="delete-action"
+                >
+                  @if (deletingId === item.id) {
+                    <ion-spinner name="crescent" slot="icon-only"></ion-spinner>
+                  } @else {
+                    Eliminar
+                  }
+                </ion-button>
+              </ion-item>
+            }
+          </ion-list>
+        }
+      </div>
+
+    }
+
+  </div>
+</div>

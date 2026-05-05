@@ -1,5 +1,6 @@
 package com.masterforge.masterforge_backend.controller
 
+import com.masterforge.masterforge_backend.config.SecurityUtils
 import com.masterforge.masterforge_backend.model.dto.SpellDto
 import com.masterforge.masterforge_backend.model.entity.Spell
 import com.masterforge.masterforge_backend.model.entity.User
@@ -72,9 +73,17 @@ class SpellController(
 
     @DeleteMapping("/{id}")
     fun deleteSpell(@PathVariable id: UUID): ResponseEntity<Void> {
-        if (!spellRepository.existsById(id)) {
-            return ResponseEntity.notFound().build()
+        val currentUserId = SecurityUtils.getCurrentUserId()
+        val spell = spellRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Spell not found with id $id") }
+
+        // Official content (no author) and content owned by another user are both forbidden
+        val authorId = spell.author?.id
+            ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot delete official content")
+        if (authorId != currentUserId) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this content")
         }
+
         spellRepository.deleteById(id)
         return ResponseEntity.noContent().build()
     }
