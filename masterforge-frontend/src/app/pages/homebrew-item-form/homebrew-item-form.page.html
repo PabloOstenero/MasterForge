@@ -1,98 +1,378 @@
 <div class="homebrew-form-wrapper">
 
   <div class="homebrew-form-topbar">
-    <button class="back-btn" type="button" (click)="cancel()" data-testid="cancel-button">← Cancelar</button>
-    <h1 class="form-title">Nuevo Objeto</h1>
+    <button class="back-btn" type="button" (click)="cancel()">← Cancelar</button>
+    <h1 class="form-title">{{ editMode ? 'Editar Objeto' : 'Nuevo Objeto' }}</h1>
   </div>
 
-  <div class="homebrew-form-content">
+  @if (error) {
+    <div class="form-error-banner">{{ error }}</div>
+  }
 
-    <!-- Error state -->
-    @if (error) {
-      <p class="text-muted" data-testid="form-error">{{ error }}</p>
-    }
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="form-grid">
 
-    <form [formGroup]="form" (ngSubmit)="submit()">
+      <!-- ── col-left: General Info ── -->
+      <div class="col-left">
+        <div class="form-section">
+          <h2 class="section-title">Información General</h2>
 
-      <!-- Name field -->
-      <div class="field-group">
-        <label class="field-label">Nombre <span class="required">*</span></label>
-        <ion-input
-          class="forge-input"
-          formControlName="name"
-          placeholder="Nombre del objeto"
-          data-testid="name-input"
-          [class.input-error]="form.get('name')?.invalid && form.get('name')?.touched">
-        </ion-input>
-        @if (form.get('name')?.invalid && form.get('name')?.touched) {
-          <p class="error-message" data-testid="name-error">El nombre es obligatorio.</p>
+          <div class="field-group">
+            <label class="field-label">Nombre <span class="required">*</span></label>
+            <ion-input class="forge-input" formControlName="name" placeholder="Nombre del objeto"
+              [class.input-error]="form.get('name')?.invalid && form.get('name')?.touched">
+            </ion-input>
+            @if (form.get('name')?.invalid && form.get('name')?.touched) {
+              <p class="error-message">El nombre es obligatorio.</p>
+            }
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Tipo <span class="required">*</span></label>
+            <select class="forge-select-native" formControlName="type"
+              [class.input-error]="form.get('type')?.invalid && form.get('type')?.touched">
+              <option value="">-- Selecciona un tipo --</option>
+              @for (t of itemTypes; track t) {
+                <option [value]="t">{{ t }}</option>
+              }
+            </select>
+            @if (form.get('type')?.invalid && form.get('type')?.touched) {
+              <p class="error-message">El tipo es obligatorio.</p>
+            }
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Peso (lbs) <span class="required">*</span></label>
+            <ion-input class="forge-input" type="number" formControlName="weight" placeholder="0"
+              [class.input-error]="form.get('weight')?.invalid && form.get('weight')?.touched">
+            </ion-input>
+            @if (form.get('weight')?.invalid && form.get('weight')?.touched) {
+              @if (form.get('weight')?.errors?.['required']) {
+                <p class="error-message">El peso es obligatorio.</p>
+              } @else if (form.get('weight')?.errors?.['min']) {
+                <p class="error-message">El peso no puede ser negativo.</p>
+              }
+            }
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Rareza <span class="optional-tag">opcional</span></label>
+            <select class="forge-select-native" formControlName="rarity">
+              <option value="">-- Sin rareza --</option>
+              @for (r of itemRarities; track r) {
+                <option [value]="r">{{ r }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Valor (PO) <span class="optional-tag">opcional</span></label>
+            <ion-input class="forge-input" type="number" formControlName="valueGp" placeholder="0"></ion-input>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Descripción / Trasfondo <span class="optional-tag">opcional</span></label>
+            <ion-textarea class="forge-input" formControlName="description" placeholder="Historia o descripción del objeto" [rows]="4"></ion-textarea>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Requiere Sintonización</label>
+            <input type="checkbox" formControlName="requiresAttunement" />
+          </div>
+        </div>
+      </div>
+
+      <!-- ── col-right: Type-specific sections ── -->
+      <div class="col-right">
+
+        <!-- Weapon -->
+        @if (isWeapon) {
+          <div class="form-section" formGroupName="weapon">
+            <h2 class="section-title">Propiedades de Arma</h2>
+
+            <div class="field-group">
+              <label class="field-label">Dados de Daño</label>
+              <ion-input class="forge-input" formControlName="damageDice" placeholder="1d8"></ion-input>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Tipo de Daño</label>
+              <div class="chip-grid">
+                @for (dt of damageTypes; track dt; let i = $index) {
+                  <button type="button" class="chip"
+                    [class.chip--active]="weaponDamageTypeIndex === i"
+                    (click)="selectDamageType(i)">{{ dt }}</button>
+                }
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Propiedades de Arma</label>
+              <div class="chip-grid">
+                @for (wp of weaponProperties; track wp; let i = $index) {
+                  <button type="button" class="chip"
+                    [class.chip--active]="weaponPropertiesArray.at(i).value"
+                    (click)="toggleWeaponProperty(i)">{{ wp }}</button>
+                }
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field-group">
+                <label class="field-label">Alcance Normal</label>
+                <ion-input class="forge-input" formControlName="rangeNormal" placeholder="80 ft."></ion-input>
+              </div>
+              <div class="field-group">
+                <label class="field-label">Alcance Largo</label>
+                <ion-input class="forge-input" formControlName="rangeLong" placeholder="320 ft."></ion-input>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Dados Versátil</label>
+              <ion-input class="forge-input" formControlName="versatileDice" placeholder="1d10"></ion-input>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Característica</label>
+              <select class="forge-select-native" formControlName="stat">
+                @for (s of abilityStats; track s) {
+                  <option [value]="s">{{ s }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Bonus Mágico</label>
+              <select class="forge-select-native" formControlName="magicalBonus">
+                @for (b of magicalBonuses; track b) {
+                  <option [value]="b">+{{ b }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Bonus de Ataque <span class="optional-tag">opcional</span></label>
+              <ion-input class="forge-input" type="number" formControlName="attackBonus"></ion-input>
+            </div>
+          </div>
         }
-      </div>
 
-      <!-- Type field -->
-      <div class="field-group">
-        <label class="field-label">Tipo <span class="required">*</span></label>
-        <ion-input
-          class="forge-input"
-          formControlName="type"
-          placeholder="Ej: Arma, Armadura, Poción"
-          data-testid="type-input"
-          [class.input-error]="form.get('type')?.invalid && form.get('type')?.touched">
-        </ion-input>
-        @if (form.get('type')?.invalid && form.get('type')?.touched) {
-          <p class="error-message" data-testid="type-error">El tipo es obligatorio.</p>
+        <!-- Armor -->
+        @if (isArmor) {
+          <div class="form-section" formGroupName="armor">
+            <h2 class="section-title">Propiedades de Armadura</h2>
+
+            <div class="field-group">
+              <label class="field-label">Categoría</label>
+              <select class="forge-select-native" formControlName="armorCategory">
+                @for (c of armorCategories; track c) {
+                  <option [value]="c">{{ c }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">CA Base <span class="required">*</span></label>
+              <ion-input class="forge-input" type="number" formControlName="baseAc" placeholder="10"
+                [class.input-error]="form.get('armor.baseAc')?.invalid && form.get('armor.baseAc')?.touched">
+              </ion-input>
+              @if (form.get('armor.baseAc')?.errors?.['min'] && form.get('armor.baseAc')?.touched) {
+                <p class="error-message">La CA base debe ser al menos 1.</p>
+              }
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Permite Bonificador de DES</label>
+              <input type="checkbox" formControlName="dexBonus" />
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Límite DES <span class="optional-tag">opcional</span></label>
+              <ion-input class="forge-input" type="number" formControlName="dexLimit"></ion-input>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Desventaja en Sigilo</label>
+              <input type="checkbox" formControlName="stealthDisadvantage" />
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Requisito de FUE <span class="optional-tag">opcional</span></label>
+              <ion-input class="forge-input" type="number" formControlName="strengthRequirement"></ion-input>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Bonus Mágico CA</label>
+              <select class="forge-select-native" formControlName="magicalBonus">
+                @for (b of magicalBonuses; track b) {
+                  <option [value]="b">+{{ b }}</option>
+                }
+              </select>
+            </div>
+          </div>
         }
-      </div>
 
-      <!-- Weight field -->
-      <div class="field-group">
-        <label class="field-label">Peso (kg) <span class="required">*</span></label>
-        <ion-input
-          class="forge-input"
-          type="number"
-          formControlName="weight"
-          placeholder="0.00"
-          data-testid="weight-input"
-          [class.input-error]="form.get('weight')?.invalid && form.get('weight')?.touched">
-        </ion-input>
-        @if (form.get('weight')?.invalid && form.get('weight')?.touched) {
-          @if (form.get('weight')?.errors?.['required']) {
-            <p class="error-message" data-testid="weight-error">El peso es obligatorio.</p>
-          } @else if (form.get('weight')?.errors?.['min']) {
-            <p class="error-message" data-testid="weight-error">El peso no puede ser negativo.</p>
-          }
+        <!-- Shield -->
+        @if (isShield) {
+          <div class="form-section" formGroupName="shield">
+            <h2 class="section-title">Propiedades de Escudo</h2>
+
+            <div class="field-group">
+              <label class="field-label">Bonus de CA</label>
+              <ion-input class="forge-input" type="number" formControlName="acBonus"></ion-input>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Bonus Mágico CA</label>
+              <select class="forge-select-native" formControlName="magicalBonus">
+                @for (b of magicalBonuses; track b) {
+                  <option [value]="b">+{{ b }}</option>
+                }
+              </select>
+            </div>
+          </div>
         }
-      </div>
 
-      <!-- Properties field (optional) -->
-      <div class="field-group">
-        <label class="field-label">Propiedades (JSON, opcional)</label>
-        <p class="field-hint">Introduce las propiedades como JSON, por ejemplo: {{ '{' }}"daño": "1d6", "bonus_ca": 2{{ '}' }}</p>
-        <ion-textarea
-          class="forge-input"
-          formControlName="properties"
-          placeholder='{"daño": "1d6"}'
-          data-testid="properties-input"
-          [rows]="4">
-        </ion-textarea>
-      </div>
+        <!-- Potion -->
+        @if (isPotion) {
+          <div class="form-section" formGroupName="potion">
+            <h2 class="section-title">Propiedades de Poción</h2>
 
-      <!-- Form actions -->
-      <div class="form-actions">
-        <button
-          type="submit"
-          class="btn-submit"
-          [disabled]="submitting"
-          data-testid="submit-button"
-        >
+            <div class="field-group">
+              <label class="field-label">Dados de Curación <span class="optional-tag">opcional</span></label>
+              <ion-input class="forge-input" formControlName="healingDice" placeholder="2d4+2"></ion-input>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Curación Fija <span class="optional-tag">opcional</span></label>
+              <ion-input class="forge-input" type="number" formControlName="healingAmount"></ion-input>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Descripción del Efecto <span class="optional-tag">opcional</span></label>
+              <ion-textarea class="forge-input" formControlName="effectDescription" [rows]="3"></ion-textarea>
+            </div>
+          </div>
+        }
+
+        <!-- Magical Item -->
+        @if (isMagicalItem) {
+          <div class="form-section" formGroupName="magical">
+            <h2 class="section-title">Propiedades Mágicas</h2>
+
+            <div class="field-group">
+              <label class="field-label">Cargas <span class="optional-tag">opcional</span></label>
+              <ion-input class="forge-input" type="number" formControlName="charges"></ion-input>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Recarga <span class="optional-tag">opcional</span></label>
+              <ion-input class="forge-input" formControlName="recharge" placeholder="Al amanecer"></ion-input>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Sintonización por <span class="optional-tag">opcional</span></label>
+              <ion-input class="forge-input" formControlName="attunementBy" placeholder="un lanzador de conjuros"></ion-input>
+            </div>
+          </div>
+        }
+
+        <!-- Ammunition -->
+        @if (isAmmunition) {
+          <div class="form-section" formGroupName="ammunition">
+            <h2 class="section-title">Propiedades de Munición</h2>
+
+            <div class="field-group">
+              <label class="field-label">Bonus de Daño <span class="optional-tag">opcional</span></label>
+              <ion-input class="forge-input" type="number" formControlName="damageBonus"></ion-input>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Bonus Mágico</label>
+              <select class="forge-select-native" formControlName="magicalBonus">
+                @for (b of magicalBonuses; track b) {
+                  <option [value]="b">+{{ b }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        }
+
+        <!-- General Gear -->
+        @if (isGeneralGear) {
+          <div class="form-section" formGroupName="gear">
+            <h2 class="section-title">Propiedades Generales</h2>
+
+            <div class="field-group">
+              <label class="field-label">Descripción <span class="optional-tag">opcional</span></label>
+              <ion-textarea class="forge-input" formControlName="gearDescription" [rows]="4"></ion-textarea>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Valor (PO) <span class="optional-tag">opcional</span></label>
+              <ion-input class="forge-input" type="number" formControlName="valueGp"></ion-input>
+            </div>
+          </div>
+        }
+
+      </div><!-- /col-right -->
+
+      <!-- ── col-full: Special Abilities (Magical Items only) ── -->
+      @if (showsSpecialAbilities) {
+        <div class="col-full">
+          <div class="form-section">
+            <div class="section-header-row">
+              <h2 class="section-title">Habilidades Especiales</h2>
+              <button type="button" class="btn-add" (click)="addAbility()">+ Añadir</button>
+            </div>
+
+            @if (abilities.length === 0) {
+              <p class="empty-hint">Sin habilidades especiales. Pulsa "+ Añadir" para agregar una.</p>
+            }
+
+            <div formArrayName="abilities">
+              @for (ctrl of abilities.controls; track ctrl; let i = $index) {
+                <div class="entry-card" [formGroupName]="i">
+                  <div class="entry-card-fields">
+                    <div class="field-group">
+                      <label class="field-label">Nombre <span class="required">*</span></label>
+                      <ion-input class="forge-input" formControlName="name" placeholder="Nombre de la habilidad"
+                        [class.input-error]="ctrl.get('name')?.invalid && ctrl.get('name')?.touched">
+                      </ion-input>
+                      @if (ctrl.get('name')?.invalid && ctrl.get('name')?.touched) {
+                        <p class="error-message">El nombre es obligatorio.</p>
+                      }
+                    </div>
+                    <div class="field-group">
+                      <label class="field-label">Descripción <span class="required">*</span></label>
+                      <ion-textarea class="forge-input" formControlName="description" placeholder="Descripción de la habilidad" [rows]="3"
+                        [class.input-error]="ctrl.get('description')?.invalid && ctrl.get('description')?.touched">
+                      </ion-textarea>
+                      @if (ctrl.get('description')?.invalid && ctrl.get('description')?.touched) {
+                        <p class="error-message">La descripción es obligatoria.</p>
+                      }
+                    </div>
+                  </div>
+                  <button type="button" class="btn-remove" (click)="removeAbility(i)">Eliminar</button>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ── col-full: Submit row ── -->
+      <div class="col-full">
+        <ion-button type="submit" expand="block" class="btn-submit" [disabled]="submitting">
           @if (submitting) {
             <ion-spinner name="crescent"></ion-spinner>
           }
-          Crear Objeto
-        </button>
+          {{ editMode ? 'Guardar Cambios' : 'Crear Objeto' }}
+        </ion-button>
       </div>
 
-    </form>
+    </div><!-- /form-grid -->
+  </form>
 
-  </div>
 </div>

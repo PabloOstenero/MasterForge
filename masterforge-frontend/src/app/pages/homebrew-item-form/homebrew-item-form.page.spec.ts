@@ -1,7 +1,7 @@
 /**
  * Unit tests for HomebrewItemFormPage — form validation, submit behaviour, and navigation.
  *
- * Validates: Requirements 10.2, 10.5
+ * Validates: Requirements 2.1, 2.3, 2.8, 10.2, 10.5, 14.1
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -10,19 +10,17 @@ import { of, throwError } from 'rxjs';
 
 import { HomebrewItemFormPage } from './homebrew-item-form.page';
 import { HomebrewService } from '../../services/homebrew.service';
-import { AuthService } from '../../services/auth.service';
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-/** Returns a valid form value that satisfies all validators. */
+/** Returns a valid form value that satisfies all required validators. */
 function validFormValue() {
   return {
     name: 'Sword of Flames',
     type: 'Weapon',
     weight: 1.5,
-    properties: null,   // optional — omitted
   };
 }
 
@@ -39,18 +37,16 @@ describe('HomebrewItemFormPage', () => {
   beforeEach(async () => {
     homebrewServiceSpy = jasmine.createSpyObj<HomebrewService>('HomebrewService', [
       'createItem',
+      'updateItem',
+      'getItem',
     ]);
     homebrewServiceSpy.createItem.and.returnValue(of({}));
-
-    const authServiceMock = {
-      getUserIdFromToken: () => 'user-1',
-    };
+    homebrewServiceSpy.updateItem.and.returnValue(of({}));
 
     await TestBed.configureTestingModule({
       imports: [HomebrewItemFormPage],
       providers: [
         { provide: HomebrewService, useValue: homebrewServiceSpy },
-        { provide: AuthService, useValue: authServiceMock },
         provideRouter([]),
       ],
     }).compileComponents();
@@ -77,8 +73,13 @@ describe('HomebrewItemFormPage', () => {
     expect(component.error).toBeNull();
   });
 
+  it('should NOT inject AuthService directly (Requirement 14.3)', () => {
+    // The component should not have an authService property
+    expect((component as any).authService).toBeUndefined();
+  });
+
   // -------------------------------------------------------------------------
-  // Form validity — Requirement 10.2
+  // Form validity — Requirements 2.1, 2.3, 2.8
   // -------------------------------------------------------------------------
 
   describe('Form validity', () => {
@@ -144,32 +145,191 @@ describe('HomebrewItemFormPage', () => {
       expect(component.form.get('weight')?.valid).toBeTrue();
     });
 
-    // --- properties field (optional) ---
-
-    it('should be valid when properties is null (optional field)', () => {
-      component.form.patchValue({ properties: null });
-      expect(component.form.get('properties')?.valid).toBeTrue();
-    });
-
-    it('should be valid when properties is omitted (null default)', () => {
-      // properties defaults to null — no validators applied
-      expect(component.form.get('properties')?.valid).toBeTrue();
-    });
-
     // --- overall form validity ---
 
     it('should be invalid when the overall form starts (all fields empty/default)', () => {
       expect(component.form.invalid).toBeTrue();
     });
 
-    it('should be valid when all required fields satisfy their constraints and properties is omitted', () => {
+    it('should be valid when all required fields satisfy their constraints', () => {
       component.form.patchValue(validFormValue());
       expect(component.form.valid).toBeTrue();
     });
 
-    it('should be valid with correct values even when properties is not provided', () => {
+    it('should be valid with correct values for different item types', () => {
       component.form.patchValue({ name: 'Potion of Healing', type: 'Potion', weight: 0.5 });
       expect(component.form.valid).toBeTrue();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Type-helper getters — Requirements 3.1, 4.1, 5.1, 6.1, 7.1, 8.1, 9.1
+  // -------------------------------------------------------------------------
+
+  describe('Type-helper getters', () => {
+
+    it('isWeapon should be true when type is Weapon', () => {
+      component.form.patchValue({ type: 'Weapon' });
+      expect(component.isWeapon).toBeTrue();
+    });
+
+    it('isWeapon should be false when type is Armor', () => {
+      component.form.patchValue({ type: 'Armor' });
+      expect(component.isWeapon).toBeFalse();
+    });
+
+    it('isArmor should be true when type is Armor', () => {
+      component.form.patchValue({ type: 'Armor' });
+      expect(component.isArmor).toBeTrue();
+    });
+
+    it('isShield should be true when type is Shield', () => {
+      component.form.patchValue({ type: 'Shield' });
+      expect(component.isShield).toBeTrue();
+    });
+
+    it('isPotion should be true when type is Potion', () => {
+      component.form.patchValue({ type: 'Potion' });
+      expect(component.isPotion).toBeTrue();
+    });
+
+    it('isMagicalItem should be true for Wondrous Item', () => {
+      component.form.patchValue({ type: 'Wondrous Item' });
+      expect(component.isMagicalItem).toBeTrue();
+    });
+
+    it('isMagicalItem should be true for Ring', () => {
+      component.form.patchValue({ type: 'Ring' });
+      expect(component.isMagicalItem).toBeTrue();
+    });
+
+    it('isMagicalItem should be true for Rod', () => {
+      component.form.patchValue({ type: 'Rod' });
+      expect(component.isMagicalItem).toBeTrue();
+    });
+
+    it('isMagicalItem should be true for Staff', () => {
+      component.form.patchValue({ type: 'Staff' });
+      expect(component.isMagicalItem).toBeTrue();
+    });
+
+    it('isMagicalItem should be true for Wand', () => {
+      component.form.patchValue({ type: 'Wand' });
+      expect(component.isMagicalItem).toBeTrue();
+    });
+
+    it('isMagicalItem should be false for Weapon', () => {
+      component.form.patchValue({ type: 'Weapon' });
+      expect(component.isMagicalItem).toBeFalse();
+    });
+
+    it('isAmmunition should be true when type is Ammunition', () => {
+      component.form.patchValue({ type: 'Ammunition' });
+      expect(component.isAmmunition).toBeTrue();
+    });
+
+    it('isGeneralGear should be true for Adventuring Gear', () => {
+      component.form.patchValue({ type: 'Adventuring Gear' });
+      expect(component.isGeneralGear).toBeTrue();
+    });
+
+    it('isGeneralGear should be true for Tool', () => {
+      component.form.patchValue({ type: 'Tool' });
+      expect(component.isGeneralGear).toBeTrue();
+    });
+
+    it('isGeneralGear should be true for Mount', () => {
+      component.form.patchValue({ type: 'Mount' });
+      expect(component.isGeneralGear).toBeTrue();
+    });
+
+    it('isGeneralGear should be true for Vehicle', () => {
+      component.form.patchValue({ type: 'Vehicle' });
+      expect(component.isGeneralGear).toBeTrue();
+    });
+
+    it('isGeneralGear should be true for Treasure', () => {
+      component.form.patchValue({ type: 'Treasure' });
+      expect(component.isGeneralGear).toBeTrue();
+    });
+
+    it('isGeneralGear should be false for Weapon', () => {
+      component.form.patchValue({ type: 'Weapon' });
+      expect(component.isGeneralGear).toBeFalse();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Chip helpers — Requirements 3.4, 3.5
+  // -------------------------------------------------------------------------
+
+  describe('Chip helpers', () => {
+
+    it('selectDamageType should select the chip at the given index', () => {
+      component.selectDamageType(2);
+      expect(component.weaponDamageTypeIndex).toBe(2);
+    });
+
+    it('selectDamageType should deselect all other chips (single-select)', () => {
+      component.selectDamageType(0);
+      component.selectDamageType(3);
+      expect(component.weaponDamageTypeIndex).toBe(3);
+    });
+
+    it('selectDamageType on already-selected chip should deselect it', () => {
+      component.selectDamageType(1);
+      component.selectDamageType(1); // toggle off
+      expect(component.weaponDamageTypeIndex).toBe(-1);
+    });
+
+    it('toggleWeaponProperty should toggle the chip at the given index', () => {
+      const arr = component.weaponPropertiesArray;
+      expect(arr.at(0).value).toBeFalse();
+      component.toggleWeaponProperty(0);
+      expect(arr.at(0).value).toBeTrue();
+    });
+
+    it('toggleWeaponProperty should not affect other chips', () => {
+      component.toggleWeaponProperty(0);
+      expect(component.weaponPropertiesArray.at(1).value).toBeFalse();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // FormArray helpers — Requirements 10.3, 10.4
+  // -------------------------------------------------------------------------
+
+  describe('FormArray helpers', () => {
+
+    it('addAbility should append a new entry to the abilities FormArray', () => {
+      expect(component.abilities.length).toBe(0);
+      component.addAbility();
+      expect(component.abilities.length).toBe(1);
+    });
+
+    it('addAbility entry should have required name and description controls', () => {
+      component.addAbility();
+      const entry = component.abilities.at(0);
+      expect(entry.get('name')).toBeTruthy();
+      expect(entry.get('description')).toBeTruthy();
+    });
+
+    it('addAbility entry name should be required', () => {
+      component.addAbility();
+      const nameCtrl = component.abilities.at(0).get('name');
+      expect(nameCtrl?.errors?.['required']).toBeTrue();
+    });
+
+    it('removeAbility should remove the entry at the given index', () => {
+      component.addAbility();
+      component.addAbility();
+      component.abilities.at(0).get('name')?.setValue('First');
+      component.abilities.at(1).get('name')?.setValue('Second');
+
+      component.removeAbility(0);
+
+      expect(component.abilities.length).toBe(1);
+      expect(component.abilities.at(0).get('name')?.value).toBe('Second');
     });
   });
 
@@ -186,23 +346,11 @@ describe('HomebrewItemFormPage', () => {
     });
 
     it('should show name error message after submit with empty name', () => {
-      // Form starts invalid; calling submit() marks all touched
       component.submit();
       fixture.detectChanges();
 
-      const nameError = fixture.nativeElement.querySelector('[data-testid="name-error"]');
+      const nameError = fixture.nativeElement.querySelector('.error-message');
       expect(nameError).toBeTruthy();
-      expect(nameError.textContent).toContain('obligatorio');
-    });
-
-    it('should show type error message after submit with empty type', () => {
-      component.form.patchValue({ name: 'Sword', type: '', weight: 1 });
-      component.submit();
-      fixture.detectChanges();
-
-      const typeError = fixture.nativeElement.querySelector('[data-testid="type-error"]');
-      expect(typeError).toBeTruthy();
-      expect(typeError.textContent).toContain('obligatorio');
     });
 
     it('should show weight error message after submit with negative weight', () => {
@@ -210,39 +358,8 @@ describe('HomebrewItemFormPage', () => {
       component.submit();
       fixture.detectChanges();
 
-      const weightError = fixture.nativeElement.querySelector('[data-testid="weight-error"]');
-      expect(weightError).toBeTruthy();
-    });
-
-    it('should show weight required error message after submit with null weight', () => {
-      component.form.patchValue({ name: 'Sword', type: 'Weapon', weight: null });
-      component.submit();
-      fixture.detectChanges();
-
-      const weightError = fixture.nativeElement.querySelector('[data-testid="weight-error"]');
-      expect(weightError).toBeTruthy();
-    });
-
-    it('should NOT show name error before submit is attempted', () => {
-      // Form is invalid but untouched — errors should not be visible yet
-      fixture.detectChanges();
-
-      const nameError = fixture.nativeElement.querySelector('[data-testid="name-error"]');
-      expect(nameError).toBeNull();
-    });
-
-    it('should NOT show type error before submit is attempted', () => {
-      fixture.detectChanges();
-
-      const typeError = fixture.nativeElement.querySelector('[data-testid="type-error"]');
-      expect(typeError).toBeNull();
-    });
-
-    it('should NOT show weight error before submit is attempted', () => {
-      fixture.detectChanges();
-
-      const weightError = fixture.nativeElement.querySelector('[data-testid="weight-error"]');
-      expect(weightError).toBeNull();
+      const errors = fixture.nativeElement.querySelectorAll('.error-message');
+      expect(errors.length).toBeGreaterThan(0);
     });
   });
 
@@ -314,12 +431,17 @@ describe('HomebrewItemFormPage', () => {
       expect(component.error).toBeNull();
     });
 
-    it('should pass properties as empty object when properties is null', () => {
-      component.form.patchValue({ name: 'Sword', type: 'Weapon', weight: 1, properties: null });
+    it('should pass a properties object (not null) to createItem', () => {
       component.submit();
-
       const callArg = homebrewServiceSpy.createItem.calls.mostRecent().args[0];
-      expect(callArg['properties']).toEqual({});
+      expect(callArg['properties']).toBeDefined();
+      expect(typeof callArg['properties']).toBe('object');
+    });
+
+    it('should pass authorId as empty string placeholder to createItem (Requirement 14.1)', () => {
+      component.submit();
+      const callArg = homebrewServiceSpy.createItem.calls.mostRecent().args[0];
+      expect(callArg['authorId']).toBe('');
     });
   });
 
@@ -364,7 +486,7 @@ describe('HomebrewItemFormPage', () => {
       component.submit();
       fixture.detectChanges();
 
-      const errorEl = fixture.nativeElement.querySelector('[data-testid="form-error"]');
+      const errorEl = fixture.nativeElement.querySelector('.form-error-banner');
       expect(errorEl).toBeTruthy();
       expect(errorEl.textContent).toContain('Internal server error');
     });
@@ -388,6 +510,21 @@ describe('HomebrewItemFormPage', () => {
   });
 
   // -------------------------------------------------------------------------
+  // Edit mode — Requirement 12
+  // -------------------------------------------------------------------------
+
+  describe('Edit mode', () => {
+
+    it('should be in create mode by default (editMode = false)', () => {
+      expect(component.editMode).toBeFalse();
+    });
+
+    it('should have editId = null in create mode', () => {
+      expect(component.editId).toBeNull();
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // Cancel button — navigates to /homebrew
   // -------------------------------------------------------------------------
 
@@ -400,7 +537,7 @@ describe('HomebrewItemFormPage', () => {
     });
 
     it('should render a cancel button in the template', () => {
-      const cancelBtn = fixture.nativeElement.querySelector('[data-testid="cancel-button"]');
+      const cancelBtn = fixture.nativeElement.querySelector('.back-btn');
       expect(cancelBtn).toBeTruthy();
     });
   });

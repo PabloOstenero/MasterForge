@@ -250,6 +250,15 @@
                 <ion-button
                   slot="end"
                   fill="clear"
+                  size="small"
+                  (click)="navigateToEdit('ITEM', item.id)"
+                  data-testid="edit-action"
+                >
+                  Editar
+                </ion-button>
+                <ion-button
+                  slot="end"
+                  fill="clear"
                   color="danger"
                   size="small"
                   [disabled]="deletingId === item.id"

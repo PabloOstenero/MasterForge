@@ -73,6 +73,8 @@ export class HomebrewPage implements OnInit {
       this.router.navigate([`/homebrew/monster/${id}/edit`]);
     } else if (type === 'SPELL') {
       this.router.navigate([`/homebrew/spell/${id}/edit`]);
+    } else if (type === 'ITEM') {
+      this.router.navigate([`/homebrew/item/${id}/edit`]);
     }
   }
 

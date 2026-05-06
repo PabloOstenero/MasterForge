@@ -1,10 +1,227 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { IonSpinner, IonInput, IonTextarea } from '@ionic/angular/standalone';
+import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
+import {
+  IonButton, IonSpinner,
+  IonItem, IonLabel, IonInput, IonTextarea,
+} from '@ionic/angular/standalone';
 
 import { HomebrewService } from '../../services/homebrew.service';
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+/** All 15 valid D&D 5e item type categories. */
+export const ITEM_TYPES = [
+  'Weapon', 'Armor', 'Shield', 'Potion', 'Wondrous Item',
+  'Ring', 'Rod', 'Staff', 'Wand', 'Ammunition',
+  'Adventuring Gear', 'Tool', 'Mount', 'Vehicle', 'Treasure',
+] as const;
+
+/** Magical item types that may have charges, attunement, and special abilities. */
+export const MAGICAL_ITEM_TYPES = [
+  'Wondrous Item', 'Ring', 'Rod', 'Staff', 'Wand',
+] as const;
+
+/** All valid D&D 5e item rarity tiers. */
+export const ITEM_RARITIES = [
+  'Common', 'Uncommon', 'Rare', 'Very Rare', 'Legendary', 'Artifact',
+] as const;
+
+/** All D&D 5e damage types. */
+export const DAMAGE_TYPES = [
+  'Acid', 'Bludgeoning', 'Cold', 'Fire', 'Force', 'Lightning',
+  'Necrotic', 'Piercing', 'Poison', 'Psychic', 'Radiant', 'Slashing', 'Thunder',
+] as const;
+
+/** All D&D 5e weapon property tags. */
+export const WEAPON_PROPERTIES = [
+  'Finesse', 'Versatile', 'Thrown', 'Range', 'Two-Handed',
+  'Light', 'Heavy', 'Reach', 'Loading', 'Special', 'Ammunition',
+] as const;
+
+/** Valid magical attack/damage bonus values. */
+export const MAGICAL_BONUSES = [0, 1, 2, 3] as const;
+
+/** Armor weight categories. */
+export const ARMOR_CATEGORIES = ['Light', 'Medium', 'Heavy'] as const;
+
+/** Ability score keys used for weapon attack/damage rolls. */
+export const ABILITY_STATS = ['str', 'dex'] as const;
+
+// ---------------------------------------------------------------------------
+// Interfaces
+// ---------------------------------------------------------------------------
+
+/** A named special ability entry for magical items. */
+export interface SpecialAbilityEntry {
+  name: string;
+  description: string;
+}
+
+/** Form values for the weapon properties sub-group. */
+export interface WeaponFormValues {
+  damageDice: string;
+  damageType: boolean[];       // Array of 13 booleans (single-select)
+  weaponProperties: boolean[]; // Array of 11 booleans (multi-select)
+  rangeNormal: string;
+  rangeLong: string;
+  versatileDice: string;
+  stat: string;
+  magicalBonus: number;
+  attackBonus: number | null;
+}
+
+/** Form values for the armor properties sub-group. */
+export interface ArmorFormValues {
+  armorCategory: string;
+  baseAc: number;
+  dexBonus: boolean;
+  dexLimit: number | null;
+  stealthDisadvantage: boolean;
+  strengthRequirement: number | null;
+  magicalBonus: number;
+}
+
+/** Form values for the shield properties sub-group. */
+export interface ShieldFormValues {
+  acBonus: number;
+  magicalBonus: number;
+}
+
+/** Form values for the potion properties sub-group. */
+export interface PotionFormValues {
+  healingDice: string;
+  healingAmount: number | null;
+  effectDescription: string;
+}
+
+/** Form values for the magical item properties sub-group. */
+export interface MagicalFormValues {
+  charges: number | null;
+  recharge: string;
+  attunementBy: string;
+}
+
+/** Form values for the ammunition properties sub-group. */
+export interface AmmunitionFormValues {
+  damageBonus: number | null;
+  magicalBonus: number;
+}
+
+/** Form values for the general gear properties sub-group. */
+export interface GearFormValues {
+  gearDescription: string;
+  valueGp: number | null;
+}
+
+// ---------------------------------------------------------------------------
+// Pure serialization function
+// ---------------------------------------------------------------------------
+
+/**
+ * Builds the `properties` map from the individual form values.
+ *
+ * Rules:
+ * - Only keys relevant to the selected `itemType` are included.
+ * - Optional string fields with value `''` and optional numeric fields with
+ *   value `null` or `undefined` are omitted.
+ * - Boolean fields (`dexBonus`, `stealthDisadvantage`) are always included
+ *   when their section is active, even if `false`.
+ * - `damageType` chip: the single selected `DAMAGE_TYPES[i]` string, or `''` if none.
+ * - `weaponProperties` chips: comma-separated string of selected labels, or `''` if none.
+ *
+ * This function is exported so it can be tested without mounting the component.
+ */
+export function buildItemProperties(
+  itemType: string,
+  weapon: WeaponFormValues,
+  armor: ArmorFormValues,
+  shield: ShieldFormValues,
+  potion: PotionFormValues,
+  magical: MagicalFormValues,
+  ammunition: AmmunitionFormValues,
+  gear: GearFormValues,
+  specialAbilities: SpecialAbilityEntry[],
+): Record<string, any> {
+  const props: Record<string, any> = {};
+
+  /** Helper: add a key only if the value is not null, undefined, or empty string. */
+  const addOptional = (key: string, value: any): void => {
+    if (value !== null && value !== undefined && value !== '') {
+      props[key] = value;
+    }
+  };
+
+  if (itemType === 'Weapon') {
+    // Serialize damageType chip (single-select)
+    const damageTypeIndex = (weapon.damageType ?? []).findIndex((v) => v === true);
+    const damageTypeValue = damageTypeIndex >= 0 ? DAMAGE_TYPES[damageTypeIndex] : '';
+
+    // Serialize weaponProperties chips (multi-select)
+    const weaponPropertiesValue = (weapon.weaponProperties ?? [])
+      .map((selected, i) => (selected ? (WEAPON_PROPERTIES[i] as string) : null))
+      .filter((v): v is NonNullable<typeof v> => v !== null)
+      .join(', ');
+
+    // Always include core weapon keys
+    addOptional('damageDice', weapon.damageDice);
+    props['damageType'] = damageTypeValue;
+    props['weaponProperties'] = weaponPropertiesValue;
+    addOptional('rangeNormal', weapon.rangeNormal);
+    addOptional('rangeLong', weapon.rangeLong);
+    addOptional('versatileDice', weapon.versatileDice);
+    props['stat'] = weapon.stat || 'str';
+    props['magicalBonus'] = weapon.magicalBonus ?? 0;
+    addOptional('attackBonus', weapon.attackBonus);
+    if (specialAbilities.length > 0) props['specialAbilities'] = specialAbilities;
+
+  } else if (itemType === 'Armor') {
+    addOptional('armorCategory', armor.armorCategory);
+    props['baseAc'] = armor.baseAc;
+    props['dexBonus'] = armor.dexBonus;           // always include boolean
+    addOptional('dexLimit', armor.dexLimit);
+    props['stealthDisadvantage'] = armor.stealthDisadvantage; // always include boolean
+    addOptional('strengthRequirement', armor.strengthRequirement);
+    props['magicalBonus'] = armor.magicalBonus ?? 0;
+    if (specialAbilities.length > 0) props['specialAbilities'] = specialAbilities;
+
+  } else if (itemType === 'Shield') {
+    props['acBonus'] = shield.acBonus;
+    props['magicalBonus'] = shield.magicalBonus ?? 0;
+    if (specialAbilities.length > 0) props['specialAbilities'] = specialAbilities;
+
+  } else if (itemType === 'Potion') {
+    addOptional('healingDice', potion.healingDice);
+    addOptional('healingAmount', potion.healingAmount);
+    addOptional('effectDescription', potion.effectDescription);
+
+  } else if ((MAGICAL_ITEM_TYPES as readonly string[]).includes(itemType)) {
+    addOptional('charges', magical.charges);
+    addOptional('recharge', magical.recharge);
+    addOptional('attunementBy', magical.attunementBy);
+    if (specialAbilities.length > 0) {
+      props['specialAbilities'] = specialAbilities;
+    }
+
+  } else if (itemType === 'Ammunition') {
+    addOptional('damageBonus', ammunition.damageBonus);
+    props['magicalBonus'] = ammunition.magicalBonus ?? 0;
+
+  } else {
+    // Adventuring Gear, Tool, Mount, Vehicle, Treasure
+    addOptional('gearDescription', gear.gearDescription);
+    addOptional('valueGp', gear.valueGp);
+  }
+
+  return props;
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 @Component({
   selector: 'app-homebrew-item-form',
@@ -14,7 +231,9 @@ import { HomebrewService } from '../../services/homebrew.service';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    IonSpinner, IonInput, IonTextarea,
+    FormsModule,
+    IonButton, IonSpinner,
+    IonItem, IonLabel, IonInput, IonTextarea,
   ],
 })
 export class HomebrewItemFormPage implements OnInit {
@@ -23,23 +242,306 @@ export class HomebrewItemFormPage implements OnInit {
   submitting = false;
   error: string | null = null;
 
+  /** Edit mode — set when route has an :id param */
+  editMode = false;
+  editId: string | null = null;
+
+  // Exposed constants for template use
+  readonly itemTypes = ITEM_TYPES;
+  readonly itemRarities = ITEM_RARITIES;
+  readonly damageTypes = DAMAGE_TYPES;
+  readonly weaponProperties = WEAPON_PROPERTIES;
+  readonly magicalBonuses = MAGICAL_BONUSES;
+  readonly armorCategories = ARMOR_CATEGORIES;
+  readonly abilityStats = ABILITY_STATS;
+
   constructor(
     private fb: FormBuilder,
     private homebrewService: HomebrewService,
     private router: Router,
+    private route: ActivatedRoute,
   ) {}
+
+  // ---------------------------------------------------------------------------
+  // Computed type-helper getters
+  // ---------------------------------------------------------------------------
+
+  get selectedType(): string {
+    return this.form?.get('type')?.value ?? '';
+  }
+
+  get isWeapon(): boolean {
+    return this.selectedType === 'Weapon';
+  }
+
+  get isArmor(): boolean {
+    return this.selectedType === 'Armor';
+  }
+
+  get isShield(): boolean {
+    return this.selectedType === 'Shield';
+  }
+
+  get isPotion(): boolean {
+    return this.selectedType === 'Potion';
+  }
+
+  get isMagicalItem(): boolean {
+    return (MAGICAL_ITEM_TYPES as readonly string[]).includes(this.selectedType);
+  }
+
+  get isAmmunition(): boolean {
+    return this.selectedType === 'Ammunition';
+  }
+
+  get isGeneralGear(): boolean {
+    return ['Adventuring Gear', 'Tool', 'Mount', 'Vehicle', 'Treasure'].includes(this.selectedType);
+  }
+
+  get showsSpecialAbilities(): boolean {
+    return this.isMagicalItem || this.isWeapon || this.isArmor || this.isShield;
+  }
+
+  // ---------------------------------------------------------------------------
+  // FormArray getter
+  // ---------------------------------------------------------------------------
+
+  get abilities(): FormArray {
+    return this.form.get('abilities') as FormArray;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Chip helpers
+  // ---------------------------------------------------------------------------
+
+  get weaponDamageTypeIndex(): number {
+    const arr = this.form.get('weapon.damageType') as FormArray;
+    return arr ? arr.controls.findIndex((c) => c.value === true) : -1;
+  }
+
+  selectDamageType(index: number): void {
+    const arr = this.form.get('weapon.damageType') as FormArray;
+    if (!arr) return;
+    arr.controls.forEach((ctrl, i) => ctrl.setValue(i === index ? !ctrl.value : false));
+  }
+
+  get weaponPropertiesArray(): FormArray {
+    return this.form.get('weapon.weaponProperties') as FormArray;
+  }
+
+  toggleWeaponProperty(index: number): void {
+    const arr = this.weaponPropertiesArray;
+    if (!arr) return;
+    const ctrl = arr.at(index);
+    ctrl.setValue(!ctrl.value);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Special abilities FormArray helpers
+  // ---------------------------------------------------------------------------
+
+  addAbility(): void {
+    this.abilities.push(
+      this.fb.group({
+        name:        ['', Validators.required],
+        description: ['', Validators.required],
+      }),
+    );
+  }
+
+  removeAbility(index: number): void {
+    this.abilities.removeAt(index);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Lifecycle
+  // ---------------------------------------------------------------------------
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      name:       ['', Validators.required],
-      type:       ['', Validators.required],
-      weight:     [null, [Validators.required, Validators.min(0)]],
-      properties: [null],   // optional — defaults to {} on submit (task 68)
+      // Core fields
+      name:               ['', Validators.required],
+      type:               ['', Validators.required],
+      weight:             [null, [Validators.required, Validators.min(0)]],
+      rarity:             [''],
+      valueGp:            [null, Validators.min(0)],
+      description:        [''],
+      requiresAttunement: [false],
+
+      // Weapon sub-group
+      weapon: this.fb.group({
+        damageDice:       [''],
+        damageType:       this.fb.array(DAMAGE_TYPES.map(() => false)),
+        weaponProperties: this.fb.array(WEAPON_PROPERTIES.map(() => false)),
+        rangeNormal:      [''],
+        rangeLong:        [''],
+        versatileDice:    [''],
+        stat:             ['str'],
+        magicalBonus:     [0],
+        attackBonus:      [null],
+      }),
+
+      // Armor sub-group
+      armor: this.fb.group({
+        armorCategory:      ['Light'],
+        baseAc:             [null, Validators.min(1)],
+        dexBonus:           [true],
+        dexLimit:           [null],
+        stealthDisadvantage:[false],
+        strengthRequirement:[null],
+        magicalBonus:       [0],
+      }),
+
+      // Shield sub-group
+      shield: this.fb.group({
+        acBonus:      [2, Validators.min(0)],
+        magicalBonus: [0],
+      }),
+
+      // Potion sub-group
+      potion: this.fb.group({
+        healingDice:       [''],
+        healingAmount:     [null],
+        effectDescription: [''],
+      }),
+
+      // Magical item sub-group
+      magical: this.fb.group({
+        charges:      [null, Validators.min(0)],
+        recharge:     [''],
+        attunementBy: [''],
+      }),
+
+      // Ammunition sub-group
+      ammunition: this.fb.group({
+        damageBonus:  [null],
+        magicalBonus: [0],
+      }),
+
+      // General gear sub-group
+      gear: this.fb.group({
+        gearDescription: [''],
+        valueGp:         [null, Validators.min(0)],
+      }),
+
+      // Special abilities FormArray
+      abilities: this.fb.array([]),
+    });
+
+    // Detect edit mode from route param
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.editMode = true;
+      this.editId = id;
+      this.loadItemForEdit(id);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Edit mode loader
+  // ---------------------------------------------------------------------------
+
+  private loadItemForEdit(id: string): void {
+    this.homebrewService.getItem(id).subscribe({
+      next: (item: any) => {
+        const p = item.properties ?? {};
+
+        // Patch core fields
+        this.form.patchValue({
+          name:               item.name ?? '',
+          type:               item.type ?? '',
+          weight:             item.weight ?? null,
+          rarity:             p.rarity ?? '',
+          valueGp:            p.valueGp ?? null,
+          description:        p.description ?? '',
+          requiresAttunement: p.requiresAttunement ?? false,
+        });
+
+        // Patch sub-groups from properties
+        this.form.get('weapon')?.patchValue({
+          damageDice:    p.damageDice ?? '',
+          rangeNormal:   p.rangeNormal ?? '',
+          rangeLong:     p.rangeLong ?? '',
+          versatileDice: p.versatileDice ?? '',
+          stat:          p.stat ?? 'str',
+          magicalBonus:  p.magicalBonus ?? 0,
+          attackBonus:   p.attackBonus ?? null,
+        });
+
+        // Restore damageType chip state
+        if (p.damageType) {
+          const dtArr = this.form.get('weapon.damageType') as FormArray;
+          const idx = DAMAGE_TYPES.indexOf(p.damageType as any);
+          if (idx >= 0) dtArr.at(idx).setValue(true);
+        }
+
+        // Restore weaponProperties chip state
+        if (p.weaponProperties) {
+          const wpArr = this.form.get('weapon.weaponProperties') as FormArray;
+          const selected = (p.weaponProperties as string).split(',').map((s: string) => s.trim());
+          WEAPON_PROPERTIES.forEach((prop, i) => {
+            if (selected.includes(prop)) wpArr.at(i).setValue(true);
+          });
+        }
+
+        this.form.get('armor')?.patchValue({
+          armorCategory:       p.armorCategory ?? 'Light',
+          baseAc:              p.baseAc ?? null,
+          dexBonus:            p.dexBonus ?? true,
+          dexLimit:            p.dexLimit ?? null,
+          stealthDisadvantage: p.stealthDisadvantage ?? false,
+          strengthRequirement: p.strengthRequirement ?? null,
+          magicalBonus:        p.magicalBonus ?? 0,
+        });
+
+        this.form.get('shield')?.patchValue({
+          acBonus:      p.acBonus ?? 2,
+          magicalBonus: p.magicalBonus ?? 0,
+        });
+
+        this.form.get('potion')?.patchValue({
+          healingDice:       p.healingDice ?? '',
+          healingAmount:     p.healingAmount ?? null,
+          effectDescription: p.effectDescription ?? '',
+        });
+
+        this.form.get('magical')?.patchValue({
+          charges:      p.charges ?? null,
+          recharge:     p.recharge ?? '',
+          attunementBy: p.attunementBy ?? '',
+        });
+
+        this.form.get('ammunition')?.patchValue({
+          damageBonus:  p.damageBonus ?? null,
+          magicalBonus: p.magicalBonus ?? 0,
+        });
+
+        this.form.get('gear')?.patchValue({
+          gearDescription: p.gearDescription ?? '',
+          valueGp:         p.valueGp ?? null,
+        });
+
+        // Restore special abilities
+        if (Array.isArray(p.specialAbilities)) {
+          p.specialAbilities.forEach((a: any) => {
+            this.abilities.push(this.fb.group({
+              name:        [a.name ?? '', Validators.required],
+              description: [a.description ?? '', Validators.required],
+            }));
+          });
+        }
+      },
+      error: () => {
+        this.error = 'No se pudo cargar el objeto para editar.';
+      },
     });
   }
 
+  // ---------------------------------------------------------------------------
+  // Submit / Cancel
+  // ---------------------------------------------------------------------------
+
   submit(): void {
-    // Mark all controls as touched so validation errors become visible
     this.form.markAllAsTouched();
 
     if (this.form.invalid) {
@@ -49,12 +551,33 @@ export class HomebrewItemFormPage implements OnInit {
     this.submitting = true;
     this.error = null;
 
-    const formValue = {
-      ...this.form.value,
-      properties: this.form.value.properties ?? {},
+    const v = this.form.value;
+
+    const properties = buildItemProperties(
+      v.type,
+      v.weapon,
+      v.armor,
+      v.shield,
+      v.potion,
+      v.magical,
+      v.ammunition,
+      v.gear,
+      v.abilities ?? [],
+    );
+
+    const dto = {
+      name:       v.name,
+      type:       v.type,
+      weight:     v.weight,
+      properties,
+      authorId:   '', // Placeholder — service will override with actual user ID
     };
 
-    this.homebrewService.createItem(formValue).subscribe({
+    const request$ = this.editMode && this.editId
+      ? this.homebrewService.updateItem(this.editId, dto)
+      : this.homebrewService.createItem(dto);
+
+    request$.subscribe({
       next: () => {
         this.submitting = false;
         this.router.navigate(['/homebrew']);
@@ -64,8 +587,9 @@ export class HomebrewItemFormPage implements OnInit {
         this.error =
           err?.error?.message ??
           err?.message ??
-          'Error al crear el objeto. Por favor, inténtalo de nuevo.';
-        // Form values are retained automatically — no reset needed
+          (this.editMode
+            ? 'Error al actualizar el objeto. Por favor, inténtalo de nuevo.'
+            : 'Error al crear el objeto. Por favor, inténtalo de nuevo.');
       },
     });
   }

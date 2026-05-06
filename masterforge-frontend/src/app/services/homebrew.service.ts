@@ -160,6 +160,10 @@ export class HomebrewService {
     return this.http.put<any>(`/api/spells/${id}`, { ...dto, authorId });
   }
 
+  getItem(id: string): Observable<any> {
+    return this.http.get<any>(`/api/items/${id}`);
+  }
+
   createItem(dto: CreateItemDto): Observable<any> {
     const authorId = this.authService.getUserIdFromToken();
     return this.http.post<any>('/api/items', {
@@ -167,6 +171,11 @@ export class HomebrewService {
       properties: dto.properties ?? {},
       authorId,
     });
+  }
+
+  updateItem(id: string, dto: CreateItemDto): Observable<any> {
+    const authorId = this.authService.getUserIdFromToken();
+    return this.http.put<any>(`/api/items/${id}`, { ...dto, authorId });
   }
 
   deleteItem(type: ContentType, id: string): Observable<void> {
