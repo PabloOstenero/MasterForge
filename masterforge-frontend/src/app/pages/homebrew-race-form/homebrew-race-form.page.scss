@@ -1,7 +1,148 @@
 @use 'src/theme/variables' as *;
 
+$gold:       #C5A059;
+$gold-hover: #d9b96e;
+$bg-page:    #121212;
+$bg-surface: #1E1E1E;
+$border:     #2e2e2e;
+$border-card:#383838;
+$text-white: #f0e6d3;
+$text-muted: #888;
+$text-dim:   #555;
+$red:        #C62828;
+
 :host { display: block; }
-.homebrew-form-content { --background: #121212; }
+
+.homebrew-form-wrapper {
+  min-height: 100%;
+  background: $bg-page;
+  color: $text-white;
+}
+
+.homebrew-form-topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px 12px;
+  background: $bg-page;
+  border-bottom: 1px solid $border;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: $gold;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 4px 0;
+  white-space: nowrap;
+  flex-shrink: 0;
+  &:hover { color: $gold-hover; }
+}
+
+.form-title {
+  color: $text-white;
+  font-size: 1.15rem;
+  font-weight: bold;
+  margin: 0;
+  flex: 1;
+  text-align: center;
+  padding-right: 60px;
+}
+
+.homebrew-form-content {
+  padding: 20px 16px 40px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.field-group {
+  margin-bottom: 16px;
+  &:last-child { margin-bottom: 0; }
+}
+
+.field-label {
+  display: block;
+  color: $text-muted;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 5px;
+  font-weight: bold;
+  .required { color: $gold; }
+}
+
+.field-hint {
+  color: $text-muted;
+  font-size: 0.8rem;
+  margin: 0 0 6px;
+  line-height: 1.4;
+}
+
+.forge-input {
+  --background: #141414;
+  --color: #{$text-white};
+  --placeholder-color: #{$text-dim};
+  --border-radius: 8px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  border: 1px solid $border-card;
+  border-radius: 8px;
+  transition: border-color 0.15s;
+  &:focus-within { border-color: rgba(197, 160, 89, 0.5); }
+  &.input-error { border-color: $red; }
+}
+
+.error-message {
+  color: $red;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  padding-left: 2px;
+}
+
+.ability-bonuses-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+
+  @media (max-width: 560px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.ability-bonus-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ability-label {
+  color: $text-white;
+  font-size: 0.78rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  text-align: center;
+}
+
 .text-muted { color: $text-muted; }
+
 .form-actions { margin-top: 24px; }
-.btn-gold { --background: #C5A059; --color: #121212; --border-radius: 12px; font-weight: bold; }
+
+.btn-submit {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: #C5A059;
+  color: #121212;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.15s;
+  &:hover:not(:disabled) { background: #d9b96e; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}

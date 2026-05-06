@@ -1,14 +1,11 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button fill="clear" (click)="cancel()" data-testid="cancel-button">Cancelar</ion-button>
-    </ion-buttons>
-    <ion-title>Nueva Clase</ion-title>
-  </ion-toolbar>
-</ion-header>
+<div class="homebrew-form-wrapper">
 
-<ion-content class="homebrew-form-content">
-  <div class="ion-padding">
+  <div class="homebrew-form-topbar">
+    <button class="back-btn" type="button" (click)="cancel()" data-testid="cancel-button">← Cancelar</button>
+    <h1 class="form-title">Nueva Clase</h1>
+  </div>
+
+  <div class="homebrew-form-content">
 
     <!-- Error state -->
     @if (error) {
@@ -93,21 +90,20 @@
 
       <!-- Form actions -->
       <div class="form-actions">
-        <ion-button
-          expand="block"
+        <button
           type="submit"
-          class="btn-gold"
+          class="btn-submit"
           [disabled]="submitting"
           data-testid="submit-button"
         >
           @if (submitting) {
-            <ion-spinner name="crescent" slot="start"></ion-spinner>
+            <ion-spinner name="crescent"></ion-spinner>
           }
           Crear Clase
-        </ion-button>
+        </button>
       </div>
 
     </form>
 
   </div>
-</ion-content>
+</div>

@@ -9,11 +9,7 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import {
-  IonContent, IonHeader, IonTitle, IonToolbar,
-  IonButton, IonButtons, IonSpinner,
-  IonItem, IonLabel, IonInput, IonCheckbox,
-} from '@ionic/angular/standalone';
+import { IonSpinner, IonInput, IonCheckbox } from '@ionic/angular/standalone';
 
 import { HomebrewService } from '../../services/homebrew.service';
 
@@ -45,9 +41,7 @@ export function atLeastOneTrue(control: AbstractControl): ValidationErrors | nul
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    IonContent, IonHeader, IonTitle, IonToolbar,
-    IonButton, IonButtons, IonSpinner,
-    IonItem, IonLabel, IonInput, IonCheckbox,
+    IonSpinner, IonInput, IonCheckbox,
   ],
 })
 export class HomebrewClassFormPage implements OnInit {

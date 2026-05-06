@@ -2,11 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import {
-  IonContent, IonHeader, IonTitle, IonToolbar,
-  IonButton, IonButtons, IonSpinner,
-  IonItem, IonLabel, IonInput
-} from '@ionic/angular/standalone';
+import { IonSpinner, IonInput } from '@ionic/angular/standalone';
 
 import { HomebrewService } from '../../services/homebrew.service';
 
@@ -28,9 +24,7 @@ export const ABILITY_BONUS_KEYS = [
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    IonContent, IonHeader, IonTitle, IonToolbar,
-    IonButton, IonButtons, IonSpinner,
-    IonItem, IonLabel, IonInput,
+    IonSpinner, IonInput,
   ],
 })
 export class HomebrewRaceFormPage implements OnInit {
