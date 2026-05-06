@@ -304,6 +304,9 @@ class HomebrewOwnershipEnforcementPropertyTest : StringSpec() {
                         name = name,
                         level = 1,
                         school = school,
+                        castingTime = "1 action",
+                        range = "30 ft.",
+                        duration = "Instantaneous",
                         description = description,
                         author = userA
                     )

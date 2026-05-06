@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @RestController
@@ -25,6 +26,7 @@ class SpellController(
     }
 
     @PostMapping
+    @Transactional
     fun createSpell(@RequestBody dto: SpellDto): Spell {
         val author: User? = dto.authorId?.let {
             userRepository.findById(it)
@@ -35,8 +37,21 @@ class SpellController(
             name = dto.name,
             level = dto.level,
             school = dto.school,
+            castingTime = dto.castingTime,
+            range = dto.range,
+            duration = dto.duration,
+            verbal = dto.verbal,
+            somatic = dto.somatic,
+            material = dto.material,
+            materialComponent = dto.materialComponent,
+            concentration = dto.concentration,
+            ritual = dto.ritual,
+            damageTypes = dto.damageTypes,
+            savingThrow = dto.savingThrow,
+            spellClasses = dto.spellClasses,
+            higherLevelDescription = dto.higherLevelDescription,
             description = dto.description,
-            author = author
+            author = author,
         )
         return spellRepository.save(spell)
     }
@@ -52,6 +67,7 @@ class SpellController(
     }
 
     @PutMapping("/{id}")
+    @Transactional
     fun updateSpell(@PathVariable id: UUID, @RequestBody dto: SpellDto): Spell {
         val existingSpell = spellRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Spell not found with id $id") }
@@ -65,8 +81,21 @@ class SpellController(
             name = dto.name,
             level = dto.level,
             school = dto.school,
+            castingTime = dto.castingTime,
+            range = dto.range,
+            duration = dto.duration,
+            verbal = dto.verbal,
+            somatic = dto.somatic,
+            material = dto.material,
+            materialComponent = dto.materialComponent,
+            concentration = dto.concentration,
+            ritual = dto.ritual,
+            damageTypes = dto.damageTypes,
+            savingThrow = dto.savingThrow,
+            spellClasses = dto.spellClasses,
+            higherLevelDescription = dto.higherLevelDescription,
             description = dto.description,
-            author = author
+            author = author,
         )
         return spellRepository.save(updatedSpell)
     }

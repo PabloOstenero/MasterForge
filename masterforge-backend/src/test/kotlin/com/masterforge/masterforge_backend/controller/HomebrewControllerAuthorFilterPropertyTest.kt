@@ -147,6 +147,9 @@ class HomebrewControllerAuthorFilterPropertyTest : StringSpec() {
                     name = "Spell_${user.id}_$i",
                     level = 1,
                     school = "Evocation",
+                    castingTime = "1 action",
+                    range = "30 ft.",
+                    duration = "Instantaneous",
                     description = "A test spell",
                     author = user
                 )

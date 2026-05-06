@@ -1,101 +1,296 @@
 <div class="homebrew-form-wrapper">
 
+  <!-- Top bar -->
   <div class="homebrew-form-topbar">
-    <button class="back-btn" type="button" (click)="cancel()" data-testid="cancel-button">← Cancelar</button>
-    <h1 class="form-title">Nuevo Hechizo</h1>
+    <button class="back-btn" type="button" (click)="cancel()" data-testid="cancel-button">
+      ← Cancelar
+    </button>
+    <h1 class="form-title">{{ editMode ? 'Editar Hechizo' : 'Nuevo Hechizo' }}</h1>
   </div>
 
   <div class="homebrew-form-content">
 
-    <!-- Error state -->
     @if (error) {
-      <p class="text-muted" data-testid="form-error">{{ error }}</p>
+      <div class="form-error-banner" data-testid="form-error">
+        <span>⚠ {{ error }}</span>
+      </div>
     }
 
     <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form-grid">
 
-      <!-- Name field -->
-      <div class="field-group">
-        <label class="field-label">Nombre <span class="required">*</span></label>
-        <ion-input
-          class="forge-input"
-          formControlName="name"
-          placeholder="Nombre del hechizo"
-          data-testid="name-input"
-          [class.input-error]="form.get('name')?.invalid && form.get('name')?.touched">
-        </ion-input>
-        @if (form.get('name')?.invalid && form.get('name')?.touched) {
-          <p class="error-message" data-testid="name-error">El nombre es obligatorio.</p>
-        }
-      </div>
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 1 · IDENTIDAD DEL HECHIZO
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-left">
+        <h2 class="section-title">Identidad del Hechizo</h2>
 
-      <!-- Level field -->
-      <div class="field-group">
-        <label class="field-label">Nivel <span class="required">*</span></label>
-        <ion-input
-          class="forge-input"
-          type="number"
-          formControlName="level"
-          placeholder="Ej: 3"
-          data-testid="level-input"
-          [class.input-error]="form.get('level')?.invalid && form.get('level')?.touched">
-        </ion-input>
-        @if (form.get('level')?.invalid && form.get('level')?.touched) {
-          @if (form.get('level')?.errors?.['required']) {
-            <p class="error-message" data-testid="level-error">El nivel es obligatorio.</p>
-          } @else if (form.get('level')?.errors?.['min'] || form.get('level')?.errors?.['max']) {
-            <p class="error-message" data-testid="level-error">El nivel debe estar entre 0 y 9.</p>
+        <!-- Nombre -->
+        <div class="field-group">
+          <label class="field-label">Nombre <span class="required">*</span></label>
+          <ion-input
+            class="forge-input"
+            formControlName="name"
+            placeholder="Nombre del hechizo"
+            data-testid="name-input"
+            [class.input-error]="form.get('name')?.invalid && form.get('name')?.touched">
+          </ion-input>
+          @if (form.get('name')?.invalid && form.get('name')?.touched) {
+            <p class="error-message" data-testid="name-error">El nombre es obligatorio.</p>
           }
+        </div>
+
+        <!-- Nivel + Escuela en fila -->
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Nivel <span class="required">*</span></label>
+            <ion-input
+              class="forge-input"
+              type="number"
+              formControlName="level"
+              placeholder="0–9"
+              data-testid="level-input"
+              [class.input-error]="form.get('level')?.invalid && form.get('level')?.touched">
+            </ion-input>
+            @if (form.get('level')?.invalid && form.get('level')?.touched) {
+              @if (form.get('level')?.errors?.['required']) {
+                <p class="error-message" data-testid="level-error">El nivel es obligatorio.</p>
+              } @else if (form.get('level')?.errors?.['min'] || form.get('level')?.errors?.['max']) {
+                <p class="error-message" data-testid="level-error">El nivel debe estar entre 0 y 9.</p>
+              }
+            }
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Escuela <span class="required">*</span></label>
+            <select
+              class="forge-select-native"
+              formControlName="school"
+              data-testid="school-input"
+              [class.input-error]="form.get('school')?.invalid && form.get('school')?.touched">
+              <option value="" disabled>Escuela de magia</option>
+              @for (school of spellSchools; track school) {
+                <option [value]="school">{{ school }}</option>
+              }
+            </select>
+            @if (form.get('school')?.invalid && form.get('school')?.touched) {
+              <p class="error-message" data-testid="school-error">La escuela es obligatoria.</p>
+            }
+          </div>
+        </div>
+
+        <!-- Tiempo de lanzamiento -->
+        <div class="field-group">
+          <label class="field-label">Tiempo de Lanzamiento <span class="required">*</span></label>
+          <ion-input
+            class="forge-input"
+            formControlName="castingTime"
+            placeholder="Ej: 1 acción, 1 acción adicional"
+            data-testid="casting-time-input"
+            [class.input-error]="form.get('castingTime')?.invalid && form.get('castingTime')?.touched">
+          </ion-input>
+          @if (form.get('castingTime')?.invalid && form.get('castingTime')?.touched) {
+            <p class="error-message" data-testid="casting-time-error">El tiempo de lanzamiento es obligatorio.</p>
+          }
+        </div>
+
+        <!-- Alcance + Duración en fila -->
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Alcance <span class="required">*</span></label>
+            <ion-input
+              class="forge-input"
+              formControlName="range"
+              placeholder="Ej: 30 ft., Toque"
+              data-testid="range-input"
+              [class.input-error]="form.get('range')?.invalid && form.get('range')?.touched">
+            </ion-input>
+            @if (form.get('range')?.invalid && form.get('range')?.touched) {
+              <p class="error-message" data-testid="range-error">El alcance es obligatorio.</p>
+            }
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Duración <span class="required">*</span></label>
+            <ion-input
+              class="forge-input"
+              formControlName="duration"
+              placeholder="Ej: Instantáneo, 1 minuto"
+              data-testid="duration-input"
+              [class.input-error]="form.get('duration')?.invalid && form.get('duration')?.touched">
+            </ion-input>
+            @if (form.get('duration')?.invalid && form.get('duration')?.touched) {
+              <p class="error-message" data-testid="duration-error">La duración es obligatoria.</p>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 2 · COMPONENTES Y PROPIEDADES
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-right">
+        <h2 class="section-title">Componentes y Propiedades</h2>
+
+        <!-- Components + Special Properties side by side -->
+        <div class="field-row">
+
+          <div class="field-group">
+            <label class="field-label">Componentes</label>
+            <div class="toggle-list">
+              <label class="toggle-item">
+                <input type="checkbox" formControlName="verbal" data-testid="verbal-input" />
+                <span>Verbal (V)</span>
+              </label>
+              <label class="toggle-item">
+                <input type="checkbox" formControlName="somatic" data-testid="somatic-input" />
+                <span>Somático (S)</span>
+              </label>
+              <label class="toggle-item">
+                <input type="checkbox" formControlName="material" data-testid="material-input" />
+                <span>Material (M)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Concentration + Ritual -->
+          <div class="field-group">
+            <label class="field-label">Propiedades Especiales</label>
+            <div class="toggle-list">
+              <label class="toggle-item">
+                <input type="checkbox" formControlName="concentration" data-testid="concentration-input" />
+                <span>Concentración</span>
+              </label>
+              <label class="toggle-item">
+                <input type="checkbox" formControlName="ritual" data-testid="ritual-input" />
+                <span>Ritual</span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Material component text — only shown when material is true -->
+        @if (form.get('material')?.value) {
+          <div class="field-group">
+            <label class="field-label">Componente Material <span class="optional-tag">opcional</span></label>
+            <ion-input
+              class="forge-input"
+              formControlName="materialComponent"
+              placeholder="Ej: una pluma de cuervo"
+              data-testid="material-component-input">
+            </ion-input>
+          </div>
         }
       </div>
 
-      <!-- School field -->
-      <div class="field-group">
-        <label class="field-label">Escuela <span class="required">*</span></label>
-        <ion-input
-          class="forge-input"
-          formControlName="school"
-          placeholder="Ej: Evocación, Ilusión"
-          data-testid="school-input"
-          [class.input-error]="form.get('school')?.invalid && form.get('school')?.touched">
-        </ion-input>
-        @if (form.get('school')?.invalid && form.get('school')?.touched) {
-          <p class="error-message" data-testid="school-error">La escuela es obligatoria.</p>
-        }
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 3 · DESCRIPCIÓN
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-left">
+        <h2 class="section-title">Descripción</h2>
+
+        <!-- Descripción principal -->
+        <div class="field-group">
+          <label class="field-label">Descripción <span class="required">*</span></label>
+          <ion-textarea
+            class="forge-input forge-textarea"
+            formControlName="description"
+            placeholder="Describe el efecto del hechizo…"
+            rows="5"
+            data-testid="description-input"
+            [class.input-error]="form.get('description')?.invalid && form.get('description')?.touched">
+          </ion-textarea>
+          @if (form.get('description')?.invalid && form.get('description')?.touched) {
+            <p class="error-message" data-testid="description-error">La descripción es obligatoria.</p>
+          }
+        </div>
+
+        <!-- Descripción a niveles superiores (opcional) -->
+        <div class="field-group">
+          <label class="field-label">A Niveles Superiores <span class="optional-tag">opcional</span></label>
+          <ion-textarea
+            class="forge-input forge-textarea"
+            formControlName="higherLevelDescription"
+            placeholder="Describe el efecto adicional al lanzar con un espacio de hechizo de nivel superior…"
+            rows="3"
+            data-testid="higher-level-description-input">
+          </ion-textarea>
+        </div>
       </div>
 
-      <!-- Description field -->
-      <div class="field-group">
-        <label class="field-label">Descripción <span class="required">*</span></label>
-        <ion-textarea
-          class="forge-input"
-          formControlName="description"
-          placeholder="Describe el efecto del hechizo"
-          data-testid="description-input"
-          [rows]="4"
-          [class.input-error]="form.get('description')?.invalid && form.get('description')?.touched">
-        </ion-textarea>
-        @if (form.get('description')?.invalid && form.get('description')?.touched) {
-          <p class="error-message" data-testid="description-error">La descripción es obligatoria.</p>
-        }
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 4 · MECÁNICAS DE COMBATE
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-right">
+        <h2 class="section-title">Mecánicas de Combate <span class="section-badge">opcional</span></h2>
+
+        <!-- Tirada de salvación -->
+        <div class="field-group">
+          <label class="field-label">Tirada de Salvación</label>
+          <select
+            class="forge-select-native"
+            formControlName="savingThrow"
+            data-testid="saving-throw-input">
+            @for (st of savingThrows; track st) {
+              <option [value]="st">{{ st }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Tipos de daño (chip multi-select) -->
+        <div class="field-group">
+          <label class="field-label">Tipos de Daño</label>
+          <div class="chip-grid" data-testid="damage-types-input">
+            @for (type of damageTypes; track type; let i = $index) {
+              <button
+                type="button"
+                class="chip"
+                [class.chip--active]="damageTypesArray.at(i).value"
+                (click)="toggleChip(damageTypesArray, i)"
+                [attr.data-testid]="'damage-type-chip-' + type.toLowerCase()">
+                {{ type }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Clases de hechicero (chip multi-select) -->
+        <div class="field-group">
+          <label class="field-label">Clases</label>
+          <div class="chip-grid" data-testid="spell-classes-input">
+            @for (cls of spellClasses; track cls; let i = $index) {
+              <button
+                type="button"
+                class="chip"
+                [class.chip--active]="spellClassesArray.at(i).value"
+                (click)="toggleChip(spellClassesArray, i)"
+                [attr.data-testid]="'spell-class-chip-' + cls.toLowerCase()">
+                {{ cls }}
+              </button>
+            }
+          </div>
+        </div>
       </div>
 
-      <!-- Form actions -->
-      <div class="form-actions">
-        <button
+      <!-- ══════════════════════════════════════════════════════════════════
+           ACCIÓN PRINCIPAL
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-actions col-full">
+        <ion-button
+          expand="block"
           type="submit"
           class="btn-submit"
           [disabled]="submitting"
-          data-testid="submit-button"
-        >
+          data-testid="submit-button">
           @if (submitting) {
-            <ion-spinner name="crescent"></ion-spinner>
+            <ion-spinner name="crescent" slot="start"></ion-spinner>
           }
-          Crear Hechizo
-        </button>
+          {{ editMode ? 'Guardar Cambios' : 'Crear Hechizo' }}
+        </ion-button>
       </div>
 
+      </div><!-- .form-grid -->
     </form>
-
   </div>
 </div>

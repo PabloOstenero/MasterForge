@@ -379,6 +379,14 @@ class HomebrewControllerAuthorStoragePropertyTest : StringSpec() {
                       "name": "${name.escapeJson()}",
                       "level": $level,
                       "school": "${school.escapeJson()}",
+                      "castingTime": "1 action",
+                      "range": "30 ft.",
+                      "duration": "Instantaneous",
+                      "verbal": false,
+                      "somatic": false,
+                      "material": false,
+                      "concentration": false,
+                      "ritual": false,
                       "description": "${description.escapeJson()}",
                       "authorId": "${author.id}"
                     }

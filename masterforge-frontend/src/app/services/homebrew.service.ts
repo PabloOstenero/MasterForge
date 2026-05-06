@@ -75,8 +75,21 @@ export interface CreateSpellDto {
   name: string;
   level: number;
   school: string;
+  castingTime: string;
+  range: string;
+  duration: string;
+  verbal: boolean;
+  somatic: boolean;
+  material: boolean;
+  materialComponent: string;
+  concentration: boolean;
+  ritual: boolean;
+  damageTypes: string;       // comma-separated, e.g. "Fire, Cold"
+  savingThrow: string;       // e.g. "Dexterity" or "None"
+  spellClasses: string;      // comma-separated, e.g. "Wizard, Sorcerer"
+  higherLevelDescription: string;
   description: string;
-  authorId: string;
+  authorId: string | null;
 }
 
 export interface CreateItemDto {
@@ -136,6 +149,15 @@ export class HomebrewService {
   createSpell(dto: CreateSpellDto): Observable<any> {
     const authorId = this.authService.getUserIdFromToken();
     return this.http.post<any>('/api/spells', { ...dto, authorId });
+  }
+
+  getSpell(id: string): Observable<any> {
+    return this.http.get<any>(`/api/spells/${id}`);
+  }
+
+  updateSpell(id: string, dto: CreateSpellDto): Observable<any> {
+    const authorId = this.authService.getUserIdFromToken();
+    return this.http.put<any>(`/api/spells/${id}`, { ...dto, authorId });
   }
 
   createItem(dto: CreateItemDto): Observable<any> {
