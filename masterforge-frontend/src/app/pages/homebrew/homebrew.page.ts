@@ -68,6 +68,12 @@ export class HomebrewPage implements OnInit {
     this.router.navigate([routeMap[type]]);
   }
 
+  navigateToEdit(type: ContentType, id: string): void {
+    if (type === 'MONSTER') {
+      this.router.navigate([`/homebrew/monster/${id}/edit`]);
+    }
+  }
+
   confirmDelete(item: HomebrewItem): void {
     const confirmed = window.confirm(`¿Estás seguro de que quieres eliminar "${item.name}"?`);
     if (confirmed) {

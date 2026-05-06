@@ -1,129 +1,208 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button fill="clear" (click)="cancel()" data-testid="cancel-button">Cancelar</ion-button>
-    </ion-buttons>
-    <ion-title>Nuevo Monstruo</ion-title>
-  </ion-toolbar>
-</ion-header>
+<div class="homebrew-form-wrapper">
 
-<ion-content class="homebrew-form-content">
-  <div class="ion-padding">
+  <!-- Top bar -->
+  <div class="homebrew-form-topbar">
+    <button class="back-btn" type="button" (click)="cancel()" data-testid="cancel-button">
+      ← Cancelar
+    </button>
+    <h1 class="form-title">{{ editMode ? 'Editar Monstruo' : 'Nuevo Monstruo' }}</h1>
+  </div>
 
-    <!-- Error state -->
+  <div class="homebrew-form-content">
+
     @if (error) {
-      <p class="text-muted" data-testid="form-error">{{ error }}</p>
+      <div class="form-error-banner" data-testid="form-error">
+        <span>⚠ {{ error }}</span>
+      </div>
     }
 
     <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form-grid">
 
-      <!-- Name field -->
-      <div class="field-group">
-        <label class="field-label">Nombre <span class="required">*</span></label>
-        <ion-input
-          class="forge-input"
-          formControlName="name"
-          placeholder="Nombre del monstruo"
-          data-testid="name-input"
-          [class.input-error]="form.get('name')?.invalid && form.get('name')?.touched">
-        </ion-input>
-        @if (form.get('name')?.invalid && form.get('name')?.touched) {
-          <p class="error-message" data-testid="name-error">El nombre es obligatorio.</p>
-        }
-      </div>
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 1 · IDENTIDAD
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-left">
+        <h2 class="section-title">Identidad</h2>
 
-      <!-- Type field -->
-      <div class="field-group">
-        <label class="field-label">Tipo <span class="required">*</span></label>
-        <ion-input
-          class="forge-input"
-          formControlName="type"
-          placeholder="Ej: Humanoide, Bestia, No-muerto"
-          data-testid="type-input"
-          [class.input-error]="form.get('type')?.invalid && form.get('type')?.touched">
-        </ion-input>
-        @if (form.get('type')?.invalid && form.get('type')?.touched) {
-          <p class="error-message" data-testid="type-error">El tipo es obligatorio.</p>
-        }
-      </div>
-
-      <!-- Size field -->
-      <div class="field-group">
-        <label class="field-label">Tamaño <span class="required">*</span></label>
-        <ion-select
-          class="forge-input"
-          formControlName="size"
-          placeholder="Selecciona un tamaño"
-          data-testid="size-input"
-          [class.input-error]="form.get('size')?.invalid && form.get('size')?.touched">
-          @for (size of monsterSizes; track size) {
-            <ion-select-option [value]="size">{{ size }}</ion-select-option>
+        <!-- Nombre -->
+        <div class="field-group">
+          <label class="field-label">Nombre <span class="required">*</span></label>
+          <ion-input
+            class="forge-input"
+            formControlName="name"
+            placeholder="Nombre del monstruo"
+            data-testid="name-input"
+            [class.input-error]="form.get('name')?.invalid && form.get('name')?.touched">
+          </ion-input>
+          @if (form.get('name')?.invalid && form.get('name')?.touched) {
+            <p class="error-message" data-testid="name-error">El nombre es obligatorio.</p>
           }
-        </ion-select>
-        @if (form.get('size')?.invalid && form.get('size')?.touched) {
-          <p class="error-message" data-testid="size-error">El tamaño es obligatorio.</p>
-        }
+        </div>
+
+        <!-- Tipo + Tamaño en fila -->
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Tipo <span class="required">*</span></label>
+            <select
+              class="forge-select-native"
+              formControlName="type"
+              data-testid="type-input"
+              [class.input-error]="form.get('type')?.invalid && form.get('type')?.touched">
+              <option value="" disabled>Tipo de criatura</option>
+              @for (type of monsterTypes; track type) {
+                <option [value]="type">{{ type }}</option>
+              }
+            </select>
+            @if (form.get('type')?.invalid && form.get('type')?.touched) {
+              <p class="error-message" data-testid="type-error">El tipo es obligatorio.</p>
+            }
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Tamaño <span class="required">*</span></label>
+            <select
+              class="forge-select-native"
+              formControlName="size"
+              data-testid="size-input"
+              [class.input-error]="form.get('size')?.invalid && form.get('size')?.touched">
+              <option value="" disabled>Tamaño</option>
+              @for (size of monsterSizes; track size) {
+                <option [value]="size">{{ size }}</option>
+              }
+            </select>
+            @if (form.get('size')?.invalid && form.get('size')?.touched) {
+              <p class="error-message" data-testid="size-error">El tamaño es obligatorio.</p>
+            }
+          </div>
+        </div>
+
+        <!-- Descripción -->
+        <div class="field-group">
+          <label class="field-label">Descripción <span class="optional-tag">opcional</span></label>
+          <ion-textarea
+            class="forge-input forge-textarea"
+            formControlName="description"
+            placeholder="Descripción narrativa del monstruo…"
+            rows="3"
+            data-testid="description-input">
+          </ion-textarea>
+        </div>
       </div>
 
-      <!-- Armor Class field -->
-      <div class="field-group">
-        <label class="field-label">Clase de Armadura <span class="required">*</span></label>
-        <ion-input
-          class="forge-input"
-          type="number"
-          formControlName="armorClass"
-          placeholder="Ej: 15"
-          data-testid="armor-class-input"
-          [class.input-error]="form.get('armorClass')?.invalid && form.get('armorClass')?.touched">
-        </ion-input>
-        @if (form.get('armorClass')?.invalid && form.get('armorClass')?.touched) {
-          @if (form.get('armorClass')?.errors?.['required']) {
-            <p class="error-message" data-testid="armor-class-error">La clase de armadura es obligatoria.</p>
-          } @else if (form.get('armorClass')?.errors?.['min'] || form.get('armorClass')?.errors?.['max']) {
-            <p class="error-message" data-testid="armor-class-error">La clase de armadura debe estar entre 1 y 30.</p>
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 2 · ESTADÍSTICAS DE COMBATE
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-right">
+        <h2 class="section-title">Estadísticas de Combate</h2>
+
+        <div class="field-row">
+          <!-- CA -->
+          <div class="field-group">
+            <label class="field-label">Clase de Armadura <span class="required">*</span></label>
+            <ion-input
+              class="forge-input"
+              type="number"
+              formControlName="armorClass"
+              placeholder="Ej: 15"
+              data-testid="armor-class-input"
+              [class.input-error]="form.get('armorClass')?.invalid && form.get('armorClass')?.touched">
+            </ion-input>
+            @if (form.get('armorClass')?.invalid && form.get('armorClass')?.touched) {
+              @if (form.get('armorClass')?.errors?.['required']) {
+                <p class="error-message" data-testid="armor-class-error">Obligatorio.</p>
+              } @else {
+                <p class="error-message" data-testid="armor-class-error">Entre 1 y 30.</p>
+              }
+            }
+          </div>
+
+          <!-- PG -->
+          <div class="field-group">
+            <label class="field-label">Puntos de Golpe <span class="required">*</span></label>
+            <ion-input
+              class="forge-input"
+              type="number"
+              formControlName="hitPoints"
+              placeholder="Ej: 7"
+              data-testid="hit-points-input"
+              [class.input-error]="form.get('hitPoints')?.invalid && form.get('hitPoints')?.touched">
+            </ion-input>
+            @if (form.get('hitPoints')?.invalid && form.get('hitPoints')?.touched) {
+              @if (form.get('hitPoints')?.errors?.['required']) {
+                <p class="error-message" data-testid="hit-points-error">Obligatorio.</p>
+              } @else {
+                <p class="error-message" data-testid="hit-points-error">Mínimo 1.</p>
+              }
+            }
+          </div>
+        </div>
+
+        <div class="field-row">
+          <!-- Velocidad -->
+          <div class="field-group">
+            <label class="field-label">Velocidad <span class="required">*</span></label>
+            <ion-input
+              class="forge-input"
+              formControlName="speed"
+              placeholder="Ej: 30 ft."
+              data-testid="speed-input"
+              [class.input-error]="form.get('speed')?.invalid && form.get('speed')?.touched">
+            </ion-input>
+            @if (form.get('speed')?.invalid && form.get('speed')?.touched) {
+              <p class="error-message" data-testid="speed-error">La velocidad es obligatoria.</p>
+            }
+          </div>
+
+          <!-- CR + XP -->
+          <div class="field-group">
+            <label class="field-label">Índice de Desafío <span class="required">*</span></label>
+            <ion-input
+              class="forge-input"
+              type="number"
+              formControlName="challengeRating"
+              placeholder="Ej: 0.25"
+              data-testid="challenge-rating-input"
+              [class.input-error]="form.get('challengeRating')?.invalid && form.get('challengeRating')?.touched">
+            </ion-input>
+            @if (form.get('challengeRating')?.invalid && form.get('challengeRating')?.touched) {
+              @if (form.get('challengeRating')?.errors?.['required']) {
+                <p class="error-message" data-testid="challenge-rating-error">Obligatorio.</p>
+              } @else {
+                <p class="error-message" data-testid="challenge-rating-error">No puede ser negativo.</p>
+              }
+            }
+          </div>
+        </div>
+
+        <!-- XP -->
+        <div class="field-group field-group--half">
+          <label class="field-label">Experiencia (XP) <span class="required">*</span></label>
+          <ion-input
+            class="forge-input"
+            type="number"
+            formControlName="xp"
+            placeholder="Ej: 50"
+            data-testid="xp-input"
+            [class.input-error]="form.get('xp')?.invalid && form.get('xp')?.touched">
+          </ion-input>
+          @if (form.get('xp')?.invalid && form.get('xp')?.touched) {
+            @if (form.get('xp')?.errors?.['required']) {
+              <p class="error-message" data-testid="xp-error">Obligatorio.</p>
+            } @else {
+              <p class="error-message" data-testid="xp-error">No puede ser negativo.</p>
+            }
           }
-        }
+        </div>
       </div>
 
-      <!-- Hit Points field -->
-      <div class="field-group">
-        <label class="field-label">Puntos de Golpe <span class="required">*</span></label>
-        <ion-input
-          class="forge-input"
-          type="number"
-          formControlName="hitPoints"
-          placeholder="Ej: 7"
-          data-testid="hit-points-input"
-          [class.input-error]="form.get('hitPoints')?.invalid && form.get('hitPoints')?.touched">
-        </ion-input>
-        @if (form.get('hitPoints')?.invalid && form.get('hitPoints')?.touched) {
-          @if (form.get('hitPoints')?.errors?.['required']) {
-            <p class="error-message" data-testid="hit-points-error">Los puntos de golpe son obligatorios.</p>
-          } @else if (form.get('hitPoints')?.errors?.['min']) {
-            <p class="error-message" data-testid="hit-points-error">Los puntos de golpe deben ser al menos 1.</p>
-          }
-        }
-      </div>
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 3 · PUNTUACIONES DE CARACTERÍSTICAS
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-left">
+        <h2 class="section-title">Características</h2>
+        <p class="section-hint">Cada valor debe estar entre 1 y 30.</p>
 
-      <!-- Speed field -->
-      <div class="field-group">
-        <label class="field-label">Velocidad <span class="required">*</span></label>
-        <ion-input
-          class="forge-input"
-          formControlName="speed"
-          placeholder="Ej: 30 ft."
-          data-testid="speed-input"
-          [class.input-error]="form.get('speed')?.invalid && form.get('speed')?.touched">
-        </ion-input>
-        @if (form.get('speed')?.invalid && form.get('speed')?.touched) {
-          <p class="error-message" data-testid="speed-error">La velocidad es obligatoria.</p>
-        }
-      </div>
-
-      <!-- Ability Scores -->
-      <div class="field-group">
-        <label class="field-label">Puntuaciones de Características <span class="required">*</span></label>
-        <p class="field-hint">Cada valor debe estar entre 1 y 30.</p>
         <div class="ability-scores-grid">
           @for (key of abilityKeys; track key) {
             <div class="ability-score-item">
@@ -138,9 +217,9 @@
               </ion-input>
               @if (form.get(key)?.invalid && form.get(key)?.touched) {
                 @if (form.get(key)?.errors?.['required']) {
-                  <p class="error-message" [attr.data-testid]="key + '-error'">Este campo es obligatorio.</p>
-                } @else if (form.get(key)?.errors?.['min'] || form.get(key)?.errors?.['max']) {
-                  <p class="error-message" [attr.data-testid]="key + '-error'">El valor debe estar entre 1 y 30.</p>
+                  <p class="error-message" [attr.data-testid]="key + '-error'">Obligatorio.</p>
+                } @else {
+                  <p class="error-message" [attr.data-testid]="key + '-error'">1–30.</p>
                 }
               }
             </div>
@@ -148,63 +227,390 @@
         </div>
       </div>
 
-      <!-- Challenge Rating field -->
-      <div class="field-group">
-        <label class="field-label">Índice de Desafío <span class="required">*</span></label>
-        <ion-input
-          class="forge-input"
-          type="number"
-          formControlName="challengeRating"
-          placeholder="Ej: 0.25"
-          data-testid="challenge-rating-input"
-          [class.input-error]="form.get('challengeRating')?.invalid && form.get('challengeRating')?.touched">
-        </ion-input>
-        @if (form.get('challengeRating')?.invalid && form.get('challengeRating')?.touched) {
-          @if (form.get('challengeRating')?.errors?.['required']) {
-            <p class="error-message" data-testid="challenge-rating-error">El índice de desafío es obligatorio.</p>
-          } @else if (form.get('challengeRating')?.errors?.['min']) {
-            <p class="error-message" data-testid="challenge-rating-error">El índice de desafío no puede ser negativo.</p>
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 4 · TIRADAS DE SALVACIÓN
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-right" formGroupName="savingThrows">
+        <h2 class="section-title">Tiradas de Salvación <span class="section-badge">opcional</span></h2>
+        <p class="section-hint">Introduce el bonificador para las características con competencia. Se permiten valores negativos.</p>
+
+        <div class="saving-throws-grid">
+          <div class="saving-throw-item">
+            <label class="ability-label">FUE</label>
+            <ion-input class="forge-input" type="number" formControlName="str" placeholder="—" data-testid="saving-throw-str"></ion-input>
+          </div>
+          <div class="saving-throw-item">
+            <label class="ability-label">DES</label>
+            <ion-input class="forge-input" type="number" formControlName="dex" placeholder="—" data-testid="saving-throw-dex"></ion-input>
+          </div>
+          <div class="saving-throw-item">
+            <label class="ability-label">CON</label>
+            <ion-input class="forge-input" type="number" formControlName="con" placeholder="—" data-testid="saving-throw-con"></ion-input>
+          </div>
+          <div class="saving-throw-item">
+            <label class="ability-label">INT</label>
+            <ion-input class="forge-input" type="number" formControlName="int" placeholder="—" data-testid="saving-throw-int"></ion-input>
+          </div>
+          <div class="saving-throw-item">
+            <label class="ability-label">SAB</label>
+            <ion-input class="forge-input" type="number" formControlName="wis" placeholder="—" data-testid="saving-throw-wis"></ion-input>
+          </div>
+          <div class="saving-throw-item">
+            <label class="ability-label">CAR</label>
+            <ion-input class="forge-input" type="number" formControlName="cha" placeholder="—" data-testid="saving-throw-cha"></ion-input>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 5 · SENTIDOS
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-left" formGroupName="senses">
+        <h2 class="section-title">Sentidos <span class="section-badge">opcional</span></h2>
+
+        <div class="senses-grid">
+          <div class="field-group">
+            <label class="field-label">Visión en la Oscuridad</label>
+            <ion-input class="forge-input" formControlName="darkvision" placeholder="Ej: 60 ft." data-testid="senses-darkvision"></ion-input>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Visión Ciega</label>
+            <ion-input class="forge-input" formControlName="blindsight" placeholder="Ej: 30 ft." data-testid="senses-blindsight"></ion-input>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Sentido del Temblor</label>
+            <ion-input class="forge-input" formControlName="tremorsense" placeholder="Ej: 60 ft." data-testid="senses-tremorsense"></ion-input>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Visión Verdadera</label>
+            <ion-input class="forge-input" formControlName="truesight" placeholder="Ej: 120 ft." data-testid="senses-truesight"></ion-input>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Percepción Pasiva</label>
+            <ion-input class="forge-input" type="number" formControlName="passivePerception" placeholder="Ej: 12" data-testid="senses-passive-perception"></ion-input>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 6 · DEFENSAS
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-right">
+        <h2 class="section-title">Defensas <span class="section-badge">opcional</span></h2>
+
+        <!-- Resistencias al Daño -->
+        <div class="field-group">
+          <label class="field-label">Resistencias al Daño</label>
+          <div class="chip-grid" data-testid="damage-resistances-input">
+            @for (type of damageTypes; track type; let i = $index) {
+              <button
+                type="button"
+                class="chip"
+                [class.chip--active]="damageResistances.at(i).value"
+                (click)="toggleChip(damageResistances, i)"
+                [attr.data-testid]="'resistance-chip-' + type.toLowerCase()">
+                {{ type }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Inmunidades al Daño -->
+        <div class="field-group">
+          <label class="field-label">Inmunidades al Daño</label>
+          <div class="chip-grid" data-testid="damage-immunities-input">
+            @for (type of damageTypes; track type; let i = $index) {
+              <button
+                type="button"
+                class="chip"
+                [class.chip--active]="damageImmunities.at(i).value"
+                (click)="toggleChip(damageImmunities, i)"
+                [attr.data-testid]="'immunity-chip-' + type.toLowerCase()">
+                {{ type }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Vulnerabilidades al Daño -->
+        <div class="field-group">
+          <label class="field-label">Vulnerabilidades al Daño</label>
+          <div class="chip-grid" data-testid="damage-vulnerabilities-input">
+            @for (type of damageTypes; track type; let i = $index) {
+              <button
+                type="button"
+                class="chip"
+                [class.chip--active]="damageVulnerabilities.at(i).value"
+                (click)="toggleChip(damageVulnerabilities, i)"
+                [attr.data-testid]="'vulnerability-chip-' + type.toLowerCase()">
+                {{ type }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Inmunidades a Condiciones -->
+        <div class="field-group">
+          <label class="field-label">Inmunidades a Condiciones</label>
+          <div class="chip-grid" data-testid="condition-immunities-input">
+            @for (cond of conditions; track cond; let i = $index) {
+              <button
+                type="button"
+                class="chip"
+                [class.chip--active]="conditionImmunities.at(i).value"
+                (click)="toggleChip(conditionImmunities, i)"
+                [attr.data-testid]="'condition-chip-' + cond.toLowerCase()">
+                {{ cond }}
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 7 · COMPETENCIAS DE HABILIDAD
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-full">
+        <h2 class="section-title">Competencias de Habilidad <span class="section-badge">opcional</span></h2>
+
+        <!-- Click-outside overlay to close dropdown -->
+        @if (skillDropdownOpen) {
+          <div class="dropdown-overlay" (click)="closeSkillDropdown()"></div>
+        }
+
+        <!-- Custom skill picker -->
+        <div class="skill-picker-row">
+
+          <!-- Custom dropdown trigger + panel -->
+          <div class="custom-dropdown" [class.custom-dropdown--open]="skillDropdownOpen">
+            <button
+              type="button"
+              class="custom-dropdown-trigger"
+              (click)="toggleSkillDropdown()"
+              data-testid="skill-picker-select">
+              <span [class.custom-dropdown-placeholder]="!pendingSkillName">
+                {{ pendingSkillName || 'Selecciona una habilidad…' }}
+              </span>
+              <span class="custom-dropdown-arrow">{{ skillDropdownOpen ? '▲' : '▼' }}</span>
+            </button>
+
+            @if (skillDropdownOpen) {
+              <div class="custom-dropdown-panel" (click)="$event.stopPropagation()">
+                @for (skill of availableSkillNames; track skill) {
+                  <button
+                    type="button"
+                    class="custom-dropdown-option"
+                    (click)="selectSkillFromDropdown(skill)">
+                    {{ skill }}
+                  </button>
+                }
+                @if (availableSkillNames.length === 0) {
+                  <span class="custom-dropdown-empty">Todas las habilidades añadidas</span>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Bonus input — shown once a skill is selected -->
+          @if (pendingSkillName) {
+            <ion-input
+              class="forge-input skill-picker-bonus"
+              type="number"
+              [(ngModel)]="pendingSkillBonus"
+              [ngModelOptions]="{standalone: true}"
+              placeholder="Bonificador"
+              data-testid="skill-picker-bonus">
+            </ion-input>
           }
+
+          <button
+            type="button"
+            class="btn-add"
+            [disabled]="!pendingSkillName"
+            (click)="confirmAddSkill()"
+            data-testid="add-skill-button">
+            + Añadir
+          </button>
+        </div>
+
+        <!-- Selected skills as removable tags -->
+        @if (selectedSkillNames.length > 0) {
+          <div class="skill-tags" data-testid="skill-tags">
+            @for (skill of selectedSkillNames; track skill) {
+              <div class="skill-tag" [attr.data-testid]="'skill-tag-' + skill.toLowerCase().replace(' ', '-')">
+                <span class="skill-tag-name">{{ skill }}</span>
+                <span class="skill-tag-bonus">+{{ getSkillBonus(skill) ?? 0 }}</span>
+                <button
+                  type="button"
+                  class="skill-tag-remove"
+                  (click)="removeSkillEntry(skill)"
+                  [attr.data-testid]="'remove-skill-' + skill.toLowerCase().replace(' ', '-')">
+                  ×
+                </button>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="empty-hint">Sin competencias de habilidad.</p>
         }
       </div>
 
-      <!-- XP field -->
-      <div class="field-group">
-        <label class="field-label">Experiencia (XP) <span class="required">*</span></label>
-        <ion-input
-          class="forge-input"
-          type="number"
-          formControlName="xp"
-          placeholder="Ej: 50"
-          data-testid="xp-input"
-          [class.input-error]="form.get('xp')?.invalid && form.get('xp')?.touched">
-        </ion-input>
-        @if (form.get('xp')?.invalid && form.get('xp')?.touched) {
-          @if (form.get('xp')?.errors?.['required']) {
-            <p class="error-message" data-testid="xp-error">La experiencia es obligatoria.</p>
-          } @else if (form.get('xp')?.errors?.['min']) {
-            <p class="error-message" data-testid="xp-error">La experiencia no puede ser negativa.</p>
-          }
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 8 · ATAQUES
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-left">
+        <div class="section-header-row">
+          <h2 class="section-title">Ataques</h2>
+          <button type="button" class="btn-add" (click)="addAttack()" data-testid="add-attack-button">
+            + Añadir
+          </button>
+        </div>
+
+        @if (attacks.length === 0) {
+          <p class="empty-hint">Sin ataques definidos.</p>
+        }
+
+        @for (attack of attacks.controls; track $index) {
+          <div class="entry-card" [formGroup]="$any(attack)" [attr.data-testid]="'attack-entry-' + $index">
+            <!-- Nombre (fila completa) -->
+            <div class="field-group">
+              <label class="field-label">Nombre <span class="required">*</span></label>
+              <ion-input
+                class="forge-input"
+                formControlName="name"
+                placeholder="Ej: Cimitarra, Mordisco"
+                [attr.data-testid]="'attack-name-' + $index"
+                [class.input-error]="$any(attack).get('name')?.invalid && $any(attack).get('name')?.touched">
+              </ion-input>
+              @if ($any(attack).get('name')?.invalid && $any(attack).get('name')?.touched) {
+                <p class="error-message" [attr.data-testid]="'attack-name-error-' + $index">El nombre del ataque es obligatorio.</p>
+              }
+            </div>
+
+            <!-- Bonificador + Dados en fila -->
+            <div class="entry-card-fields">
+              <div class="field-group">
+                <label class="field-label">Bonificador</label>
+                <ion-input
+                  class="forge-input"
+                  type="number"
+                  formControlName="attackBonus"
+                  placeholder="Ej: +4"
+                  [attr.data-testid]="'attack-bonus-' + $index">
+                </ion-input>
+              </div>
+              <div class="field-group">
+                <label class="field-label">Dados de Daño</label>
+                <ion-input
+                  class="forge-input"
+                  formControlName="damageDice"
+                  placeholder="Ej: 2d6"
+                  [attr.data-testid]="'attack-damage-dice-' + $index">
+                </ion-input>
+              </div>
+            </div>
+
+            <!-- Tipo de daño + Alcance en fila -->
+            <div class="entry-card-fields">
+              <div class="field-group">
+                <label class="field-label">Tipo de Daño</label>
+                <select
+                  class="forge-select-native"
+                  formControlName="damageType"
+                  [attr.data-testid]="'attack-damage-type-' + $index">
+                  <option value="">— ninguno —</option>
+                  @for (type of damageTypes; track type) {
+                    <option [value]="type">{{ type }}</option>
+                  }
+                </select>
+              </div>
+              <div class="field-group">
+                <label class="field-label">Alcance / Rango</label>
+                <ion-input
+                  class="forge-input"
+                  formControlName="reach"
+                  placeholder="Ej: 5 ft."
+                  [attr.data-testid]="'attack-reach-' + $index">
+                </ion-input>
+              </div>
+            </div>
+
+            <button type="button" class="btn-remove" (click)="removeAttack($index)" [attr.data-testid]="'remove-attack-' + $index">
+              Eliminar
+            </button>
+          </div>
         }
       </div>
 
-      <!-- Form actions -->
-      <div class="form-actions">
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 9 · HABILIDADES ESPECIALES
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-right">
+        <div class="section-header-row">
+          <h2 class="section-title">Habilidades Especiales</h2>
+          <button type="button" class="btn-add" (click)="addAbility()" data-testid="add-ability-button">
+            + Añadir
+          </button>
+        </div>
+
+        @if (abilities.length === 0) {
+          <p class="empty-hint">Sin habilidades especiales.</p>
+        }
+
+        @for (ability of abilities.controls; track $index) {
+          <div class="entry-card" [formGroup]="$any(ability)" [attr.data-testid]="'ability-entry-' + $index">
+            <div class="field-group">
+              <label class="field-label">Nombre <span class="required">*</span></label>
+              <ion-input
+                class="forge-input"
+                formControlName="name"
+                placeholder="Ej: Huida Cobarde, Resistencia Mágica"
+                [attr.data-testid]="'ability-name-' + $index"
+                [class.input-error]="$any(ability).get('name')?.invalid && $any(ability).get('name')?.touched">
+              </ion-input>
+              @if ($any(ability).get('name')?.invalid && $any(ability).get('name')?.touched) {
+                <p class="error-message" [attr.data-testid]="'ability-name-error-' + $index">El nombre es obligatorio.</p>
+              }
+            </div>
+            <div class="field-group">
+              <label class="field-label">Descripción <span class="required">*</span></label>
+              <ion-textarea
+                class="forge-input forge-textarea"
+                formControlName="description"
+                placeholder="Describe el efecto de la habilidad…"
+                rows="3"
+                [attr.data-testid]="'ability-description-' + $index"
+                [class.input-error]="$any(ability).get('description')?.invalid && $any(ability).get('description')?.touched">
+              </ion-textarea>
+              @if ($any(ability).get('description')?.invalid && $any(ability).get('description')?.touched) {
+                <p class="error-message" [attr.data-testid]="'ability-description-error-' + $index">La descripción es obligatoria.</p>
+              }
+            </div>
+            <button type="button" class="btn-remove" (click)="removeAbility($index)" [attr.data-testid]="'remove-ability-' + $index">
+              Eliminar
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════════
+           ACCIÓN PRINCIPAL
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-actions col-full">
         <ion-button
           expand="block"
           type="submit"
-          class="btn-gold"
+          class="btn-submit"
           [disabled]="submitting"
-          data-testid="submit-button"
-        >
+          data-testid="submit-button">
           @if (submitting) {
             <ion-spinner name="crescent" slot="start"></ion-spinner>
           }
-          Crear Monstruo
+          {{ editMode ? 'Guardar Cambios' : 'Crear Monstruo' }}
         </ion-button>
       </div>
 
+      </div><!-- .form-grid -->
     </form>
-
   </div>
-</ion-content>
+</div>

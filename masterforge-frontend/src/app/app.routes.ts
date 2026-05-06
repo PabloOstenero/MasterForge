@@ -29,6 +29,7 @@ export const routes: Routes = [
       { path: 'homebrew/subclass/new', loadComponent: () => import('./pages/homebrew-subclass-form/homebrew-subclass-form.page').then(m => m.HomebrewSubclassFormPage) },
       { path: 'homebrew/race/new', loadComponent: () => import('./pages/homebrew-race-form/homebrew-race-form.page').then(m => m.HomebrewRaceFormPage) },
       { path: 'homebrew/monster/new', loadComponent: () => import('./pages/homebrew-monster-form/homebrew-monster-form.page').then(m => m.HomebrewMonsterFormPage) },
+      { path: 'homebrew/monster/:id/edit', loadComponent: () => import('./pages/homebrew-monster-form/homebrew-monster-form.page').then(m => m.HomebrewMonsterFormPage) },
       { path: 'homebrew/spell/new', loadComponent: () => import('./pages/homebrew-spell-form/homebrew-spell-form.page').then(m => m.HomebrewSpellFormPage) },
       { path: 'homebrew/item/new', loadComponent: () => import('./pages/homebrew-item-form/homebrew-item-form.page').then(m => m.HomebrewItemFormPage) },
       { path: 'search-campaigns', loadComponent: () => import('./pages/search-campaigns/search-campaigns.page').then(m => m.SearchCampaignsPage) },

@@ -75,6 +75,7 @@ function makeCreateMonsterDto() {
     cha: 8,
     challengeRating: 0.25,
     xp: 50,
+    combatMechanics: {},
   };
 }
 
@@ -529,6 +530,7 @@ const monsterFormArb = fc.record({
   cha: fc.integer({ min: 1, max: 30 }),
   challengeRating: fc.float({ min: 0, max: 30, noNaN: true }),
   xp: fc.integer({ min: 0, max: 1000000 }),
+  combatMechanics: fc.constant({}),
 });
 
 /** Arbitrary for CreateSpellDto (without authorId) */
@@ -736,6 +738,163 @@ describe('HomebrewService — Property 8: Delete request targets the correct end
         const req = httpMock.expectOne(expectedUrl);
         expect(req.request.method).toBe('DELETE');
         req.flush(null);
+      }),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Property-Based Tests — Property 9: combatMechanics passed without modifications
+// ---------------------------------------------------------------------------
+// Feature: homebrew-monster-form-complete
+// Property 9: El servicio pasa combatMechanics sin modificaciones al endpoint
+
+import {
+  AttackEntry,
+  AbilityEntry,
+  SkillEntry,
+  SavingThrows,
+  Senses,
+  CombatMechanics,
+} from '../pages/homebrew-monster-form/homebrew-monster-form.page';
+
+/** Arbitrary for AttackEntry */
+const attackEntryArb9: fc.Arbitrary<AttackEntry> = fc.record({
+  name: fc.string({ minLength: 1, maxLength: 60 }),
+  attackBonus: fc.option(fc.integer({ min: -10, max: 20 }), { nil: null }),
+  damageDice: fc.string({ minLength: 0, maxLength: 20 }),
+  damageType: fc.string({ minLength: 0, maxLength: 40 }),
+  reach: fc.string({ minLength: 0, maxLength: 20 }),
+});
+
+/** Arbitrary for AbilityEntry */
+const abilityEntryArb9: fc.Arbitrary<AbilityEntry> = fc.record({
+  name: fc.string({ minLength: 1, maxLength: 60 }),
+  description: fc.string({ minLength: 1, maxLength: 200 }),
+});
+
+/** Arbitrary for SkillEntry */
+const skillEntryArb9: fc.Arbitrary<SkillEntry> = fc.record({
+  name: fc.string({ minLength: 1, maxLength: 60 }),
+  bonus: fc.integer({ min: -10, max: 20 }),
+});
+
+/** Arbitrary for SavingThrows */
+const savingThrowsArb9: fc.Arbitrary<Partial<Record<keyof SavingThrows, number>>> = fc.record({
+  str: fc.option(fc.integer({ min: -10, max: 20 }), { nil: undefined }),
+  dex: fc.option(fc.integer({ min: -10, max: 20 }), { nil: undefined }),
+  con: fc.option(fc.integer({ min: -10, max: 20 }), { nil: undefined }),
+  int: fc.option(fc.integer({ min: -10, max: 20 }), { nil: undefined }),
+  wis: fc.option(fc.integer({ min: -10, max: 20 }), { nil: undefined }),
+  cha: fc.option(fc.integer({ min: -10, max: 20 }), { nil: undefined }),
+}).map((obj) => {
+  // Remove undefined keys to simulate the filtered savingThrows from buildCombatMechanics
+  const result: Partial<Record<keyof SavingThrows, number>> = {};
+  (Object.keys(obj) as Array<keyof SavingThrows>).forEach((key) => {
+    if (obj[key] !== undefined) {
+      result[key] = obj[key] as number;
+    }
+  });
+  return result;
+});
+
+/** Arbitrary for Partial<Senses> (already filtered — no empty/null values) */
+const sensesArb9: fc.Arbitrary<Partial<Senses>> = fc.record({
+  darkvision: fc.option(fc.string({ minLength: 1, maxLength: 20 }), { nil: undefined }),
+  blindsight: fc.option(fc.string({ minLength: 1, maxLength: 20 }), { nil: undefined }),
+  tremorsense: fc.option(fc.string({ minLength: 1, maxLength: 20 }), { nil: undefined }),
+  truesight: fc.option(fc.string({ minLength: 1, maxLength: 20 }), { nil: undefined }),
+  passivePerception: fc.option(fc.integer({ min: 1, max: 30 }), { nil: undefined }),
+}).map((obj) => {
+  // Remove undefined keys
+  const result: Partial<Senses> = {};
+  (Object.keys(obj) as Array<keyof Senses>).forEach((key) => {
+    if ((obj as any)[key] !== undefined) {
+      (result as any)[key] = (obj as any)[key];
+    }
+  });
+  return result;
+});
+
+/** Arbitrary for a complete CombatMechanics object */
+const combatMechanicsArb: fc.Arbitrary<CombatMechanics> = fc.record({
+  description: fc.string(),
+  savingThrows: savingThrowsArb9,
+  skills: fc.array(skillEntryArb9, { maxLength: 5 }),
+  damageResistances: fc.string(),
+  damageImmunities: fc.string(),
+  damageVulnerabilities: fc.string(),
+  conditionImmunities: fc.string(),
+  senses: sensesArb9,
+  attacks: fc.array(attackEntryArb9, { maxLength: 5 }),
+  abilities: fc.array(abilityEntryArb9, { maxLength: 5 }),
+});
+
+/** Base monster stats DTO (without combatMechanics) */
+const baseMonsterStatsArb = fc.record({
+  name: fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
+  type: fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
+  size: fc.constantFrom('Small', 'Medium', 'Large', 'Huge', 'Gargantuan'),
+  armorClass: fc.integer({ min: 1, max: 30 }),
+  hitPoints: fc.integer({ min: 1, max: 1000 }),
+  speed: fc.string({ minLength: 1, maxLength: 30 }).filter(s => s.trim().length > 0),
+  str: fc.integer({ min: 1, max: 30 }),
+  dex: fc.integer({ min: 1, max: 30 }),
+  con: fc.integer({ min: 1, max: 30 }),
+  intStat: fc.integer({ min: 1, max: 30 }),
+  wis: fc.integer({ min: 1, max: 30 }),
+  cha: fc.integer({ min: 1, max: 30 }),
+  challengeRating: fc.float({ min: 0, max: 30, noNaN: true }),
+  xp: fc.integer({ min: 0, max: 1000000 }),
+  authorId: fc.string({ minLength: 1, maxLength: 36 }).filter(s => s.trim().length > 0),
+});
+
+describe('HomebrewService — Property 9: combatMechanics passed without modifications to endpoint', () => {
+  // **Validates: Requirement 4.3**
+
+  let service: HomebrewService;
+  let httpMock: HttpTestingController;
+  let authServiceSpy: jasmine.SpyObj<AuthService>;
+
+  beforeEach(() => {
+    authServiceSpy = jasmine.createSpyObj<AuthService>('AuthService', [
+      'getUserIdFromToken',
+    ]);
+    authServiceSpy.getUserIdFromToken.and.returnValue(mockUserId);
+
+    TestBed.configureTestingModule({
+      providers: [
+        HomebrewService,
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: AuthService, useValue: authServiceSpy },
+      ],
+    });
+
+    service = TestBed.inject(HomebrewService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  it('Property 9: createMonster() sends combatMechanics to POST /api/monsters without any modifications', () => {
+    // **Validates: Requirement 4.3**
+
+    fc.assert(
+      fc.property(baseMonsterStatsArb, combatMechanicsArb, (stats, combatMechanics) => {
+        const dto = { ...stats, combatMechanics };
+
+        service.createMonster(dto).subscribe();
+
+        const req = httpMock.expectOne('/api/monsters');
+        const body = req.request.body;
+        req.flush({});
+
+        // The combatMechanics in the HTTP body must be deeply equal to the input
+        expect(body.combatMechanics).toEqual(combatMechanics);
       }),
       { numRuns: 100 }
     );

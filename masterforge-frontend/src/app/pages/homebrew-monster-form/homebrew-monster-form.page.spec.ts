@@ -765,9 +765,12 @@ describe('HomebrewMonsterFormPage', () => {
       component.form.patchValue(validFormValue());
     });
 
-    it('should call HomebrewService.createMonster() with the form value', () => {
+    it('should call HomebrewService.createMonster() with a DTO that includes combatMechanics', () => {
       component.submit();
-      expect(homebrewServiceSpy.createMonster).toHaveBeenCalledWith(component.form.value);
+      expect(homebrewServiceSpy.createMonster).toHaveBeenCalled();
+      const dto = homebrewServiceSpy.createMonster.calls.mostRecent().args[0];
+      expect(dto.combatMechanics).toBeDefined();
+      expect(dto.name).toBe('Goblin');
     });
 
     it('should navigate to /homebrew on successful submit', () => {
@@ -875,6 +878,324 @@ describe('HomebrewMonsterFormPage', () => {
     it('should render a cancel button in the template', () => {
       const cancelBtn = fixture.nativeElement.querySelector('[data-testid="cancel-button"]');
       expect(cancelBtn).toBeTruthy();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Saving Throws fields — Requirement 6.1
+  // -------------------------------------------------------------------------
+
+  describe('Saving Throws fields', () => {
+
+    it('should render the STR saving throw input in the template', () => {
+      const input = fixture.nativeElement.querySelector('[data-testid="saving-throw-str"]');
+      expect(input).toBeTruthy();
+    });
+
+    it('should render the DEX saving throw input in the template', () => {
+      const input = fixture.nativeElement.querySelector('[data-testid="saving-throw-dex"]');
+      expect(input).toBeTruthy();
+    });
+
+    it('should render the CON saving throw input in the template', () => {
+      const input = fixture.nativeElement.querySelector('[data-testid="saving-throw-con"]');
+      expect(input).toBeTruthy();
+    });
+
+    it('should render the INT saving throw input in the template', () => {
+      const input = fixture.nativeElement.querySelector('[data-testid="saving-throw-int"]');
+      expect(input).toBeTruthy();
+    });
+
+    it('should render the WIS saving throw input in the template', () => {
+      const input = fixture.nativeElement.querySelector('[data-testid="saving-throw-wis"]');
+      expect(input).toBeTruthy();
+    });
+
+    it('should render the CHA saving throw input in the template', () => {
+      const input = fixture.nativeElement.querySelector('[data-testid="saving-throw-cha"]');
+      expect(input).toBeTruthy();
+    });
+
+    it('should have a savingThrows FormGroup in the form', () => {
+      expect(component.form.get('savingThrows')).toBeTruthy();
+    });
+
+    it('should be valid when all saving throws are empty (all fields are optional)', () => {
+      expect(component.form.get('savingThrows')?.valid).toBeTrue();
+    });
+
+    it('should not affect overall form validity when all saving throws are null', () => {
+      component.form.patchValue({ ...validFormValue() });
+      expect(component.form.valid).toBeTrue();
+    });
+
+    it('should accept a positive saving throw bonus', () => {
+      component.form.get('savingThrows')?.patchValue({ dex: 4 });
+      expect(component.form.get('savingThrows.dex')?.value).toBe(4);
+    });
+
+    it('should accept a negative saving throw bonus', () => {
+      component.form.get('savingThrows')?.patchValue({ str: -2 });
+      expect(component.form.get('savingThrows.str')?.value).toBe(-2);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Description field — Requirement 1.1
+  // -------------------------------------------------------------------------
+
+  describe('Description field', () => {
+
+    it('should render the description textarea in the template', () => {
+      const descriptionInput = fixture.nativeElement.querySelector('[data-testid="description-input"]');
+      expect(descriptionInput).toBeTruthy();
+    });
+
+    it('should have a description FormControl in the form', () => {
+      expect(component.form.get('description')).toBeTruthy();
+    });
+
+    it('should be valid when description is empty (field is optional)', () => {
+      component.form.patchValue({ description: '' });
+      expect(component.form.get('description')?.valid).toBeTrue();
+    });
+
+    it('should be valid when description contains text', () => {
+      component.form.patchValue({ description: 'Un goblin astuto y peligroso.' });
+      expect(component.form.get('description')?.valid).toBeTrue();
+    });
+
+    it('should not affect overall form validity when description is empty', () => {
+      component.form.patchValue({ ...validFormValue(), description: '' });
+      expect(component.form.valid).toBeTrue();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Skills section — Requirement 7.3
+  // -------------------------------------------------------------------------
+
+  describe('Skills section', () => {
+
+    it('should render the skill picker select in the template', () => {
+      const select = fixture.nativeElement.querySelector('[data-testid="skill-picker-select"]');
+      expect(select).toBeTruthy();
+    });
+
+    it('should render the add-skill button in the template', () => {
+      const btn = fixture.nativeElement.querySelector('[data-testid="add-skill-button"]');
+      expect(btn).toBeTruthy();
+    });
+
+    it('should start with all skills unselected', () => {
+      const anySelected = component.skillNames.some(s => component.isSkillSelected(s));
+      expect(anySelected).toBeFalse();
+    });
+
+    it('should add a skill tag when confirmAddSkill() is called with a valid skill and bonus', () => {
+      component.pendingSkillName = 'Perception';
+      component.pendingSkillBonus = 6;
+      component.confirmAddSkill();
+
+      expect(component.isSkillSelected('Perception')).toBeTrue();
+      expect(component.getSkillBonus('Perception')).toBe(6);
+    });
+
+    it('should reset pendingSkillName and pendingSkillBonus after confirming', () => {
+      component.pendingSkillName = 'Stealth';
+      component.pendingSkillBonus = 4;
+      component.confirmAddSkill();
+
+      expect(component.pendingSkillName).toBe('');
+      expect(component.pendingSkillBonus).toBeNull();
+    });
+
+    it('should remove a skill when removeSkillEntry() is called', () => {
+      component.pendingSkillName = 'Arcana';
+      component.pendingSkillBonus = 3;
+      component.confirmAddSkill();
+      expect(component.isSkillSelected('Arcana')).toBeTrue();
+
+      component.removeSkillEntry('Arcana');
+      expect(component.isSkillSelected('Arcana')).toBeFalse();
+      expect(component.getSkillBonus('Arcana')).toBeNull();
+    });
+
+    it('should not include a skill in availableSkillNames once selected', () => {
+      component.pendingSkillName = 'Stealth';
+      component.pendingSkillBonus = 4;
+      component.confirmAddSkill();
+
+      expect(component.availableSkillNames).not.toContain('Stealth');
+    });
+
+    it('should serialize selected skills with bonuses into SkillEntry[]', () => {
+      component.pendingSkillName = 'Perception';
+      component.pendingSkillBonus = 6;
+      component.confirmAddSkill();
+      component.pendingSkillName = 'Stealth';
+      component.pendingSkillBonus = 4;
+      component.confirmAddSkill();
+
+      const result = component['serializeSkills']();
+      expect(result).toEqual(jasmine.arrayContaining([
+        { name: 'Perception', bonus: 6 },
+        { name: 'Stealth', bonus: 4 },
+      ]));
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Damage Resistances / Immunities / Vulnerabilities fields — Requirement 8.1
+  // -------------------------------------------------------------------------
+
+  describe('Damage Resistances, Immunities and Vulnerabilities fields', () => {
+
+    it('should render the damageResistances input in the template', () => {
+      const input = fixture.nativeElement.querySelector('[data-testid="damage-resistances-input"]');
+      expect(input).toBeTruthy();
+    });
+
+    it('should render the damageImmunities input in the template', () => {
+      const input = fixture.nativeElement.querySelector('[data-testid="damage-immunities-input"]');
+      expect(input).toBeTruthy();
+    });
+
+    it('should render the damageVulnerabilities input in the template', () => {
+      const input = fixture.nativeElement.querySelector('[data-testid="damage-vulnerabilities-input"]');
+      expect(input).toBeTruthy();
+    });
+
+    it('should have a damageResistances FormControl in the form', () => {
+      expect(component.form.get('damageResistances')).toBeTruthy();
+    });
+
+    it('should have a damageImmunities FormControl in the form', () => {
+      expect(component.form.get('damageImmunities')).toBeTruthy();
+    });
+
+    it('should have a damageVulnerabilities FormControl in the form', () => {
+      expect(component.form.get('damageVulnerabilities')).toBeTruthy();
+    });
+
+    it('should be valid when all three fields are empty (all are optional)', () => {
+      // damageResistances, damageImmunities, damageVulnerabilities are now FormArrays of booleans
+      // They start as all-false, which is valid (no validators)
+      expect(component.form.get('damageResistances')?.valid).toBeTrue();
+      expect(component.form.get('damageImmunities')?.valid).toBeTrue();
+      expect(component.form.get('damageVulnerabilities')?.valid).toBeTrue();
+    });
+
+    it('should not affect overall form validity when all three fields are empty', () => {
+      component.form.patchValue({ ...validFormValue() });
+      // damageResistances, damageImmunities, damageVulnerabilities are FormArrays with no validators
+      // They don't affect overall form validity
+      expect(component.form.valid).toBeTrue();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Senses fields — Requirement 10.1
+  // -------------------------------------------------------------------------
+
+  describe('Senses fields', () => {
+
+    it('should render the darkvision input in the template', () => {
+      const input = fixture.nativeElement.querySelector('[data-testid="senses-darkvision"]');
+      expect(input).toBeTruthy();
+    });
+
+    it('should render the blindsight input in the template', () => {
+      const input = fixture.nativeElement.querySelector('[data-testid="senses-blindsight"]');
+      expect(input).toBeTruthy();
+    });
+
+    it('should render the tremorsense input in the template', () => {
+      const input = fixture.nativeElement.querySelector('[data-testid="senses-tremorsense"]');
+      expect(input).toBeTruthy();
+    });
+
+    it('should render the truesight input in the template', () => {
+      const input = fixture.nativeElement.querySelector('[data-testid="senses-truesight"]');
+      expect(input).toBeTruthy();
+    });
+
+    it('should render the passivePerception input in the template', () => {
+      const input = fixture.nativeElement.querySelector('[data-testid="senses-passive-perception"]');
+      expect(input).toBeTruthy();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Attacks section — Requirement 2.3
+  // -------------------------------------------------------------------------
+
+  describe('Attacks section', () => {
+
+    it('should render the add-attack button in the template', () => {
+      const addBtn = fixture.nativeElement.querySelector('[data-testid="add-attack-button"]');
+      expect(addBtn).toBeTruthy();
+    });
+
+    it('should show attack name input in the DOM after adding an attack', () => {
+      component.addAttack();
+      fixture.detectChanges();
+
+      const nameInput = fixture.nativeElement.querySelector('[data-testid="attack-name-0"]');
+      expect(nameInput).toBeTruthy();
+    });
+
+    it('should show all attack fields in the DOM after adding an attack', () => {
+      component.addAttack();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('[data-testid="attack-name-0"]')).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('[data-testid="attack-bonus-0"]')).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('[data-testid="attack-damage-dice-0"]')).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('[data-testid="attack-damage-type-0"]')).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('[data-testid="attack-reach-0"]')).toBeTruthy();
+    });
+
+    it('should show a remove button for each attack entry', () => {
+      component.addAttack();
+      fixture.detectChanges();
+
+      const removeBtn = fixture.nativeElement.querySelector('[data-testid="remove-attack-0"]');
+      expect(removeBtn).toBeTruthy();
+    });
+
+    it('should remove the attack entry from the DOM when remove is clicked', () => {
+      component.addAttack();
+      fixture.detectChanges();
+
+      component.removeAttack(0);
+      fixture.detectChanges();
+
+      const attackEntry = fixture.nativeElement.querySelector('[data-testid="attack-entry-0"]');
+      expect(attackEntry).toBeNull();
+    });
+
+    it('should show attack name error message when name is empty and touched', () => {
+      component.addAttack();
+      fixture.detectChanges();
+
+      const attackGroup = component.attacks.at(0);
+      attackGroup.get('name')?.markAsTouched();
+      fixture.detectChanges();
+
+      const nameError = fixture.nativeElement.querySelector('[data-testid="attack-name-error-0"]');
+      expect(nameError).toBeTruthy();
+      expect(nameError.textContent).toContain('El nombre del ataque es obligatorio.');
+    });
+
+    it('should start with an empty attacks FormArray', () => {
+      expect(component.attacks.length).toBe(0);
+    });
+
+    it('should increment attacks FormArray length by 1 when addAttack() is called', () => {
+      component.addAttack();
+      expect(component.attacks.length).toBe(1);
     });
   });
 });

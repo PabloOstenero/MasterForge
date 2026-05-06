@@ -68,6 +68,7 @@ export interface CreateMonsterDto {
   challengeRating: number;
   xp: number;
   authorId: string;
+  combatMechanics: Record<string, any>;
 }
 
 export interface CreateSpellDto {
@@ -121,6 +122,15 @@ export class HomebrewService {
   createMonster(dto: CreateMonsterDto): Observable<any> {
     const authorId = this.authService.getUserIdFromToken();
     return this.http.post<any>('/api/monsters', { ...dto, authorId });
+  }
+
+  getMonster(id: string): Observable<any> {
+    return this.http.get<any>(`/api/monsters/${id}`);
+  }
+
+  updateMonster(id: string, dto: CreateMonsterDto): Observable<any> {
+    const authorId = this.authService.getUserIdFromToken();
+    return this.http.put<any>(`/api/monsters/${id}`, { ...dto, authorId });
   }
 
   createSpell(dto: CreateSpellDto): Observable<any> {
