@@ -50,12 +50,15 @@ function makeCreateRaceDto() {
   return {
     name: 'Warforged',
     price: 0,
+    description: '',
+    size: 'Medium',
     bonusStr: 0,
     bonusDex: 0,
     bonusCon: 2,
     bonusInt: 0,
     bonusWis: 0,
     bonusCha: 0,
+    raceFeatures: {},
   };
 }
 
@@ -519,12 +522,15 @@ const subclassFormArb = fc.record({
 const raceFormArb = fc.record({
   name: nonEmptyString,
   price: fc.float({ min: 0, max: 1000, noNaN: true }),
+  description: fc.string(),
+  size: fc.constantFrom('Tiny', 'Small', 'Medium', 'Large', 'Huge'),
   bonusStr: fc.integer({ min: -10, max: 10 }),
   bonusDex: fc.integer({ min: -10, max: 10 }),
   bonusCon: fc.integer({ min: -10, max: 10 }),
   bonusInt: fc.integer({ min: -10, max: 10 }),
   bonusWis: fc.integer({ min: -10, max: 10 }),
   bonusCha: fc.integer({ min: -10, max: 10 }),
+  raceFeatures: fc.constant({}),
 });
 
 /** Arbitrary for CreateMonsterDto (without authorId) */

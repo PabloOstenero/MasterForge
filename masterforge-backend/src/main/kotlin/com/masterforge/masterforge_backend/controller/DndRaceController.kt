@@ -2,6 +2,8 @@ package com.masterforge.masterforge_backend.controller
 
 import com.masterforge.masterforge_backend.config.SecurityUtils
 import com.masterforge.masterforge_backend.model.dto.DndRaceDto
+import com.masterforge.masterforge_backend.model.dto.DndRaceResponseDto
+import com.masterforge.masterforge_backend.model.dto.RaceTraitSummary
 import com.masterforge.masterforge_backend.model.entity.DndRace
 import com.masterforge.masterforge_backend.model.entity.User
 import com.masterforge.masterforge_backend.repository.DndRaceRepository
@@ -41,16 +43,42 @@ class DndRaceController(
             bonusInt = dto.bonusInt,
             bonusWis = dto.bonusWis,
             bonusCha = dto.bonusCha,
+            raceFeatures = dto.raceFeatures ?: emptyMap(),
+            size = dto.size,
+            description = dto.description,
             author = author
         )
         return dndRaceRepository.save(dndRace)
     }
 
     @GetMapping("/{id}")
-    fun getDndRaceById(@PathVariable id: Int): ResponseEntity<DndRace> {
+    fun getDndRaceById(@PathVariable id: Int): ResponseEntity<DndRaceResponseDto> {
         val dndRace = dndRaceRepository.findById(id)
         return if (dndRace.isPresent) {
-            ResponseEntity.ok(dndRace.get())
+            val race = dndRace.get()
+            val traitSummaries = race.traits.map { trait ->
+                RaceTraitSummary(
+                    id = trait.id ?: 0,
+                    name = trait.name,
+                    description = trait.description
+                )
+            }
+            val responseDto = DndRaceResponseDto(
+                id = race.id,
+                name = race.name,
+                price = race.price,
+                description = race.description,
+                size = race.size,
+                bonusStr = race.bonusStr,
+                bonusDex = race.bonusDex,
+                bonusCon = race.bonusCon,
+                bonusInt = race.bonusInt,
+                bonusWis = race.bonusWis,
+                bonusCha = race.bonusCha,
+                raceFeatures = race.raceFeatures,
+                traits = traitSummaries
+            )
+            ResponseEntity.ok(responseDto)
         } else {
             ResponseEntity.notFound().build()
         }
@@ -75,6 +103,9 @@ class DndRaceController(
             bonusInt = dto.bonusInt,
             bonusWis = dto.bonusWis,
             bonusCha = dto.bonusCha,
+            raceFeatures = dto.raceFeatures ?: emptyMap(),
+            size = dto.size,
+            description = dto.description,
             author = author
         )
         return dndRaceRepository.save(updatedRace)

@@ -45,7 +45,9 @@ import {
 
 /** Arbitrary for WeaponFormValues */
 const weaponFormArb: fc.Arbitrary<WeaponFormValues> = fc.record({
-  damageDice:       fc.oneof(fc.constant(''), fc.string({ minLength: 1, maxLength: 10 })),
+  damageDiceCount:  fc.option(fc.integer({ min: 1, max: 10 }), { nil: null }),
+  damageDieType:    fc.constantFrom('d4', 'd6', 'd8', 'd10', 'd12', 'd20'),
+  damageBonus:      fc.option(fc.integer({ min: -5, max: 10 }), { nil: null }),
   damageType:       fc.tuple(
     ...Array.from({ length: DAMAGE_TYPES.length }, () => fc.boolean())
   ).map((arr) => {
@@ -56,12 +58,13 @@ const weaponFormArb: fc.Arbitrary<WeaponFormValues> = fc.record({
   weaponProperties: fc.tuple(
     ...Array.from({ length: WEAPON_PROPERTIES.length }, () => fc.boolean())
   ).map((arr) => [...arr]),
-  rangeNormal:      fc.oneof(fc.constant(''), fc.string({ minLength: 1, maxLength: 20 })),
-  rangeLong:        fc.oneof(fc.constant(''), fc.string({ minLength: 1, maxLength: 20 })),
-  versatileDice:    fc.oneof(fc.constant(''), fc.string({ minLength: 1, maxLength: 10 })),
-  stat:             fc.constantFrom(...ABILITY_STATS),
-  magicalBonus:     fc.constantFrom(...MAGICAL_BONUSES),
-  attackBonus:      fc.option(fc.integer({ min: -5, max: 20 }), { nil: null }),
+  rangeNormal:        fc.oneof(fc.constant(''), fc.string({ minLength: 1, maxLength: 20 })),
+  rangeLong:          fc.oneof(fc.constant(''), fc.string({ minLength: 1, maxLength: 20 })),
+  versatileDiceCount: fc.option(fc.integer({ min: 1, max: 10 }), { nil: null }),
+  versatileDieType:   fc.constantFrom('d4', 'd6', 'd8', 'd10', 'd12', 'd20'),
+  stat:               fc.constantFrom(...ABILITY_STATS),
+  magicalBonus:       fc.constantFrom(...MAGICAL_BONUSES),
+  attackBonus:        fc.option(fc.integer({ min: -5, max: 20 }), { nil: null }),
 });
 
 /** Arbitrary for ArmorFormValues */
@@ -83,7 +86,8 @@ const shieldFormArb: fc.Arbitrary<ShieldFormValues> = fc.record({
 
 /** Arbitrary for PotionFormValues */
 const potionFormArb: fc.Arbitrary<PotionFormValues> = fc.record({
-  healingDice:       fc.oneof(fc.constant(''), fc.string({ minLength: 1, maxLength: 10 })),
+  healingDiceCount:  fc.option(fc.integer({ min: 1, max: 10 }), { nil: null }),
+  healingDieType:    fc.constantFrom('d4', 'd6', 'd8', 'd10', 'd12', 'd20'),
   healingAmount:     fc.option(fc.integer({ min: 0, max: 100 }), { nil: null }),
   effectDescription: fc.oneof(fc.constant(''), fc.string({ minLength: 1, maxLength: 100 })),
 });
@@ -115,9 +119,12 @@ const specialAbilityArb: fc.Arbitrary<SpecialAbilityEntry> = fc.record({
 
 /** Default/empty form values used when a section is not under test */
 const defaultWeapon: WeaponFormValues = {
-  damageDice: '', damageType: Array(DAMAGE_TYPES.length).fill(false),
+  damageDiceCount: null, damageDieType: 'd6', damageBonus: null,
+  damageType: Array(DAMAGE_TYPES.length).fill(false),
   weaponProperties: Array(WEAPON_PROPERTIES.length).fill(false),
-  rangeNormal: '', rangeLong: '', versatileDice: '', stat: 'str', magicalBonus: 0, attackBonus: null,
+  rangeNormal: '', rangeLong: '',
+  versatileDiceCount: null, versatileDieType: 'd8',
+  stat: 'str', magicalBonus: 0, attackBonus: null,
 };
 
 const defaultArmor: ArmorFormValues = {
@@ -127,7 +134,7 @@ const defaultArmor: ArmorFormValues = {
 
 const defaultShield: ShieldFormValues = { acBonus: 2, magicalBonus: 0 };
 
-const defaultPotion: PotionFormValues = { healingDice: '', healingAmount: null, effectDescription: '' };
+const defaultPotion: PotionFormValues = { healingDiceCount: null, healingDieType: 'd4', healingAmount: null, effectDescription: '' };
 
 const defaultMagical: MagicalFormValues = { charges: null, recharge: '', attunementBy: '' };
 
@@ -153,7 +160,7 @@ describe('buildItemProperties() — Property-Based Tests', () => {
       'baseAc', 'dexBonus', 'dexLimit', 'stealthDisadvantage', 'strengthRequirement', 'armorCategory',
     ];
     const shieldOnlyKeys = ['acBonus'];
-    const potionOnlyKeys = ['healingDice', 'healingAmount', 'effectDescription'];
+    const potionOnlyKeys = ['healingDiceCount', 'healingDieType', 'healingAmount', 'effectDescription'];
     const ammunitionOnlyKeys = ['damageBonus'];
     const gearOnlyKeys = ['gearDescription'];
 
@@ -202,11 +209,11 @@ describe('buildItemProperties() — Property-Based Tests', () => {
     // **Validates: Requirements 11.2, 11.5**
 
     const weaponOnlyKeys = [
-      'damageDice', 'damageType', 'weaponProperties', 'rangeNormal', 'rangeLong',
-      'versatileDice', 'stat', 'attackBonus',
+      'damageDiceCount', 'damageDieType', 'damageBonus', 'damageType', 'weaponProperties',
+      'rangeNormal', 'rangeLong', 'versatileDiceCount', 'versatileDieType', 'stat', 'attackBonus',
     ];
     const shieldOnlyKeys = ['acBonus'];
-    const potionOnlyKeys = ['healingDice', 'healingAmount', 'effectDescription'];
+    const potionOnlyKeys = ['healingDiceCount', 'healingDieType', 'healingAmount', 'effectDescription'];
     const ammunitionOnlyKeys = ['damageBonus'];
     const gearOnlyKeys = ['gearDescription'];
 
@@ -276,15 +283,12 @@ describe('buildItemProperties() — Property-Based Tests', () => {
 
     /** Weapon with all optional fields cleared */
     const emptyWeapon: WeaponFormValues = {
-      damageDice: '',
+      damageDiceCount: null, damageDieType: 'd6', damageBonus: null,
       damageType: Array(DAMAGE_TYPES.length).fill(false),
       weaponProperties: Array(WEAPON_PROPERTIES.length).fill(false),
-      rangeNormal: '',
-      rangeLong: '',
-      versatileDice: '',
-      stat: 'str',
-      magicalBonus: 0,
-      attackBonus: null,
+      rangeNormal: '', rangeLong: '',
+      versatileDiceCount: null, versatileDieType: 'd8',
+      stat: 'str', magicalBonus: 0, attackBonus: null,
     };
 
     /** Armor with all optional fields cleared */
@@ -300,9 +304,8 @@ describe('buildItemProperties() — Property-Based Tests', () => {
 
     /** Potion with all optional fields cleared */
     const emptyPotion: PotionFormValues = {
-      healingDice: '',
-      healingAmount: null,
-      effectDescription: '',
+      healingDiceCount: null, healingDieType: 'd4',
+      healingAmount: null, effectDescription: '',
     };
 
     /** Magical with all optional fields cleared */
@@ -363,9 +366,9 @@ describe('buildItemProperties() — Property-Based Tests', () => {
 
           // Verify that known optional keys are absent when their values are empty/null
           const optionalStringKeysByType: Record<string, string[]> = {
-            'Weapon':          ['damageDice', 'rangeNormal', 'rangeLong', 'versatileDice', 'attackBonus'],
+            'Weapon':          ['damageDiceCount', 'damageDieType', 'damageBonus', 'rangeNormal', 'rangeLong', 'versatileDiceCount', 'versatileDieType', 'attackBonus'],
             'Armor':           ['dexLimit', 'strengthRequirement'],
-            'Potion':          ['healingDice', 'healingAmount', 'effectDescription'],
+            'Potion':          ['healingDiceCount', 'healingDieType', 'healingAmount', 'effectDescription'],
             'Wondrous Item':   ['charges', 'recharge', 'attunementBy'],
             'Ammunition':      ['damageBonus'],
             'Adventuring Gear':['gearDescription', 'valueGp'],

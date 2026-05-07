@@ -92,7 +92,14 @@
 
             <div class="field-group">
               <label class="field-label">Dados de Daño</label>
-              <ion-input class="forge-input" formControlName="damageDice" placeholder="1d8"></ion-input>
+              <div class="dice-row">
+                <ion-input class="forge-input dice-count" type="number" formControlName="damageDiceCount" placeholder="1" min="1"></ion-input>
+                <select class="forge-select-native die-type" formControlName="damageDieType">
+                  @for (d of dieTypes; track d) { <option [value]="d">{{ d }}</option> }
+                </select>
+                <span class="dice-plus">+</span>
+                <ion-input class="forge-input dice-bonus" type="number" formControlName="damageBonus" placeholder="0"></ion-input>
+              </div>
             </div>
 
             <div class="field-group">
@@ -130,7 +137,12 @@
 
             <div class="field-group">
               <label class="field-label">Dados Versátil</label>
-              <ion-input class="forge-input" formControlName="versatileDice" placeholder="1d10"></ion-input>
+              <div class="dice-row">
+                <ion-input class="forge-input dice-count" type="number" formControlName="versatileDiceCount" placeholder="1" min="1"></ion-input>
+                <select class="forge-select-native die-type" formControlName="versatileDieType">
+                  @for (d of dieTypes; track d) { <option [value]="d">{{ d }}</option> }
+                </select>
+              </div>
             </div>
 
             <div class="field-group">
@@ -241,7 +253,12 @@
 
             <div class="field-group">
               <label class="field-label">Dados de Curación <span class="optional-tag">opcional</span></label>
-              <ion-input class="forge-input" formControlName="healingDice" placeholder="2d4+2"></ion-input>
+              <div class="dice-row">
+                <ion-input class="forge-input dice-count" type="number" formControlName="healingDiceCount" placeholder="2" min="1"></ion-input>
+                <select class="forge-select-native die-type" formControlName="healingDieType">
+                  @for (d of dieTypes; track d) { <option [value]="d">{{ d }}</option> }
+                </select>
+              </div>
             </div>
 
             <div class="field-group">

@@ -45,6 +45,9 @@ export const WEAPON_PROPERTIES = [
 /** Valid magical attack/damage bonus values. */
 export const MAGICAL_BONUSES = [0, 1, 2, 3] as const;
 
+/** Standard polyhedral die types. */
+export const DIE_TYPES = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20'] as const;
+
 /** Armor weight categories. */
 export const ARMOR_CATEGORIES = ['Light', 'Medium', 'Heavy'] as const;
 
@@ -63,12 +66,15 @@ export interface SpecialAbilityEntry {
 
 /** Form values for the weapon properties sub-group. */
 export interface WeaponFormValues {
-  damageDice: string;
+  damageDiceCount: number | null;
+  damageDieType:   string;
+  damageBonus:     number | null;
   damageType: boolean[];       // Array of 13 booleans (single-select)
   weaponProperties: boolean[]; // Array of 11 booleans (multi-select)
   rangeNormal: string;
   rangeLong: string;
-  versatileDice: string;
+  versatileDiceCount: number | null;
+  versatileDieType:   string;
   stat: string;
   magicalBonus: number;
   attackBonus: number | null;
@@ -93,7 +99,8 @@ export interface ShieldFormValues {
 
 /** Form values for the potion properties sub-group. */
 export interface PotionFormValues {
-  healingDice: string;
+  healingDiceCount: number | null;
+  healingDieType:   string;
   healingAmount: number | null;
   effectDescription: string;
 }
@@ -145,6 +152,11 @@ export function buildItemProperties(
   ammunition: AmmunitionFormValues,
   gear: GearFormValues,
   specialAbilities: SpecialAbilityEntry[],
+  // Shared fields always stored regardless of type
+  rarity?: string,
+  valueGp?: number | null,
+  description?: string,
+  requiresAttunement?: boolean,
 ): Record<string, any> {
   const props: Record<string, any> = {};
 
@@ -154,6 +166,12 @@ export function buildItemProperties(
       props[key] = value;
     }
   };
+
+  // ── Shared fields — always stored ─────────────────────────────────────────
+  addOptional('rarity', rarity);
+  addOptional('valueGp', valueGp);
+  addOptional('description', description);
+  if (requiresAttunement) props['requiresAttunement'] = true;
 
   if (itemType === 'Weapon') {
     // Serialize damageType chip (single-select)
@@ -167,12 +185,15 @@ export function buildItemProperties(
       .join(', ');
 
     // Always include core weapon keys
-    addOptional('damageDice', weapon.damageDice);
+    addOptional('damageDiceCount', weapon.damageDiceCount);
+    addOptional('damageDieType',   weapon.damageDieType);
+    addOptional('damageBonus',     weapon.damageBonus);
     props['damageType'] = damageTypeValue;
     props['weaponProperties'] = weaponPropertiesValue;
     addOptional('rangeNormal', weapon.rangeNormal);
     addOptional('rangeLong', weapon.rangeLong);
-    addOptional('versatileDice', weapon.versatileDice);
+    addOptional('versatileDiceCount', weapon.versatileDiceCount);
+    addOptional('versatileDieType',   weapon.versatileDieType);
     props['stat'] = weapon.stat || 'str';
     props['magicalBonus'] = weapon.magicalBonus ?? 0;
     addOptional('attackBonus', weapon.attackBonus);
@@ -194,7 +215,8 @@ export function buildItemProperties(
     if (specialAbilities.length > 0) props['specialAbilities'] = specialAbilities;
 
   } else if (itemType === 'Potion') {
-    addOptional('healingDice', potion.healingDice);
+    addOptional('healingDiceCount', potion.healingDiceCount);
+    addOptional('healingDieType',   potion.healingDieType);
     addOptional('healingAmount', potion.healingAmount);
     addOptional('effectDescription', potion.effectDescription);
 
@@ -250,6 +272,7 @@ export class HomebrewItemFormPage implements OnInit {
   readonly itemTypes = ITEM_TYPES;
   readonly itemRarities = ITEM_RARITIES;
   readonly damageTypes = DAMAGE_TYPES;
+  readonly dieTypes = DIE_TYPES;
   readonly weaponProperties = WEAPON_PROPERTIES;
   readonly magicalBonuses = MAGICAL_BONUSES;
   readonly armorCategories = ARMOR_CATEGORIES;
@@ -354,6 +377,28 @@ export class HomebrewItemFormPage implements OnInit {
   }
 
   // ---------------------------------------------------------------------------
+  // Backward-compat helpers — parse old free-text dice strings like "2d6+3"
+  // ---------------------------------------------------------------------------
+
+  private parseDiceCount(dice: string | undefined): number | null {
+    if (!dice) return null;
+    const m = dice.match(/^(\d+)d/i);
+    return m ? parseInt(m[1], 10) : null;
+  }
+
+  private parseDieType(dice: string | undefined): string | null {
+    if (!dice) return null;
+    const m = dice.match(/(d\d+)/i);
+    return m ? m[1].toLowerCase() : null;
+  }
+
+  private parseDiceBonus(dice: string | undefined): number | null {
+    if (!dice) return null;
+    const m = dice.match(/[+-]\s*(\d+)$/);
+    return m ? parseInt(m[0].replace(/\s/g, ''), 10) : null;
+  }
+
+  // ---------------------------------------------------------------------------
   // Lifecycle
   // ---------------------------------------------------------------------------
 
@@ -370,12 +415,15 @@ export class HomebrewItemFormPage implements OnInit {
 
       // Weapon sub-group
       weapon: this.fb.group({
-        damageDice:       [''],
+        damageDiceCount:  [null, Validators.min(1)],
+        damageDieType:    ['d6'],
+        damageBonus:      [null],
         damageType:       this.fb.array(DAMAGE_TYPES.map(() => false)),
         weaponProperties: this.fb.array(WEAPON_PROPERTIES.map(() => false)),
         rangeNormal:      [''],
         rangeLong:        [''],
-        versatileDice:    [''],
+        versatileDiceCount: [null, Validators.min(1)],
+        versatileDieType:   ['d8'],
         stat:             ['str'],
         magicalBonus:     [0],
         attackBonus:      [null],
@@ -400,7 +448,8 @@ export class HomebrewItemFormPage implements OnInit {
 
       // Potion sub-group
       potion: this.fb.group({
-        healingDice:       [''],
+        healingDiceCount:  [null, Validators.min(1)],
+        healingDieType:    ['d4'],
         healingAmount:     [null],
         effectDescription: [''],
       }),
@@ -459,13 +508,16 @@ export class HomebrewItemFormPage implements OnInit {
 
         // Patch sub-groups from properties
         this.form.get('weapon')?.patchValue({
-          damageDice:    p.damageDice ?? '',
-          rangeNormal:   p.rangeNormal ?? '',
-          rangeLong:     p.rangeLong ?? '',
-          versatileDice: p.versatileDice ?? '',
-          stat:          p.stat ?? 'str',
-          magicalBonus:  p.magicalBonus ?? 0,
-          attackBonus:   p.attackBonus ?? null,
+          damageDiceCount:  p.damageDiceCount ?? this.parseDiceCount(p.damageDice),
+          damageDieType:    p.damageDieType   ?? this.parseDieType(p.damageDice) ?? 'd6',
+          damageBonus:      p.damageBonus     ?? this.parseDiceBonus(p.damageDice),
+          rangeNormal:      p.rangeNormal ?? '',
+          rangeLong:        p.rangeLong ?? '',
+          versatileDiceCount: p.versatileDiceCount ?? this.parseDiceCount(p.versatileDice),
+          versatileDieType:   p.versatileDieType   ?? this.parseDieType(p.versatileDice) ?? 'd8',
+          stat:             p.stat ?? 'str',
+          magicalBonus:     p.magicalBonus ?? 0,
+          attackBonus:      p.attackBonus ?? null,
         });
 
         // Restore damageType chip state
@@ -500,7 +552,8 @@ export class HomebrewItemFormPage implements OnInit {
         });
 
         this.form.get('potion')?.patchValue({
-          healingDice:       p.healingDice ?? '',
+          healingDiceCount:  p.healingDiceCount ?? this.parseDiceCount(p.healingDice),
+          healingDieType:    p.healingDieType   ?? this.parseDieType(p.healingDice) ?? 'd4',
           healingAmount:     p.healingAmount ?? null,
           effectDescription: p.effectDescription ?? '',
         });
@@ -563,6 +616,10 @@ export class HomebrewItemFormPage implements OnInit {
       v.ammunition,
       v.gear,
       v.abilities ?? [],
+      v.rarity ?? '',
+      v.valueGp ?? null,
+      v.description ?? '',
+      v.requiresAttunement ?? false,
     );
 
     const dto = {

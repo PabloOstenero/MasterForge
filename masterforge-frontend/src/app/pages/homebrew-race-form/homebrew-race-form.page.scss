@@ -1,24 +1,31 @@
 @use 'src/theme/variables' as *;
 
-$gold:       #C5A059;
-$gold-hover: #d9b96e;
-$bg-page:    #121212;
-$bg-surface: #1E1E1E;
-$border:     #2e2e2e;
-$border-card:#383838;
-$text-white: #f0e6d3;
-$text-muted: #888;
-$text-dim:   #555;
-$red:        #C62828;
+// ─── Design tokens ────────────────────────────────────────────────────────────
+$gold:        #C5A059;
+$gold-hover:  #d9b96e;
+$bg-page:     #121212;
+$bg-surface:  #1E1E1E;
+$bg-card:     #1a1a1a;
+$border:      #2e2e2e;
+$border-card: #383838;
+$text-white:  #f0e6d3;
+$text-muted:  #888;
+$text-dim:    #555;
+$red:         #C62828;
 
-:host { display: block; }
+// ─── Host ─────────────────────────────────────────────────────────────────────
+:host {
+  display: block;
+}
 
+// ─── Page wrapper ─────────────────────────────────────────────────────────────
 .homebrew-form-wrapper {
   min-height: 100%;
   background: $bg-page;
   color: $text-white;
 }
 
+// ─── Top bar ──────────────────────────────────────────────────────────────────
 .homebrew-form-topbar {
   display: flex;
   align-items: center;
@@ -40,6 +47,7 @@ $red:        #C62828;
   padding: 4px 0;
   white-space: nowrap;
   flex-shrink: 0;
+
   &:hover { color: $gold-hover; }
 }
 
@@ -50,18 +58,138 @@ $red:        #C62828;
   margin: 0;
   flex: 1;
   text-align: center;
-  padding-right: 60px;
+  padding-right: 60px; // compensate for back-btn width so title looks centered
 }
 
+// ─── Content area ─────────────────────────────────────────────────────────────
 .homebrew-form-content {
   padding: 20px 16px 40px;
-  max-width: 640px;
+  max-width: 1280px; // wider to accommodate two columns
   margin: 0 auto;
 }
 
+// ─── Form grid (two columns on wide screens) ──────────────────────────────────
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+
+  @media (min-width: 900px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+}
+
+// Column assignments
+.col-left {
+  @media (min-width: 900px) {
+    grid-column: 1;
+  }
+}
+
+.col-right {
+  @media (min-width: 900px) {
+    grid-column: 2;
+  }
+}
+
+.col-full {
+  @media (min-width: 900px) {
+    grid-column: 1 / -1; // span both columns
+  }
+}
+
+// ─── Error banner ─────────────────────────────────────────────────────────────
+.form-error-banner {
+  background: rgba(198, 40, 40, 0.12);
+  border: 1px solid rgba(198, 40, 40, 0.4);
+  border-radius: 8px;
+  color: #e57373;
+  font-size: 0.9rem;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+}
+
+// ─── Form sections ────────────────────────────────────────────────────────────
+.form-section {
+  background: $bg-surface;
+  border: 1px solid $border;
+  border-radius: 12px;
+  padding: 20px;
+  // margin-bottom removed — grid gap handles spacing now
+}
+
+.section-title {
+  color: $gold;
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-badge {
+  color: $text-dim;
+  font-size: 0.7rem;
+  font-weight: normal;
+  text-transform: lowercase;
+  letter-spacing: 0;
+  border: 1px solid $border-card;
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+
+.section-hint {
+  color: $text-muted;
+  font-size: 0.8rem;
+  margin: -8px 0 14px;
+  line-height: 1.4;
+}
+
+// Section header with inline "Añadir" button
+.section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+
+  .section-title {
+    margin-bottom: 0;
+  }
+}
+
+// ─── Field group ──────────────────────────────────────────────────────────────
 .field-group {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+
   &:last-child { margin-bottom: 0; }
+
+  &--half {
+    max-width: 50%;
+
+    @media (max-width: 480px) { max-width: 100%; }
+  }
+
+  &--bonus {
+    max-width: 140px;
+    flex-shrink: 0;
+
+    @media (max-width: 480px) { max-width: 100%; }
+  }
+}
+
+// Two-column row for paired fields
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .field-label {
@@ -72,16 +200,19 @@ $red:        #C62828;
   letter-spacing: 0.05em;
   margin-bottom: 5px;
   font-weight: bold;
+
   .required { color: $gold; }
 }
 
-.field-hint {
-  color: $text-muted;
-  font-size: 0.8rem;
-  margin: 0 0 6px;
-  line-height: 1.4;
+.optional-tag {
+  color: $text-dim;
+  font-size: 0.7rem;
+  font-weight: normal;
+  text-transform: lowercase;
+  letter-spacing: 0;
 }
 
+// ─── Inputs ───────────────────────────────────────────────────────────────────
 .forge-input {
   --background: #141414;
   --color: #{$text-white};
@@ -92,10 +223,39 @@ $red:        #C62828;
   border: 1px solid $border-card;
   border-radius: 8px;
   transition: border-color 0.15s;
-  &:focus-within { border-color: rgba(197, 160, 89, 0.5); }
-  &.input-error { border-color: $red; }
+
+  &:focus-within {
+    border-color: rgba(197, 160, 89, 0.5);
+  }
+
+  &.input-error {
+    border-color: $red;
+  }
 }
 
+.forge-textarea {
+  --padding-top: 10px;
+  --padding-bottom: 10px;
+}
+
+.forge-select-native {
+  background: #141414;
+  color: $text-white;
+  border: 1px solid $border-card;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.88rem;
+  cursor: pointer;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s;
+
+  option { background: #1e1e1e; }
+
+  &:focus { border-color: rgba(197, 160, 89, 0.5); }
+}
+
+// ─── Error message ────────────────────────────────────────────────────────────
 .error-message {
   color: $red;
   font-size: 0.8rem;
@@ -103,7 +263,15 @@ $red:        #C62828;
   padding-left: 2px;
 }
 
-.ability-bonuses-grid {
+// ─── Senses grid (2 columns) ──────────────────────────────────────────────────
+.senses-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+// ─── Ability scores grid (6 columns, collapses to 3 on narrow screens) ────────
+.ability-scores-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 10px;
@@ -113,7 +281,7 @@ $red:        #C62828;
   }
 }
 
-.ability-bonus-item {
+.ability-score-item {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -127,22 +295,374 @@ $red:        #C62828;
   text-align: center;
 }
 
-.text-muted { color: $text-muted; }
-
-.form-actions { margin-top: 24px; }
-
-.btn-submit {
-  display: block;
-  width: 100%;
+// ─── Entry cards (traits / innate spells) ─────────────────────────────────────
+.entry-card {
+  background: $bg-card;
+  border: 1px solid $border-card;
+  border-radius: 10px;
   padding: 14px;
-  background: #C5A059;
-  color: #121212;
-  border: none;
-  border-radius: 12px;
-  font-size: 1rem;
+  margin-bottom: 10px;
+
+  &:last-of-type { margin-bottom: 0; }
+}
+
+// Two-column layout inside entry cards
+.entry-card-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ─── Empty state hint ─────────────────────────────────────────────────────────
+.empty-hint {
+  color: $text-dim;
+  font-size: 0.85rem;
+  font-style: italic;
+  text-align: center;
+  padding: 12px 0 4px;
+}
+
+// ─── Add button (inline in section header) ────────────────────────────────────
+.btn-add {
+  background: rgba(197, 160, 89, 0.12);
+  color: $gold;
+  border: 1px solid rgba(197, 160, 89, 0.35);
+  border-radius: 8px;
+  padding: 5px 14px;
+  font-size: 0.82rem;
   font-weight: bold;
   cursor: pointer;
-  transition: background 0.15s;
-  &:hover:not(:disabled) { background: #d9b96e; }
-  &:disabled { opacity: 0.6; cursor: not-allowed; }
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+
+  &:hover {
+    background: rgba(197, 160, 89, 0.22);
+    border-color: $gold;
+  }
+}
+
+// ─── Remove button ────────────────────────────────────────────────────────────
+.btn-remove {
+  background: transparent;
+  color: #e57373;
+  border: 1px solid rgba(198, 40, 40, 0.4);
+  border-radius: 7px;
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: block;
+  margin-top: 8px;
+  margin-left: auto;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: rgba(198, 40, 40, 0.15);
+    border-color: $red;
+  }
+}
+
+// ─── Chip multi-select (languages / damage types / conditions / proficiencies) ─
+.chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.chip {
+  background: #1a1a1a;
+  color: $text-muted;
+  border: 1px solid $border-card;
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+
+  &:hover {
+    border-color: rgba(197, 160, 89, 0.4);
+    color: $text-white;
+  }
+
+  &--active {
+    background: rgba(197, 160, 89, 0.15);
+    color: $gold;
+    border-color: $gold;
+    font-weight: 600;
+  }
+}
+
+// ─── Skill picker (custom dropdown + bonus + add button) ─────────────────────
+.skill-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+// Custom dropdown
+.custom-dropdown {
+  position: relative;
+  flex: 1;
+  min-width: 180px;
+}
+
+.custom-dropdown-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #141414;
+  color: $text-white;
+  border: 1px solid $border-card;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.88rem;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s;
+
+  &:hover, .custom-dropdown--open & {
+    border-color: rgba(197, 160, 89, 0.5);
+  }
+}
+
+.custom-dropdown-placeholder {
+  color: $text-dim;
+}
+
+.custom-dropdown-arrow {
+  color: $text-muted;
+  font-size: 0.65rem;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.custom-dropdown-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #1a1a1a;
+  border: 1px solid $border-card;
+  border-radius: 8px;
+  z-index: 100;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  // Scrollbar styling
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: $border-card; border-radius: 2px; }
+}
+
+.custom-dropdown-option {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  color: $text-white;
+  padding: 9px 14px;
+  font-size: 0.88rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+
+  &:hover {
+    background: rgba(197, 160, 89, 0.12);
+    color: $gold;
+  }
+
+  & + & {
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+  }
+}
+
+.custom-dropdown-empty {
+  display: block;
+  padding: 10px 14px;
+  color: $text-dim;
+  font-size: 0.82rem;
+  font-style: italic;
+}
+
+.dropdown-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+}
+
+.skill-picker-bonus {
+  flex: 0 0 120px;
+}
+
+// ─── Selected skill tags ──────────────────────────────────────────────────────
+.skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.skill-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(197, 160, 89, 0.12);
+  border: 1px solid rgba(197, 160, 89, 0.4);
+  border-radius: 20px;
+  padding: 4px 10px 4px 12px;
+  font-size: 0.82rem;
+}
+
+.skill-tag-name {
+  color: $text-white;
+  font-weight: 500;
+}
+
+.skill-tag-bonus {
+  color: $gold;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.skill-tag-remove {
+  background: none;
+  border: none;
+  color: $text-muted;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+  transition: color 0.15s;
+
+  &:hover { color: #e57373; }
+}
+
+// ─── Submit button ────────────────────────────────────────────────────────────
+.btn-submit {
+  --background: #{$gold};
+  --background-activated: #{$gold-hover};
+  --color: #121212;
+  --border-radius: 12px;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+// ─── Subsection divider & title (ASI Especial, Dote Racial, etc.) ─────────────
+.subsection-divider {
+  height: 1px;
+  background: $border-card;
+  margin: 16px 0 12px;
+}
+
+.subsection-title {
+  color: $text-white;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 10px;
+}
+
+// ─── Natural armor toggle row ─────────────────────────────────────────────────
+.natural-armor-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: $gold;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .toggle-label {
+    color: $text-white;
+    font-size: 0.88rem;
+    cursor: pointer;
+    line-height: 1.4;
+  }
+}
+
+// ─── Spell picker dropdown ────────────────────────────────────────────────────
+.spell-dropdown-panel {
+  max-height: 260px;
+}
+
+.spell-search-wrapper {
+  padding: 6px 8px;
+  border-bottom: 1px solid $border-card;
+  position: sticky;
+  top: 0;
+  background: #1a1a1a;
+  z-index: 1;
+}
+
+.spell-search-input {
+  --padding-top: 6px;
+  --padding-bottom: 6px;
+  font-size: 0.85rem;
+}
+
+.spell-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.spell-option-name {
+  flex: 1;
+  text-align: left;
+}
+
+.spell-option-level {
+  color: $text-muted;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+// ─── Dice row (structured damage input) ──────────────────────────────────────
+.dice-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.dice-count {
+  flex: 0 0 60px;
+  min-width: 0;
+}
+
+.die-type {
+  flex: 0 0 70px;
+}
+
+.damage-type-select {
+  flex: 1;
+  min-width: 100px;
+}
+
+.dice-plus {
+  color: $text-muted;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.dice-bonus {
+  flex: 0 0 60px;
+  min-width: 0;
 }

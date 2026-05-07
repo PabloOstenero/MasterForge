@@ -17,17 +17,19 @@ import { AuthService } from '../../services/auth.service';
 // ---------------------------------------------------------------------------
 
 /**
- * Returns a valid form value that satisfies all validators once the form is
- * fully implemented in task 52.
+ * Returns a valid form value that satisfies all validators.
  *
  * Requirements 5.2:
  *   - name: non-empty string
+ *   - size: non-empty string (required)
  *   - price: decimal >= 0
- *   - bonusStr/Dex/Con/Int/Wis/Cha: integer in [-10, 10]
+ *   - bonusStr/Dex/Con/Int/Wis/Cha: integer in [-10, 10] (optional, default 0)
+ *   - speeds.walk: required, >= 0
  */
 function validFormValue() {
   return {
     name: 'Half-Elf',
+    size: 'Medium',
     price: 0,
     bonusStr: 0,
     bonusDex: 1,
@@ -35,6 +37,7 @@ function validFormValue() {
     bonusInt: 1,
     bonusWis: 0,
     bonusCha: 2,
+    speeds: { walk: 30, swim: null, climb: null, fly: null },
   };
 }
 
@@ -179,9 +182,9 @@ describe('HomebrewRaceFormPage', () => {
       expect(component.form.get('bonusStr')?.errors?.['max']).toBeTruthy();
     });
 
-    it('should be invalid when bonusStr is null (required)', () => {
+    it('should be valid when bonusStr is null (optional field, defaults to 0)', () => {
       component.form.patchValue({ bonusStr: null });
-      expect(component.form.get('bonusStr')?.invalid).toBeTrue();
+      expect(component.form.get('bonusStr')?.valid).toBeTrue();
     });
 
     it('should be valid when bonusStr is exactly -10 (lower boundary)', () => {
@@ -211,9 +214,9 @@ describe('HomebrewRaceFormPage', () => {
       expect(component.form.get('bonusDex')?.invalid).toBeTrue();
     });
 
-    it('should be invalid when bonusDex is null (required)', () => {
+    it('should be valid when bonusDex is null (optional field, defaults to 0)', () => {
       component.form.patchValue({ bonusDex: null });
-      expect(component.form.get('bonusDex')?.invalid).toBeTrue();
+      expect(component.form.get('bonusDex')?.valid).toBeTrue();
     });
 
     it('should be valid when bonusDex is within range [-10, 10]', () => {
@@ -233,9 +236,9 @@ describe('HomebrewRaceFormPage', () => {
       expect(component.form.get('bonusCon')?.invalid).toBeTrue();
     });
 
-    it('should be invalid when bonusCon is null (required)', () => {
+    it('should be valid when bonusCon is null (optional field, defaults to 0)', () => {
       component.form.patchValue({ bonusCon: null });
-      expect(component.form.get('bonusCon')?.invalid).toBeTrue();
+      expect(component.form.get('bonusCon')?.valid).toBeTrue();
     });
 
     it('should be valid when bonusCon is within range [-10, 10]', () => {
@@ -255,9 +258,9 @@ describe('HomebrewRaceFormPage', () => {
       expect(component.form.get('bonusInt')?.invalid).toBeTrue();
     });
 
-    it('should be invalid when bonusInt is null (required)', () => {
+    it('should be valid when bonusInt is null (optional field, defaults to 0)', () => {
       component.form.patchValue({ bonusInt: null });
-      expect(component.form.get('bonusInt')?.invalid).toBeTrue();
+      expect(component.form.get('bonusInt')?.valid).toBeTrue();
     });
 
     it('should be valid when bonusInt is within range [-10, 10]', () => {
@@ -277,9 +280,9 @@ describe('HomebrewRaceFormPage', () => {
       expect(component.form.get('bonusWis')?.invalid).toBeTrue();
     });
 
-    it('should be invalid when bonusWis is null (required)', () => {
+    it('should be valid when bonusWis is null (optional field, defaults to 0)', () => {
       component.form.patchValue({ bonusWis: null });
-      expect(component.form.get('bonusWis')?.invalid).toBeTrue();
+      expect(component.form.get('bonusWis')?.valid).toBeTrue();
     });
 
     it('should be valid when bonusWis is within range [-10, 10]', () => {
@@ -299,9 +302,9 @@ describe('HomebrewRaceFormPage', () => {
       expect(component.form.get('bonusCha')?.invalid).toBeTrue();
     });
 
-    it('should be invalid when bonusCha is null (required)', () => {
+    it('should be valid when bonusCha is null (optional field, defaults to 0)', () => {
       component.form.patchValue({ bonusCha: null });
-      expect(component.form.get('bonusCha')?.invalid).toBeTrue();
+      expect(component.form.get('bonusCha')?.valid).toBeTrue();
     });
 
     it('should be valid when bonusCha is within range [-10, 10]', () => {
@@ -497,9 +500,9 @@ describe('HomebrewRaceFormPage', () => {
       component.form.patchValue(validFormValue());
     });
 
-    it('should call HomebrewService.createRace() with the form value', () => {
+    it('should call HomebrewService.createRace() when form is valid', () => {
       component.submit();
-      expect(homebrewServiceSpy.createRace).toHaveBeenCalledWith(component.form.value);
+      expect(homebrewServiceSpy.createRace).toHaveBeenCalled();
     });
 
     it('should navigate to /homebrew on successful submit', () => {

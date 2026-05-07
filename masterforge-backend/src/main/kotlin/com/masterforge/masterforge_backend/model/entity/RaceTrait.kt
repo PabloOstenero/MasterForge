@@ -1,5 +1,6 @@
 package com.masterforge.masterforge_backend.model.entity
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 
 @Entity
@@ -16,6 +17,7 @@ data class RaceTrait(
     val description: String,
 
     // It connects to the DndRace entity using a foreign key
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "race_id", nullable = false)
     val race: DndRace

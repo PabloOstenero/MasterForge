@@ -15,8 +15,8 @@ data class UserSimpleDto(
     val email: String
 )
 
-// DTO for DndRace in Character response
-data class DndRaceResponseDto(
+// DTO for DndRace in Character response (minimal summary)
+data class DndRaceSummaryDto(
     val id: Int,
     val name: String,
     val bonusStr: Int,
@@ -28,8 +28,8 @@ data class DndRaceResponseDto(
     // Add other fields from DndRace entity as needed, e.g., traits, author, price
 ) {
     companion object {
-        fun fromEntity(race: DndRace): DndRaceResponseDto {
-            return DndRaceResponseDto(
+        fun fromEntity(race: DndRace): DndRaceSummaryDto {
+            return DndRaceSummaryDto(
                 id = race.id!!,
                 name = race.name,
                 bonusStr = race.bonusStr,
@@ -135,7 +135,7 @@ data class CharacterResponseDto(
     val spellSlots: Map<String, Any>,
     val user: UserSimpleDto,
     @JsonProperty("dndRace")
-    val dndRace: DndRaceResponseDto,
+    val dndRace: DndRaceSummaryDto,
     @JsonProperty("dndClass")
     val dndClass: DndClassResponseDto,
     val campaign: CampaignRef? = null,
@@ -179,7 +179,7 @@ data class CharacterResponseDto(
                 skillProficiencies = character.skillProficiencies,
                 spellSlots = character.spellSlots,
                 user = userSimpleDto,
-                dndRace = DndRaceResponseDto.fromEntity(character.dndRace),
+                dndRace = DndRaceSummaryDto.fromEntity(character.dndRace),
                 dndClass = DndClassResponseDto.fromEntity(character.dndClass),
                 campaign = character.campaign?.let { CampaignRef(it.id!!) },
                 subclass = character.subclass?.let { ClassRef(it.id!!) }, // Map subclass to ClassRef if not null

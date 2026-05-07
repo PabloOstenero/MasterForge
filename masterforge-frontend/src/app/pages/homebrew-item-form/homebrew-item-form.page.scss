@@ -393,3 +393,31 @@ $red:         #C62828;
   font-weight: bold;
   font-size: 1rem;
 }
+
+// ─── Dice row (structured damage input) ──────────────────────────────────────
+.dice-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.dice-count {
+  flex: 0 0 60px;
+  min-width: 0;
+}
+
+.die-type {
+  flex: 0 0 70px;
+}
+
+.dice-plus {
+  color: $text-muted;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.dice-bonus {
+  flex: 0 0 60px;
+  min-width: 0;
+}

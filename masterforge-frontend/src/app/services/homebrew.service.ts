@@ -43,12 +43,15 @@ export interface CreateSubclassDto {
 export interface CreateRaceDto {
   name: string;
   price: number;
+  description: string;
+  size: string;
   bonusStr: number;
   bonusDex: number;
   bonusCon: number;
   bonusInt: number;
   bonusWis: number;
   bonusCha: number;
+  raceFeatures: Record<string, any>;
   authorId: string;
 }
 
@@ -132,6 +135,27 @@ export class HomebrewService {
     return this.http.post<any>('/api/dnd-races', { ...dto, authorId });
   }
 
+  getRace(id: string): Observable<any> {
+    return this.http.get<any>(`/api/dnd-races/${id}`);
+  }
+
+  updateRace(id: string, dto: CreateRaceDto): Observable<any> {
+    const authorId = this.authService.getUserIdFromToken();
+    return this.http.put<any>(`/api/dnd-races/${id}`, { ...dto, authorId });
+  }
+
+  createRaceTrait(dto: { name: string; description: string; raceId: number }): Observable<any> {
+    return this.http.post<any>('/api/race-traits', dto);
+  }
+
+  updateRaceTrait(id: number, dto: { name: string; description: string; raceId: number }): Observable<any> {
+    return this.http.put<any>(`/api/race-traits/${id}`, dto);
+  }
+
+  deleteRaceTrait(id: number): Observable<void> {
+    return this.http.delete<void>(`/api/race-traits/${id}`);
+  }
+
   createMonster(dto: CreateMonsterDto): Observable<any> {
     const authorId = this.authService.getUserIdFromToken();
     return this.http.post<any>('/api/monsters', { ...dto, authorId });
@@ -144,6 +168,10 @@ export class HomebrewService {
   updateMonster(id: string, dto: CreateMonsterDto): Observable<any> {
     const authorId = this.authService.getUserIdFromToken();
     return this.http.put<any>(`/api/monsters/${id}`, { ...dto, authorId });
+  }
+
+  getAllSpells(): Observable<any[]> {
+    return this.http.get<any[]>('/api/spells');
   }
 
   createSpell(dto: CreateSpellDto): Observable<any> {

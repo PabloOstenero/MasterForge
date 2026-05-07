@@ -1,61 +1,102 @@
 <div class="homebrew-form-wrapper">
 
+  <!-- Top bar -->
   <div class="homebrew-form-topbar">
-    <button class="back-btn" type="button" (click)="cancel()" data-testid="cancel-button">← Cancelar</button>
-    <h1 class="form-title">Nueva Raza</h1>
+    <button class="back-btn" type="button" (click)="cancel()" data-testid="cancel-button">
+      ← Cancelar
+    </button>
+    <h1 class="form-title">{{ editMode ? 'Editar Raza' : 'Nueva Raza' }}</h1>
   </div>
 
   <div class="homebrew-form-content">
 
-    <!-- Error state -->
     @if (error) {
-      <p class="text-muted" data-testid="form-error">{{ error }}</p>
+      <div class="form-error-banner" data-testid="form-error">
+        <span>⚠ {{ error }}</span>
+      </div>
     }
 
     <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form-grid">
 
-      <!-- Name field -->
-      <div class="field-group">
-        <label class="field-label">Nombre <span class="required">*</span></label>
-        <ion-input
-          class="forge-input"
-          formControlName="name"
-          placeholder="Nombre de la raza"
-          data-testid="name-input"
-          [class.input-error]="form.get('name')?.invalid && form.get('name')?.touched">
-        </ion-input>
-        @if (form.get('name')?.invalid && form.get('name')?.touched) {
-          <p class="error-message" data-testid="name-error">El nombre es obligatorio.</p>
-        }
-      </div>
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 1 · IDENTIDAD
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-left">
+        <h2 class="section-title">Identidad</h2>
 
-      <!-- Price field -->
-      <div class="field-group">
-        <label class="field-label">Precio <span class="required">*</span></label>
-        <ion-input
-          class="forge-input"
-          type="number"
-          formControlName="price"
-          placeholder="0.00"
-          data-testid="price-input"
-          [class.input-error]="form.get('price')?.invalid && form.get('price')?.touched">
-        </ion-input>
-        @if (form.get('price')?.invalid && form.get('price')?.touched) {
-          @if (form.get('price')?.errors?.['required']) {
-            <p class="error-message" data-testid="price-error">El precio es obligatorio.</p>
-          } @else if (form.get('price')?.errors?.['min']) {
+        <!-- Nombre -->
+        <div class="field-group">
+          <label class="field-label">Nombre <span class="required">*</span></label>
+          <ion-input
+            class="forge-input"
+            formControlName="name"
+            placeholder="Nombre de la raza"
+            data-testid="name-input"
+            [class.input-error]="form.get('name')?.invalid && form.get('name')?.touched">
+          </ion-input>
+          @if (form.get('name')?.invalid && form.get('name')?.touched) {
+            <p class="error-message" data-testid="name-error">El nombre es obligatorio.</p>
+          }
+        </div>
+
+        <!-- Descripción -->
+        <div class="field-group">
+          <label class="field-label">Descripción <span class="optional-tag">opcional</span></label>
+          <ion-textarea
+            class="forge-input forge-textarea"
+            formControlName="description"
+            placeholder="Descripción narrativa de la raza…"
+            rows="3"
+            data-testid="description-input">
+          </ion-textarea>
+        </div>
+
+        <!-- Tamaño -->
+        <div class="field-group">
+          <label class="field-label">Tamaño <span class="required">*</span></label>
+          <select
+            class="forge-select-native"
+            formControlName="size"
+            data-testid="size-input"
+            [class.input-error]="form.get('size')?.invalid && form.get('size')?.touched">
+            <option value="" disabled>Tamaño de la raza</option>
+            @for (size of raceSizes; track size) {
+              <option [value]="size">{{ size }}</option>
+            }
+          </select>
+          @if (form.get('size')?.invalid && form.get('size')?.touched) {
+            <p class="error-message" data-testid="size-error">El tamaño es obligatorio.</p>
+          }
+        </div>
+
+        <!-- Precio -->
+        <div class="field-group">
+          <label class="field-label">Precio <span class="optional-tag">opcional</span></label>
+          <ion-input
+            class="forge-input"
+            type="number"
+            formControlName="price"
+            placeholder="Ej: 0"
+            data-testid="price-input"
+            [class.input-error]="form.get('price')?.invalid && form.get('price')?.touched">
+          </ion-input>
+          @if (form.get('price')?.invalid && form.get('price')?.touched) {
             <p class="error-message" data-testid="price-error">El precio no puede ser negativo.</p>
           }
-        }
+        </div>
       </div>
 
-      <!-- Ability Score Bonuses -->
-      <div class="field-group">
-        <label class="field-label">Bonificaciones de Características <span class="required">*</span></label>
-        <p class="field-hint">Cada valor debe estar entre -10 y 10.</p>
-        <div class="ability-bonuses-grid">
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 2 · BONIFICADORES DE CARACTERÍSTICAS
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-right">
+        <h2 class="section-title">Bonificadores de Características</h2>
+        <p class="section-hint">Cada valor debe estar entre -10 y 10.</p>
+
+        <div class="ability-scores-grid">
           @for (key of abilityBonusKeys; track key) {
-            <div class="ability-bonus-item">
+            <div class="ability-score-item">
               <label class="ability-label">{{ abilityBonusLabels[key] }}</label>
               <ion-input
                 class="forge-input"
@@ -66,33 +107,771 @@
                 [class.input-error]="form.get(key)?.invalid && form.get(key)?.touched">
               </ion-input>
               @if (form.get(key)?.invalid && form.get(key)?.touched) {
-                @if (form.get(key)?.errors?.['required']) {
-                  <p class="error-message" [attr.data-testid]="key + '-error'">Este campo es obligatorio.</p>
-                } @else if (form.get(key)?.errors?.['min'] || form.get(key)?.errors?.['max']) {
-                  <p class="error-message" [attr.data-testid]="key + '-error'">El valor debe estar entre -10 y 10.</p>
+                <p class="error-message" [attr.data-testid]="key + '-error'">-10 a 10.</p>
+              }
+            </div>
+          }
+        </div>
+
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 3 · VELOCIDAD
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-left" formGroupName="speeds">
+        <h2 class="section-title">Velocidad</h2>
+
+        <!-- Velocidad a pie (requerida) -->
+        <div class="field-group">
+          <label class="field-label">A pie <span class="required">*</span></label>
+          <ion-input
+            class="forge-input"
+            type="number"
+            formControlName="walk"
+            placeholder="Ej: 30"
+            data-testid="speed-walk-input"
+            [class.input-error]="form.get('speeds.walk')?.invalid && form.get('speeds.walk')?.touched">
+          </ion-input>
+          @if (form.get('speeds.walk')?.invalid && form.get('speeds.walk')?.touched) {
+            <p class="error-message" data-testid="speed-walk-error">La velocidad a pie es obligatoria.</p>
+          }
+        </div>
+
+        <!-- Velocidades opcionales en fila -->
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Natación <span class="optional-tag">opcional</span></label>
+            <ion-input
+              class="forge-input"
+              type="number"
+              formControlName="swim"
+              placeholder="Ej: 30"
+              data-testid="speed-swim-input">
+            </ion-input>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Escalada <span class="optional-tag">opcional</span></label>
+            <ion-input
+              class="forge-input"
+              type="number"
+              formControlName="climb"
+              placeholder="Ej: 30"
+              data-testid="speed-climb-input">
+            </ion-input>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Vuelo <span class="optional-tag">opcional</span></label>
+          <ion-input
+            class="forge-input"
+            type="number"
+            formControlName="fly"
+            placeholder="Ej: 30"
+            data-testid="speed-fly-input">
+          </ion-input>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 4 · SENTIDOS — paired with Velocidad
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-right" formGroupName="senses">
+        <h2 class="section-title">Sentidos <span class="section-badge">opcional</span></h2>
+
+        <div class="senses-grid">
+          <div class="field-group">
+            <label class="field-label">Visión en la Oscuridad</label>
+            <ion-input
+              class="forge-input"
+              type="number"
+              formControlName="darkvision"
+              placeholder="Ej: 60"
+              data-testid="darkvision-input">
+            </ion-input>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Visión Ciega</label>
+            <ion-input
+              class="forge-input"
+              type="number"
+              formControlName="blindsight"
+              placeholder="Ej: 30"
+              data-testid="blindsight-input">
+            </ion-input>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Sentido del Temblor</label>
+            <ion-input
+              class="forge-input"
+              type="number"
+              formControlName="tremorsense"
+              placeholder="Ej: 30"
+              data-testid="tremorsense-input">
+            </ion-input>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Visión Verdadera</label>
+            <ion-input
+              class="forge-input"
+              type="number"
+              formControlName="truesight"
+              placeholder="Ej: 30"
+              data-testid="truesight-input">
+            </ion-input>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 5 · TIPO DE CRIATURA + ARMADURA NATURAL — paired with Idiomas
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-left" [formGroup]="form">
+        <h2 class="section-title">Tipo de Criatura <span class="section-badge">opcional</span></h2>
+
+        <div class="field-group">
+          <label class="field-label">Tipo</label>
+          <select
+            class="forge-select-native"
+            formControlName="creatureType"
+            data-testid="creature-type-select">
+            <option value="" disabled>Selecciona un tipo…</option>
+            @for (type of creatureTypes; track type) {
+              <option [value]="type">{{ type }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- ── Armadura Natural ─────────────────────────────────────────── -->
+        <div class="subsection-divider"></div>
+        <h3 class="subsection-title">Armadura Natural <span class="section-badge">opcional</span></h3>
+
+        <div class="natural-armor-toggle-row">
+          <input
+            type="checkbox"
+            id="natural-armor-toggle"
+            [checked]="naturalArmorEnabled"
+            (change)="toggleNaturalArmor()"
+            data-testid="natural-armor-toggle">
+          <label for="natural-armor-toggle" class="toggle-label">Activar armadura natural</label>
+        </div>
+
+        @if (naturalArmorEnabled) {
+          <div class="field-group" style="margin-top: 0.75rem;">
+            <label class="field-label">CA Base <span class="required">*</span></label>
+            <ion-input
+              class="forge-input"
+              type="number"
+              formControlName="naturalArmorBaseAC"
+              placeholder="Ej: 13"
+              data-testid="natural-armor-base-ac"
+              [class.input-error]="form.get('naturalArmorBaseAC')?.invalid && form.get('naturalArmorBaseAC')?.touched">
+            </ion-input>
+            @if (form.get('naturalArmorBaseAC')?.invalid && form.get('naturalArmorBaseAC')?.touched) {
+              <p class="error-message" data-testid="natural-armor-formula-error">La CA base es obligatoria (mínimo 1).</p>
+            }
+          </div>
+          <div class="natural-armor-toggle-row" style="margin-top: 0.5rem;">
+            <input
+              type="checkbox"
+              id="natural-armor-add-dex"
+              formControlName="naturalArmorAddDex"
+              data-testid="natural-armor-add-dex">
+            <label for="natural-armor-add-dex" class="toggle-label">Añadir modificador de DES</label>
+          </div>
+        }
+
+        <!-- ── Restricción de Vuelo ─────────────────────────────────────── -->
+        @if ((form.get('speeds.fly')?.value ?? 0) > 0) {
+          <div class="subsection-divider"></div>
+          <h3 class="subsection-title">Restricción de Vuelo <span class="section-badge">opcional</span></h3>
+          <div class="field-group">
+            <ion-input
+              class="forge-input"
+              formControlName="flyRestriction"
+              placeholder="Ej: Solo si no llevas armadura media o pesada"
+              data-testid="fly-restriction-input">
+            </ion-input>
+          </div>
+        }
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 6 · IDIOMAS — paired with Tipo de Criatura + Armadura Natural
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-right">
+        <h2 class="section-title">Idiomas <span class="section-badge">opcional</span></h2>
+
+        <!-- Chip selector de idiomas -->
+        <div class="field-group">
+          <label class="field-label">Idiomas conocidos</label>
+          <div class="chip-grid">
+            @for (lang of languages; track lang; let i = $index) {
+              <button
+                type="button"
+                class="chip"
+                [class.chip--active]="languageChips[i]"
+                (click)="toggleLanguageChip(i)"
+                [attr.data-testid]="'language-chip-' + lang.toLowerCase().replace(' ', '-')">
+                {{ lang }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Elecciones de idioma adicionales -->
+        <div class="field-group">
+          <label class="field-label">Elecciones adicionales <span class="optional-tag">opcional</span></label>
+          <ion-input
+            class="forge-input"
+            type="number"
+            formControlName="extraLanguageChoices"
+            placeholder="Ej: 1"
+            data-testid="extra-language-choices">
+          </ion-input>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 7 · RASGOS RACIALES — full width (dynamic height)
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-full">
+        <div class="section-header-row">
+          <h2 class="section-title">Rasgos Raciales <span class="section-badge">opcional</span></h2>
+          <button type="button" class="btn-add" (click)="addTrait()" data-testid="add-trait-button">
+            + Añadir
+          </button>
+        </div>
+
+        @if (traits.length === 0) {
+          <p class="empty-hint">Sin rasgos definidos.</p>
+        }
+
+        @for (trait of traits.controls; track $index) {
+          <div class="entry-card" [formGroup]="$any(trait)" [attr.data-testid]="'trait-entry-' + $index">
+
+            <!-- ID oculto -->
+            <input
+              type="hidden"
+              formControlName="id"
+              [attr.data-testid]="'trait-id-' + $index">
+
+            <!-- Nombre del rasgo -->
+            <div class="field-group">
+              <label class="field-label">Nombre <span class="required">*</span></label>
+              <ion-input
+                class="forge-input"
+                formControlName="name"
+                placeholder="Ej: Ventaja en Salvaciones"
+                [attr.data-testid]="'trait-name-' + $index"
+                [class.input-error]="$any(trait).get('name')?.invalid && $any(trait).get('name')?.touched">
+              </ion-input>
+              @if ($any(trait).get('name')?.invalid && $any(trait).get('name')?.touched) {
+                <p class="error-message" [attr.data-testid]="'trait-name-error-' + $index">El nombre del rasgo es obligatorio.</p>
+              }
+            </div>
+
+            <!-- Descripción del rasgo -->
+            <div class="field-group">
+              <label class="field-label">Descripción <span class="required">*</span></label>
+              <ion-textarea
+                class="forge-input forge-textarea"
+                formControlName="description"
+                placeholder="Describe el efecto del rasgo…"
+                rows="3"
+                [attr.data-testid]="'trait-description-' + $index"
+                [class.input-error]="$any(trait).get('description')?.invalid && $any(trait).get('description')?.touched">
+              </ion-textarea>
+              @if ($any(trait).get('description')?.invalid && $any(trait).get('description')?.touched) {
+                <p class="error-message" [attr.data-testid]="'trait-description-error-' + $index">La descripción es obligatoria.</p>
+              }
+            </div>
+
+            <button type="button" class="btn-remove" (click)="removeTrait($index)" [attr.data-testid]="'remove-trait-' + $index">
+              Eliminar
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 7 · COMPETENCIAS DE HABILIDAD
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-full">
+        <h2 class="section-title">Competencias de Habilidad <span class="section-badge">opcional</span></h2>
+
+        <!-- Click-outside overlay to close dropdown -->
+        @if (skillDropdownOpen) {
+          <div class="dropdown-overlay" (click)="closeSkillDropdown()"></div>
+        }
+
+        <!-- Custom skill picker -->
+        <div class="skill-picker-row">
+
+          <!-- Custom dropdown trigger + panel -->
+          <div class="custom-dropdown" [class.custom-dropdown--open]="skillDropdownOpen">
+            <button
+              type="button"
+              class="custom-dropdown-trigger"
+              (click)="toggleSkillDropdown()"
+              data-testid="skill-picker-select">
+              <span [class.custom-dropdown-placeholder]="!pendingSkillName">
+                {{ pendingSkillName || 'Selecciona una habilidad…' }}
+              </span>
+              <span class="custom-dropdown-arrow">{{ skillDropdownOpen ? '▲' : '▼' }}</span>
+            </button>
+
+            @if (skillDropdownOpen) {
+              <div class="custom-dropdown-panel" (click)="$event.stopPropagation()">
+                @for (skill of availableSkillNames; track skill) {
+                  <button
+                    type="button"
+                    class="custom-dropdown-option"
+                    (click)="selectSkillFromDropdown(skill)">
+                    {{ skill }}
+                  </button>
                 }
+                @if (availableSkillNames.length === 0) {
+                  <span class="custom-dropdown-empty">Todas las habilidades añadidas</span>
+                }
+              </div>
+            }
+          </div>
+
+          <button
+            type="button"
+            class="btn-add"
+            [disabled]="!pendingSkillName"
+            (click)="confirmAddSkill()"
+            data-testid="add-skill-button">
+            + Añadir
+          </button>
+        </div>
+
+        <!-- Selected skills as removable tags -->
+        @if (selectedSkillNames.length > 0) {
+          <div class="skill-tags" data-testid="skill-tags">
+            @for (skill of selectedSkillNames; track skill) {
+              <div class="skill-tag" [attr.data-testid]="'skill-tag-' + skill.toLowerCase().replace(' ', '-')">
+                <span class="skill-tag-name">{{ skill }}</span>
+                <button
+                  type="button"
+                  class="skill-tag-remove"
+                  (click)="removeSkillEntry(skill)"
+                  [attr.data-testid]="'remove-skill-' + skill.toLowerCase().replace(' ', '-')">
+                  ×
+                </button>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="empty-hint">Sin competencias de habilidad.</p>
+        }
+
+        <!-- Número de elecciones -->
+        <div class="field-group" style="margin-top: 1rem; max-width: 200px;">
+          <label class="field-label">Número de elecciones <span class="optional-tag">opcional</span></label>
+          <ion-input
+            class="forge-input"
+            type="number"
+            formControlName="skillChoiceCount"
+            placeholder="Ej: 2"
+            data-testid="skill-choice-count">
+          </ion-input>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 8 · OTRAS COMPETENCIAS
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-full">
+        <h2 class="section-title">Otras Competencias <span class="section-badge">opcional</span></h2>
+
+        <!-- Competencias con armas -->
+        <div class="field-group">
+          <label class="field-label">Armas</label>
+          <div class="chip-grid">
+            @for (wp of weaponProfs; track wp; let i = $index) {
+              <button
+                type="button"
+                class="chip"
+                [class.chip--active]="weaponChips[i]"
+                (click)="toggleWeaponChip(i)"
+                [attr.data-testid]="'weapon-chip-' + i">
+                {{ wp }}
+              </button>
+            }
+          </div>
+          <!-- Free-text custom weapon prof -->
+          <div class="skill-picker-row" style="margin-top: 0.5rem;">
+            <ion-input
+              class="forge-input"
+              [(ngModel)]="pendingWeaponProf"
+              [ngModelOptions]="{standalone: true}"
+              placeholder="Arma personalizada…"
+              data-testid="weapon-prof-input">
+            </ion-input>
+            <button type="button" class="btn-add" (click)="addCustomWeaponProf()">
+              Añadir
+            </button>
+          </div>
+          <!-- Custom weapon tags -->
+          @if (customWeaponProfs.length > 0) {
+            <div class="skill-tags">
+              @for (wp of customWeaponProfs; track $index) {
+                <div class="skill-tag">
+                  <span class="skill-tag-name">{{ wp }}</span>
+                  <button type="button" class="skill-tag-remove" (click)="removeCustomProf(customWeaponProfs, $index)">×</button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Competencias con armaduras -->
+        <div class="field-group">
+          <label class="field-label">Armaduras</label>
+          <div class="chip-grid">
+            @for (ap of armorProfs; track ap; let i = $index) {
+              <button
+                type="button"
+                class="chip"
+                [class.chip--active]="armorChips[i]"
+                (click)="toggleArmorChip(i)"
+                [attr.data-testid]="'armor-chip-' + i">
+                {{ ap }}
+              </button>
+            }
+          </div>
+          <!-- Free-text custom armor prof -->
+          <div class="skill-picker-row" style="margin-top: 0.5rem;">
+            <ion-input
+              class="forge-input"
+              [(ngModel)]="pendingArmorProf"
+              [ngModelOptions]="{standalone: true}"
+              placeholder="Armadura personalizada…"
+              data-testid="armor-prof-input">
+            </ion-input>
+            <button type="button" class="btn-add" (click)="addCustomArmorProf()">
+              Añadir
+            </button>
+          </div>
+          <!-- Custom armor tags -->
+          @if (customArmorProfs.length > 0) {
+            <div class="skill-tags">
+              @for (ap of customArmorProfs; track $index) {
+                <div class="skill-tag">
+                  <span class="skill-tag-name">{{ ap }}</span>
+                  <button type="button" class="skill-tag-remove" (click)="removeCustomProf(customArmorProfs, $index)">×</button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Competencias con herramientas -->
+        <div class="field-group">
+          <label class="field-label">Herramientas</label>
+          <div class="skill-picker-row">
+            <ion-input
+              class="forge-input"
+              [(ngModel)]="pendingToolProf"
+              [ngModelOptions]="{standalone: true}"
+              placeholder="Ej: Herramientas de artesano…"
+              data-testid="tool-prof-input">
+            </ion-input>
+            <button type="button" class="btn-add" (click)="addCustomToolProf()">
+              Añadir
+            </button>
+          </div>
+          <!-- Custom tool tags -->
+          @if (customToolProfs.length > 0) {
+            <div class="skill-tags">
+              @for (tp of customToolProfs; track $index) {
+                <div class="skill-tag">
+                  <span class="skill-tag-name">{{ tp }}</span>
+                  <button type="button" class="skill-tag-remove" (click)="removeCustomProf(customToolProfs, $index)">×</button>
+                </div>
               }
             </div>
           }
         </div>
       </div>
 
-      <!-- Form actions -->
-      <div class="form-actions">
-        <button
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 9 · DEFENSAS
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-full">
+        <h2 class="section-title">Defensas <span class="section-badge">opcional</span></h2>
+
+        <!-- Resistencias al Daño -->
+        <div class="field-group">
+          <label class="field-label">Resistencias al Daño</label>
+          <div class="chip-grid" data-testid="damage-resistances-input">
+            @for (type of damageTypes; track type; let i = $index) {
+              <button
+                type="button"
+                class="chip"
+                [class.chip--active]="damageResistances.at(i).value"
+                (click)="toggleChip(damageResistances, i)"
+                [attr.data-testid]="'resistance-chip-' + type.toLowerCase()">
+                {{ type }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Inmunidades al Daño -->
+        <div class="field-group">
+          <label class="field-label">Inmunidades al Daño</label>
+          <div class="chip-grid" data-testid="damage-immunities-input">
+            @for (type of damageTypes; track type; let i = $index) {
+              <button
+                type="button"
+                class="chip"
+                [class.chip--active]="damageImmunities.at(i).value"
+                (click)="toggleChip(damageImmunities, i)"
+                [attr.data-testid]="'immunity-chip-' + type.toLowerCase()">
+                {{ type }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Inmunidades a Condiciones -->
+        <div class="field-group">
+          <label class="field-label">Inmunidades a Condiciones</label>
+          <div class="chip-grid" data-testid="condition-immunities-input">
+            @for (cond of conditions; track cond; let i = $index) {
+              <button
+                type="button"
+                class="chip"
+                [class.chip--active]="conditionImmunities.at(i).value"
+                (click)="toggleChip(conditionImmunities, i)"
+                [attr.data-testid]="'condition-chip-' + cond.toLowerCase()">
+                {{ cond }}
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 10 · CONJUROS INNATOS
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-full">
+        <div class="section-header-row">
+          <h2 class="section-title">Conjuros Innatos <span class="section-badge">opcional</span></h2>
+          <button type="button" class="btn-add" (click)="addSpell()" data-testid="add-spell-button">
+            + Añadir
+          </button>
+        </div>
+
+        @if (innateSpells.length === 0) {
+          <p class="empty-hint">Sin conjuros innatos.</p>
+        }
+
+        @for (spell of innateSpells.controls; track $index) {
+          <div class="entry-card" [formGroup]="$any(spell)" [attr.data-testid]="'spell-entry-' + $index">
+
+            <!-- Conjuro — searchable picker -->
+            <div class="field-group">
+              <label class="field-label">Conjuro <span class="required">*</span></label>
+              @if (spellDropdownOpen[$index]) {
+                <div class="dropdown-overlay" (click)="closeSpellDropdown($index)"></div>
+              }
+              <div class="custom-dropdown" [class.custom-dropdown--open]="spellDropdownOpen[$index]">
+                <button
+                  type="button"
+                  class="custom-dropdown-trigger"
+                  (click)="toggleSpellDropdown($index)"
+                  [attr.data-testid]="'spell-name-' + $index">
+                  <span [class.custom-dropdown-placeholder]="!$any(spell).get('name')?.value">
+                    {{ $any(spell).get('name')?.value || 'Busca un conjuro…' }}
+                  </span>
+                  <span class="custom-dropdown-arrow">{{ spellDropdownOpen[$index] ? '▲' : '▼' }}</span>
+                </button>
+                @if (spellDropdownOpen[$index]) {
+                  <div class="custom-dropdown-panel spell-dropdown-panel" (click)="$event.stopPropagation()">
+                    <div class="spell-search-wrapper">
+                      <ion-input
+                        class="forge-input spell-search-input"
+                        [(ngModel)]="spellSearchQueries[$index]"
+                        [ngModelOptions]="{standalone: true}"
+                        placeholder="Buscar conjuro…"
+                        (ionInput)="spellSearchQueries[$index] = $any($event.target).value">
+                      </ion-input>
+                    </div>
+                    @for (s of filteredSpells($index); track s.id) {
+                      <button
+                        type="button"
+                        class="custom-dropdown-option spell-option"
+                        (click)="selectSpell($index, s)">
+                        <span class="spell-option-name">{{ s.name }}</span>
+                        <span class="spell-option-level">Nv. {{ s.level === 0 ? 'Truco' : s.level }}</span>
+                      </button>
+                    }
+                    @if (filteredSpells($index).length === 0) {
+                      <span class="custom-dropdown-empty">Sin resultados.</span>
+                    }
+                  </div>
+                }
+              </div>
+              @if ($any(spell).get('name')?.invalid && $any(spell).get('name')?.touched) {
+                <p class="error-message" [attr.data-testid]="'spell-name-error-' + $index">El conjuro es obligatorio.</p>
+              }
+            </div>
+
+            <div class="entry-card-fields">
+              <!-- Nivel -->
+              <div class="field-group">
+                <label class="field-label">Nivel <span class="required">*</span></label>
+                <ion-input
+                  class="forge-input"
+                  type="number"
+                  formControlName="level"
+                  placeholder="0–9"
+                  [attr.data-testid]="'spell-level-' + $index"
+                  [class.input-error]="$any(spell).get('level')?.invalid && $any(spell).get('level')?.touched">
+                </ion-input>
+                @if ($any(spell).get('level')?.invalid && $any(spell).get('level')?.touched) {
+                  <p class="error-message" [attr.data-testid]="'spell-level-error-' + $index">Nivel requerido (0–9).</p>
+                }
+              </div>
+
+              <!-- Usos por día -->
+              <div class="field-group">
+                <label class="field-label">Usos/día <span class="optional-tag">opcional</span></label>
+                <ion-input
+                  class="forge-input"
+                  type="number"
+                  formControlName="usesPerDay"
+                  placeholder="Ej: 1"
+                  [attr.data-testid]="'spell-uses-' + $index">
+                </ion-input>
+              </div>
+            </div>
+
+            <div class="entry-card-fields">
+              <!-- Característica de lanzamiento -->
+              <div class="field-group">
+                <label class="field-label">Característica <span class="optional-tag">opcional</span></label>
+                <select
+                  class="forge-select-native"
+                  formControlName="ability"
+                  [attr.data-testid]="'spell-ability-' + $index">
+                  <option value="">— ninguna —</option>
+                  @for (ability of spellAbilities; track ability) {
+                    <option [value]="ability">{{ ability }}</option>
+                  }
+                </select>
+              </div>
+
+              <!-- Recarga -->
+              <div class="field-group">
+                <label class="field-label">Recarga <span class="optional-tag">opcional</span></label>
+                <select
+                  class="forge-select-native"
+                  formControlName="rechargeOn"
+                  [attr.data-testid]="'spell-recharge-' + $index">
+                  <option value="">— ninguna —</option>
+                  @for (opt of rechargeOptions; track opt) {
+                    <option [value]="opt">{{ opt }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <button type="button" class="btn-remove" (click)="removeSpell($index)" [attr.data-testid]="'remove-spell-' + $index">
+              Eliminar
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 11 · ARMAS NATURALES
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-full">
+        <div class="section-header-row">
+          <h2 class="section-title">Armas Naturales <span class="section-badge">opcional</span></h2>
+          <button type="button" class="btn-add" (click)="addNaturalWeapon()" data-testid="add-natural-weapon-button">
+            + Añadir
+          </button>
+        </div>
+
+        @if (naturalWeapons.length === 0) {
+          <p class="empty-hint">Sin armas naturales.</p>
+        }
+
+        @for (weapon of naturalWeapons.controls; track $index) {
+          <div class="entry-card" [formGroup]="$any(weapon)" [attr.data-testid]="'natural-weapon-entry-' + $index">
+
+            <!-- Nombre del arma -->
+            <div class="field-group">
+              <label class="field-label">Nombre <span class="required">*</span></label>
+              <ion-input
+                class="forge-input"
+                formControlName="name"
+                placeholder="Ej: Garras"
+                [attr.data-testid]="'natural-weapon-name-' + $index"
+                [class.input-error]="$any(weapon).get('name')?.invalid && $any(weapon).get('name')?.touched">
+              </ion-input>
+              @if ($any(weapon).get('name')?.invalid && $any(weapon).get('name')?.touched) {
+                <p class="error-message" [attr.data-testid]="'natural-weapon-name-error-' + $index">El nombre es obligatorio.</p>
+              }
+            </div>
+
+            <!-- Daño estructurado -->
+            <div class="field-group">
+              <label class="field-label">Daño <span class="required">*</span></label>
+              <div class="dice-row">
+                <ion-input
+                  class="forge-input dice-count"
+                  type="number"
+                  formControlName="diceCount"
+                  placeholder="1"
+                  min="1"
+                  [attr.data-testid]="'natural-weapon-dice-count-' + $index">
+                </ion-input>
+                <select class="forge-select-native die-type" formControlName="dieType" [attr.data-testid]="'natural-weapon-die-type-' + $index">
+                  @for (d of dieTypes; track d) { <option [value]="d">{{ d }}</option> }
+                </select>
+                <select class="forge-select-native damage-type-select" formControlName="damageType" [attr.data-testid]="'natural-weapon-damage-type-' + $index">
+                  @for (dt of naturalWeaponDamageTypes; track dt) { <option [value]="dt">{{ dt }}</option> }
+                </select>
+                <select class="forge-select-native die-type" formControlName="stat" [attr.data-testid]="'natural-weapon-stat-' + $index">
+                  <option value="str">FUE</option>
+                  <option value="dex">DES</option>
+                </select>
+              </div>
+            </div>
+
+            <button type="button" class="btn-remove" (click)="removeNaturalWeapon($index)" [attr.data-testid]="'remove-natural-weapon-' + $index">
+              Eliminar
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════════
+           ACCIÓN PRINCIPAL
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-actions col-full">
+        <ion-button
+          expand="block"
           type="submit"
           class="btn-submit"
           [disabled]="submitting"
-          data-testid="submit-button"
-        >
+          data-testid="submit-button">
           @if (submitting) {
-            <ion-spinner name="crescent"></ion-spinner>
+            <ion-spinner name="crescent" slot="start"></ion-spinner>
           }
-          Crear Raza
-        </button>
+          {{ editMode ? 'Guardar Cambios' : 'Crear Raza' }}
+        </ion-button>
       </div>
 
+      </div><!-- .form-grid -->
     </form>
-
   </div>
 </div>
