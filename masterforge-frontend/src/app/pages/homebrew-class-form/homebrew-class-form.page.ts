@@ -557,13 +557,16 @@ export class HomebrewClassFormPage implements OnInit {
         }
         if (isStructuredEquipment(parsedEquipment)) {
           this.equipmentInitialValue = parsedEquipment;
+          this.currentEquipment = parsedEquipment; // preserve even if Rasgos tab is never visited
           this.equipmentLegacyText = null;
         } else if (typeof rawEquipment === 'string' && rawEquipment.trim() !== '') {
           this.equipmentLegacyText = rawEquipment;
           this.equipmentInitialValue = null;
+          this.currentEquipment = null;
         } else {
           this.equipmentInitialValue = null;
           this.equipmentLegacyText = null;
+          this.currentEquipment = null;
         }
 
         // Restore weapon chips and custom weapon profs
