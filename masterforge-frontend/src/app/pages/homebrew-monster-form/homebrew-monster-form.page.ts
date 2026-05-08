@@ -8,6 +8,16 @@ import {
 } from '@ionic/angular/standalone';
 
 import { HomebrewService } from '../../services/homebrew.service';
+import {
+  SpeedObject,
+  SenseObject,
+  SenseObject as Senses,
+  FeatureEntry,
+  AttackEntry,
+  MonsterSkillEntry as SkillEntry,
+  MonsterSavingThrows as SavingThrows,
+  CombatMechanics
+} from '../../models/homebrew.models';
 
 /** Valid size options for a D&D monster. */
 export const MONSTER_SIZES = ['Small', 'Medium', 'Large', 'Huge', 'Gargantuan'] as const;
@@ -91,63 +101,7 @@ export const SKILL_NAMES = [
 /** The six base ability score fields for a monster. */
 export const MONSTER_ABILITY_KEYS = ['str', 'dex', 'con', 'intStat', 'wis', 'cha'] as const;
 
-// ---------------------------------------------------------------------------
-// Combat mechanics interfaces
-// ---------------------------------------------------------------------------
 
-/** A single attack action (melee, ranged, multiattack, reaction, etc.). */
-export interface AttackEntry {
-  name: string;
-  attackBonus: number | null;
-  damageDice: string;
-  damageType: string;
-  reach: string;
-}
-
-/** A special ability or passive trait of the monster. */
-export interface AbilityEntry {
-  name: string;
-  description: string;
-}
-
-/** A skill proficiency with its bonus. */
-export interface SkillEntry {
-  name: string;
-  bonus: number;
-}
-
-/** Saving throw proficiency bonuses (null = no proficiency). */
-export interface SavingThrows {
-  str: number | null;
-  dex: number | null;
-  con: number | null;
-  int: number | null;
-  wis: number | null;
-  cha: number | null;
-}
-
-/** Special senses of the monster. */
-export interface Senses {
-  darkvision: string;
-  blindsight: string;
-  tremorsense: string;
-  truesight: string;
-  passivePerception: number | null;
-}
-
-/** Full structure of the combatMechanics field sent to the backend. */
-export interface CombatMechanics {
-  description: string;
-  savingThrows: Partial<Record<keyof SavingThrows, number>>;
-  skills: SkillEntry[];
-  damageResistances: string;
-  damageImmunities: string;
-  damageVulnerabilities: string;
-  conditionImmunities: string;
-  senses: Partial<Senses>;
-  attacks: AttackEntry[];
-  abilities: AbilityEntry[];
-}
 
 // ---------------------------------------------------------------------------
 // Pure serialization function
@@ -165,13 +119,14 @@ export function buildCombatMechanics(
   description: string,
   savingThrows: SavingThrows,
   skills: SkillEntry[],
-  damageResistances: string,
-  damageImmunities: string,
-  damageVulnerabilities: string,
-  conditionImmunities: string,
-  senses: Senses,
+  damageResistances: string | string[],
+  damageImmunities: string | string[],
+  damageVulnerabilities: string | string[],
+  conditionImmunities: string | string[],
+  senses: SenseObject,
   attacks: AttackEntry[],
-  abilities: AbilityEntry[],
+  abilities: FeatureEntry[],
+  speeds?: SpeedObject,
 ): CombatMechanics {
   // Filter savingThrows: keep only keys whose value is a non-null number
   const filteredSavingThrows: Partial<Record<keyof SavingThrows, number>> = {};
@@ -185,23 +140,29 @@ export function buildCombatMechanics(
   // Filter senses: keep only keys whose value is not null and not ""
   const filteredSenses: Partial<Senses> = {};
   (Object.keys(senses) as Array<keyof Senses>).forEach((key) => {
-    const val = senses[key];
+    const val = (senses as any)[key];
     if (val !== null && val !== '') {
       (filteredSenses as any)[key] = val;
     }
   });
 
+  const toArray = (val: string | string[]): string[] => {
+    if (Array.isArray(val)) return val;
+    return val ? val.split(',').map(s => s.trim()).filter(Boolean) : [];
+  };
+
   return {
     description,
     savingThrows: filteredSavingThrows,
     skills,
-    damageResistances,
-    damageImmunities,
-    damageVulnerabilities,
-    conditionImmunities,
-    senses: filteredSenses,
+    damageResistances:     toArray(damageResistances),
+    damageImmunities:      toArray(damageImmunities),
+    damageVulnerabilities: toArray(damageVulnerabilities),
+    conditionImmunities:   toArray(conditionImmunities),
+    senses:                filteredSenses,
     attacks,
     abilities,
+    speeds,
   };
 }
 
@@ -372,15 +333,15 @@ export class HomebrewMonsterFormPage implements OnInit {
         }
 
         // Patch damage resistances/immunities/vulnerabilities/conditions
-        const patchBoolArray = (controlName: string, labels: readonly string[], value: string) => {
-          const selected = (value ?? '').split(',').map((s: string) => s.trim());
+        const patchBoolArray = (controlName: string, labels: readonly string[], value: string | string[]) => {
+          const selected = Array.isArray(value) ? value : (value ?? '').split(',').map((s: string) => s.trim());
           const arr = this.form.get(controlName) as FormArray;
           labels.forEach((label, i) => arr.at(i).setValue(selected.includes(label)));
         };
-        patchBoolArray('damageResistances',     DAMAGE_TYPES, cm.damageResistances ?? '');
-        patchBoolArray('damageImmunities',      DAMAGE_TYPES, cm.damageImmunities ?? '');
-        patchBoolArray('damageVulnerabilities', DAMAGE_TYPES, cm.damageVulnerabilities ?? '');
-        patchBoolArray('conditionImmunities',   CONDITIONS,   cm.conditionImmunities ?? '');
+        patchBoolArray('damageResistances',     DAMAGE_TYPES, cm.damageResistances ?? []);
+        patchBoolArray('damageImmunities',      DAMAGE_TYPES, cm.damageImmunities ?? []);
+        patchBoolArray('damageVulnerabilities', DAMAGE_TYPES, cm.damageVulnerabilities ?? []);
+        patchBoolArray('conditionImmunities',   CONDITIONS,   cm.conditionImmunities ?? []);
 
         // Patch skills
         if (Array.isArray(cm.skills)) {
@@ -511,11 +472,10 @@ export class HomebrewMonsterFormPage implements OnInit {
     array.at(index).setValue(!array.at(index).value);
   }
 
-  /** Collect the selected labels from a boolean FormArray. */
-  private selectedLabels(array: FormArray, labels: readonly string[]): string {
+  /** Collect the selected labels from a boolean FormArray as a string array. */
+  private selectedLabels(array: FormArray, labels: readonly string[]): string[] {
     return labels
-      .filter((_, i) => array.at(i).value === true)
-      .join(', ');
+      .filter((_, i) => array.at(i).value === true);
   }
 
   // ---------------------------------------------------------------------------
@@ -583,6 +543,7 @@ export class HomebrewMonsterFormPage implements OnInit {
       v.senses ?? { darkvision: '', blindsight: '', tremorsense: '', truesight: '', passivePerception: null },
       v.attacks ?? [],
       v.abilities ?? [],
+      v.speeds,
     );
 
     // Build the complete DTO including combatMechanics

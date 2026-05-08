@@ -54,15 +54,7 @@ export const ARMOR_CATEGORIES = ['Light', 'Medium', 'Heavy'] as const;
 /** Ability score keys used for weapon attack/damage rolls. */
 export const ABILITY_STATS = ['str', 'dex'] as const;
 
-// ---------------------------------------------------------------------------
-// Interfaces
-// ---------------------------------------------------------------------------
-
-/** A named special ability entry for magical items. */
-export interface SpecialAbilityEntry {
-  name: string;
-  description: string;
-}
+import { FeatureEntry } from '../../models/homebrew.models';
 
 /** Form values for the weapon properties sub-group. */
 export interface WeaponFormValues {
@@ -151,7 +143,7 @@ export function buildItemProperties(
   magical: MagicalFormValues,
   ammunition: AmmunitionFormValues,
   gear: GearFormValues,
-  specialAbilities: SpecialAbilityEntry[],
+  specialAbilities: FeatureEntry[],
   // Shared fields always stored regardless of type
   rarity?: string,
   valueGp?: number | null,
@@ -176,13 +168,12 @@ export function buildItemProperties(
   if (itemType === 'Weapon') {
     // Serialize damageType chip (single-select)
     const damageTypeIndex = (weapon.damageType ?? []).findIndex((v) => v === true);
-    const damageTypeValue = damageTypeIndex >= 0 ? DAMAGE_TYPES[damageTypeIndex] : '';
+    const damageTypeValue = damageTypeIndex >= 0 ? [DAMAGE_TYPES[damageTypeIndex]] : [];
 
     // Serialize weaponProperties chips (multi-select)
     const weaponPropertiesValue = (weapon.weaponProperties ?? [])
       .map((selected, i) => (selected ? (WEAPON_PROPERTIES[i] as string) : null))
-      .filter((v): v is NonNullable<typeof v> => v !== null)
-      .join(', ');
+      .filter((v): v is NonNullable<typeof v> => v !== null);
 
     // Always include core weapon keys
     addOptional('damageDiceCount', weapon.damageDiceCount);
@@ -523,14 +514,17 @@ export class HomebrewItemFormPage implements OnInit {
         // Restore damageType chip state
         if (p.damageType) {
           const dtArr = this.form.get('weapon.damageType') as FormArray;
-          const idx = DAMAGE_TYPES.indexOf(p.damageType as any);
+          const val = Array.isArray(p.damageType) ? p.damageType[0] : p.damageType;
+          const idx = DAMAGE_TYPES.indexOf(val as any);
           if (idx >= 0) dtArr.at(idx).setValue(true);
         }
 
         // Restore weaponProperties chip state
         if (p.weaponProperties) {
           const wpArr = this.form.get('weapon.weaponProperties') as FormArray;
-          const selected = (p.weaponProperties as string).split(',').map((s: string) => s.trim());
+          const selected = Array.isArray(p.weaponProperties) 
+            ? p.weaponProperties 
+            : (p.weaponProperties as string).split(',').map((s: string) => s.trim());
           WEAPON_PROPERTIES.forEach((prop, i) => {
             if (selected.includes(prop)) wpArr.at(i).setValue(true);
           });

@@ -120,7 +120,7 @@ const subclassFormArb = fc.record({
     damageImmunities: [],
     conditionImmunities: [],
     skillProficiencies: { fixed: [], choicePool: [], choiceCount: 0 },
-    subclassFeatureEntries: [],
+    features: [],
     expandedSpellList: [],
     resourcePools: [],
   }),

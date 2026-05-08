@@ -35,9 +35,11 @@ import {
   MagicalFormValues,
   AmmunitionFormValues,
   GearFormValues,
-  SpecialAbilityEntry,
   HomebrewItemFormPage,
 } from './homebrew-item-form.page';
+import {
+  SpecialAbilityEntry
+} from '../../models/homebrew.models';
 
 // ---------------------------------------------------------------------------
 // fast-check arbitraries

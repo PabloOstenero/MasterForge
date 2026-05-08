@@ -15,7 +15,18 @@ import {
   IonItem, IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption
 } from '@ionic/angular/standalone';
 
-import { HomebrewService } from '../../services/homebrew.service';
+import { HomebrewService, CreateSubclassDto } from '../../services/homebrew.service';
+import {
+  SkillProficiencies,
+  Spellcasting,
+  CommonHomebrewFeatures,
+  SpellSlotTable,
+  FeatureEntry,
+  SubclassFeatureEntry,
+  SubclassFeatures,
+  ExpandedSpellEntry,
+  ResourcePool
+} from '../../models/homebrew.models';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -143,62 +154,7 @@ export const SPELL_SLOT_PRESETS: Record<string, number[][]> = {
   'Pact Magic':    PACT_MAGIC_SLOTS,
 };
 
-// ---------------------------------------------------------------------------
-// Interfaces
-// ---------------------------------------------------------------------------
 
-export interface SubclassFeatureEntry {
-  name: string;
-  description: string;
-  levelRequired: number;
-}
-
-export interface ExpandedSpellEntry {
-  name: string;
-  level: number;           // 0 = cantrip, 1–9 = spell level
-  preparationType: 'ALWAYS_PREPARED' | 'ALWAYS_KNOWN';
-}
-
-export interface ResourcePool {
-  name: string;
-  dieType: string;         // one of DIE_TYPES: 'd4' | 'd6' | 'd8' | 'd10' | 'd12' | 'd20'
-  count: number;           // min 1
-  rechargeOn: string;      // one of RECHARGE_OPTIONS: 'At Will' | 'Short Rest' | 'Long Rest'
-}
-
-export interface SkillProficiencies {
-  fixed: string[];
-  choicePool: string[];
-  choiceCount: number;
-}
-
-export interface SpellSlotTable {
-  slots: number[][];
-}
-
-export interface Spellcasting {
-  ability: string;
-  spellcastingType: string;
-  ritualCasting: boolean;
-  preparationStyle: 'PREPARED' | 'KNOWN';
-  cantripsKnown: number[];
-  spellsKnown?: number[];
-  spellSlots: SpellSlotTable;
-}
-
-export interface SubclassFeatures {
-  weaponProficiencies: string[];
-  armorProficiencies: string[];
-  toolProficiencies: string[];
-  skillProficiencies: SkillProficiencies;
-  damageResistances: string[];
-  damageImmunities: string[];
-  conditionImmunities: string[];
-  subclassFeatureEntries: SubclassFeatureEntry[];
-  expandedSpellList: ExpandedSpellEntry[];
-  resourcePools: ResourcePool[];
-  spellcasting?: Spellcasting;
-}
 
 // ---------------------------------------------------------------------------
 // Pure serialization function
@@ -216,7 +172,7 @@ export function buildSubclassFeatures(
   damageResistances: string[],
   damageImmunities: string[],
   conditionImmunities: string[],
-  subclassFeatureEntries: SubclassFeatureEntry[],
+  features: FeatureEntry[],
   expandedSpellList: ExpandedSpellEntry[],
   resourcePools: ResourcePool[],
   spellcasting: Spellcasting | null,
@@ -229,7 +185,7 @@ export function buildSubclassFeatures(
     damageResistances,
     damageImmunities,
     conditionImmunities,
-    subclassFeatureEntries,
+    features,
     expandedSpellList,
     resourcePools,
   };
@@ -605,7 +561,7 @@ export class HomebrewSubclassFormPage implements OnInit {
         // Features FormArray
         // ---------------------------------------------------------------
         this.features.clear();
-        (sf.subclassFeatureEntries ?? []).forEach((entry: SubclassFeatureEntry) => {
+        (sf.features ?? sf.subclassFeatureEntries ?? []).forEach((entry: FeatureEntry) => {
           this.features.push(this.fb.group({
             name:          [entry.name,          Validators.required],
             description:   [entry.description,   Validators.required],

@@ -11,12 +11,14 @@ import { of, throwError } from 'rxjs';
 import {
   HomebrewSubclassFormPage,
   buildSubclassFeatures,
+} from './homebrew-subclass-form.page';
+import {
   SkillProficiencies,
   SubclassFeatureEntry,
   ExpandedSpellEntry,
   ResourcePool,
   Spellcasting
-} from './homebrew-subclass-form.page';
+} from '../../models/homebrew.models';
 import { HomebrewService } from '../../services/homebrew.service';
 import { AuthService } from '../../services/auth.service';
 

@@ -9,7 +9,18 @@ import {
 import { forkJoin, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
-import { HomebrewService } from '../../services/homebrew.service';
+import { HomebrewService, CreateRaceDto } from '../../services/homebrew.service';
+import {
+  SkillProficiencies,
+  SpeedObject,
+  SenseObject,
+  NaturalArmor,
+  NaturalWeapon,
+  CommonHomebrewFeatures,
+  FeatureEntry,
+  RaceFeatures,
+  InnateSpell
+} from '../../models/homebrew.models';
 
 // ---------------------------------------------------------------------------
 // Constant arrays
@@ -69,60 +80,7 @@ export const NATURAL_WEAPON_DAMAGE_TYPES = [
   'Bludgeoning', 'Piercing', 'Slashing',
 ] as const;
 
-// ---------------------------------------------------------------------------
-// Interfaces
-// ---------------------------------------------------------------------------
 
-export interface InnateSpell {
-  spellId?: string | null;
-  name: string;
-  level: number;
-  usesPerDay: number | null;
-  ability: string;
-  rechargeOn: string;
-}
-
-export interface SkillProficiencies {
-  fixed: string[];
-  choicePool: string[];
-  choiceCount: number;
-}
-
-export interface NaturalArmor {
-  enabled: true;
-  baseAC: number;
-  addDex: boolean;
-}
-
-export interface NaturalWeapon {
-  name: string;
-  diceCount: number;
-  dieType: string;
-  damageType: string;
-  stat: string;
-}
-
-export interface RaceFeatures {
-  // ── Existing fields ───────────────────────────────────────────────────────
-  speeds: Partial<{ walk: number; swim: number; climb: number; fly: number }>;
-  senses: Partial<{ darkvision: number; blindsight: number; tremorsense: number; truesight: number }>;
-  languages: string[];
-  extraLanguageChoices: number;
-  skillProficiencies: SkillProficiencies;
-  weaponProficiencies: string[];
-  armorProficiencies: string[];
-  toolProficiencies: string[];
-  damageResistances: string[];
-  damageImmunities: string[];
-  conditionImmunities: string[];
-  innateSpells: InnateSpell[];
-
-  // ── New optional fields ───────────────────────────────────────────────────
-  naturalArmor?:    NaturalArmor;
-  naturalWeapons?:  NaturalWeapon[];
-  creatureType?:    string;
-  flyRestriction?:  string;
-}
 
 // ---------------------------------------------------------------------------
 // Pure serialization function
@@ -136,15 +94,15 @@ export function buildRaceFeatures(
   // ── Existing parameters (unchanged) ──────────────────────────────────────
   speeds: { walk: number | null; swim: number | null; climb: number | null; fly: number | null },
   senses: { darkvision: number | null; blindsight: number | null; tremorsense: number | null; truesight: number | null },
-  languages: string,
+  languages: string[],
   extraLanguageChoices: number,
-  skillProficiencies: { fixed: string[]; choicePool: string[]; choiceCount: number },
+  skillProficiencies: SkillProficiencies,
   weaponProficiencies: string[],
   armorProficiencies: string[],
   toolProficiencies: string[],
-  damageResistances: string,
-  damageImmunities: string,
-  conditionImmunities: string,
+  damageResistances: string[],
+  damageImmunities: string[],
+  conditionImmunities: string[],
   innateSpells: InnateSpell[],
   // ── New optional parameters ───────────────────────────────────────────────
   naturalArmor?: NaturalArmor | null,
@@ -180,19 +138,24 @@ export function buildRaceFeatures(
     rechargeOn: spell.rechargeOn,
   }));
 
+  const toArray = (val: string | string[]): string[] => {
+    if (Array.isArray(val)) return val;
+    return val ? val.split(',').map(s => s.trim()).filter(Boolean) : [];
+  };
+
   // ── Base result (existing fields always present) ──────────────────────────
   const result: RaceFeatures = {
     speeds: filteredSpeeds,
     senses: filteredSenses,
-    languages: languages ? languages.split(',').map(s => s.trim()).filter(Boolean) : [],
+    languages: toArray(languages),
     extraLanguageChoices,
     skillProficiencies,
     weaponProficiencies,
     armorProficiencies,
     toolProficiencies,
-    damageResistances: damageResistances ? damageResistances.split(',').map(s => s.trim()).filter(Boolean) : [],
-    damageImmunities:  damageImmunities  ? damageImmunities.split(',').map(s => s.trim()).filter(Boolean)  : [],
-    conditionImmunities: conditionImmunities ? conditionImmunities.split(',').map(s => s.trim()).filter(Boolean) : [],
+    damageResistances:   toArray(damageResistances),
+    damageImmunities:    toArray(damageImmunities),
+    conditionImmunities: toArray(conditionImmunities),
     innateSpells: serializedSpells,
   };
 
@@ -1029,11 +992,10 @@ export class HomebrewRaceFormPage implements OnInit {
   // Private helpers
   // ---------------------------------------------------------------------------
 
-  /** Collect the selected labels from a boolean FormArray as a comma-separated string. */
-  private selectedLabels(array: FormArray, labels: readonly string[]): string {
+  /** Collect the selected labels from a boolean FormArray as a string array. */
+  private selectedLabels(array: FormArray, labels: readonly string[]): string[] {
     return labels
-      .filter((_, i) => array.at(i).value === true)
-      .join(', ');
+      .filter((_, i) => array.at(i).value === true);
   }
 
   // ---------------------------------------------------------------------------

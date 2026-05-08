@@ -86,7 +86,20 @@ function makeCreateRaceDto() {
     bonusInt: 0,
     bonusWis: 0,
     bonusCha: 0,
-    raceFeatures: {},
+    raceFeatures: {
+      speeds: { walk: 30 },
+      senses: {},
+      languages: ['Common'],
+      extraLanguageChoices: 0,
+      skillProficiencies: { fixed: [], choicePool: [], choiceCount: 0 },
+      weaponProficiencies: [],
+      armorProficiencies: [],
+      toolProficiencies: [],
+      damageResistances: [],
+      damageImmunities: [],
+      conditionImmunities: [],
+      innateSpells: [],
+    },
   };
 }
 
@@ -106,7 +119,19 @@ function makeCreateMonsterDto() {
     cha: 8,
     challengeRating: 0.25,
     xp: 50,
-    combatMechanics: {},
+    combatMechanics: {
+      description: '',
+      savingThrows: {},
+      skills: [],
+      damageResistances: [],
+      damageImmunities: [],
+      damageVulnerabilities: [],
+      conditionImmunities: [],
+      senses: {},
+      attacks: [],
+      abilities: [],
+      speeds: { walk: 30 },
+    },
   };
 }
 
@@ -124,9 +149,9 @@ function makeCreateSpellDto() {
     materialComponent: '',
     concentration: false,
     ritual: false,
-    damageTypes: 'Fire',
+    damageTypes: ['Fire'],
     savingThrow: 'Dexterity',
-    spellClasses: 'Wizard, Sorcerer',
+    spellClasses: ['Wizard', 'Sorcerer'],
     higherLevelDescription: '',
     description: 'A bright streak flashes from your pointing finger.',
   };
@@ -677,7 +702,20 @@ const raceFormArb = fc.record({
   bonusInt: fc.integer({ min: -10, max: 10 }),
   bonusWis: fc.integer({ min: -10, max: 10 }),
   bonusCha: fc.integer({ min: -10, max: 10 }),
-  raceFeatures: fc.constant({}),
+  raceFeatures: fc.constant({
+    speeds: { walk: 30 },
+    senses: {},
+    languages: ['Common'] as string[],
+    extraLanguageChoices: 0,
+    skillProficiencies: { fixed: [] as string[], choicePool: [] as string[], choiceCount: 0 },
+    weaponProficiencies: [] as string[],
+    armorProficiencies: [] as string[],
+    toolProficiencies: [] as string[],
+    damageResistances: [] as string[],
+    damageImmunities: [] as string[],
+    conditionImmunities: [] as string[],
+    innateSpells: [] as any[],
+  }),
 });
 
 /** Arbitrary for CreateMonsterDto (without authorId) */
@@ -696,7 +734,19 @@ const monsterFormArb = fc.record({
   cha: fc.integer({ min: 1, max: 30 }),
   challengeRating: fc.float({ min: 0, max: 30, noNaN: true }),
   xp: fc.integer({ min: 0, max: 1000000 }),
-  combatMechanics: fc.constant({}),
+  combatMechanics: fc.constant({
+    description: '',
+    savingThrows: {},
+    skills: [] as any[],
+    damageResistances: [] as string[],
+    damageImmunities: [] as string[],
+    damageVulnerabilities: [] as string[],
+    conditionImmunities: [] as string[],
+    senses: {},
+    attacks: [] as any[],
+    abilities: [] as any[],
+    speeds: { walk: 30 },
+  }),
 });
 
 /** Arbitrary for CreateSpellDto (without authorId) */
@@ -713,9 +763,9 @@ const spellFormArb = fc.record({
   materialComponent: fc.string(),
   concentration: fc.boolean(),
   ritual: fc.boolean(),
-  damageTypes: fc.string(),
+  damageTypes: fc.array(fc.string()),
   savingThrow: fc.string(),
-  spellClasses: fc.string(),
+  spellClasses: fc.array(fc.string()),
   higherLevelDescription: fc.string(),
   description: nonEmptyString,
 });
@@ -931,12 +981,12 @@ describe('HomebrewService — Property 8: Delete request targets the correct end
 
 import {
   AttackEntry,
-  AbilityEntry,
-  SkillEntry,
-  SavingThrows,
-  Senses,
+  FeatureEntry,
+  MonsterSkillEntry as SkillEntry,
+  MonsterSavingThrows as SavingThrows,
+  SenseObject as Senses,
   CombatMechanics,
-} from '../pages/homebrew-monster-form/homebrew-monster-form.page';
+} from '../models/homebrew.models';
 
 /** Arbitrary for AttackEntry */
 const attackEntryArb9: fc.Arbitrary<AttackEntry> = fc.record({
@@ -947,8 +997,8 @@ const attackEntryArb9: fc.Arbitrary<AttackEntry> = fc.record({
   reach: fc.string({ minLength: 0, maxLength: 20 }),
 });
 
-/** Arbitrary for AbilityEntry */
-const abilityEntryArb9: fc.Arbitrary<AbilityEntry> = fc.record({
+/** Arbitrary for FeatureEntry (renamed from AbilityEntry) */
+const abilityEntryArb9: fc.Arbitrary<FeatureEntry> = fc.record({
   name: fc.string({ minLength: 1, maxLength: 60 }),
   description: fc.string({ minLength: 1, maxLength: 200 }),
 });
@@ -1001,13 +1051,14 @@ const combatMechanicsArb: fc.Arbitrary<CombatMechanics> = fc.record({
   description: fc.string(),
   savingThrows: savingThrowsArb9,
   skills: fc.array(skillEntryArb9, { maxLength: 5 }),
-  damageResistances: fc.string(),
-  damageImmunities: fc.string(),
-  damageVulnerabilities: fc.string(),
-  conditionImmunities: fc.string(),
+  damageResistances: fc.array(fc.string()),
+  damageImmunities: fc.array(fc.string()),
+  damageVulnerabilities: fc.array(fc.string()),
+  conditionImmunities: fc.array(fc.string()),
   senses: sensesArb9,
   attacks: fc.array(attackEntryArb9, { maxLength: 5 }),
   abilities: fc.array(abilityEntryArb9, { maxLength: 5 }),
+  speeds: fc.constant({ walk: 30 }),
 });
 
 /** Base monster stats DTO (without combatMechanics) */

@@ -1,9 +1,20 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, FormArray, FormControl, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { IonButton, IonSpinner, IonItem, IonLabel, IonInput, IonTextarea } from '@ionic/angular/standalone';
-import { HomebrewService } from '../../services/homebrew.service';
+import { HomebrewService, CreateClassDto } from '../../services/homebrew.service';
+import {
+  SkillProficiencies,
+  Spellcasting,
+  CommonHomebrewFeatures,
+  SpellSlotTable,
+  ClassFeatures,
+  FeatureEntry,
+  MulticlassingPrerequisite,
+  MulticlassingPrerequisites,
+  MulticlassingProficiencies
+} from '../../models/homebrew.models';
 import { StructuredEquipment, isStructuredEquipment, serializeEquipment } from '../../models/equipment.models';
 import { StartingEquipmentPickerComponent } from '../../components/starting-equipment-picker/starting-equipment-picker.component';
 
@@ -132,78 +143,7 @@ export const SPELL_SLOT_PRESETS: Record<string, number[][]> = {
   'Pact Magic':    PACT_MAGIC_SLOTS,
 };
 
-// ---------------------------------------------------------------------------
-// Interfaces
-// ---------------------------------------------------------------------------
 
-export interface ClassFeature {
-  id?: number | null;
-  name: string;
-  description: string;
-  levelRequired: number;
-}
-
-export interface SkillProficiencies {
-  fixed: string[];
-  choicePool: string[];
-  choiceCount: number;
-}
-
-export interface MulticlassingPrerequisite {
-  ability: string;
-  minScore: number;
-}
-
-export interface MulticlassingPrerequisites {
-  requirements: MulticlassingPrerequisite[];
-  logic: 'AND' | 'OR';
-}
-
-export interface MulticlassingProficiencies {
-  armor: string[];
-  weapons: string[];
-  tools: string[];
-}
-
-export interface SpellSlotTable {
-  slots: number[][];
-}
-
-export interface Spellcasting {
-  ability: string;
-  spellcastingType: string;
-  ritualCasting: boolean;
-  preparationStyle: 'PREPARED' | 'KNOWN';
-  cantripsKnown: number[];
-  spellsKnown?: number[];
-  spellSlots: SpellSlotTable;
-}
-
-export interface ClassFeatures {
-  primaryAbility: string;
-  subclassLevel: number;
-  startingEquipment?: string | StructuredEquipment;
-  skillProficiencies: SkillProficiencies;
-  weaponProficiencies: string[];
-  armorProficiencies: string[];
-  toolProficiencies: string[];
-  multiclassingPrerequisites?: MulticlassingPrerequisites;
-  multiclassingProficiencies?: MulticlassingProficiencies;
-  spellcasting?: Spellcasting;
-  damageResistances: string[];
-  damageImmunities: string[];
-  conditionImmunities: string[];
-}
-
-export interface CreateClassDto {
-  name: string;
-  description?: string;
-  price: number;
-  hitDie: string;
-  savingThrows: Record<string, boolean>;
-  classFeatures: ClassFeatures;
-  authorId: string;
-}
 
 // ---------------------------------------------------------------------------
 // Custom validator

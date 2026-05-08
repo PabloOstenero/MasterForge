@@ -71,30 +71,25 @@ export const SPELL_CLASSES = [
 // ---------------------------------------------------------------------------
 
 /**
- * Serializes the chip multi-select state (boolean array) into a
- * comma-separated string of selected labels.
- *
- * Example: [false, true, false, true] with labels ['Acid','Cold','Fire','Lightning']
- *          → "Cold, Lightning"
+ * Serializes the chip multi-select state (boolean array) into an array of selected labels.
  */
 export function serializeChips(
   selected: boolean[],
   labels: readonly string[],
-): string {
-  return labels.filter((_, i) => selected[i]).join(', ');
+): string[] {
+  return labels.filter((_, i) => selected[i]);
 }
 
 /**
- * Deserializes a comma-separated string into a boolean array aligned to labels.
- *
- * Example: "Cold, Lightning" with labels ['Acid','Cold','Fire','Lightning']
- *          → [false, true, false, true]
+ * Deserializes a comma-separated string OR an array into a boolean array aligned to labels.
  */
 export function deserializeChips(
-  value: string,
+  value: string | string[],
   labels: readonly string[],
 ): boolean[] {
-  const selected = (value ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+  const selected = Array.isArray(value) 
+    ? value 
+    : (value ?? '').split(',').map((s) => s.trim()).filter(Boolean);
   return labels.map((label) => selected.includes(label));
 }
 

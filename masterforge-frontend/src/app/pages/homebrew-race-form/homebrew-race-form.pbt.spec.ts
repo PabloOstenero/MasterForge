@@ -1,4 +1,4 @@
-﻿import * as fc from 'fast-check';
+import * as fc from 'fast-check';
 import {
   buildRaceFeatures,
   LANGUAGES,
@@ -7,12 +7,14 @@ import {
   SKILL_NAMES,
   WEAPON_PROFS,
   ARMOR_PROFS,
+  CREATURE_TYPES,
+} from './homebrew-race-form.page';
+import {
   InnateSpell,
   SkillProficiencies,
   NaturalArmor,
   NaturalWeapon,
-  CREATURE_TYPES,
-} from './homebrew-race-form.page';
+} from '../../models/homebrew.models';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -32,15 +34,15 @@ function callBuildRaceFeatures(overrides: Partial<Parameters<typeof buildRaceFea
   const defaults: Parameters<typeof buildRaceFeatures> = [
     { walk: 30, swim: null, climb: null, fly: null },
     { darkvision: null, blindsight: null, tremorsense: null, truesight: null },
-    '',
+    [],
     0,
     { fixed: [], choicePool: [], choiceCount: 0 },
     [],
     [],
     [],
-    '',
-    '',
-    '',
+    [],
+    [],
+    [],
     [],
   ];
   return buildRaceFeatures(...defaults);
@@ -66,17 +68,17 @@ describe('Property 2: Speed serialization omits zero/null values', () => {
           const result = buildRaceFeatures(
             speeds,
             { darkvision: null, blindsight: null, tremorsense: null, truesight: null },
-            '',
+            [],
             0,
             { fixed: [], choicePool: [], choiceCount: 0 },
-            [], [], [], '', '', '', [],
+            [], [], [], [], [], [], [],
           );
 
-          const speedKeys = Object.keys(result.speeds) as Array<keyof typeof result.speeds>;
+          const speedKeys = Object.keys(result.speeds!) as Array<keyof typeof result.speeds>;
 
           // Every key present in output must have a positive value
           for (const key of speedKeys) {
-            const val = result.speeds[key];
+            const val = result.speeds![key];
             expect(val).not.toBeNull();
             expect(val).not.toBe(0);
             expect(val! > 0).toBeTrue();
@@ -86,9 +88,9 @@ describe('Property 2: Speed serialization omits zero/null values', () => {
           (Object.keys(speeds) as Array<keyof typeof speeds>).forEach((key) => {
             const val = speeds[key];
             if (val !== null && val !== 0) {
-              expect(result.speeds[key]).toBe(val);
+              expect(result.speeds![key]).toBe(val);
             } else {
-              expect(result.speeds[key]).toBeUndefined();
+              expect(result.speeds![key]).toBeUndefined();
             }
           });
         },
@@ -118,17 +120,17 @@ describe('Property 3: Senses serialization omits zero/null values', () => {
           const result = buildRaceFeatures(
             { walk: 30, swim: null, climb: null, fly: null },
             senses,
-            '',
+            [],
             0,
             { fixed: [], choicePool: [], choiceCount: 0 },
-            [], [], [], '', '', '', [],
+            [], [], [], [], [], [], [],
           );
 
-          const senseKeys = Object.keys(result.senses) as Array<keyof typeof result.senses>;
+          const senseKeys = Object.keys(result.senses!) as Array<keyof typeof result.senses>;
 
           // Every key present in output must have a positive value
           for (const key of senseKeys) {
-            const val = result.senses[key];
+            const val = result.senses![key];
             expect(val).not.toBeNull();
             expect(val).not.toBe(0);
             expect(val! > 0).toBeTrue();
@@ -137,10 +139,14 @@ describe('Property 3: Senses serialization omits zero/null values', () => {
           // Every key with a positive input value must appear in output
           (Object.keys(senses) as Array<keyof typeof senses>).forEach((key) => {
             const val = senses[key];
+            // Verify round-trip: result.senses is always an object (even if empty)
+            expect(result.senses).toBeDefined();
+            const rs = result.senses!;
+
             if (val !== null && val !== 0) {
-              expect(result.senses[key]).toBe(val);
+              expect(rs[key]).toBe(val);
             } else {
-              expect(result.senses[key]).toBeUndefined();
+              expect(rs[key]).toBeUndefined();
             }
           });
         },
@@ -170,10 +176,10 @@ describe('Property 4: Languages round-trip', () => {
           const result = buildRaceFeatures(
             { walk: 30, swim: null, climb: null, fly: null },
             { darkvision: null, blindsight: null, tremorsense: null, truesight: null },
-            languagesString,
+            selectedLanguages,
             0,
             { fixed: [], choicePool: [], choiceCount: 0 },
-            [], [], [], '', '', '', [],
+            [], [], [], [], [], [], [],
           );
 
           // Verify round-trip: result.languages is now an array
@@ -208,10 +214,10 @@ describe('Property 5: Skill proficiencies placement by choiceCount', () => {
           const result = buildRaceFeatures(
             { walk: 30, swim: null, climb: null, fly: null },
             { darkvision: null, blindsight: null, tremorsense: null, truesight: null },
-            '',
+            [],
             0,
             skillProficiencies,
-            [], [], [], '', '', '', [],
+            [], [], [], [], [], [], [],
           );
 
           const sp = result.skillProficiencies;
@@ -284,13 +290,13 @@ describe('Property 6: Proficiency merging (chips + free-text)', () => {
           const result = buildRaceFeatures(
             { walk: 30, swim: null, climb: null, fly: null },
             { darkvision: null, blindsight: null, tremorsense: null, truesight: null },
-            '',
+            [],
             0,
             { fixed: [], choicePool: [], choiceCount: 0 },
             weaponProficiencies,
             armorProficiencies,
             toolProfs,
-            '', '', '', [],
+            [], [], [], [],
           );
 
           // Weapon proficiencies: output must equal input (C ∪ T)
@@ -344,20 +350,16 @@ describe('Property 7: Damage type / condition chip round-trip', () => {
           const immunities = immuneIndices.map((i) => DAMAGE_TYPES[i]);
           const conditions = condIndices.map((i) => CONDITIONS[i]);
 
-          const damageResistancesStr = resistances.join(', ');
-          const damageImmunitiesStr = immunities.join(', ');
-          const conditionImmunitiesStr = conditions.join(', ');
-
           const result = buildRaceFeatures(
             { walk: 30, swim: null, climb: null, fly: null },
             { darkvision: null, blindsight: null, tremorsense: null, truesight: null },
-            '',
+            [],
             0,
             { fixed: [], choicePool: [], choiceCount: 0 },
             [], [], [],
-            damageResistancesStr,
-            damageImmunitiesStr,
-            conditionImmunitiesStr,
+            resistances,
+            immunities,
+            conditions,
             [],
           );
 
@@ -381,6 +383,7 @@ describe('Property 7: Damage type / condition chip round-trip', () => {
 describe('Property 8: Innate spell serialization completeness', () => {
   it('should serialize every innate spell with all five fields present', () => {
     const spellArb = fc.record({
+      spellId:    fc.oneof(fc.constant(null), fc.string({ minLength: 1, maxLength: 20 })),
       name:       fc.string({ minLength: 1, maxLength: 50 }),
       level:      fc.integer({ min: 0, max: 9 }),
       usesPerDay: fc.oneof(fc.constant(null), fc.integer({ min: 1, max: 10 })),
@@ -391,14 +394,15 @@ describe('Property 8: Innate spell serialization completeness', () => {
     fc.assert(
       fc.property(
         fc.array(spellArb, { minLength: 0, maxLength: 10 }),
-        (spells: InnateSpell[]) => {
+        fc.integer({ min: 0, max: 5 }),
+        (spells: InnateSpell[], extraLanguageChoices) => {
           const result = buildRaceFeatures(
             { walk: 30, swim: null, climb: null, fly: null },
             { darkvision: null, blindsight: null, tremorsense: null, truesight: null },
-            '',
-            0,
+            [],
+            extraLanguageChoices,
             { fixed: [], choicePool: [], choiceCount: 0 },
-            [], [], [], '', '', '',
+            [], [], [], [], [], [],
             spells,
           );
 
@@ -571,7 +575,7 @@ describe('Property 5 (extended): Whitespace-only flyRestriction omission', () =>
         fc.string({ minLength: 0, maxLength: 10 }).map(s => s.replace(/[^\s]/g, ' ')),
         (flyRestriction) => {
           const result = buildRaceFeatures(
-            DEF_SPEEDS, DEF_SENSES, '', 0, DEF_SKILLS, [], [], [], '', '', '', DEF_SPELLS,
+            DEF_SPEEDS, DEF_SENSES, [], 0, DEF_SKILLS, [], [], [], [], [], [], DEF_SPELLS,
             undefined,       // naturalArmor
             undefined,       // naturalWeapons
             undefined,       // creatureType
@@ -590,7 +594,7 @@ describe('Property 5 (extended): Whitespace-only flyRestriction omission', () =>
         fc.string({ minLength: 1 }).filter(s => s.trim() !== ''),
         (flyRestriction) => {
           const result = buildRaceFeatures(
-            DEF_SPEEDS, DEF_SENSES, '', 0, DEF_SKILLS, [], [], [], '', '', '', DEF_SPELLS,
+            DEF_SPEEDS, DEF_SENSES, [], 0, DEF_SKILLS, [], [], [], [], [], [], DEF_SPELLS,
             undefined,       // naturalArmor
             undefined,       // naturalWeapons
             undefined,       // creatureType
@@ -624,7 +628,7 @@ describe('Property 6 (extended): Natural armor conditional serialization', () =>
             : null;
 
           const result = buildRaceFeatures(
-            DEF_SPEEDS, DEF_SENSES, '', 0, DEF_SKILLS, [], [], [], '', '', '', DEF_SPELLS,
+            DEF_SPEEDS, DEF_SENSES, [], 0, DEF_SKILLS, [], [], [], [], [], [], DEF_SPELLS,
             naturalArmor,  // naturalArmor
           );
 
@@ -662,7 +666,7 @@ describe('Property 7 (extended): Natural weapons serialization completeness', ()
         fc.array(naturalWeaponArb, { minLength: 0, maxLength: 10 }),
         (naturalWeapons) => {
           const result = buildRaceFeatures(
-            DEF_SPEEDS, DEF_SENSES, '', 0, DEF_SKILLS, [], [], [], '', '', '', DEF_SPELLS,
+            DEF_SPEEDS, DEF_SENSES, [], 0, DEF_SKILLS, [], [], [], [], [], [], DEF_SPELLS,
             undefined,       // naturalArmor
             naturalWeapons as NaturalWeapon[],  // naturalWeapons
           );
@@ -720,15 +724,15 @@ describe('Property 9 (extended): Non-regression — existing keys preserved', ()
       fc.property(
         speedsArb,
         sensesArb,
-        fc.constant(''),                                          // languages
+        fc.constant([] as string[]),                              // languages
         fc.constant(0),                                           // extraLanguageChoices
         fc.constant({ fixed: [], choicePool: [], choiceCount: 0 } as SkillProficiencies), // skillProficiencies
         fc.constant([] as string[]),                              // weaponProficiencies
         fc.constant([] as string[]),                              // armorProficiencies
         fc.constant([] as string[]),                              // toolProficiencies
-        fc.constant(''),                                          // damageResistances
-        fc.constant(''),                                          // damageImmunities
-        fc.constant(''),                                          // conditionImmunities
+        fc.constant([] as string[]),                              // damageResistances
+        fc.constant([] as string[]),                              // damageImmunities
+        fc.constant([] as string[]),                              // conditionImmunities
         fc.constant([] as InnateSpell[]),                         // innateSpells
         (speeds, senses, languages, extraLanguageChoices, skillProficiencies,
          weaponProficiencies, armorProficiencies, toolProficiencies,

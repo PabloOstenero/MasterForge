@@ -4,6 +4,14 @@ import { Observable } from 'rxjs';
 
 import { AuthService } from './auth.service';
 import { ItemSummary, StructuredEquipment } from '../models/equipment.models';
+import {
+  SkillProficiencies,
+  FeatureEntry,
+  CombatMechanics,
+  RaceFeatures,
+  SubclassFeatures,
+  ClassFeatures
+} from '../models/homebrew.models';
 
 // ---------------------------------------------------------------------------
 // Types and interfaces
@@ -26,57 +34,7 @@ export interface HomebrewSummary {
   items: HomebrewItem[];
 }
 
-export interface SkillProficiencies {
-  fixed: string[];
-  choicePool: string[];
-  choiceCount: number;
-}
 
-export interface MulticlassingPrerequisite {
-  ability: string;
-  minScore: number;
-}
-
-export interface MulticlassingPrerequisites {
-  requirements: MulticlassingPrerequisite[];
-  logic: 'AND' | 'OR';
-}
-
-export interface MulticlassingProficiencies {
-  armor: string[];
-  weapons: string[];
-  tools: string[];
-}
-
-export interface SpellSlotTable {
-  slots: number[][];
-}
-
-export interface Spellcasting {
-  ability: string;
-  spellcastingType: string;
-  ritualCasting: boolean;
-  preparationStyle: 'PREPARED' | 'KNOWN';
-  cantripsKnown: number[];
-  spellsKnown?: number[];
-  spellSlots: SpellSlotTable;
-}
-
-export interface ClassFeatures {
-  primaryAbility: string;
-  subclassLevel: number;
-  startingEquipment?: string | StructuredEquipment;
-  skillProficiencies: SkillProficiencies;
-  weaponProficiencies: string[];
-  armorProficiencies: string[];
-  toolProficiencies: string[];
-  multiclassingPrerequisites?: MulticlassingPrerequisites;
-  multiclassingProficiencies?: MulticlassingProficiencies;
-  spellcasting?: Spellcasting;
-  damageResistances: string[];
-  damageImmunities: string[];
-  conditionImmunities: string[];
-}
 
 export interface CreateClassDto {
   name: string;
@@ -88,38 +46,7 @@ export interface CreateClassDto {
   authorId: string;
 }
 
-export interface SubclassFeatureEntry {
-  name: string;
-  description: string;
-  levelRequired: number;
-}
 
-export interface ExpandedSpellEntry {
-  name: string;
-  level: number;           // 0 = cantrip, 1–9 = spell level
-  preparationType: 'ALWAYS_PREPARED' | 'ALWAYS_KNOWN';
-}
-
-export interface ResourcePool {
-  name: string;
-  dieType: string;         // one of DIE_TYPES: 'd4' | 'd6' | 'd8' | 'd10' | 'd12' | 'd20'
-  count: number;           // min 1
-  rechargeOn: string;      // one of RECHARGE_OPTIONS: 'At Will' | 'Short Rest' | 'Long Rest'
-}
-
-export interface SubclassFeatures {
-  weaponProficiencies: string[];
-  armorProficiencies: string[];
-  toolProficiencies: string[];
-  damageResistances: string[];
-  damageImmunities: string[];
-  conditionImmunities: string[];
-  skillProficiencies: SkillProficiencies;
-  subclassFeatureEntries: SubclassFeatureEntry[];
-  expandedSpellList: ExpandedSpellEntry[];
-  resourcePools: ResourcePool[];
-  spellcasting?: Spellcasting;
-}
 
 export interface CreateSubclassDto {
   name: string;
@@ -128,6 +55,8 @@ export interface CreateSubclassDto {
   subclassFeatures: SubclassFeatures;
   authorId: string;  // injected by service, not set by form
 }
+
+
 
 export interface CreateRaceDto {
   name: string;
@@ -140,7 +69,7 @@ export interface CreateRaceDto {
   bonusInt: number;
   bonusWis: number;
   bonusCha: number;
-  raceFeatures: Record<string, any>;
+  raceFeatures: RaceFeatures;
   authorId: string;
 }
 
@@ -160,7 +89,7 @@ export interface CreateMonsterDto {
   challengeRating: number;
   xp: number;
   authorId: string;
-  combatMechanics: Record<string, any>;
+  combatMechanics: CombatMechanics;
 }
 
 export interface CreateSpellDto {
@@ -176,9 +105,9 @@ export interface CreateSpellDto {
   materialComponent: string;
   concentration: boolean;
   ritual: boolean;
-  damageTypes: string;       // comma-separated, e.g. "Fire, Cold"
-  savingThrow: string;       // e.g. "Dexterity" or "None"
-  spellClasses: string;      // comma-separated, e.g. "Wizard, Sorcerer"
+  damageTypes: string[];       // Standardized to array
+  savingThrow: string;
+  spellClasses: string[];      // Standardized to array
   higherLevelDescription: string;
   description: string;
   authorId: string | null;

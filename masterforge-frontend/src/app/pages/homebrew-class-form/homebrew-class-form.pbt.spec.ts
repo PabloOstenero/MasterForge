@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Property-Based Tests for HomebrewClassFormPage
  *
  * Feature: homebrew-class-form
@@ -38,11 +38,13 @@ import {
   ARMOR_PROFS,
   DAMAGE_TYPES,
   CONDITIONS,
+} from './homebrew-class-form.page';
+import {
   SkillProficiencies,
   MulticlassingPrerequisites,
   MulticlassingProficiencies,
   Spellcasting,
-} from './homebrew-class-form.page';
+} from '../../models/homebrew.models';
 
 // ---------------------------------------------------------------------------
 // Shared helpers

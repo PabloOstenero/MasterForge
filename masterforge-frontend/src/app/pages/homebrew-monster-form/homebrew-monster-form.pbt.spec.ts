@@ -21,13 +21,15 @@ import * as fc from 'fast-check';
 import { FormBuilder } from '@angular/forms';
 import {
   buildCombatMechanics,
-  AttackEntry,
-  AbilityEntry,
-  SkillEntry,
-  SavingThrows,
-  Senses,
   HomebrewMonsterFormPage,
 } from './homebrew-monster-form.page';
+import {
+  AttackEntry,
+  FeatureEntry as AbilityEntry,
+  MonsterSkillEntry as SkillEntry,
+  MonsterSavingThrows as SavingThrows,
+  SenseObject as Senses,
+} from '../../models/homebrew.models';
 
 // ---------------------------------------------------------------------------
 // fast-check arbitraries
@@ -64,12 +66,12 @@ const savingThrowsArb: fc.Arbitrary<SavingThrows> = fc.record({
   cha: fc.option(fc.integer({ min: -10, max: 20 }), { nil: null }),
 });
 
-/** Arbitrary for Senses — string fields can be "" or a value; passivePerception can be null */
-const sensesArb: fc.Arbitrary<Senses> = fc.record({
-  darkvision: fc.oneof(fc.constant(''), fc.string({ minLength: 1, maxLength: 20 })),
-  blindsight: fc.oneof(fc.constant(''), fc.string({ minLength: 1, maxLength: 20 })),
-  tremorsense: fc.oneof(fc.constant(''), fc.string({ minLength: 1, maxLength: 20 })),
-  truesight: fc.oneof(fc.constant(''), fc.string({ minLength: 1, maxLength: 20 })),
+/** Arbitrary for Senses — numeric fields can be null; passivePerception can be null */
+const sensesArb: fc.Arbitrary<any> = fc.record({
+  darkvision: fc.option(fc.integer({ min: 0, max: 120 }), { nil: null }),
+  blindsight: fc.option(fc.integer({ min: 0, max: 120 }), { nil: null }),
+  tremorsense: fc.option(fc.integer({ min: 0, max: 120 }), { nil: null }),
+  truesight: fc.option(fc.integer({ min: 0, max: 120 }), { nil: null }),
   passivePerception: fc.option(fc.integer({ min: 1, max: 30 }), { nil: null }),
 });
 
@@ -78,9 +80,9 @@ const emptySavingThrows: SavingThrows = {
   str: null, dex: null, con: null, int: null, wis: null, cha: null,
 };
 
-/** Minimal/empty Senses (all empty) */
-const emptySenses: Senses = {
-  darkvision: '', blindsight: '', tremorsense: '', truesight: '', passivePerception: null,
+/** Minimal/empty Senses (all null) */
+const emptySenses: any = {
+  darkvision: null, blindsight: null, tremorsense: null, truesight: null, passivePerception: null,
 };
 
 // ---------------------------------------------------------------------------
@@ -168,10 +170,10 @@ describe('buildCombatMechanics() — Property-Based Tests', () => {
           description,
           emptySavingThrows,
           [],
-          '',
-          '',
-          '',
-          '',
+          [],
+          [],
+          [],
+          [],
           emptySenses,
           [],
           [],
@@ -208,10 +210,10 @@ describe('buildCombatMechanics() — Property-Based Tests', () => {
         fc.string(),
         savingThrowsArb,
         fc.array(skillEntryArb, { maxLength: 5 }),
-        fc.string(),
-        fc.string(),
-        fc.string(),
-        fc.string(),
+        fc.array(fc.string(), { maxLength: 5 }),
+        fc.array(fc.string(), { maxLength: 5 }),
+        fc.array(fc.string(), { maxLength: 5 }),
+        fc.array(fc.string(), { maxLength: 5 }),
         sensesArb,
         fc.array(attackEntryArb, { maxLength: 5 }),
         fc.array(abilityEntryArb, { maxLength: 5 }),
@@ -261,10 +263,10 @@ describe('buildCombatMechanics() — Property-Based Tests', () => {
           '',
           savingThrows,
           [],
-          '',
-          '',
-          '',
-          '',
+          [],
+          [],
+          [],
+          [],
           emptySenses,
           [],
           [],
@@ -273,7 +275,7 @@ describe('buildCombatMechanics() — Property-Based Tests', () => {
         // Every key in the result must have a numeric value
         const resultKeys = Object.keys(result.savingThrows) as Array<keyof SavingThrows>;
         for (const key of resultKeys) {
-          const val = result.savingThrows[key];
+          const val = (result.savingThrows as any)[key];
           expect(typeof val).toBe('number');
           expect(val).not.toBeNull();
         }
@@ -281,11 +283,11 @@ describe('buildCombatMechanics() — Property-Based Tests', () => {
         // Every key with a numeric value in the input must appear in the result
         const inputKeys = Object.keys(savingThrows) as Array<keyof SavingThrows>;
         for (const key of inputKeys) {
-          const inputVal = savingThrows[key];
+          const inputVal = (savingThrows as any)[key];
           if (inputVal !== null && typeof inputVal === 'number') {
-            expect(result.savingThrows[key]).toBe(inputVal);
+            expect((result.savingThrows as any)[key]).toBe(inputVal);
           } else {
-            expect(result.savingThrows[key]).toBeUndefined();
+            expect((result.savingThrows as any)[key]).toBeUndefined();
           }
         }
       }),
@@ -306,10 +308,10 @@ describe('buildCombatMechanics() — Property-Based Tests', () => {
           '',
           emptySavingThrows,
           [],
-          '',
-          '',
-          '',
-          '',
+          [],
+          [],
+          [],
+          [],
           senses,
           [],
           [],

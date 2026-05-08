@@ -38,11 +38,13 @@ import {
   DAMAGE_TYPES,
   CONDITIONS,
   SKILL_NAMES,
+} from './homebrew-class-form.page';
+import {
   SkillProficiencies,
   MulticlassingPrerequisites,
   MulticlassingProficiencies,
   Spellcasting,
-} from './homebrew-class-form.page';
+} from '../../models/homebrew.models';
 import { HomebrewService } from '../../services/homebrew.service';
 
 // Mock router that captures navigate calls

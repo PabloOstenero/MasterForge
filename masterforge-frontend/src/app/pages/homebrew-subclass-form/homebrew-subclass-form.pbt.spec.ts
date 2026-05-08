@@ -17,8 +17,10 @@ import {
   SPELL_SLOT_PRESETS,
   SKILL_NAMES,
   HomebrewSubclassFormPage,
-  SkillProficiencies
 } from './homebrew-subclass-form.page';
+import {
+  SkillProficiencies
+} from '../../models/homebrew.models';
 
 describe('HomebrewSubclassFormPage - Property Based Tests', () => {
 
@@ -77,7 +79,7 @@ describe('HomebrewSubclassFormPage - Property Based Tests', () => {
     damageResistances: damageTypesGen,
     damageImmunities: damageTypesGen,
     conditionImmunities: conditionsGen,
-    subclassFeatureEntries: featureEntriesGen,
+    features: featureEntriesGen,
     expandedSpellList: expandedSpellListGen,
     resourcePools: resourcePoolsGen,
     spellcasting: spellcastingGen
@@ -134,7 +136,7 @@ describe('HomebrewSubclassFormPage - Property Based Tests', () => {
           expect(result.damageResistances).toEqual(dmgRes);
           expect(result.damageImmunities).toEqual(dmgImm);
           expect(result.conditionImmunities).toEqual(condImm);
-          expect(result.subclassFeatureEntries).toEqual(features);
+          expect(result.features).toEqual(features);
           expect(result.expandedSpellList).toEqual(spells);
           expect(result.resourcePools).toEqual(pools);
 
