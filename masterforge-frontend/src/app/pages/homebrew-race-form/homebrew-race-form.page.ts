@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -466,7 +466,9 @@ export class HomebrewRaceFormPage implements OnInit {
             ? rf.languages
             : (rf.languages as string).split(',').map((s: string) => s.trim());
           LANGUAGES.forEach((lang, i) => {
-            this.languageChips[i] = selected.includes(lang);
+            const isSelected = selected.includes(lang);
+            this.languageChips[i] = isSelected;
+            this.languagesArray.at(i).setValue(isSelected);
           });
         }
 
@@ -925,6 +927,7 @@ export class HomebrewRaceFormPage implements OnInit {
   /** Toggle a language chip. */
   toggleLanguageChip(index: number): void {
     this.languageChips[index] = !this.languageChips[index];
+    this.languagesArray.at(index).setValue(this.languageChips[index]);
   }
 
   /** Toggle a weapon proficiency chip. */
