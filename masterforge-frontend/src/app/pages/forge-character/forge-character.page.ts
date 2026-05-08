@@ -11,19 +11,24 @@ import {
 import { ApiService } from '../../services/api';
 import { AuthService } from '../../services/auth.service';
 import { isStructuredEquipment, resolveInventory, StructuredEquipment, ResolvedInventoryLine } from '../../models/equipment.models';
+import { HomebrewService } from '../../services/homebrew.service';
+import { forkJoin, of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 // ─── Step definitions ────────────────────────────────────────────────────────
 const BASE_STEPS = ['identity', 'race', 'class', 'ability-scores', 'skills', 'review'] as const;
 type BaseStep = typeof BASE_STEPS[number];
-type Step = BaseStep | 'equipment';
+type Step = BaseStep | 'subclass' | 'equipment' | 'spells';
 
 export const STEP_LABELS: Record<Step, string> = {
   'identity': 'Identidad',
   'race': 'Raza',
   'class': 'Clase',
+  'subclass': 'Subclase',
   'equipment': 'Equipamiento',
   'ability-scores': 'Puntuaciones',
   'skills': 'Habilidades',
+  'spells': 'Conjuros',
   'review': 'Revisión'
 };
 
@@ -67,6 +72,37 @@ export const DND_SKILLS: { id: string; name: string; stat: AbilityKey }[] = [
   { id: 'survival', name: 'Supervivencia', stat: 'wis' }
 ];
 
+/**
+ * Maps English skill names (as stored in the backend choicePool) to DND_SKILLS ids.
+ * This bridges the gap between the homebrew forms (which save English names)
+ * and the character forge (which uses snake_case ids internally).
+ */
+const ENGLISH_SKILL_TO_ID: Record<string, string> = {
+  'acrobatics': 'acrobatics',
+  'animal handling': 'animal_handling',
+  'arcana': 'arcana',
+  'athletics': 'athletics',
+  'deception': 'deception',
+  'history': 'history',
+  'insight': 'insight',
+  'intimidation': 'intimidation',
+  'investigation': 'investigation',
+  'medicine': 'medicine',
+  'nature': 'nature',
+  'perception': 'perception',
+  'performance': 'performance',
+  'persuasion': 'persuasion',
+  'religion': 'religion',
+  'sleight of hand': 'sleight_of_hand',
+  'stealth': 'stealth',
+  'survival': 'survival',
+};
+
+/** Converts an English skill name from the choicePool to a DND_SKILLS id. */
+function poolNameToSkillId(poolEntry: string): string | undefined {
+  return ENGLISH_SKILL_TO_ID[poolEntry.toLowerCase()];
+}
+
 // ─── CharacterFormData interface ──────────────────────────────────────────────
 export interface CharacterFormData {
   // Step 0: Identity
@@ -74,6 +110,7 @@ export interface CharacterFormData {
   background: string;
   alignment: string;
   xp: number;
+  level: number;
 
   // Step 1: Race
   selectedRace: any | null;
@@ -89,9 +126,14 @@ export interface CharacterFormData {
   scoreMode: 'standard' | 'manual';
   tokenAssignments: { [abilityKey: string]: number | null };
   manualScores: { str: number; dex: number; con: number; int: number; wis: number; cha: number };
+  hpGenerationMode: 'average' | 'roll';
+  hpRolledValue: number;
 
   // Step 4/5: Skills
   selectedSkills: string[];
+
+  // Step (dynamic): Spells
+  selectedSpells: string[];
 
   // Derived (computed at review/submit)
   finalScores: { str: number; dex: number; con: number; int: number; wis: number; cha: number };
@@ -121,12 +163,27 @@ export class ForgeCharacterPage implements OnInit {
 
   /** Dynamically computed step list — inserts 'equipment' after 'class' when needed. */
   get activeSteps(): string[] {
-    const equipment = this.formData.selectedClass?.classFeatures?.startingEquipment;
+    const steps: string[] = ['identity', 'race', 'class'];
+
+    const cls = this.formData.selectedClass;
+    if (cls && cls.classFeatures?.subclassLevel && this.formData.level >= cls.classFeatures.subclassLevel) {
+      steps.push('subclass');
+    }
+
+    const equipment = cls?.classFeatures?.startingEquipment;
     const hasChoiceSets = isStructuredEquipment(equipment) && equipment.choiceSets.length > 0;
     if (hasChoiceSets) {
-      return ['identity', 'race', 'class', 'equipment', 'ability-scores', 'skills', 'review'];
+      steps.push('equipment');
     }
-    return [...BASE_STEPS];
+
+    steps.push('ability-scores', 'skills');
+
+    if (cls?.classFeatures?.spellcasting || this.formData.selectedSubclass?.subclassFeatures?.spellcasting) {
+      steps.push('spells');
+    }
+
+    steps.push('review');
+    return steps;
   }
 
   // ─── Form data ──────────────────────────────────────────────────────────────
@@ -135,6 +192,7 @@ export class ForgeCharacterPage implements OnInit {
     background: '',
     alignment: '',
     xp: 0,
+    level: 1,
     selectedRace: null,
     selectedClass: null,
     selectedSubclass: null,
@@ -142,7 +200,10 @@ export class ForgeCharacterPage implements OnInit {
     scoreMode: 'standard',
     tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
     manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+    hpGenerationMode: 'average',
+    hpRolledValue: 0,
     selectedSkills: [],
+    selectedSpells: [],
     finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
     calculatedHp: 0
   };
@@ -184,14 +245,35 @@ export class ForgeCharacterPage implements OnInit {
   // ─── Submit error state ──────────────────────────────────────────────────────
   submitError: boolean = false;
 
+  // ─── Spells step state ───────────────────────────────────────────────────────
+  allSpells: any[] = [];
+  spellsLoading: boolean = false;
+  spellsError: boolean = false;
+
   constructor(
     private apiService: ApiService,
     private authService: AuthService,
+    private homebrewService: HomebrewService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    // Initialization logic will be added in later tasks
+    this.loadSpells();
+  }
+
+  loadSpells(): void {
+    this.spellsLoading = true;
+    this.spellsError = false;
+    this.homebrewService.getAllSpells().subscribe({
+      next: (data) => {
+        this.allSpells = data.sort((a, b) => a.name.localeCompare(b.name));
+        this.spellsLoading = false;
+      },
+      error: () => {
+        this.spellsLoading = false;
+        this.spellsError = true;
+      }
+    });
   }
 
   // ─── Navigation ─────────────────────────────────────────────────────────────
@@ -434,6 +516,13 @@ export class ForgeCharacterPage implements OnInit {
     }
   }
 
+  onHpGenerationModeChange(event: any): void {
+    this.formData.hpGenerationMode = event.detail.value;
+    if (this.validationErrors['hpRolledValue']) {
+      delete this.validationErrors['hpRolledValue'];
+    }
+  }
+
   // ─── Skills step ─────────────────────────────────────────────────────────────
 
   /**
@@ -453,9 +542,9 @@ export class ForgeCharacterPage implements OnInit {
   get availableSkills(): { id: string; name: string; stat: AbilityKey }[] {
     const choicePool: string[] | undefined = this.formData.selectedClass?.classFeatures?.skillProficiencies?.choicePool;
     if (choicePool && choicePool.length > 0) {
-      // Map pool entries (English names) to DND_SKILLS entries by matching name case-insensitively
-      const poolLower = choicePool.map((s: string) => s.toLowerCase());
-      return DND_SKILLS.filter(skill => poolLower.includes(skill.name.toLowerCase()));
+      // Convert English pool names to internal DND_SKILLS ids
+      const poolIds = new Set(choicePool.map(poolNameToSkillId).filter(Boolean));
+      return DND_SKILLS.filter(skill => poolIds.has(skill.id));
     }
     return DND_SKILLS;
   }
@@ -488,9 +577,8 @@ export class ForgeCharacterPage implements OnInit {
     // Disable skills not in the choicePool when a pool is defined
     const choicePool: string[] | undefined = this.formData.selectedClass?.classFeatures?.skillProficiencies?.choicePool;
     if (choicePool && choicePool.length > 0) {
-      const poolLower = choicePool.map((s: string) => s.toLowerCase());
-      const skill = DND_SKILLS.find(sk => sk.id === skillId);
-      if (skill && !poolLower.includes(skill.name.toLowerCase())) {
+      const poolIds = new Set(choicePool.map(poolNameToSkillId).filter(Boolean));
+      if (!poolIds.has(skillId)) {
         return true;
       }
     }
@@ -504,7 +592,63 @@ export class ForgeCharacterPage implements OnInit {
     if (!this.formData.selectedClass) return null;
     const finalCon = this.getFinalScore('con');
     if (finalCon === null) return null;
-    return calculateHp(this.formData.selectedClass.hitDie, finalCon);
+    return calculateHp(this.formData.selectedClass.hitDie, finalCon, this.formData.level, this.formData.hpGenerationMode, this.formData.hpRolledValue);
+  }
+
+  // ─── Spells step logic ───────────────────────────────────────────────────────
+
+  get availableCantrips(): any[] {
+    return this.allSpells.filter(s => s.level === 0);
+  }
+
+  get availableNonCantrips(): any[] {
+    return this.allSpells.filter(s => s.level > 0);
+  }
+
+  get cantripsAllowed(): number {
+    const sc = this.formData.selectedSubclass?.subclassFeatures?.spellcasting || this.formData.selectedClass?.classFeatures?.spellcasting;
+    if (!sc) return 0;
+    const idx = Math.min(Math.max(this.formData.level - 1, 0), 19);
+    return sc.cantripsKnown?.[idx] || 0;
+  }
+
+  get spellsAllowed(): number {
+    const sc = this.formData.selectedSubclass?.subclassFeatures?.spellcasting || this.formData.selectedClass?.classFeatures?.spellcasting;
+    if (!sc) return 0;
+    const idx = Math.min(Math.max(this.formData.level - 1, 0), 19);
+    return sc.spellsKnown?.[idx] || 0;
+  }
+
+  get selectedCantripsCount(): number {
+    return this.formData.selectedSpells.filter(id => this.allSpells.find(s => s.id === id)?.level === 0).length;
+  }
+
+  get selectedNonCantripsCount(): number {
+    return this.formData.selectedSpells.filter(id => this.allSpells.find(s => s.id === id)?.level > 0).length;
+  }
+
+  isSpellSelected(spellId: string): boolean {
+    return this.formData.selectedSpells.includes(spellId);
+  }
+
+  getSpellById(spellId: string): any {
+    return this.allSpells.find(s => s.id === spellId);
+  }
+
+  isSpellDisabled(spellId: string, isCantrip: boolean): boolean {
+    if (this.formData.selectedSpells.includes(spellId)) return false; 
+    if (isCantrip && this.selectedCantripsCount >= this.cantripsAllowed) return true;
+    if (!isCantrip && this.selectedNonCantripsCount >= this.spellsAllowed) return true;
+    return false;
+  }
+
+  toggleSpell(spellId: string): void {
+    const idx = this.formData.selectedSpells.indexOf(spellId);
+    if (idx !== -1) {
+      this.formData.selectedSpells.splice(idx, 1);
+    } else {
+      this.formData.selectedSpells.push(spellId);
+    }
   }
 
   /** Submit the character to the backend. */
@@ -522,7 +666,7 @@ export class ForgeCharacterPage implements OnInit {
       wis: this.getFinalScore('wis') ?? 10,
       cha: this.getFinalScore('cha') ?? 10,
     };
-    const hp = calculateHp(this.formData.selectedClass?.hitDie ?? 8, finalCon);
+    const hp = calculateHp(this.formData.selectedClass?.hitDie ?? 8, finalCon, this.formData.level, this.formData.hpGenerationMode, this.formData.hpRolledValue);
 
     // Resolve inventory from structured equipment + player selections
     const equipment = this.structuredEquipment;
@@ -532,7 +676,24 @@ export class ForgeCharacterPage implements OnInit {
 
     const dto = buildCharacterDto(this.formData, finalScores, hp, this.authService.getUserIdFromToken(), inventory);
 
-    this.apiService.createCharacter(dto).subscribe({
+    this.apiService.createCharacter(dto).pipe(
+      switchMap((response: any) => {
+        const charId = response.id;
+        if (this.formData.selectedSpells.length > 0) {
+          const spellRequests = this.formData.selectedSpells.map(spellId => 
+            this.apiService.createCharacterSpell({
+              characterId: charId,
+              spellId: spellId,
+              isPrepared: true
+            })
+          );
+          return forkJoin(spellRequests).pipe(
+             switchMap(() => of(response))
+          );
+        }
+        return of(response);
+      })
+    ).subscribe({
       next: (response: any) => {
         this.isSubmitting = false;
         this.router.navigate(['/character-sheet', response.id]);
@@ -552,6 +713,7 @@ export class ForgeCharacterPage implements OnInit {
       case 'identity': return validateIdentityStep(this.formData);
       case 'race': return this.formData.selectedRace ? {} : { race: 'Selecciona una raza para continuar.' };
       case 'class': return this.formData.selectedClass ? {} : { class: 'Selecciona una clase para continuar.' };
+      case 'subclass': return this.formData.selectedSubclass ? {} : { subclass: 'Selecciona una subclase para continuar.' };
       case 'equipment': return this._validateEquipmentStep();
       case 'ability-scores': return this._validateAbilityScoresStep();
       case 'skills': return this.formData.selectedSkills.length === this.requiredSkillCount ? {} : { skills: `Selecciona exactamente ${this.requiredSkillCount} habilidades.` };
@@ -571,16 +733,24 @@ export class ForgeCharacterPage implements OnInit {
   }
 
   private _validateAbilityScoresStep(): { [key: string]: string } {
+    const errors: { [key: string]: string } = {};
     if (this.formData.scoreMode === 'standard') {
       const allAssigned = Object.values(this.formData.tokenAssignments).every(v => v !== null);
-      return allAssigned ? {} : { scores: 'Asigna todos los valores de habilidad.' };
+      if (!allAssigned) errors['scores'] = 'Asigna todos los valores de habilidad.';
+    } else {
+      const scores = this.formData.manualScores;
+      const keys = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
+      for (const key of keys) {
+        if (scores[key] < 1 || scores[key] > 20) {
+          errors[key] = 'El valor debe estar entre 1 y 20';
+        }
+      }
     }
-    const scores = this.formData.manualScores;
-    const keys = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
-    const errors: { [key: string]: string } = {};
-    for (const key of keys) {
-      if (scores[key] < 1 || scores[key] > 20) {
-        errors[key] = 'El valor debe estar entre 1 y 20';
+    if (this.formData.hpGenerationMode === 'roll' && this.formData.level > 1) {
+      const maxRoll = (this.formData.level - 1) * (this.formData.selectedClass?.hitDie ?? 8);
+      const minRoll = this.formData.level - 1;
+      if (this.formData.hpRolledValue < minRoll || this.formData.hpRolledValue > maxRoll) {
+         errors['hpRolledValue'] = `El valor de HP debe estar entre ${minRoll} y ${maxRoll}`;
       }
     }
     return errors;
@@ -603,7 +773,7 @@ export class ForgeCharacterPage implements OnInit {
  * Validates the identity step fields.
  * Returns a map of field → error message; empty map means valid.
  */
-export function validateIdentityStep(formData: Pick<CharacterFormData, 'name' | 'background' | 'alignment' | 'xp'>): { [key: string]: string } {
+export function validateIdentityStep(formData: Pick<CharacterFormData, 'name' | 'background' | 'alignment' | 'xp' | 'level'>): { [key: string]: string } {
   const errors: { [key: string]: string } = {};
 
   const trimmedName = formData.name.trim();
@@ -623,6 +793,10 @@ export function validateIdentityStep(formData: Pick<CharacterFormData, 'name' | 
 
   if (formData.xp < 0) {
     errors['xp'] = 'La experiencia no puede ser negativa';
+  }
+
+  if (formData.level < 1 || formData.level > 20) {
+    errors['level'] = 'El nivel debe estar entre 1 y 20';
   }
 
   return errors;
@@ -692,9 +866,18 @@ export function formatRaceBonuses(race: any): string {
  * @param hitDie  The class hit die value (e.g. 8 for d8)
  * @param finalCon  The final Constitution score (base + racial bonus)
  */
-export function calculateHp(hitDie: number, finalCon: number): number {
+export function calculateHp(hitDie: number, finalCon: number, level: number = 1, mode: 'average' | 'roll' = 'average', rolledValue: number = 0): number {
   const conModifier = Math.floor((finalCon - 10) / 2);
-  return hitDie + conModifier;
+  const firstLevelHp = hitDie + conModifier;
+  
+  if (level <= 1) return firstLevelHp;
+
+  if (mode === 'average') {
+    const avgHpPerLevel = Math.floor(hitDie / 2) + 1 + conModifier;
+    return firstLevelHp + ((level - 1) * avgHpPerLevel);
+  } else {
+    return firstLevelHp + rolledValue + ((level - 1) * conModifier);
+  }
 }
 
 /**
@@ -735,12 +918,12 @@ export function buildCharacterDto(
     background: formData.background,
     alignment: formData.alignment,
     xp: formData.xp,
-    level: 1,
+    level: formData.level,
     maxHp: hp,
     currentHp: hp,
     tempHp: 0,
     speed: 30,
-    hitDiceTotal: 1,
+    hitDiceTotal: formData.level,
     hitDiceSpent: 0,
     baseStr: finalScores.str,
     baseDex: finalScores.dex,

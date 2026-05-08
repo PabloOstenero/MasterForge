@@ -87,6 +87,23 @@
           }
         </div>
 
+        <!-- Level -->
+        <div class="field-group">
+          <label class="field-label">Nivel del Personaje <span class="required">*</span></label>
+          <ion-input
+            class="forge-input"
+            type="number"
+            [(ngModel)]="formData.level"
+            placeholder="1"
+            min="1"
+            max="20"
+            [class.input-error]="validationErrors['level']">
+          </ion-input>
+          @if (validationErrors['level']) {
+            <p class="error-message">{{ validationErrors['level'] }}</p>
+          }
+        </div>
+
       </div>
     }
 
@@ -186,28 +203,48 @@
             <p class="empty-message">No hay clases disponibles.</p>
           }
 
-          @if (formData.selectedClass && filteredSubclasses.length > 0) {
-            <div class="subclasses-section">
-              <h3 class="subsection-title">Subclase (opcional)</h3>
-              <ion-grid class="races-grid">
-                <ion-row>
-                  @for (sc of filteredSubclasses; track sc.id) {
-                    <ion-col size="12" size-md="6">
-                      <div
-                        class="selectable-card selectable-card--small"
-                        [class.selected]="formData.selectedSubclass?.id === sc.id"
-                        (click)="selectSubclass(sc)">
-                        <div class="card-title">{{ sc.name }}</div>
-                      </div>
-                    </ion-col>
-                  }
-                </ion-row>
-              </ion-grid>
-            </div>
-          }
-
           @if (validationErrors['class']) {
             <p class="error-message">{{ validationErrors['class'] }}</p>
+          }
+        }
+      </div>
+    }
+
+    <!-- ── Step 2.5: Subclass ────────────────────────────────────────────── -->
+    @if (currentStepName === 'subclass') {
+      <div class="step-section">
+        <h2 class="section-title">Selecciona tu Subclase</h2>
+        <p class="mode-hint">Tu clase te otorga una especialización a este nivel.</p>
+
+        @if (subclassesLoading) {
+          <div class="loading-container">
+            <ion-spinner name="crescent" color="warning"></ion-spinner>
+            <p class="loading-text">Cargando subclases...</p>
+          </div>
+        }
+
+        @if (!subclassesLoading) {
+          @if (filteredSubclasses.length > 0) {
+            <ion-grid class="races-grid">
+              <ion-row>
+                @for (sc of filteredSubclasses; track sc.id) {
+                  <ion-col size="12" size-md="6">
+                    <div
+                      class="selectable-card selectable-card--small"
+                      [class.selected]="formData.selectedSubclass?.id === sc.id"
+                      (click)="selectSubclass(sc)">
+                      <div class="card-title">{{ sc.name }}</div>
+                    </div>
+                  </ion-col>
+                }
+              </ion-row>
+            </ion-grid>
+          } @else {
+            <p class="empty-message">No hay subclases disponibles para esta clase.</p>
+          }
+
+          @if (validationErrors['subclass']) {
+            <p class="error-message">{{ validationErrors['subclass'] }}</p>
           }
         }
       </div>
@@ -371,6 +408,39 @@
           <p class="error-message">{{ validationErrors['scores'] }}</p>
         }
 
+        <!-- HP Generation Mode (if level > 1) -->
+        @if (formData.level > 1 && formData.selectedClass) {
+          <h3 class="subsection-title" style="margin-top: 24px;">Generación de Puntos de Vida (Niveles Superiores)</h3>
+          <ion-segment [value]="formData.hpGenerationMode" (ionChange)="onHpGenerationModeChange($event)" class="score-mode-segment">
+            <ion-segment-button value="average">
+              <ion-label>Promedio</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="roll">
+              <ion-label>Tirada Manual</ion-label>
+            </ion-segment-button>
+          </ion-segment>
+
+          @if (formData.hpGenerationMode === 'roll') {
+            <div class="manual-entry-section">
+              <p class="mode-hint">Introduce la suma total de tus tiradas de dados de golpe (sin modificadores) para los niveles 2 a {{ formData.level }}.</p>
+              <div class="field-group">
+                <ion-input
+                  class="forge-input"
+                  type="number"
+                  [(ngModel)]="formData.hpRolledValue"
+                  placeholder="Suma de las tiradas"
+                  [min]="formData.level - 1"
+                  [max]="(formData.level - 1) * formData.selectedClass.hitDie"
+                  [class.input-error]="validationErrors['hpRolledValue']">
+                </ion-input>
+                @if (validationErrors['hpRolledValue']) {
+                  <p class="error-message">{{ validationErrors['hpRolledValue'] }}</p>
+                }
+              </div>
+            </div>
+          }
+        }
+
         <!-- HP preview (shown when class is selected and CON is assigned) -->
         @if (previewHp !== null) {
           <div class="hp-preview-row">
@@ -414,6 +484,70 @@
       </div>
     }
 
+    <!-- ── Spells Step ─────────────────────────────────────────────────── -->
+    @if (currentStepName === 'spells') {
+      <div class="step-section">
+        <h2 class="section-title">Conjuros</h2>
+        <p class="mode-hint">Selecciona los trucos y conjuros que conoce tu personaje de nivel {{ formData.level }}.</p>
+        
+        @if (spellsLoading) {
+          <div class="loading-container">
+            <ion-spinner name="crescent" color="warning"></ion-spinner>
+            <p class="loading-text">Cargando conjuros...</p>
+          </div>
+        }
+
+        @if (!spellsLoading) {
+          <div class="skills-count">
+            <span [class.skills-count--complete]="selectedCantripsCount === cantripsAllowed">
+              Trucos: {{ selectedCantripsCount }} / {{ cantripsAllowed }}
+            </span>
+            <span style="margin-left: 16px;" [class.skills-count--complete]="selectedNonCantripsCount === spellsAllowed">
+              Conjuros: {{ selectedNonCantripsCount }} / {{ spellsAllowed }}
+            </span>
+          </div>
+
+          <!-- Cantrips -->
+          @if (cantripsAllowed > 0) {
+            <h3 class="subsection-title">Trucos (Nivel 0)</h3>
+            <div class="skills-list">
+              @for (spell of availableCantrips; track spell.id) {
+                <button
+                  class="skill-option"
+                  [class.skill-selected]="isSpellSelected(spell.id)"
+                  [class.skill-disabled]="isSpellDisabled(spell.id, true)"
+                  [disabled]="isSpellDisabled(spell.id, true)"
+                  (click)="toggleSpell(spell.id)">
+                  <span class="skill-name">{{ spell.name }}</span>
+                </button>
+              }
+            </div>
+          }
+
+          <!-- Spells -->
+          @if (spellsAllowed > 0) {
+            <h3 class="subsection-title">Conjuros (Nivel 1+)</h3>
+            <div class="skills-list">
+              @for (spell of availableNonCantrips; track spell.id) {
+                <button
+                  class="skill-option"
+                  [class.skill-selected]="isSpellSelected(spell.id)"
+                  [class.skill-disabled]="isSpellDisabled(spell.id, false)"
+                  [disabled]="isSpellDisabled(spell.id, false)"
+                  (click)="toggleSpell(spell.id)">
+                  <span class="skill-name">{{ spell.name }} <span style="opacity:0.6;font-size:0.85em;margin-left:4px;">Nivel {{ spell.level }}</span></span>
+                </button>
+              }
+            </div>
+          }
+
+          @if (validationErrors['spells']) {
+            <p class="error-message">{{ validationErrors['spells'] }}</p>
+          }
+        }
+      </div>
+    }
+
     <!-- ── Step 5: Review ───────────────────────────────────────────────── -->
     @if (currentStepName === 'review') {
       <div class="step-section">
@@ -431,6 +565,7 @@
         <div class="review-card">
           <div class="review-card-header">Identidad</div>
           <div class="review-row"><span class="review-key">Nombre</span><span class="review-val">{{ formData.name }}</span></div>
+          <div class="review-row"><span class="review-key">Nivel</span><span class="review-val">{{ formData.level }}</span></div>
           <div class="review-row"><span class="review-key">Trasfondo</span><span class="review-val">{{ formData.background }}</span></div>
           <div class="review-row"><span class="review-key">Alineamiento</span><span class="review-val">{{ formData.alignment }}</span></div>
           <div class="review-row"><span class="review-key">XP</span><span class="review-val">{{ formData.xp }}</span></div>
@@ -521,6 +656,22 @@
             <div class="review-row"><span class="review-val">Ninguna seleccionada</span></div>
           }
         </div>
+
+        <!-- Conjuros seleccionados -->
+        @if (formData.selectedSpells.length > 0) {
+          <div class="review-card">
+            <div class="review-card-header">Conjuros Seleccionados</div>
+            @for (spellId of formData.selectedSpells; track spellId) {
+              @let foundSpell = getSpellById(spellId);
+              @if (foundSpell) {
+                <div class="review-row">
+                  <span class="review-key">{{ foundSpell.name }}</span>
+                  <span class="review-val">{{ foundSpell.level === 0 ? 'Truco' : 'Nivel ' + foundSpell.level }}</span>
+                </div>
+              }
+            }
+          </div>
+        }
 
         <!-- Error de envío -->
         @if (submitError) {

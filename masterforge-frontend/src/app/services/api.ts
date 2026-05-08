@@ -207,6 +207,11 @@ updateTempHp(characterId: string, tempHp: number): Observable<any> {
     );
   }
 
+  // Create a character spell association
+  createCharacterSpell(dto: { characterId: string; spellId: string; isPrepared: boolean }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/character-spells`, dto);
+  }
+
 }
 
 // Interfaces for player summary cards

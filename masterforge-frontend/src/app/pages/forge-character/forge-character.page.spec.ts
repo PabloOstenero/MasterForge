@@ -76,7 +76,7 @@ describe('Property 2: Validation blocks step advancement', () => {
         fc.constantFrom(...ALIGNMENTS),
         fc.integer({ min: 0, max: 9999 }),
         (name, background, alignment, xp) => {
-          const errors = validateIdentityStep({ name, background, alignment, xp });
+          const errors = validateIdentityStep({ name, background, alignment, xp, level: 1 });
           expect(errors['name']).toBeDefined();
         }
       ),
@@ -94,7 +94,7 @@ describe('Property 2: Validation blocks step advancement', () => {
         (name, background, alignment, xp) => {
           // Ensure the name has no leading/trailing whitespace so trimmed length is also > 50
           const paddedName = name.replace(/\s/g, 'a');
-          const errors = validateIdentityStep({ name: paddedName, background, alignment, xp });
+          const errors = validateIdentityStep({ name: paddedName, background, alignment, xp, level: 1 });
           if (paddedName.trim().length > 50) {
             expect(errors['name']).toBeDefined();
           }
@@ -112,7 +112,7 @@ describe('Property 2: Validation blocks step advancement', () => {
         fc.constantFrom(...ALIGNMENTS),
         fc.integer({ min: 0, max: 9999 }),
         (name, background, alignment, xp) => {
-          const errors = validateIdentityStep({ name, background, alignment, xp });
+          const errors = validateIdentityStep({ name, background, alignment, xp, level: 1 });
           expect(errors['name']).toBeUndefined();
         }
       ),
@@ -127,7 +127,7 @@ describe('Property 2: Validation blocks step advancement', () => {
         fc.constantFrom(...ALIGNMENTS),
         fc.integer({ min: 0, max: 9999 }),
         (name, alignment, xp) => {
-          const errors = validateIdentityStep({ name, background: '', alignment, xp });
+          const errors = validateIdentityStep({ name, background: '', alignment, xp, level: 1 });
           expect(Object.keys(errors).length).toBeGreaterThan(0);
           expect(errors['background']).toBeDefined();
         }
@@ -143,7 +143,7 @@ describe('Property 2: Validation blocks step advancement', () => {
         fc.string({ minLength: 1 }),
         fc.integer({ min: 0, max: 9999 }),
         (name, background, xp) => {
-          const errors = validateIdentityStep({ name, background, alignment: '', xp });
+          const errors = validateIdentityStep({ name, background, alignment: '', xp, level: 1 });
           expect(Object.keys(errors).length).toBeGreaterThan(0);
           expect(errors['alignment']).toBeDefined();
         }
@@ -160,7 +160,7 @@ describe('Property 2: Validation blocks step advancement', () => {
         fc.constantFrom(...ALIGNMENTS),
         fc.integer({ min: 0, max: 9999 }),
         (name, background, alignment, xp) => {
-          const errors = validateIdentityStep({ name, background, alignment, xp });
+          const errors = validateIdentityStep({ name, background, alignment, xp, level: 1 });
           expect(Object.keys(errors).length).toBe(0);
         }
       ),
@@ -230,7 +230,7 @@ describe('STEP_LABELS', () => {
 // Validates: Requirements 3.1
 
 describe('Property 3: Character name length validation', () => {
-  const validBase = { background: 'Soldado', alignment: 'Legal Bueno', xp: 0 };
+  const validBase = { background: 'Soldado', alignment: 'Legal Bueno', xp: 0, level: 1 };
 
   it('should accept any name whose trimmed length is between 1 and 50 (inclusive)', () => {
     fc.assert(
@@ -300,7 +300,7 @@ describe('Property 4: XP non-negative validation', () => {
       fc.property(
         fc.integer({ min: 0, max: 355000 }),
         (xp) => {
-          const errors = validateIdentityStep({ ...validBase, xp });
+          const errors = validateIdentityStep({ ...validBase, xp, level: 1 });
           expect(errors['xp']).toBeUndefined();
         }
       ),
@@ -313,7 +313,7 @@ describe('Property 4: XP non-negative validation', () => {
       fc.property(
         fc.integer({ min: -100000, max: -1 }),
         (xp) => {
-          const errors = validateIdentityStep({ ...validBase, xp });
+          const errors = validateIdentityStep({ ...validBase, xp, level: 1 });
           expect(errors['xp']).toBeDefined();
         }
       ),
@@ -322,12 +322,12 @@ describe('Property 4: XP non-negative validation', () => {
   });
 
   it('should accept XP = 0 (default value)', () => {
-    const errors = validateIdentityStep({ ...validBase, xp: 0 });
+    const errors = validateIdentityStep({ ...validBase, xp: 0, level: 1 });
     expect(errors['xp']).toBeUndefined();
   });
 
   it('should reject XP = -1', () => {
-    const errors = validateIdentityStep({ ...validBase, xp: -1 });
+    const errors = validateIdentityStep({ ...validBase, xp: -1, level: 1 });
     expect(errors['xp']).toBeDefined();
   });
 });
@@ -1131,7 +1131,8 @@ describe('Property 12: HP calculation correctness', () => {
             selectedSkills: [],
             finalScores: { str: 10, dex: 10, con: finalCon, int: 10, wis: 10, cha: 10 },
             calculatedHp: hp,
-            equipmentSelections: {}
+            equipmentSelections: {},
+            level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: []
           };
           const finalScores = { str: 10, dex: 10, con: finalCon, int: 10, wis: 10, cha: 10 };
           const dto = buildCharacterDto(formData, finalScores, hp, 'user-1');
@@ -1192,7 +1193,8 @@ describe('Property 13: CharacterDto defaults are always fixed', () => {
             selectedSkills: skills,
             finalScores: { str: 10, dex: 10, con: finalCon, int: 10, wis: 10, cha: 10 },
             calculatedHp: hp,
-            equipmentSelections: {}
+            equipmentSelections: {},
+            level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: []
           };
           const finalScores = { str: 10, dex: 10, con: finalCon, int: 10, wis: 10, cha: 10 };
           const dto = buildCharacterDto(formData, finalScores, hp, 'user-1');
@@ -1233,7 +1235,7 @@ describe('Property 13: CharacterDto defaults are always fixed', () => {
             tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
             manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-            calculatedHp: 8,
+            level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
             equipmentSelections: {}
           };
           const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
@@ -1269,7 +1271,7 @@ describe('Property 14: DTO user ID matches JWT token', () => {
             tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
             manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-            calculatedHp: 8,
+            level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
             equipmentSelections: {}
           };
           const dto = buildCharacterDto(formData, formData.finalScores, 8, userId);
@@ -1298,7 +1300,7 @@ describe('Property 14: DTO user ID matches JWT token', () => {
             tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
             manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-            calculatedHp: 8,
+            level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
             equipmentSelections: {}
           };
           const dto = buildCharacterDto(formData, formData.finalScores, 8, extractedId);
@@ -1317,7 +1319,7 @@ describe('Property 14: DTO user ID matches JWT token', () => {
       tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
       manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-      calculatedHp: 8,
+      level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
       equipmentSelections: {}
     };
     const dto = buildCharacterDto(formData, formData.finalScores, 8, null);
@@ -1346,7 +1348,7 @@ describe('Property 15: DTO saving throws match selected class', () => {
             tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
             manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-            calculatedHp: 8,
+            level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
             equipmentSelections: {}
           };
           const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
@@ -1365,7 +1367,7 @@ describe('Property 15: DTO saving throws match selected class', () => {
       tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
       manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-      calculatedHp: 8,
+      level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
       equipmentSelections: {}
     };
     const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
@@ -1392,7 +1394,7 @@ describe('Property 16: DTO skill proficiencies match selected skills', () => {
             tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
             manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedSkills, finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-            calculatedHp: 8,
+            level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
             equipmentSelections: {}
           };
           const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
@@ -1423,7 +1425,7 @@ describe('Property 16: DTO skill proficiencies match selected skills', () => {
       tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
       manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-      calculatedHp: 8,
+      level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
       equipmentSelections: {}
     };
     const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
@@ -1454,7 +1456,7 @@ describe('ForgeCharacterPage: submit flow', () => {
       manualScores: { str: 15, dex: 12, con: 14, int: 10, wis: 10, cha: 8 },
       selectedSkills: ['athletics', 'perception'],
       finalScores: { str: 16, dex: 12, con: 14, int: 10, wis: 10, cha: 8 },
-      calculatedHp: 12,
+      level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 12,
       equipmentSelections: {}
     };
     component.currentStep = 5;
@@ -1591,7 +1593,7 @@ function makeFormDataWithClass(cls: any): CharacterFormData {
     manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
     selectedSkills: [],
     finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-    calculatedHp: 8,
+    level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
   };
 }
 
@@ -1863,7 +1865,7 @@ describe('buildCharacterDto: resolveInventory integration', () => {
     manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
     selectedSkills: [],
     finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-    calculatedHp: 8,
+    level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
   };
 
   it('should include correct inventory lines for structured equipment with fixed grants only', () => {
@@ -1989,7 +1991,7 @@ describe('ForgeCharacterPage: submitCharacter with structured equipment', () => 
       manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedSkills: [],
       finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-      calculatedHp: 8,
+      level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
     };
 
     component.submitCharacter();
@@ -2016,7 +2018,7 @@ describe('ForgeCharacterPage: submitCharacter with structured equipment', () => 
       manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedSkills: [],
       finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-      calculatedHp: 8,
+      level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
     };
 
     component.submitCharacter();
@@ -2040,7 +2042,7 @@ describe('ForgeCharacterPage: submitCharacter with structured equipment', () => 
       manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedSkills: [],
       finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-      calculatedHp: 8,
+      level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
     };
 
     component.submitCharacter();
