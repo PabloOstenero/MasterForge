@@ -1,96 +1,810 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button fill="clear" (click)="cancel()" data-testid="cancel-button">Cancelar</ion-button>
-    </ion-buttons>
-    <ion-title>Nueva Subclase</ion-title>
-  </ion-toolbar>
-</ion-header>
+<div class="homebrew-form-wrapper">
 
-<ion-content class="homebrew-form-content">
-  <div class="ion-padding">
+  <!-- Top bar -->
+  <div class="homebrew-form-topbar">
+    <button class="back-btn" type="button" (click)="cancel()" data-testid="cancel-button">
+      ← Cancelar
+    </button>
+    <h1 class="form-title">{{ editMode ? 'Editar Subclase' : 'Nueva Subclase' }}</h1>
+  </div>
 
-    <!-- Error state -->
+  <div class="homebrew-form-content">
+
+    <!-- Error banner -->
     @if (error) {
-      <p class="text-muted" data-testid="form-error">{{ error }}</p>
-    }
-
-    <!-- Classes loading error -->
-    @if (classesError) {
-      <p class="text-muted" data-testid="classes-error">{{ classesError }}</p>
+      <div class="form-error-banner" data-testid="form-error">
+        <span>⚠ {{ error }}</span>
+      </div>
     }
 
     <form [formGroup]="form" (ngSubmit)="submit()">
 
-      <!-- Name field -->
-      <div class="field-group">
-        <label class="field-label">Nombre <span class="required">*</span></label>
-        <ion-input
-          class="forge-input"
-          formControlName="name"
-          placeholder="Nombre de la subclase"
-          data-testid="name-input"
-          [class.input-error]="form.get('name')?.invalid && form.get('name')?.touched">
-        </ion-input>
-        @if (form.get('name')?.invalid && form.get('name')?.touched) {
-          <p class="error-message" data-testid="name-error">El nombre es obligatorio.</p>
-        }
+      <!-- Tab bar -->
+      <div class="tab-bar">
+        <button type="button" class="tab-btn" [class.tab-btn--active]="activeTab === 'identidad'" (click)="activeTab = 'identidad'" data-testid="tab-identidad">
+          Identidad
+          @if (tabHasError('identidad')) { <span class="tab-error-dot"></span> }
+        </button>
+        <button type="button" class="tab-btn" [class.tab-btn--active]="activeTab === 'competencias'" (click)="activeTab = 'competencias'" data-testid="tab-competencias">
+          Competencias
+          @if (tabHasError('competencias')) { <span class="tab-error-dot"></span> }
+        </button>
+        <button type="button" class="tab-btn" [class.tab-btn--active]="activeTab === 'defensas'" (click)="activeTab = 'defensas'" data-testid="tab-defensas">
+          Defensas
+          @if (tabHasError('defensas')) { <span class="tab-error-dot"></span> }
+        </button>
+        <button type="button" class="tab-btn" [class.tab-btn--active]="activeTab === 'rasgos'" (click)="activeTab = 'rasgos'" data-testid="tab-rasgos">
+          Rasgos
+          @if (tabHasError('rasgos')) { <span class="tab-error-dot"></span> }
+        </button>
+        <button type="button" class="tab-btn" [class.tab-btn--active]="activeTab === 'conjuros'" (click)="activeTab = 'conjuros'" data-testid="tab-conjuros">
+          Conjuros
+          @if (tabHasError('conjuros')) { <span class="tab-error-dot"></span> }
+        </button>
+        <button type="button" class="tab-btn" [class.tab-btn--active]="activeTab === 'recursos'" (click)="activeTab = 'recursos'" data-testid="tab-recursos">
+          Recursos
+          @if (tabHasError('recursos')) { <span class="tab-error-dot"></span> }
+        </button>
       </div>
 
-      <!-- Description field -->
-      <div class="field-group">
-        <label class="field-label">Descripción <span class="required">*</span></label>
-        <ion-input
-          class="forge-input"
-          formControlName="description"
-          placeholder="Descripción de la subclase"
-          data-testid="description-input"
-          [class.input-error]="form.get('description')?.invalid && form.get('description')?.touched">
-        </ion-input>
-        @if (form.get('description')?.invalid && form.get('description')?.touched) {
-          <p class="error-message" data-testid="description-error">La descripción es obligatoria.</p>
-        }
-      </div>
+      <!-- ================================================================ -->
+      <!-- Tab: Identidad                                                   -->
+      <!-- ================================================================ -->
+      @if (activeTab === 'identidad') {
+        <div class="tab-content" data-testid="tab-content-identidad">
+          <div class="form-grid">
+            <div class="col-left">
 
-      <!-- Parent Class selector -->
-      <div class="field-group">
-        <label class="field-label">Clase Padre <span class="required">*</span></label>
-        @if (loadingClasses) {
-          <ion-spinner name="crescent" data-testid="classes-spinner"></ion-spinner>
-        } @else {
-          <ion-select
-            class="forge-input"
-            formControlName="parentClassId"
-            placeholder="Selecciona una clase"
-            data-testid="parent-class-select"
-            [class.input-error]="form.get('parentClassId')?.invalid && form.get('parentClassId')?.touched">
-            @for (cls of availableClasses; track cls.id) {
-              <ion-select-option [value]="cls.id">{{ cls.name }}</ion-select-option>
+              <div class="form-section">
+                <h2 class="section-title">Identidad</h2>
+
+                <!-- Nombre -->
+                <div class="field-group">
+                  <label class="field-label">Nombre <span class="required">*</span></label>
+                  <ion-input
+                    class="forge-input"
+                    formControlName="name"
+                    placeholder="Nombre de la subclase"
+                    data-testid="name-input"
+                    [class.input-error]="form.get('name')?.invalid && form.get('name')?.touched">
+                  </ion-input>
+                  @if (form.get('name')?.invalid && form.get('name')?.touched) {
+                    <p class="error-message" data-testid="name-error">El nombre es obligatorio.</p>
+                  }
+                </div>
+
+                <!-- Descripción -->
+                <div class="field-group">
+                  <label class="field-label">Descripción <span class="optional-tag">opcional</span></label>
+                  <ion-textarea
+                    class="forge-input forge-textarea"
+                    formControlName="description"
+                    placeholder="Descripción narrativa de la subclase…"
+                    rows="4"
+                    data-testid="description-input">
+                  </ion-textarea>
+                </div>
+
+              </div>
+
+            </div><!-- .col-left -->
+            <div class="col-right">
+
+              <div class="form-section">
+                <h2 class="section-title">Clase y Nivel</h2>
+
+                <!-- Clase Padre -->
+                <div class="field-group">
+                  <label class="field-label">Clase Padre <span class="required">*</span></label>
+
+                  @if (loadingClasses) {
+                    <div class="classes-loading" data-testid="classes-spinner">
+                      <ion-spinner name="crescent"></ion-spinner>
+                      <span class="text-muted">Cargando clases…</span>
+                    </div>
+                  }
+                  <select
+                    [hidden]="loadingClasses"
+                    class="forge-select-native"
+                    formControlName="parentClassId"
+                    data-testid="parent-class-select"
+                    [class.input-error]="form.get('parentClassId')?.invalid && form.get('parentClassId')?.touched">
+                    <option [ngValue]="null" disabled>Selecciona una clase…</option>
+                    @for (cls of availableClasses; track cls.id) {
+                      <option [ngValue]="cls.id">{{ cls.name }}</option>
+                    }
+                  </select>
+
+                  @if (classesError) {
+                    <p class="error-message" data-testid="classes-error">{{ classesError }}</p>
+                  }
+                  @if (form.get('parentClassId')?.invalid && form.get('parentClassId')?.touched) {
+                    <p class="error-message" data-testid="parent-class-error">La clase padre es obligatoria.</p>
+                  }
+                </div>
+
+
+
+              </div>
+
+            </div><!-- .col-right -->
+          </div><!-- .form-grid -->
+        </div><!-- .tab-content identidad -->
+      }
+
+      <!-- ================================================================ -->
+      <!-- Tab: Competencias                                                -->
+      <!-- ================================================================ -->
+      @if (activeTab === 'competencias') {
+        <div class="tab-content" data-testid="tab-content-competencias">
+          <div class="form-grid">
+            <div class="col-left">
+
+              <!-- Competencias con Armas -->
+              <div class="form-section">
+                <h2 class="section-title">Competencias con Armas <span class="section-badge">opcional</span></h2>
+                <div class="chip-grid" data-testid="weapon-profs-input">
+                  @for (wp of weaponProfs; track wp; let i = $index) {
+                    <button type="button" class="chip" [class.chip--active]="weaponChips[i]"
+                      (click)="toggleWeaponChip(i)" [attr.data-testid]="'weapon-chip-' + i">
+                      {{ wp }}
+                    </button>
+                  }
+                </div>
+                <div class="skill-picker-row" style="margin-top: 0.5rem;">
+                  <ion-input class="forge-input" [(ngModel)]="customWeaponInput" [ngModelOptions]="{standalone: true}"
+                    placeholder="Arma personalizada…" data-testid="weapon-prof-input">
+                  </ion-input>
+                  <button type="button" class="btn-add" (click)="addCustomWeaponProf()" data-testid="add-weapon-prof-button">Añadir</button>
+                </div>
+                @if (customWeaponProfs.length > 0) {
+                  <div class="skill-tags" data-testid="custom-weapon-tags">
+                    @for (wp of customWeaponProfs; track $index; let i = $index) {
+                      <div class="skill-tag">
+                        <span class="skill-tag-name">{{ wp }}</span>
+                        <button type="button" class="skill-tag-remove" (click)="removeCustomWeaponProf(i)"
+                          [attr.data-testid]="'remove-weapon-prof-' + i">×</button>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <p class="empty-hint">Sin armas personalizadas.</p>
+                }
+              </div>
+
+              <!-- Competencias con Armaduras -->
+              <div class="form-section">
+                <h2 class="section-title">Competencias con Armaduras <span class="section-badge">opcional</span></h2>
+                <div class="chip-grid" data-testid="armor-profs-input">
+                  @for (ap of armorProfs; track ap; let i = $index) {
+                    <button type="button" class="chip" [class.chip--active]="armorChips[i]"
+                      (click)="toggleArmorChip(i)" [attr.data-testid]="'armor-chip-' + i">
+                      {{ ap }}
+                    </button>
+                  }
+                </div>
+                <div class="skill-picker-row" style="margin-top: 0.5rem;">
+                  <ion-input class="forge-input" [(ngModel)]="customArmorInput" [ngModelOptions]="{standalone: true}"
+                    placeholder="Armadura personalizada…" data-testid="armor-prof-input">
+                  </ion-input>
+                  <button type="button" class="btn-add" (click)="addCustomArmorProf()" data-testid="add-armor-prof-button">Añadir</button>
+                </div>
+                @if (customArmorProfs.length > 0) {
+                  <div class="skill-tags" data-testid="custom-armor-tags">
+                    @for (ap of customArmorProfs; track $index; let i = $index) {
+                      <div class="skill-tag">
+                        <span class="skill-tag-name">{{ ap }}</span>
+                        <button type="button" class="skill-tag-remove" (click)="removeCustomArmorProf(i)"
+                          [attr.data-testid]="'remove-armor-prof-' + i">×</button>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <p class="empty-hint">Sin armaduras personalizadas.</p>
+                }
+              </div>
+
+              <!-- Competencias con Herramientas -->
+              <div class="form-section">
+                <h2 class="section-title">Competencias con Herramientas <span class="section-badge">opcional</span></h2>
+                <div class="skill-picker-row">
+                  <ion-input class="forge-input" [(ngModel)]="customToolInput" [ngModelOptions]="{standalone: true}"
+                    placeholder="Ej: Herramientas de artesano…" data-testid="tool-prof-input">
+                  </ion-input>
+                  <button type="button" class="btn-add" (click)="addCustomToolProf()" data-testid="add-tool-prof-button">Añadir</button>
+                </div>
+                @if (customToolProfs.length > 0) {
+                  <div class="skill-tags" data-testid="custom-tool-tags">
+                    @for (tp of customToolProfs; track $index; let i = $index) {
+                      <div class="skill-tag">
+                        <span class="skill-tag-name">{{ tp }}</span>
+                        <button type="button" class="skill-tag-remove" (click)="removeCustomToolProf(i)"
+                          [attr.data-testid]="'remove-tool-prof-' + i">×</button>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <p class="empty-hint">Sin competencias con herramientas.</p>
+                }
+              </div>
+
+            </div><!-- .col-left -->
+            <div class="col-right">
+
+              <!-- Competencias de Habilidad -->
+              <div class="form-section">
+                <h2 class="section-title">Competencias de Habilidad <span class="section-badge">opcional</span></h2>
+
+                <div class="skill-picker-row">
+                  <select class="forge-select-native" [(ngModel)]="skillInput" [ngModelOptions]="{standalone: true}"
+                    data-testid="skill-picker-select">
+                    <option value="" disabled>Selecciona una habilidad…</option>
+                    @for (skill of skillNames; track skill) {
+                      <option [value]="skill">{{ skill }}</option>
+                    }
+                  </select>
+                  <button type="button" class="btn-add" [disabled]="!skillInput" (click)="addSkill()"
+                    data-testid="add-skill-button">+ Añadir</button>
+                </div>
+
+                @if (getSelectedSkills().length > 0) {
+                  <div class="skill-tags" data-testid="skill-tags">
+                    @for (skill of getSelectedSkills(); track skill) {
+                      <div class="skill-tag">
+                        <span class="skill-tag-name">{{ skill }}</span>
+                        <button type="button" class="skill-tag-remove" (click)="removeSkill(skill)"
+                          [attr.data-testid]="'remove-skill-' + skill">×</button>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <p class="empty-hint">Sin competencias de habilidad.</p>
+                }
+
+                <div class="field-group" style="margin-top: 1rem; max-width: 200px;">
+                  <label class="field-label">Número de elecciones <span class="optional-tag">opcional</span></label>
+                  <ion-input class="forge-input" type="number" formControlName="skillChoiceCount"
+                    placeholder="Ej: 2" data-testid="skill-choice-count">
+                  </ion-input>
+                </div>
+              </div>
+
+            </div><!-- .col-right -->
+          </div><!-- .form-grid -->
+        </div>
+      }
+
+      <!-- ================================================================ -->
+      <!-- Tab: Defensas                                                    -->
+      <!-- ================================================================ -->
+      @if (activeTab === 'defensas') {
+        <div class="tab-content" data-testid="tab-content-defensas">
+          <div class="form-grid">
+            <div class="col-left">
+
+              <!-- Resistencias al Daño -->
+              <div class="form-section">
+                <h2 class="section-title">Resistencias al Daño <span class="section-badge">opcional</span></h2>
+                <div class="chip-grid" data-testid="damage-resistances-input">
+                  @for (dt of damageTypes; track dt; let i = $index) {
+                    <button
+                      type="button"
+                      class="chip"
+                      [class.chip--active]="damageResistances.at(i).value"
+                      (click)="toggleDamageResistanceChip(i)"
+                      [attr.data-testid]="'damage-resistance-chip-' + i">
+                      {{ dt }}
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <!-- Inmunidades al Daño -->
+              <div class="form-section">
+                <h2 class="section-title">Inmunidades al Daño <span class="section-badge">opcional</span></h2>
+                <div class="chip-grid" data-testid="damage-immunities-input">
+                  @for (dt of damageTypes; track dt; let i = $index) {
+                    <button
+                      type="button"
+                      class="chip"
+                      [class.chip--active]="damageImmunities.at(i).value"
+                      (click)="toggleDamageImmunityChip(i)"
+                      [attr.data-testid]="'damage-immunity-chip-' + i">
+                      {{ dt }}
+                    </button>
+                  }
+                </div>
+              </div>
+
+            </div><!-- .col-left -->
+            <div class="col-right">
+
+              <!-- Inmunidades a Condiciones -->
+              <div class="form-section">
+                <h2 class="section-title">Inmunidades a Condiciones <span class="section-badge">opcional</span></h2>
+                <div class="chip-grid" data-testid="condition-immunities-input">
+                  @for (cond of conditions; track cond; let i = $index) {
+                    <button
+                      type="button"
+                      class="chip"
+                      [class.chip--active]="conditionImmunities.at(i).value"
+                      (click)="toggleConditionImmunityChip(i)"
+                      [attr.data-testid]="'condition-immunity-chip-' + i">
+                      {{ cond }}
+                    </button>
+                  }
+                </div>
+              </div>
+
+            </div><!-- .col-right -->
+          </div><!-- .form-grid -->
+        </div>
+      }
+
+      <!-- ================================================================ -->
+      <!-- Tab: Rasgos                                                      -->
+      <!-- ================================================================ -->
+      @if (activeTab === 'rasgos') {
+        <div class="tab-content" data-testid="tab-content-rasgos">
+          <div class="form-section">
+            <div class="section-header-row">
+              <h2 class="section-title">Rasgos de Subclase <span class="section-badge">opcional</span></h2>
+              <button type="button" class="btn-add" (click)="addFeature()" data-testid="add-feature-button">
+                + Añadir
+              </button>
+            </div>
+
+            @if (features.length === 0) {
+              <p class="empty-hint" data-testid="features-empty-hint">Sin rasgos de subclase definidos.</p>
             }
-          </ion-select>
-        }
-        @if (form.get('parentClassId')?.invalid && form.get('parentClassId')?.touched) {
-          <p class="error-message" data-testid="parent-class-error">La clase padre es obligatoria.</p>
-        }
-      </div>
 
-      <!-- Form actions -->
+            <div formArrayName="features">
+              @for (feat of features.controls; track $index; let i = $index) {
+                <div class="entry-card" [formGroupName]="i" [attr.data-testid]="'feature-entry-' + i">
+
+                  <div class="field-group">
+                    <label class="field-label">Nombre <span class="required">*</span></label>
+                    <ion-input
+                      class="forge-input"
+                      formControlName="name"
+                      placeholder="Ej: Magia de Subclase, Golpe Arcano…"
+                      [attr.data-testid]="'feature-name-' + i"
+                      [class.input-error]="$any(feat).get('name')?.invalid && $any(feat).get('name')?.touched">
+                    </ion-input>
+                    @if ($any(feat).get('name')?.invalid && $any(feat).get('name')?.touched) {
+                      <p class="error-message" [attr.data-testid]="'feature-name-error-' + i">El nombre del rasgo es obligatorio.</p>
+                    }
+                  </div>
+
+                  <div class="field-group">
+                    <label class="field-label">Descripción <span class="required">*</span></label>
+                    <ion-textarea
+                      class="forge-input forge-textarea"
+                      formControlName="description"
+                      placeholder="Describe el efecto del rasgo…"
+                      rows="3"
+                      [attr.data-testid]="'feature-description-' + i"
+                      [class.input-error]="$any(feat).get('description')?.invalid && $any(feat).get('description')?.touched">
+                    </ion-textarea>
+                    @if ($any(feat).get('description')?.invalid && $any(feat).get('description')?.touched) {
+                      <p class="error-message" [attr.data-testid]="'feature-description-error-' + i">La descripción es obligatoria.</p>
+                    }
+                  </div>
+
+                  <div class="field-group">
+                    <label class="field-label">Nivel Requerido <span class="required">*</span></label>
+                    <ion-input
+                      class="forge-input"
+                      type="number"
+                      formControlName="levelRequired"
+                      placeholder="1"
+                      [attr.data-testid]="'feature-level-' + i"
+                      [class.input-error]="$any(feat).get('levelRequired')?.invalid && $any(feat).get('levelRequired')?.touched">
+                    </ion-input>
+                    @if ($any(feat).get('levelRequired')?.invalid && $any(feat).get('levelRequired')?.touched) {
+                      <p class="error-message" [attr.data-testid]="'feature-level-error-' + i">El nivel debe estar entre 1 y 20.</p>
+                    }
+                  </div>
+
+                  <button type="button" class="btn-remove" (click)="removeFeature(i)"
+                    [attr.data-testid]="'remove-feature-' + i">Eliminar</button>
+
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ================================================================ -->
+      <!-- Tab: Conjuros                                                    -->
+      <!-- ================================================================ -->
+      @if (activeTab === 'conjuros') {
+        <div class="tab-content" data-testid="tab-content-conjuros">
+
+          <!-- S14 LANZAMIENTO DE CONJUROS -->
+          <div class="form-section">
+            <div class="section-header-row">
+              <h2 class="section-title">Lanzamiento de Conjuros <span class="section-badge">opcional</span></h2>
+              <label class="spellcasting-toggle-label">
+                <input type="checkbox" formControlName="spellcastingEnabled"
+                  (change)="toggleSpellcasting()" data-testid="spellcasting-toggle">
+                <span>Activar</span>
+              </label>
+            </div>
+          </div>
+
+          @if (form.get('spellcastingEnabled')?.value) {
+
+            <!-- Config row — horizontal, full width -->
+            <div class="form-section" style="margin-top: 20px;">
+              <div class="spellcasting-config-row">
+
+                <!-- Habilidad de Conjuros -->
+                <div class="field-group">
+                  <label class="field-label">Habilidad de Conjuros <span class="required">*</span></label>
+                  <select class="forge-select-native" formControlName="spellcastingAbility"
+                    data-testid="spellcasting-ability-input"
+                    [class.input-error]="form.get('spellcastingAbility')?.invalid && form.get('spellcastingAbility')?.touched">
+                    <option value="" disabled>Selecciona una habilidad…</option>
+                    @for (ab of spellcastingAbilities; track ab) {
+                      <option [value]="ab">{{ ab }}</option>
+                    }
+                  </select>
+                  @if (form.get('spellcastingAbility')?.invalid && form.get('spellcastingAbility')?.touched) {
+                    <p class="error-message" data-testid="spellcasting-ability-error">La habilidad de conjuros es obligatoria.</p>
+                  }
+                </div>
+
+                <!-- Tipo de Lanzador -->
+                <div class="field-group">
+                  <label class="field-label">
+                    Tipo de Lanzador <span class="required">*</span>
+                    @if (slotsCustomized) {
+                      <span class="customized-badge">Personalizado</span>
+                    }
+                  </label>
+                  <select class="forge-select-native" formControlName="spellcastingType"
+                    data-testid="spellcasting-type-input"
+                    [class.input-error]="form.get('spellcastingType')?.invalid && form.get('spellcastingType')?.touched"
+                    (change)="onSpellcastingTypeChange()">
+                    <option value="" disabled>Selecciona un tipo…</option>
+                    @for (st of spellcastingTypes; track st) {
+                      <option [value]="st">{{ st }}</option>
+                    }
+                  </select>
+                  @if (form.get('spellcastingType')?.invalid && form.get('spellcastingType')?.touched) {
+                    <p class="error-message" data-testid="spellcasting-type-error">El tipo de lanzador es obligatorio.</p>
+                  }
+                </div>
+
+                <!-- Estilo de Preparación -->
+                <div class="field-group">
+                  <label class="field-label">Estilo de Preparación</label>
+                  <select class="forge-select-native" formControlName="preparationStyle"
+                    (change)="onPreparationStyleChange()" data-testid="preparation-style-input">
+                    <option value="PREPARED">Preparado (elige diariamente)</option>
+                    <option value="KNOWN">Conocido (lista fija)</option>
+                  </select>
+                </div>
+
+                <!-- Rituales -->
+                <div class="field-group spellcasting-ritual-field">
+                  <label class="field-label">Rituales</label>
+                  <div class="natural-armor-toggle-row">
+                    <input type="checkbox" id="ritual-casting-toggle" formControlName="ritualCasting"
+                      data-testid="ritual-casting-toggle">
+                    <label for="ritual-casting-toggle" class="toggle-label">Puede lanzar como rituales</label>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Tables — full width below the config card -->
+            <div class="spellcasting-tables-col" style="margin-top: 20px;">
+
+              <!-- Conjuros Conocidos — horizontal (only for KNOWN style) -->
+              @if (showSpellsKnown) {
+                <div class="spellcasting-table-col">
+                  <label class="field-label">Conjuros Conocidos por Nivel</label>
+                  <div class="spellcasting-table-wrapper">
+                    <table class="spellcasting-table spellcasting-table--horizontal">
+                      <thead>
+                        <tr>
+                          @for (row of levelRange; track row) { <th>{{ row }}</th> }
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          @for (row of levelRange; track row; let i = $index) {
+                            <td>
+                              <ion-input class="forge-input table-input" type="number"
+                                [formControl]="$any(spellsKnown.at(i))"
+                                placeholder="—" [attr.data-testid]="'spells-known-' + i">
+                              </ion-input>
+                            </td>
+                          }
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+
+              <!-- Trucos Conocidos (narrow) + Espacios de Conjuro (wide) -->
+              <div class="spellcasting-tables-row">
+
+                <!-- Trucos Conocidos — 20-row vertical table -->
+                <div class="spellcasting-table-col">
+                  <label class="field-label">Trucos Conocidos por Nivel</label>
+                  <div class="spellcasting-table-wrapper">
+                    <table class="spellcasting-table">
+                      <thead><tr><th>Nivel</th><th>Trucos</th></tr></thead>
+                      <tbody>
+                        @for (level of levelRange; track level; let i = $index) {
+                          <tr>
+                            <td class="level-cell">{{ level }}</td>
+                            <td>
+                              <ion-input class="forge-input table-input" type="number"
+                                [formControl]="$any(cantripsKnown.at(i))"
+                                placeholder="—" [attr.data-testid]="'cantrips-known-' + i">
+                              </ion-input>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- Espacios de Conjuro — 20×9 scrollable table -->
+                <div class="spellcasting-table-col spellcasting-table-col--wide">
+                  <label class="field-label">
+                    Espacios de Conjuro por Nivel
+                    @if (slotsCustomized) {
+                      <span class="customized-badge">Personalizado</span>
+                    }
+                  </label>
+                  <div class="spellcasting-table-wrapper">
+                    <table class="spellcasting-table spell-slots-table">
+                      <thead>
+                        <tr>
+                          <th>Nivel</th>
+                          @for (sl of spellLevelRange; track sl) { <th>{{ sl }}º</th> }
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (level of levelRange; track level; let i = $index) {
+                          <tr>
+                            <td class="level-cell">{{ level }}</td>
+                            @for (sl of spellLevelRange; track sl; let j = $index) {
+                              <td>
+                                <ion-input class="forge-input table-input" type="number"
+                                  [formControl]="$any($any(spellSlots.at(i)).at(j))"
+                                  placeholder="—" [attr.data-testid]="'spell-slot-' + i + '-' + j"
+                                  (ionInput)="onSpellSlotInput()">
+                                </ion-input>
+                              </td>
+                            }
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+              </div><!-- .spellcasting-tables-row -->
+            </div><!-- .spellcasting-tables-col -->
+
+          }
+
+        </div>
+      }
+
+      <!-- ================================================================ -->
+      <!-- Tab: Recursos                                                    -->
+      <!-- ================================================================ -->
+      @if (activeTab === 'recursos') {
+        <div class="tab-content" data-testid="tab-content-recursos">
+
+          <!-- Lista de Conjuros Ampliada -->
+          <div class="form-section">
+            <div class="section-header-row">
+              <h2 class="section-title">Lista de Conjuros Ampliada <span class="section-badge">opcional</span></h2>
+              <button type="button" class="btn-add" (click)="addExpandedSpell()" data-testid="add-expanded-spell-button">
+                + Añadir
+              </button>
+            </div>
+
+            @if (expandedSpellList.length === 0) {
+              <p class="empty-hint" data-testid="expanded-spell-list-empty-hint">Sin conjuros en la lista ampliada.</p>
+            }
+
+            <div formArrayName="expandedSpellList">
+              @for (spell of expandedSpellList.controls; track $index; let i = $index) {
+                <div class="entry-card" [formGroupName]="i" [attr.data-testid]="'expanded-spell-entry-' + i">
+
+                  <div class="field-group">
+                    <label class="field-label">Nombre del Conjuro <span class="required">*</span></label>
+                    @if (spellDropdownOpen[i]) {
+                      <div class="dropdown-overlay" (click)="closeSpellDropdown(i)"></div>
+                    }
+                    <div class="custom-dropdown" [class.custom-dropdown--open]="spellDropdownOpen[i]">
+                      <button
+                        type="button"
+                        class="custom-dropdown-trigger"
+                        (click)="toggleSpellDropdown(i)"
+                        [attr.data-testid]="'expanded-spell-name-' + i">
+                        <span [class.custom-dropdown-placeholder]="!$any(spell).get('name')?.value">
+                          {{ $any(spell).get('name')?.value || 'Busca un conjuro…' }}
+                        </span>
+                        <span class="custom-dropdown-arrow">{{ spellDropdownOpen[i] ? '▲' : '▼' }}</span>
+                      </button>
+                      @if (spellDropdownOpen[i]) {
+                        <div class="custom-dropdown-panel spell-dropdown-panel" (click)="$event.stopPropagation()">
+                          <div class="spell-search-wrapper">
+                            <ion-input
+                              class="forge-input spell-search-input"
+                              [(ngModel)]="spellSearchQueries[i]"
+                              [ngModelOptions]="{standalone: true}"
+                              placeholder="Buscar conjuro…"
+                              (ionInput)="spellSearchQueries[i] = $any($event.target).value">
+                            </ion-input>
+                          </div>
+                          @for (s of filteredSpells(i); track s.id) {
+                            <button
+                              type="button"
+                              class="custom-dropdown-option spell-option"
+                              (click)="selectSpell(i, s)">
+                              <span class="spell-option-name">{{ s.name }}</span>
+                              <span class="spell-option-level">Nv. {{ s.level === 0 ? 'Truco' : s.level }}</span>
+                            </button>
+                          }
+                          @if (filteredSpells(i).length === 0) {
+                            <span class="custom-dropdown-empty">Sin resultados.</span>
+                          }
+                        </div>
+                      }
+                    </div>
+                    @if ($any(spell).get('name')?.invalid && $any(spell).get('name')?.touched) {
+                      <p class="error-message" [attr.data-testid]="'expanded-spell-name-error-' + i">El nombre del conjuro es obligatorio.</p>
+                    }
+                  </div>
+
+                  <div class="field-group">
+                    <label class="field-label">Nivel <span class="required">*</span></label>
+                    <ion-input
+                      class="forge-input"
+                      type="number"
+                      formControlName="level"
+                      placeholder="0"
+                      [attr.data-testid]="'expanded-spell-level-' + i"
+                      [class.input-error]="$any(spell).get('level')?.invalid && $any(spell).get('level')?.touched">
+                    </ion-input>
+                    @if ($any(spell).get('level')?.invalid && $any(spell).get('level')?.touched) {
+                      <p class="error-message" [attr.data-testid]="'expanded-spell-level-error-' + i">El nivel debe estar entre 0 y 9.</p>
+                    }
+                  </div>
+
+                  <div class="field-group">
+                    <label class="field-label">Tipo de Preparación <span class="required">*</span></label>
+                    <select
+                      class="forge-select-native"
+                      formControlName="preparationType"
+                      [attr.data-testid]="'expanded-spell-prep-type-' + i"
+                      [class.input-error]="$any(spell).get('preparationType')?.invalid && $any(spell).get('preparationType')?.touched">
+                      <option value="ALWAYS_PREPARED">Siempre Preparado</option>
+                      <option value="ALWAYS_KNOWN">Siempre Conocido</option>
+                    </select>
+                  </div>
+
+                  <button type="button" class="btn-remove" (click)="removeExpandedSpell(i)"
+                    [attr.data-testid]="'remove-expanded-spell-' + i">Eliminar</button>
+
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Reservas de Recursos -->
+          <div class="form-section">
+            <div class="section-header-row">
+              <h2 class="section-title">Reservas de Recursos <span class="section-badge">opcional</span></h2>
+              <button type="button" class="btn-add" (click)="addResourcePool()" data-testid="add-resource-pool-button">
+                + Añadir
+              </button>
+            </div>
+
+            @if (resourcePools.length === 0) {
+              <p class="empty-hint" data-testid="resource-pools-empty-hint">Sin reservas de recursos definidas.</p>
+            }
+
+            <div formArrayName="resourcePools">
+              @for (pool of resourcePools.controls; track $index; let i = $index) {
+                <div class="entry-card" [formGroupName]="i" [attr.data-testid]="'resource-pool-entry-' + i">
+
+                  <div class="field-group">
+                    <label class="field-label">Nombre <span class="required">*</span></label>
+                    <ion-input
+                      class="forge-input"
+                      formControlName="name"
+                      placeholder="Ej: Dados de Superioridad, Disparos Arcanos…"
+                      [attr.data-testid]="'resource-pool-name-' + i"
+                      [class.input-error]="$any(pool).get('name')?.invalid && $any(pool).get('name')?.touched">
+                    </ion-input>
+                    @if ($any(pool).get('name')?.invalid && $any(pool).get('name')?.touched) {
+                      <p class="error-message" [attr.data-testid]="'resource-pool-name-error-' + i">El nombre del recurso es obligatorio.</p>
+                    }
+                  </div>
+
+                  <div class="field-group">
+                    <label class="field-label">Tipo de Dado <span class="required">*</span></label>
+                    <select
+                      class="forge-select-native"
+                      formControlName="dieType"
+                      [attr.data-testid]="'resource-pool-die-type-' + i"
+                      [class.input-error]="$any(pool).get('dieType')?.invalid && $any(pool).get('dieType')?.touched">
+                      @for (die of dieTypes; track die) {
+                        <option [value]="die">{{ die }}</option>
+                      }
+                    </select>
+                  </div>
+
+                  <div class="field-group">
+                    <label class="field-label">Cantidad <span class="required">*</span></label>
+                    <ion-input
+                      class="forge-input"
+                      type="number"
+                      formControlName="count"
+                      placeholder="1"
+                      [attr.data-testid]="'resource-pool-count-' + i"
+                      [class.input-error]="$any(pool).get('count')?.invalid && $any(pool).get('count')?.touched">
+                    </ion-input>
+                    @if ($any(pool).get('count')?.invalid && $any(pool).get('count')?.touched) {
+                      <p class="error-message" [attr.data-testid]="'resource-pool-count-error-' + i">La cantidad debe ser al menos 1.</p>
+                    }
+                  </div>
+
+                  <div class="field-group">
+                    <label class="field-label">Recarga <span class="required">*</span></label>
+                    <select
+                      class="forge-select-native"
+                      formControlName="rechargeOn"
+                      [attr.data-testid]="'resource-pool-recharge-' + i"
+                      [class.input-error]="$any(pool).get('rechargeOn')?.invalid && $any(pool).get('rechargeOn')?.touched">
+                      @for (opt of rechargeOptions; track opt) {
+                        <option [value]="opt">{{ opt }}</option>
+                      }
+                    </select>
+                  </div>
+
+                  <button type="button" class="btn-remove" (click)="removeResourcePool(i)"
+                    [attr.data-testid]="'remove-resource-pool-' + i">Eliminar</button>
+
+                </div>
+              }
+            </div>
+          </div>
+
+        </div>
+      }
+
+      <!-- Form actions — always visible outside tab content -->
       <div class="form-actions">
         <ion-button
           expand="block"
           type="submit"
-          class="btn-gold"
+          class="btn-submit"
           [disabled]="submitting"
-          data-testid="submit-button"
-        >
+          data-testid="submit-button">
           @if (submitting) {
             <ion-spinner name="crescent" slot="start"></ion-spinner>
           }
-          Crear Subclase
+          {{ editMode ? 'Guardar Cambios' : 'Crear Subclase' }}
         </ion-button>
       </div>
 
     </form>
-
   </div>
-</ion-content>
+</div>

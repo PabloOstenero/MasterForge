@@ -88,11 +88,45 @@ export interface CreateClassDto {
   authorId: string;
 }
 
+export interface SubclassFeatureEntry {
+  name: string;
+  description: string;
+  levelRequired: number;
+}
+
+export interface ExpandedSpellEntry {
+  name: string;
+  level: number;           // 0 = cantrip, 1–9 = spell level
+  preparationType: 'ALWAYS_PREPARED' | 'ALWAYS_KNOWN';
+}
+
+export interface ResourcePool {
+  name: string;
+  dieType: string;         // one of DIE_TYPES: 'd4' | 'd6' | 'd8' | 'd10' | 'd12' | 'd20'
+  count: number;           // min 1
+  rechargeOn: string;      // one of RECHARGE_OPTIONS: 'At Will' | 'Short Rest' | 'Long Rest'
+}
+
+export interface SubclassFeatures {
+  weaponProficiencies: string[];
+  armorProficiencies: string[];
+  toolProficiencies: string[];
+  damageResistances: string[];
+  damageImmunities: string[];
+  conditionImmunities: string[];
+  skillProficiencies: SkillProficiencies;
+  subclassFeatureEntries: SubclassFeatureEntry[];
+  expandedSpellList: ExpandedSpellEntry[];
+  resourcePools: ResourcePool[];
+  spellcasting?: Spellcasting;
+}
+
 export interface CreateSubclassDto {
   name: string;
   description: string;
   parentClassId: number;
-  authorId: string;
+  subclassFeatures: SubclassFeatures;
+  authorId: string;  // injected by service, not set by form
 }
 
 export interface CreateRaceDto {
@@ -203,9 +237,18 @@ export class HomebrewService {
     return this.http.delete<void>(`/api/class-features/${id}`);
   }
 
+  getSubclass(id: string): Observable<any> {
+    return this.http.get<any>(`/api/dnd-subclasses/${id}`);
+  }
+
   createSubclass(dto: CreateSubclassDto): Observable<any> {
     const authorId = this.authService.getUserIdFromToken();
     return this.http.post<any>('/api/dnd-subclasses', { ...dto, authorId });
+  }
+
+  updateSubclass(id: string, dto: CreateSubclassDto): Observable<any> {
+    const authorId = this.authService.getUserIdFromToken();
+    return this.http.put<any>(`/api/dnd-subclasses/${id}`, { ...dto, authorId });
   }
 
   createRace(dto: CreateRaceDto): Observable<any> {

@@ -59,6 +59,18 @@ function makeCreateSubclassDto() {
     name: 'Battle Smith',
     description: 'A subclass focused on combat and constructs.',
     parentClassId: 1,
+    subclassFeatures: {
+      weaponProficiencies: [],
+      armorProficiencies: [],
+      toolProficiencies: [],
+      damageResistances: [],
+      damageImmunities: [],
+      conditionImmunities: [],
+      skillProficiencies: { fixed: [], choicePool: [], choiceCount: 0 },
+      subclassFeatureEntries: [],
+      expandedSpellList: [],
+      resourcePools: [],
+    },
   };
 }
 
@@ -270,6 +282,97 @@ describe('HomebrewService', () => {
       const req = httpMock.expectOne('/api/dnd-subclasses');
       expect(req.request.body.authorId).toBe(mockUserId);
       req.flush({});
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // getSubclass()
+  // -------------------------------------------------------------------------
+
+  describe('getSubclass()', () => {
+    it('should send GET to /api/dnd-subclasses/{id}', () => {
+      service.getSubclass('42').subscribe();
+
+      const req = httpMock.expectOne('/api/dnd-subclasses/42');
+      expect(req.request.method).toBe('GET');
+      req.flush({});
+    });
+
+    it('should use the provided id in the GET URL', () => {
+      service.getSubclass('abc-uuid-999').subscribe();
+
+      const req = httpMock.expectOne('/api/dnd-subclasses/abc-uuid-999');
+      expect(req.request.method).toBe('GET');
+      req.flush({});
+    });
+
+    it('should return the response body from the server', () => {
+      const mockSubclass = { id: '42', name: 'Battle Smith', description: 'A subclass.', parentClassId: 1 };
+
+      service.getSubclass('42').subscribe((result) => {
+        expect(result).toEqual(mockSubclass);
+      });
+
+      const req = httpMock.expectOne('/api/dnd-subclasses/42');
+      req.flush(mockSubclass);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // updateSubclass()
+  // -------------------------------------------------------------------------
+
+  describe('updateSubclass()', () => {
+    it('should send PUT to /api/dnd-subclasses/{id}', () => {
+      const dto = makeCreateSubclassDto();
+
+      service.updateSubclass('42', { ...dto, authorId: mockUserId }).subscribe();
+
+      const req = httpMock.expectOne('/api/dnd-subclasses/42');
+      expect(req.request.method).toBe('PUT');
+      req.flush({});
+    });
+
+    it('should use the provided id in the PUT URL', () => {
+      const dto = makeCreateSubclassDto();
+
+      service.updateSubclass('abc-uuid-999', { ...dto, authorId: mockUserId }).subscribe();
+
+      const req = httpMock.expectOne('/api/dnd-subclasses/abc-uuid-999');
+      expect(req.request.method).toBe('PUT');
+      req.flush({});
+    });
+
+    it('should include all form fields in the request body', () => {
+      const dto = makeCreateSubclassDto();
+
+      service.updateSubclass('42', { ...dto, authorId: mockUserId }).subscribe();
+
+      const req = httpMock.expectOne('/api/dnd-subclasses/42');
+      const body = req.request.body;
+      expect(body.name).toBe('Battle Smith');
+      expect(body.description).toBe('A subclass focused on combat and constructs.');
+      expect(body.parentClassId).toBe(1);
+      req.flush({});
+    });
+
+    it('should include authorId from AuthService.getUserIdFromToken() in the request body', () => {
+      const dto = makeCreateSubclassDto();
+
+      service.updateSubclass('42', { ...dto, authorId: 'ignored' }).subscribe();
+
+      const req = httpMock.expectOne('/api/dnd-subclasses/42');
+      expect(req.request.body.authorId).toBe(mockUserId);
+      req.flush({});
+    });
+
+    it('should call AuthService.getUserIdFromToken() to obtain the authorId', () => {
+      const dto = makeCreateSubclassDto();
+
+      service.updateSubclass('42', { ...dto, authorId: mockUserId }).subscribe();
+
+      httpMock.expectOne('/api/dnd-subclasses/42').flush({});
+      expect(authServiceSpy.getUserIdFromToken).toHaveBeenCalled();
     });
   });
 
@@ -548,6 +651,18 @@ const subclassFormArb = fc.record({
   name: nonEmptyString,
   description: nonEmptyString,
   parentClassId: fc.integer({ min: 1, max: 1000 }),
+  subclassFeatures: fc.constant({
+    weaponProficiencies: [] as string[],
+    armorProficiencies: [] as string[],
+    toolProficiencies: [] as string[],
+    damageResistances: [] as string[],
+    damageImmunities: [] as string[],
+    conditionImmunities: [] as string[],
+    skillProficiencies: { fixed: [] as string[], choicePool: [] as string[], choiceCount: 0 },
+    subclassFeatureEntries: [] as any[],
+    expandedSpellList: [] as any[],
+    resourcePools: [] as any[],
+  }),
 });
 
 /** Arbitrary for CreateRaceDto (without authorId) */

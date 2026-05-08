@@ -8,7 +8,15 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
-import { HomebrewSubclassFormPage } from './homebrew-subclass-form.page';
+import {
+  HomebrewSubclassFormPage,
+  buildSubclassFeatures,
+  SkillProficiencies,
+  SubclassFeatureEntry,
+  ExpandedSpellEntry,
+  ResourcePool,
+  Spellcasting
+} from './homebrew-subclass-form.page';
 import { HomebrewService } from '../../services/homebrew.service';
 import { AuthService } from '../../services/auth.service';
 
@@ -41,11 +49,10 @@ describe('HomebrewSubclassFormPage', () => {
   let router: Router;
 
   beforeEach(async () => {
-    homebrewServiceSpy = jasmine.createSpyObj<HomebrewService>('HomebrewService', [
-      'createSubclass',
-      'getClasses',
-    ]);
+    homebrewServiceSpy = jasmine.createSpyObj<HomebrewService>('HomebrewService', ['createSubclass', 'getClasses', 'getAllSpells']);
     homebrewServiceSpy.createSubclass.and.returnValue(of({}));
+    homebrewServiceSpy.getClasses.and.returnValue(of([{ id: 1, name: 'Barbarian' }]));
+    homebrewServiceSpy.getAllSpells.and.returnValue(of([{ id: 'spell-1', name: 'Mage Hand' }]));
     homebrewServiceSpy.getClasses.and.returnValue(of(MOCK_CLASSES));
 
     const authServiceMock = {
@@ -113,7 +120,7 @@ describe('HomebrewSubclassFormPage', () => {
     // --- name field ---
 
     it('should be invalid when name is empty', () => {
-      component.form.setValue({ name: '', description: 'Some description', parentClassId: 1 });
+      component.form.patchValue({ name: '', description: 'Some description', parentClassId: 1 });
       expect(component.form.get('name')!.invalid).toBeTrue();
     });
 
@@ -129,14 +136,14 @@ describe('HomebrewSubclassFormPage', () => {
 
     // --- description field ---
 
-    it('should be invalid when description is empty', () => {
-      component.form.setValue({ name: 'My Subclass', description: '', parentClassId: 1 });
-      expect(component.form.get('description')!.invalid).toBeTrue();
+    it('should be valid when description is empty', () => {
+      component.form.patchValue({ name: 'My Subclass', description: '', parentClassId: 1 });
+      expect(component.form.get('description')!.valid).toBeTrue();
     });
 
-    it('should have a required error on description when empty', () => {
+    it('should NOT have a required error on description when empty', () => {
       component.form.patchValue({ description: '' });
-      expect(component.form.get('description')?.errors?.['required']).toBeTrue();
+      expect(component.form.get('description')?.errors).toBeNull();
     });
 
     it('should be valid for description when a non-empty string is provided', () => {
@@ -147,7 +154,7 @@ describe('HomebrewSubclassFormPage', () => {
     // --- parentClassId field ---
 
     it('should be invalid when parentClassId is null', () => {
-      component.form.setValue({ name: 'My Subclass', description: 'Some description', parentClassId: null });
+      component.form.patchValue({ name: 'My Subclass', description: 'Some description', parentClassId: null });
       expect(component.form.get('parentClassId')!.invalid).toBeTrue();
     });
 
@@ -164,22 +171,22 @@ describe('HomebrewSubclassFormPage', () => {
     // --- overall form validity ---
 
     it('should be valid when all required fields are filled correctly', () => {
-      component.form.setValue(validFormValue());
+      component.form.patchValue(validFormValue());
       expect(component.form.valid).toBeTrue();
     });
 
     it('should be invalid when only name is missing', () => {
-      component.form.setValue({ name: '', description: 'A description', parentClassId: 1 });
+      component.form.patchValue({ name: '', description: 'A description', parentClassId: 1 });
       expect(component.form.invalid).toBeTrue();
     });
 
-    it('should be invalid when only description is missing', () => {
-      component.form.setValue({ name: 'My Subclass', description: '', parentClassId: 1 });
-      expect(component.form.invalid).toBeTrue();
+    it('should be valid when only description is missing', () => {
+      component.form.patchValue({ name: 'My Subclass', description: '', parentClassId: 1 });
+      expect(component.form.valid).toBeTrue();
     });
 
     it('should be invalid when only parentClassId is missing', () => {
-      component.form.setValue({ name: 'My Subclass', description: 'A description', parentClassId: null });
+      component.form.patchValue({ name: 'My Subclass', description: 'A description', parentClassId: null });
       expect(component.form.invalid).toBeTrue();
     });
   });
@@ -267,15 +274,13 @@ describe('HomebrewSubclassFormPage', () => {
       expect(nameError.textContent).toContain('obligatorio');
     });
 
-    it('should show description error message after submit with empty description', () => {
-      component.form.patchValue({ name: 'My Subclass', parentClassId: 1 });
-      // description remains empty
+    it('should NOT show description error message after submit with empty description', () => {
+      component.form.patchValue({ name: 'My Subclass', parentClassId: 1, description: '' });
       component.submit();
       fixture.detectChanges();
 
       const descError = fixture.nativeElement.querySelector('[data-testid="description-error"]');
-      expect(descError).toBeTruthy();
-      expect(descError.textContent).toContain('obligatoria');
+      expect(descError).toBeNull();
     });
 
     it('should show parent class error message after submit with no class selected', () => {
@@ -327,10 +332,10 @@ describe('HomebrewSubclassFormPage', () => {
       expect(homebrewServiceSpy.createSubclass).not.toHaveBeenCalled();
     });
 
-    it('should NOT call HomebrewService.createSubclass() when description is empty', () => {
-      component.form.patchValue({ name: 'My Subclass', parentClassId: 1 });
+    it('should call HomebrewService.createSubclass() when description is empty', () => {
+      component.form.patchValue({ name: 'My Subclass', description: '', parentClassId: 1 });
       component.submit();
-      expect(homebrewServiceSpy.createSubclass).not.toHaveBeenCalled();
+      expect(homebrewServiceSpy.createSubclass).toHaveBeenCalled();
     });
 
     it('should NOT call HomebrewService.createSubclass() when parentClassId is null', () => {
@@ -346,12 +351,16 @@ describe('HomebrewSubclassFormPage', () => {
 
     beforeEach(() => {
       homebrewServiceSpy.createSubclass.and.returnValue(of({}));
-      component.form.setValue(validFormValue());
+      component.form.patchValue(validFormValue());
     });
 
-    it('should call HomebrewService.createSubclass() with the form value', () => {
+    it('should call HomebrewService.createSubclass() with the correct DTO', () => {
       component.submit();
-      expect(homebrewServiceSpy.createSubclass).toHaveBeenCalledWith(component.form.value);
+      expect(homebrewServiceSpy.createSubclass).toHaveBeenCalledWith(jasmine.objectContaining({
+        name: 'Path of the Berserker',
+        description: 'A rage-fuelled subclass that channels primal fury.',
+        parentClassId: 1
+      }));
     });
 
     it('should navigate to /homebrew on successful submit', () => {
@@ -379,7 +388,7 @@ describe('HomebrewSubclassFormPage', () => {
 
     beforeEach(() => {
       homebrewServiceSpy.createSubclass.and.returnValue(throwError(() => backendError));
-      component.form.setValue(validFormValue());
+      component.form.patchValue(validFormValue());
     });
 
     it('should set error message when backend returns an error', () => {
@@ -447,5 +456,171 @@ describe('HomebrewSubclassFormPage', () => {
       const cancelBtn = fixture.nativeElement.querySelector('[data-testid="cancel-button"]');
       expect(cancelBtn).toBeTruthy();
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Pure Function Tests (13.1)
+// ---------------------------------------------------------------------------
+describe('buildSubclassFeatures() pure function', () => {
+  const emptySkillProfs: SkillProficiencies = { fixed: [], choicePool: [], choiceCount: 0 };
+
+  it('should produce empty arrays and no spellcasting key for empty inputs', () => {
+    const result = buildSubclassFeatures(
+      [], [], [], emptySkillProfs, [], [], [], [], [], [], null
+    );
+    expect(result.weaponProficiencies).toEqual([]);
+    expect(result.armorProficiencies).toEqual([]);
+    expect(result.toolProficiencies).toEqual([]);
+    expect(result.damageResistances).toEqual([]);
+    expect(result.damageImmunities).toEqual([]);
+    expect(result.conditionImmunities).toEqual([]);
+    expect(result.subclassFeatureEntries).toEqual([]);
+    expect(result.expandedSpellList).toEqual([]);
+    expect(result.resourcePools).toEqual([]);
+    expect(result.spellcasting).toBeUndefined();
+  });
+
+  it('should correctly union weapon chips and custom profs', () => {
+    const result = buildSubclassFeatures(
+      ['Simple Weapons', 'Martial Weapons', 'Firearms'],
+      [], [], emptySkillProfs, [], [], [], [], [], [], null
+    );
+    expect(result.weaponProficiencies).toEqual(['Simple Weapons', 'Martial Weapons', 'Firearms']);
+  });
+
+  it('should correctly union armor chips and custom profs', () => {
+    const result = buildSubclassFeatures(
+      [], ['Light Armor', 'Custom Armor'], [], emptySkillProfs, [], [], [], [], [], [], null
+    );
+    expect(result.armorProficiencies).toEqual(['Light Armor', 'Custom Armor']);
+  });
+
+  it('should produce the correct string array for active damage resistance chips', () => {
+    const result = buildSubclassFeatures(
+      [], [], [], emptySkillProfs, ['Fire', 'Cold'], [], [], [], [], [], null
+    );
+    expect(result.damageResistances).toEqual(['Fire', 'Cold']);
+  });
+
+  it('should produce the correct string array for active condition immunity chips', () => {
+    const result = buildSubclassFeatures(
+      [], [], [], emptySkillProfs, [], [], ['Charmed', 'Prone'], [], [], [], null
+    );
+    expect(result.conditionImmunities).toEqual(['Charmed', 'Prone']);
+  });
+
+  it('should serialize feature entries correctly', () => {
+    const features: SubclassFeatureEntry[] = [{ name: 'Action Surge', description: 'Take one additional action', levelRequired: 2 }];
+    const result = buildSubclassFeatures(
+      [], [], [], emptySkillProfs, [], [], [], features, [], [], null
+    );
+    expect(result.subclassFeatureEntries).toEqual(features);
+  });
+
+  it('should serialize expanded spell list entries correctly, including level 0', () => {
+    const spells: ExpandedSpellEntry[] = [
+      { name: 'Mage Hand', level: 0, preparationType: 'ALWAYS_KNOWN' },
+      { name: 'Fireball', level: 3, preparationType: 'ALWAYS_PREPARED' }
+    ];
+    const result = buildSubclassFeatures(
+      [], [], [], emptySkillProfs, [], [], [], [], spells, [], null
+    );
+    expect(result.expandedSpellList).toEqual(spells);
+  });
+
+  it('should serialize resource pool entries correctly', () => {
+    const pools: ResourcePool[] = [
+      { name: 'Ki Points', dieType: 'd4', count: 2, rechargeOn: 'Short Rest' }
+    ];
+    const result = buildSubclassFeatures(
+      [], [], [], emptySkillProfs, [], [], [], [], [], pools, null
+    );
+    expect(result.resourcePools).toEqual(pools);
+  });
+
+  it('should include spellcasting key when spellcasting is enabled', () => {
+    const spellcasting: Spellcasting = {
+      ability: 'Intelligence',
+      spellcastingType: 'Third Caster',
+      ritualCasting: false,
+      preparationStyle: 'KNOWN',
+      cantripsKnown: Array(20).fill(2),
+      spellsKnown: Array(20).fill(3),
+      spellSlots: { slots: [] }
+    };
+    const result = buildSubclassFeatures(
+      [], [], [], emptySkillProfs, [], [], [], [], [], [], spellcasting
+    );
+    expect(result.spellcasting).toBeDefined();
+    expect(result.spellcasting?.ability).toBe('Intelligence');
+    expect(result.spellcasting?.spellsKnown).toBeDefined();
+  });
+
+  it('should omit spellsKnown when preparationStyle is PREPARED', () => {
+    const spellcasting: Spellcasting = {
+      ability: 'Wisdom',
+      spellcastingType: 'Half Caster',
+      ritualCasting: false,
+      preparationStyle: 'PREPARED',
+      cantripsKnown: Array(20).fill(2),
+      spellSlots: { slots: [] }
+    };
+    const result = buildSubclassFeatures(
+      [], [], [], emptySkillProfs, [], [], [], [], [], [], spellcasting
+    );
+    expect(result.spellcasting).toBeDefined();
+    expect(result.spellcasting?.spellsKnown).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// HomebrewService Subclass Methods (13.2)
+// ---------------------------------------------------------------------------
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+
+describe('HomebrewService Subclass Methods', () => {
+  let service: HomebrewService;
+  let httpMock: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      providers: [
+        HomebrewService,
+        { provide: AuthService, useValue: { getUserIdFromToken: () => 'test-user-123' } }
+      ]
+    });
+    service = TestBed.inject(HomebrewService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  it('should send GET to /api/dnd-subclasses/{id} for getSubclass(id)', () => {
+    service.getSubclass('subclass-1').subscribe();
+    const req = httpMock.expectOne('/api/dnd-subclasses/subclass-1');
+    expect(req.request.method).toBe('GET');
+    req.flush({});
+  });
+
+  it('should send POST to /api/dnd-subclasses with authorId injected for createSubclass', () => {
+    const dto: any = { name: 'New Subclass' };
+    service.createSubclass(dto).subscribe();
+    const req = httpMock.expectOne('/api/dnd-subclasses');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ name: 'New Subclass', authorId: 'test-user-123' });
+    req.flush({});
+  });
+
+  it('should send PUT to /api/dnd-subclasses/{id} with authorId injected for updateSubclass', () => {
+    const dto: any = { name: 'Updated Subclass' };
+    service.updateSubclass('subclass-1', dto).subscribe();
+    const req = httpMock.expectOne('/api/dnd-subclasses/subclass-1');
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual({ name: 'Updated Subclass', authorId: 'test-user-123' });
+    req.flush({});
   });
 });

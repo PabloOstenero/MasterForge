@@ -39,7 +39,8 @@ class DndSubclassController(
             name = dto.name,
             description = dto.description,
             parentClass = parentClass,
-            author = author
+            author = author,
+            subclassFeatures = dto.subclassFeatures
         )
         return dndSubclassRepository.save(dndSubclass)
     }
@@ -71,7 +72,8 @@ class DndSubclassController(
             name = dto.name,
             description = dto.description,
             parentClass = parentClass,
-            author = author
+            author = author,
+            subclassFeatures = dto.subclassFeatures
         )
         return dndSubclassRepository.save(updatedSubclass)
     }

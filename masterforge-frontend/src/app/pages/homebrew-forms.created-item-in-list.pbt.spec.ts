@@ -112,6 +112,18 @@ const subclassFormArb = fc.record({
   name: nonEmptyString,
   description: nonEmptyString,
   parentClassId: fc.integer({ min: 1, max: 1000 }),
+  subclassFeatures: fc.constant({
+    weaponProficiencies: [],
+    armorProficiencies: [],
+    toolProficiencies: [],
+    damageResistances: [],
+    damageImmunities: [],
+    conditionImmunities: [],
+    skillProficiencies: { fixed: [], choicePool: [], choiceCount: 0 },
+    subclassFeatureEntries: [],
+    expandedSpellList: [],
+    resourcePools: [],
+  }),
 });
 
 /** Arbitrary for a valid RACE creation form data */
