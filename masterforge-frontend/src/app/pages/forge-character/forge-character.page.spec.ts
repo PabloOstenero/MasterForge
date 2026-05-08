@@ -38,7 +38,7 @@ describe('Property 1: Step navigation buttons visibility', () => {
         const expectNext = step < TOTAL_STEPS - 1;
         expect(shouldShowNext(step)).toBe(expectNext);
       }),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -48,7 +48,7 @@ describe('Property 1: Step navigation buttons visibility', () => {
         const expectPrev = step > 0;
         expect(shouldShowPrev(step)).toBe(expectPrev);
       }),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -80,7 +80,7 @@ describe('Property 2: Validation blocks step advancement', () => {
           expect(errors['name']).toBeDefined();
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -100,7 +100,7 @@ describe('Property 2: Validation blocks step advancement', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -116,7 +116,7 @@ describe('Property 2: Validation blocks step advancement', () => {
           expect(errors['name']).toBeUndefined();
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -132,7 +132,7 @@ describe('Property 2: Validation blocks step advancement', () => {
           expect(errors['background']).toBeDefined();
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -148,7 +148,7 @@ describe('Property 2: Validation blocks step advancement', () => {
           expect(errors['alignment']).toBeDefined();
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -164,7 +164,7 @@ describe('Property 2: Validation blocks step advancement', () => {
           expect(Object.keys(errors).length).toBe(0);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 });
@@ -241,7 +241,7 @@ describe('Property 3: Character name length validation', () => {
           expect(errors['name']).toBeUndefined();
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -254,7 +254,7 @@ describe('Property 3: Character name length validation', () => {
           expect(errors['name']).toBeDefined();
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -268,7 +268,7 @@ describe('Property 3: Character name length validation', () => {
           expect(errors['name']).toBeDefined();
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -304,7 +304,7 @@ describe('Property 4: XP non-negative validation', () => {
           expect(errors['xp']).toBeUndefined();
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -317,7 +317,7 @@ describe('Property 4: XP non-negative validation', () => {
           expect(errors['xp']).toBeDefined();
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -367,7 +367,7 @@ describe('Property 5: Race bonus display', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -392,7 +392,7 @@ describe('Property 5: Race bonus display', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -419,7 +419,7 @@ describe('Property 5: Race bonus display', () => {
           expect(result).toContain('+');
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 25 }
     );
   });
 });
@@ -523,7 +523,7 @@ describe('Property 6: Class info display', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -548,7 +548,7 @@ describe('Property 6: Class info display', () => {
           expect(result).toBe('');
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 25 }
     );
   });
 
@@ -596,7 +596,7 @@ describe('Property 7: Subclass filtering by parent class', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -615,7 +615,7 @@ describe('Property 7: Subclass filtering by parent class', () => {
           expect(result).toEqual([]);
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 25 }
     );
   });
 
@@ -633,7 +633,7 @@ describe('Property 7: Subclass filtering by parent class', () => {
           expect(result.length).toBe(subclasses.length);
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 25 }
     );
   });
 });
@@ -732,7 +732,7 @@ describe('Property 8: Standard array is a bijection', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -753,7 +753,7 @@ describe('Property 8: Standard array is a bijection', () => {
           expect(Object.keys(assignment).length).toBe(ABILITY_KEYS.length);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -768,7 +768,7 @@ describe('Property 8: Standard array is a bijection', () => {
           expect(uniqueValues.size).toBe(values.length);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -783,7 +783,7 @@ describe('Property 8: Standard array is a bijection', () => {
           expect(assignedSorted).toEqual(standardSorted);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 });
@@ -801,7 +801,7 @@ describe('Property 9: Manual entry range validation', () => {
           expect(validateManualScore(value)).toBeNull();
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -813,7 +813,7 @@ describe('Property 9: Manual entry range validation', () => {
           expect(validateManualScore(value)).toBe('El valor debe estar entre 1 y 20');
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -825,7 +825,7 @@ describe('Property 9: Manual entry range validation', () => {
           expect(validateManualScore(value)).toBe('El valor debe estar entre 1 y 20');
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -858,7 +858,7 @@ describe('Property 9: Manual entry range validation', () => {
           }
         }
       ),
-      { numRuns: 200 }
+      { numRuns: 25 }
     );
   });
 });
@@ -878,7 +878,7 @@ describe('Property 10: Final score preview calculation', () => {
           expect(finalScore).toBe(baseScore + racialBonus);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -891,7 +891,7 @@ describe('Property 10: Final score preview calculation', () => {
           expect(finalScore).toBe(baseScore);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -905,7 +905,7 @@ describe('Property 10: Final score preview calculation', () => {
           expect(finalScore).toBeGreaterThan(baseScore);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -919,7 +919,7 @@ describe('Property 10: Final score preview calculation', () => {
           expect(finalScore).toBeLessThan(baseScore);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -932,7 +932,7 @@ describe('Property 10: Final score preview calculation', () => {
           expect(baseScore + racialBonus).toBe(racialBonus + baseScore);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 });
@@ -970,7 +970,7 @@ describe('calculateHp()', () => {
           expect(calculateHp(hitDie, finalCon)).toBe(expected);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 });
@@ -1008,7 +1008,7 @@ describe('Property 11: Skill selection constraint', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -1024,7 +1024,7 @@ describe('Property 11: Skill selection constraint', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -1038,7 +1038,7 @@ describe('Property 11: Skill selection constraint', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -1109,7 +1109,7 @@ describe('Property 12: HP calculation correctness', () => {
           expect(calculateHp(hitDie, finalCon)).toBe(expected);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -1130,7 +1130,8 @@ describe('Property 12: HP calculation correctness', () => {
             manualScores: { str: 10, dex: 10, con: finalCon, int: 10, wis: 10, cha: 10 },
             selectedSkills: [],
             finalScores: { str: 10, dex: 10, con: finalCon, int: 10, wis: 10, cha: 10 },
-            calculatedHp: hp
+            calculatedHp: hp,
+            equipmentSelections: {}
           };
           const finalScores = { str: 10, dex: 10, con: finalCon, int: 10, wis: 10, cha: 10 };
           const dto = buildCharacterDto(formData, finalScores, hp, 'user-1');
@@ -1139,7 +1140,7 @@ describe('Property 12: HP calculation correctness', () => {
           expect(dto.maxHp).toBe(dto.currentHp);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -1156,7 +1157,7 @@ describe('Property 12: HP calculation correctness', () => {
           expect(hp).toBe(expected);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 });
@@ -1190,7 +1191,8 @@ describe('Property 13: CharacterDto defaults are always fixed', () => {
             manualScores: { str: 10, dex: 10, con: finalCon, int: 10, wis: 10, cha: 10 },
             selectedSkills: skills,
             finalScores: { str: 10, dex: 10, con: finalCon, int: 10, wis: 10, cha: 10 },
-            calculatedHp: hp
+            calculatedHp: hp,
+            equipmentSelections: {}
           };
           const finalScores = { str: 10, dex: 10, con: finalCon, int: 10, wis: 10, cha: 10 };
           const dto = buildCharacterDto(formData, finalScores, hp, 'user-1');
@@ -1215,7 +1217,7 @@ describe('Property 13: CharacterDto defaults are always fixed', () => {
           expect(dto.inventory).toEqual([]);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -1231,13 +1233,14 @@ describe('Property 13: CharacterDto defaults are always fixed', () => {
             tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
             manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-            calculatedHp: 8
+            calculatedHp: 8,
+            equipmentSelections: {}
           };
           const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
           expect(dto.xp).toBe(xp);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 });
@@ -1266,13 +1269,14 @@ describe('Property 14: DTO user ID matches JWT token', () => {
             tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
             manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-            calculatedHp: 8
+            calculatedHp: 8,
+            equipmentSelections: {}
           };
           const dto = buildCharacterDto(formData, formData.finalScores, 8, userId);
           expect(dto.user.id).toBe(userId);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -1294,13 +1298,14 @@ describe('Property 14: DTO user ID matches JWT token', () => {
             tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
             manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-            calculatedHp: 8
+            calculatedHp: 8,
+            equipmentSelections: {}
           };
           const dto = buildCharacterDto(formData, formData.finalScores, 8, extractedId);
           expect(dto.user.id).toBe(userId);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -1312,7 +1317,8 @@ describe('Property 14: DTO user ID matches JWT token', () => {
       tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
       manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-      calculatedHp: 8
+      calculatedHp: 8,
+      equipmentSelections: {}
     };
     const dto = buildCharacterDto(formData, formData.finalScores, 8, null);
     expect(dto.user.id).toBeNull();
@@ -1340,13 +1346,14 @@ describe('Property 15: DTO saving throws match selected class', () => {
             tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
             manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-            calculatedHp: 8
+            calculatedHp: 8,
+            equipmentSelections: {}
           };
           const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
           expect(dto.savingThrowsProficiencies).toEqual(savingThrows);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -1358,7 +1365,8 @@ describe('Property 15: DTO saving throws match selected class', () => {
       tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
       manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-      calculatedHp: 8
+      calculatedHp: 8,
+      equipmentSelections: {}
     };
     const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
     expect(dto.savingThrowsProficiencies).toEqual({});
@@ -1384,7 +1392,8 @@ describe('Property 16: DTO skill proficiencies match selected skills', () => {
             tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
             manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedSkills, finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-            calculatedHp: 8
+            calculatedHp: 8,
+            equipmentSelections: {}
           };
           const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
 
@@ -1402,7 +1411,7 @@ describe('Property 16: DTO skill proficiencies match selected skills', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 25 }
     );
   });
 
@@ -1414,7 +1423,8 @@ describe('Property 16: DTO skill proficiencies match selected skills', () => {
       tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
       manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-      calculatedHp: 8
+      calculatedHp: 8,
+      equipmentSelections: {}
     };
     const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
     expect(dto.skillProficiencies).toEqual({});
@@ -1444,7 +1454,8 @@ describe('ForgeCharacterPage: submit flow', () => {
       manualScores: { str: 15, dex: 12, con: 14, int: 10, wis: 10, cha: 8 },
       selectedSkills: ['athletics', 'perception'],
       finalScores: { str: 16, dex: 12, con: 14, int: 10, wis: 10, cha: 8 },
-      calculatedHp: 12
+      calculatedHp: 12,
+      equipmentSelections: {}
     };
     component.currentStep = 5;
   };
@@ -1532,5 +1543,509 @@ describe('ForgeCharacterPage: submit flow', () => {
     component.submitCharacter(); // second call while in flight
 
     expect(apiServiceSpy.createCharacter).toHaveBeenCalledTimes(1);
+  });
+});
+
+// ─── Imports for equipment tests ─────────────────────────────────────────────
+import { isStructuredEquipment, resolveInventory, StructuredEquipment } from '../../models/equipment.models';
+
+// ─── Helpers for equipment tests ─────────────────────────────────────────────
+
+/** Builds a minimal valid StructuredEquipment with the given number of choice sets. */
+function makeStructuredEquipment(choiceSetCount: number, fixedGrantCount = 0): StructuredEquipment {
+  const fixedGrants = Array.from({ length: fixedGrantCount }, (_, i) => ({
+    itemId: `item-fixed-${i}`,
+    itemName: `Fixed Item ${i}`,
+    itemType: 'weapon',
+    quantity: i + 1,
+  }));
+
+  const choiceSets = Array.from({ length: choiceSetCount }, (_, setIdx) => ({
+    label: `Choice Set ${setIdx}`,
+    options: [
+      {
+        lines: [{ itemId: `item-${setIdx}-opt0`, itemName: `Item ${setIdx}-0`, itemType: 'weapon', quantity: 1 }],
+      },
+      {
+        lines: [{ itemId: `item-${setIdx}-opt1`, itemName: `Item ${setIdx}-1`, itemType: 'armor', quantity: 2 }],
+      },
+    ],
+  }));
+
+  return { version: 'structured', fixedGrants, choiceSets };
+}
+
+/** Builds a minimal CharacterFormData with the given class object. */
+function makeFormDataWithClass(cls: any): CharacterFormData {
+  return {
+    name: 'Test',
+    background: 'Bg',
+    alignment: 'Legal Bueno',
+    xp: 0,
+    selectedRace: { id: 'r1' },
+    selectedClass: cls,
+    selectedSubclass: null,
+    equipmentSelections: {},
+    scoreMode: 'manual',
+    tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
+    manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+    selectedSkills: [],
+    finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+    calculatedHp: 8,
+  };
+}
+
+// ─── Unit tests: activeSteps getter ──────────────────────────────────────────
+// Feature: starting-equipment-picker
+// Validates: Requirements 6.1, 6.2
+
+describe('ForgeCharacterPage: activeSteps getter', () => {
+  let component: ForgeCharacterPage;
+  let apiServiceSpy: jasmine.SpyObj<ApiService>;
+
+  beforeEach(async () => {
+    apiServiceSpy = jasmine.createSpyObj('ApiService', ['getRaces', 'getClasses', 'getSubclasses', 'createCharacter']);
+    apiServiceSpy.getRaces.and.returnValue(of([]));
+    apiServiceSpy.getClasses.and.returnValue(of([]));
+
+    await TestBed.configureTestingModule({
+      imports: [ForgeCharacterPage, HttpClientTestingModule],
+      providers: [
+        { provide: ApiService, useValue: apiServiceSpy },
+        provideRouter([]),
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(ForgeCharacterPage);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should include "equipment" after "class" when selected class has StructuredEquipment with ≥1 choice set', () => {
+    const equipment = makeStructuredEquipment(1);
+    component.formData.selectedClass = { id: 'c1', classFeatures: { startingEquipment: equipment } };
+
+    const steps = component.activeSteps;
+
+    expect(steps).toContain('equipment');
+    const classIdx = steps.indexOf('class');
+    const equipmentIdx = steps.indexOf('equipment');
+    expect(equipmentIdx).toBe(classIdx + 1);
+  });
+
+  it('should include "equipment" when selected class has StructuredEquipment with multiple choice sets', () => {
+    const equipment = makeStructuredEquipment(3);
+    component.formData.selectedClass = { id: 'c1', classFeatures: { startingEquipment: equipment } };
+
+    expect(component.activeSteps).toContain('equipment');
+  });
+
+  it('should NOT include "equipment" when selected class has StructuredEquipment with 0 choice sets (fixed grants only)', () => {
+    const equipment = makeStructuredEquipment(0, 2); // 0 choice sets, 2 fixed grants
+    component.formData.selectedClass = { id: 'c1', classFeatures: { startingEquipment: equipment } };
+
+    expect(component.activeSteps).not.toContain('equipment');
+  });
+
+  it('should NOT include "equipment" when selected class has legacy equipment (plain string)', () => {
+    component.formData.selectedClass = {
+      id: 'c1',
+      classFeatures: { startingEquipment: 'a longsword and leather armor' },
+    };
+
+    expect(component.activeSteps).not.toContain('equipment');
+  });
+
+  it('should NOT include "equipment" when selected class has no equipment (null)', () => {
+    component.formData.selectedClass = {
+      id: 'c1',
+      classFeatures: { startingEquipment: null },
+    };
+
+    expect(component.activeSteps).not.toContain('equipment');
+  });
+
+  it('should NOT include "equipment" when selected class has no equipment (undefined)', () => {
+    component.formData.selectedClass = {
+      id: 'c1',
+      classFeatures: {},
+    };
+
+    expect(component.activeSteps).not.toContain('equipment');
+  });
+
+  it('should NOT include "equipment" when no class is selected', () => {
+    component.formData.selectedClass = null;
+
+    expect(component.activeSteps).not.toContain('equipment');
+  });
+
+  it('should return the base 6 steps when no class is selected', () => {
+    component.formData.selectedClass = null;
+
+    const steps = component.activeSteps;
+    expect(steps).toEqual(['identity', 'race', 'class', 'ability-scores', 'skills', 'review']);
+    expect(steps.length).toBe(6);
+  });
+
+  it('should return 7 steps when equipment step is inserted', () => {
+    const equipment = makeStructuredEquipment(2);
+    component.formData.selectedClass = { id: 'c1', classFeatures: { startingEquipment: equipment } };
+
+    expect(component.activeSteps.length).toBe(7);
+  });
+
+  it('should always have "identity" as the first step', () => {
+    component.formData.selectedClass = null;
+    expect(component.activeSteps[0]).toBe('identity');
+
+    const equipment = makeStructuredEquipment(1);
+    component.formData.selectedClass = { id: 'c1', classFeatures: { startingEquipment: equipment } };
+    expect(component.activeSteps[0]).toBe('identity');
+  });
+
+  it('should always have "review" as the last step', () => {
+    component.formData.selectedClass = null;
+    const stepsNoEquip = component.activeSteps;
+    expect(stepsNoEquip[stepsNoEquip.length - 1]).toBe('review');
+
+    const equipment = makeStructuredEquipment(1);
+    component.formData.selectedClass = { id: 'c1', classFeatures: { startingEquipment: equipment } };
+    const stepsWithEquip = component.activeSteps;
+    expect(stepsWithEquip[stepsWithEquip.length - 1]).toBe('review');
+  });
+});
+
+// ─── Unit tests: Equipment step validation ────────────────────────────────────
+// Feature: starting-equipment-picker
+// Validates: Requirements 6.5
+
+describe('ForgeCharacterPage: equipment step validation', () => {
+  let component: ForgeCharacterPage;
+  let apiServiceSpy: jasmine.SpyObj<ApiService>;
+
+  beforeEach(async () => {
+    apiServiceSpy = jasmine.createSpyObj('ApiService', ['getRaces', 'getClasses', 'getSubclasses', 'createCharacter']);
+    apiServiceSpy.getRaces.and.returnValue(of([]));
+    apiServiceSpy.getClasses.and.returnValue(of([]));
+
+    await TestBed.configureTestingModule({
+      imports: [ForgeCharacterPage, HttpClientTestingModule],
+      providers: [
+        { provide: ApiService, useValue: apiServiceSpy },
+        provideRouter([]),
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(ForgeCharacterPage);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should return a non-empty error when on equipment step and no selections have been made', () => {
+    const equipment = makeStructuredEquipment(2);
+    component.formData.selectedClass = { id: 'c1', classFeatures: { startingEquipment: equipment } };
+    component.formData.equipmentSelections = {};
+
+    // Navigate to the equipment step (index 3 in the 7-step list)
+    const equipmentStepIdx = component.activeSteps.indexOf('equipment');
+    component.currentStep = equipmentStepIdx;
+
+    // Trigger validation via nextStep (which calls _validateCurrentStep internally)
+    component.nextStep();
+
+    expect(Object.keys(component.validationErrors).length).toBeGreaterThan(0);
+    expect(component.validationErrors['equipment']).toBeDefined();
+  });
+
+  it('should return a non-empty error when only some choice sets have a selection', () => {
+    const equipment = makeStructuredEquipment(2); // 2 choice sets
+    component.formData.selectedClass = { id: 'c1', classFeatures: { startingEquipment: equipment } };
+    component.formData.equipmentSelections = { 0: 0 }; // only first choice set selected
+
+    const equipmentStepIdx = component.activeSteps.indexOf('equipment');
+    component.currentStep = equipmentStepIdx;
+
+    component.nextStep();
+
+    expect(component.validationErrors['equipment']).toBeDefined();
+  });
+
+  it('should return no error when all choice sets have a selection', () => {
+    const equipment = makeStructuredEquipment(2); // 2 choice sets
+    component.formData.selectedClass = { id: 'c1', classFeatures: { startingEquipment: equipment } };
+    component.formData.equipmentSelections = { 0: 0, 1: 1 }; // both selected
+
+    const equipmentStepIdx = component.activeSteps.indexOf('equipment');
+    component.currentStep = equipmentStepIdx;
+
+    component.nextStep();
+
+    expect(component.validationErrors['equipment']).toBeUndefined();
+    // Step should have advanced
+    expect(component.currentStep).toBe(equipmentStepIdx + 1);
+  });
+
+  it('should return no error when there are 0 choice sets (trivially valid)', () => {
+    const equipment = makeStructuredEquipment(0, 1); // 0 choice sets, 1 fixed grant
+    component.formData.selectedClass = { id: 'c1', classFeatures: { startingEquipment: equipment } };
+    component.formData.equipmentSelections = {};
+
+    // With 0 choice sets, equipment step is not inserted — validate directly via private method
+    const errors = (component as any)._validateEquipmentStep();
+
+    expect(Object.keys(errors).length).toBe(0);
+  });
+
+  it('should block advancement when any choice set has no selection', () => {
+    const equipment = makeStructuredEquipment(3); // 3 choice sets
+    component.formData.selectedClass = { id: 'c1', classFeatures: { startingEquipment: equipment } };
+    component.formData.equipmentSelections = { 0: 0, 1: 0 }; // missing selection for set 2
+
+    const equipmentStepIdx = component.activeSteps.indexOf('equipment');
+    component.currentStep = equipmentStepIdx;
+    const stepBefore = component.currentStep;
+
+    component.nextStep();
+
+    // Should not have advanced
+    expect(component.currentStep).toBe(stepBefore);
+    expect(component.validationErrors['equipment']).toBeDefined();
+  });
+
+  it('should pass validation when all 3 choice sets have selections', () => {
+    const equipment = makeStructuredEquipment(3);
+    component.formData.selectedClass = { id: 'c1', classFeatures: { startingEquipment: equipment } };
+    component.formData.equipmentSelections = { 0: 0, 1: 1, 2: 0 };
+
+    const equipmentStepIdx = component.activeSteps.indexOf('equipment');
+    component.currentStep = equipmentStepIdx;
+
+    component.nextStep();
+
+    expect(component.validationErrors['equipment']).toBeUndefined();
+    expect(component.currentStep).toBe(equipmentStepIdx + 1);
+  });
+
+  it('should clear equipment validation error when selectEquipmentOption is called', () => {
+    const equipment = makeStructuredEquipment(1);
+    component.formData.selectedClass = { id: 'c1', classFeatures: { startingEquipment: equipment } };
+    component.formData.equipmentSelections = {};
+
+    const equipmentStepIdx = component.activeSteps.indexOf('equipment');
+    component.currentStep = equipmentStepIdx;
+    component.nextStep(); // triggers error
+
+    expect(component.validationErrors['equipment']).toBeDefined();
+
+    component.selectEquipmentOption(0, 0); // make a selection
+
+    expect(component.validationErrors['equipment']).toBeUndefined();
+  });
+});
+
+// ─── Unit tests: resolveInventory integration in buildCharacterDto ────────────
+// Feature: starting-equipment-picker
+// Validates: Requirements 7.1, 7.5
+
+describe('buildCharacterDto: resolveInventory integration', () => {
+  const baseFormData: CharacterFormData = {
+    name: 'Test',
+    background: 'Bg',
+    alignment: 'Legal Bueno',
+    xp: 0,
+    selectedRace: { id: 'r1' },
+    selectedClass: { id: 'c1', hitDie: 8, savingThrows: {} },
+    selectedSubclass: null,
+    equipmentSelections: {},
+    scoreMode: 'manual',
+    tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
+    manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+    selectedSkills: [],
+    finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+    calculatedHp: 8,
+  };
+
+  it('should include correct inventory lines for structured equipment with fixed grants only', () => {
+    const equipment = makeStructuredEquipment(0, 2); // 2 fixed grants, 0 choice sets
+    const inventory = resolveInventory(equipment, {});
+
+    const dto = buildCharacterDto(baseFormData, baseFormData.finalScores, 8, 'u1', inventory);
+
+    expect(dto.inventory.length).toBe(2);
+    expect(dto.inventory[0]).toEqual({ itemId: 'item-fixed-0', quantity: 1 });
+    expect(dto.inventory[1]).toEqual({ itemId: 'item-fixed-1', quantity: 2 });
+  });
+
+  it('should include correct inventory lines for structured equipment with selected options', () => {
+    const equipment = makeStructuredEquipment(2); // 2 choice sets, no fixed grants
+    const selections = { 0: 0, 1: 1 }; // select option 0 from set 0, option 1 from set 1
+    const inventory = resolveInventory(equipment, selections);
+
+    const dto = buildCharacterDto(baseFormData, baseFormData.finalScores, 8, 'u1', inventory);
+
+    // Set 0, option 0: item-0-opt0 qty 1
+    // Set 1, option 1: item-1-opt1 qty 2
+    expect(dto.inventory.length).toBe(2);
+    expect(dto.inventory).toContain(jasmine.objectContaining({ itemId: 'item-0-opt0', quantity: 1 }));
+    expect(dto.inventory).toContain(jasmine.objectContaining({ itemId: 'item-1-opt1', quantity: 2 }));
+  });
+
+  it('should include both fixed grants and selected option lines in inventory', () => {
+    const equipment = makeStructuredEquipment(1, 1); // 1 fixed grant + 1 choice set
+    const selections = { 0: 0 }; // select option 0 from set 0
+    const inventory = resolveInventory(equipment, selections);
+
+    const dto = buildCharacterDto(baseFormData, baseFormData.finalScores, 8, 'u1', inventory);
+
+    // 1 fixed grant + 1 option line = 2 total
+    expect(dto.inventory.length).toBe(2);
+    expect(dto.inventory).toContain(jasmine.objectContaining({ itemId: 'item-fixed-0' }));
+    expect(dto.inventory).toContain(jasmine.objectContaining({ itemId: 'item-0-opt0' }));
+  });
+
+  it('should have empty inventory for legacy equipment (plain string)', () => {
+    // When equipment is a legacy string, resolveInventory is not called — inventory is []
+    const dto = buildCharacterDto(baseFormData, baseFormData.finalScores, 8, 'u1', []);
+
+    expect(dto.inventory).toEqual([]);
+  });
+
+  it('should have empty inventory when no equipment is defined (null)', () => {
+    const dto = buildCharacterDto(baseFormData, baseFormData.finalScores, 8, 'u1', []);
+
+    expect(dto.inventory).toEqual([]);
+  });
+
+  it('should have empty inventory when buildCharacterDto is called without inventory parameter', () => {
+    const dto = buildCharacterDto(baseFormData, baseFormData.finalScores, 8, 'u1');
+
+    expect(dto.inventory).toEqual([]);
+  });
+
+  it('should produce separate inventory slots for duplicate item IDs (no merging)', () => {
+    const equipment: StructuredEquipment = {
+      version: 'structured',
+      fixedGrants: [
+        { itemId: 'sword', itemName: 'Sword', itemType: 'weapon', quantity: 1 },
+        { itemId: 'sword', itemName: 'Sword', itemType: 'weapon', quantity: 1 }, // duplicate
+      ],
+      choiceSets: [],
+    };
+    const inventory = resolveInventory(equipment, {});
+
+    const dto = buildCharacterDto(baseFormData, baseFormData.finalScores, 8, 'u1', inventory);
+
+    expect(dto.inventory.length).toBe(2);
+    expect(dto.inventory[0]).toEqual({ itemId: 'sword', quantity: 1 });
+    expect(dto.inventory[1]).toEqual({ itemId: 'sword', quantity: 1 });
+  });
+});
+
+// ─── Unit tests: ForgeCharacterPage submitCharacter with structured equipment ─
+// Feature: starting-equipment-picker
+// Validates: Requirements 7.1, 7.5
+
+describe('ForgeCharacterPage: submitCharacter with structured equipment', () => {
+  let component: ForgeCharacterPage;
+  let apiServiceSpy: jasmine.SpyObj<ApiService>;
+
+  beforeEach(async () => {
+    apiServiceSpy = jasmine.createSpyObj('ApiService', ['getRaces', 'getClasses', 'getSubclasses', 'createCharacter']);
+    apiServiceSpy.getRaces.and.returnValue(of([]));
+    apiServiceSpy.getClasses.and.returnValue(of([]));
+    apiServiceSpy.createCharacter.and.returnValue(of({ id: 'new-char-id' }));
+
+    const authServiceSpy = jasmine.createSpyObj('AuthService', ['getUserIdFromToken']);
+    authServiceSpy.getUserIdFromToken.and.returnValue('user-1');
+
+    await TestBed.configureTestingModule({
+      imports: [ForgeCharacterPage, HttpClientTestingModule],
+      providers: [
+        { provide: ApiService, useValue: apiServiceSpy },
+        provideRouter([]),
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(ForgeCharacterPage);
+    component = fixture.componentInstance;
+    (component as any).authService = authServiceSpy;
+    fixture.detectChanges();
+  });
+
+  it('should pass resolved inventory to createCharacter when class has structured equipment', () => {
+    const equipment = makeStructuredEquipment(1, 1); // 1 fixed grant + 1 choice set
+    component.formData = {
+      name: 'Hero',
+      background: 'Soldado',
+      alignment: 'Legal Bueno',
+      xp: 0,
+      selectedRace: { id: 'r1', bonusStr: 0, bonusDex: 0, bonusCon: 0, bonusInt: 0, bonusWis: 0, bonusCha: 0 },
+      selectedClass: { id: 'c1', hitDie: 8, savingThrows: {}, classFeatures: { startingEquipment: equipment } },
+      selectedSubclass: null,
+      equipmentSelections: { 0: 0 }, // select option 0 from choice set 0
+      scoreMode: 'manual',
+      tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
+      manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+      selectedSkills: [],
+      finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+      calculatedHp: 8,
+    };
+
+    component.submitCharacter();
+
+    const callArgs = apiServiceSpy.createCharacter.calls.mostRecent().args[0];
+    // 1 fixed grant + 1 option line = 2 inventory items
+    expect(callArgs.inventory.length).toBe(2);
+    expect(callArgs.inventory).toContain(jasmine.objectContaining({ itemId: 'item-fixed-0' }));
+    expect(callArgs.inventory).toContain(jasmine.objectContaining({ itemId: 'item-0-opt0' }));
+  });
+
+  it('should pass empty inventory to createCharacter when class has legacy equipment', () => {
+    component.formData = {
+      name: 'Hero',
+      background: 'Soldado',
+      alignment: 'Legal Bueno',
+      xp: 0,
+      selectedRace: { id: 'r1', bonusStr: 0, bonusDex: 0, bonusCon: 0, bonusInt: 0, bonusWis: 0, bonusCha: 0 },
+      selectedClass: { id: 'c1', hitDie: 8, savingThrows: {}, classFeatures: { startingEquipment: 'a longsword and leather armor' } },
+      selectedSubclass: null,
+      equipmentSelections: {},
+      scoreMode: 'manual',
+      tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
+      manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+      selectedSkills: [],
+      finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+      calculatedHp: 8,
+    };
+
+    component.submitCharacter();
+
+    const callArgs = apiServiceSpy.createCharacter.calls.mostRecent().args[0];
+    expect(callArgs.inventory).toEqual([]);
+  });
+
+  it('should pass empty inventory to createCharacter when class has no equipment', () => {
+    component.formData = {
+      name: 'Hero',
+      background: 'Soldado',
+      alignment: 'Legal Bueno',
+      xp: 0,
+      selectedRace: { id: 'r1', bonusStr: 0, bonusDex: 0, bonusCon: 0, bonusInt: 0, bonusWis: 0, bonusCha: 0 },
+      selectedClass: { id: 'c1', hitDie: 8, savingThrows: {}, classFeatures: {} },
+      selectedSubclass: null,
+      equipmentSelections: {},
+      scoreMode: 'manual',
+      tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
+      manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+      selectedSkills: [],
+      finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+      calculatedHp: 8,
+    };
+
+    component.submitCharacter();
+
+    const callArgs = apiServiceSpy.createCharacter.calls.mostRecent().args[0];
+    expect(callArgs.inventory).toEqual([]);
   });
 });

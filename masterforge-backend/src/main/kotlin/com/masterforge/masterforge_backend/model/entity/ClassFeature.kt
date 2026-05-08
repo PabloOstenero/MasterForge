@@ -1,5 +1,6 @@
 package com.masterforge.masterforge_backend.model.entity
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 
 @Entity
@@ -19,6 +20,7 @@ data class ClassFeature(
     val levelRequired: Int,
 
     // It connects to the DndClass entity using a foreign key
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "class_id", nullable = false)
     val dndClass: DndClass

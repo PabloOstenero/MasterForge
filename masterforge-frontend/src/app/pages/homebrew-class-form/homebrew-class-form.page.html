@@ -1,109 +1,754 @@
-<div class="homebrew-form-wrapper">
+﻿<div class="homebrew-form-wrapper">
 
+  <!-- Top bar -->
   <div class="homebrew-form-topbar">
-    <button class="back-btn" type="button" (click)="cancel()" data-testid="cancel-button">← Cancelar</button>
-    <h1 class="form-title">Nueva Clase</h1>
+    <button class="back-btn" type="button" (click)="cancel()" data-testid="cancel-button">
+      ← Cancelar
+    </button>
+    <h1 class="form-title">{{ editMode ? 'Editar Clase' : 'Nueva Clase' }}</h1>
   </div>
 
   <div class="homebrew-form-content">
 
-    <!-- Error state -->
     @if (error) {
-      <p class="text-muted" data-testid="form-error">{{ error }}</p>
+      <div class="form-error-banner" data-testid="form-error">
+        <span>⚠ {{ error }}</span>
+      </div>
     }
 
     <form [formGroup]="form" (ngSubmit)="submit()">
 
-      <!-- Name field -->
-      <div class="field-group">
-        <label class="field-label">Nombre <span class="required">*</span></label>
-        <ion-input
-          class="forge-input"
-          formControlName="name"
-          placeholder="Nombre de la clase"
-          data-testid="name-input"
-          [class.input-error]="form.get('name')?.invalid && form.get('name')?.touched">
-        </ion-input>
-        @if (form.get('name')?.invalid && form.get('name')?.touched) {
-          <p class="error-message" data-testid="name-error">El nombre es obligatorio.</p>
-        }
+      <!-- Tab bar -->
+      <div class="tab-bar">
+        <button type="button" class="tab-btn" [class.tab-btn--active]="currentTab === 'identidad'" (click)="setTab('identidad')">
+          Identidad
+          @if (tabHasError['identidad'] && form.touched) { <span class="tab-error-dot"></span> }
+        </button>
+        <button type="button" class="tab-btn" [class.tab-btn--active]="currentTab === 'competencias'" (click)="setTab('competencias')">
+          Competencias
+          @if (tabHasError['competencias'] && form.touched) { <span class="tab-error-dot"></span> }
+        </button>
+        <button type="button" class="tab-btn" [class.tab-btn--active]="currentTab === 'defensas'" (click)="setTab('defensas')">
+          Defensas
+        </button>
+        <button type="button" class="tab-btn" [class.tab-btn--active]="currentTab === 'rasgos'" (click)="setTab('rasgos')">
+          Rasgos
+          @if (tabHasError['rasgos'] && form.touched) { <span class="tab-error-dot"></span> }
+        </button>
+        <button type="button" class="tab-btn" [class.tab-btn--active]="currentTab === 'multiclase'" (click)="setTab('multiclase')">
+          Multiclase
+          @if (tabHasError['multiclase'] && form.touched) { <span class="tab-error-dot"></span> }
+        </button>
+        <button type="button" class="tab-btn" [class.tab-btn--active]="currentTab === 'conjuros'" (click)="setTab('conjuros')">
+          Conjuros
+          @if (tabHasError['conjuros'] && form.touched) { <span class="tab-error-dot"></span> }
+        </button>
       </div>
 
-      <!-- Hit Die field -->
-      <div class="field-group">
-        <label class="field-label">Dado de Golpe <span class="required">*</span></label>
-        <ion-input
-          class="forge-input"
-          type="number"
-          formControlName="hitDie"
-          placeholder="Ej: 8"
-          data-testid="hit-die-input"
-          [class.input-error]="form.get('hitDie')?.invalid && form.get('hitDie')?.touched">
-        </ion-input>
-        @if (form.get('hitDie')?.invalid && form.get('hitDie')?.touched) {
-          @if (form.get('hitDie')?.errors?.['required']) {
-            <p class="error-message" data-testid="hit-die-error">El dado de golpe es obligatorio.</p>
-          } @else if (form.get('hitDie')?.errors?.['min'] || form.get('hitDie')?.errors?.['max']) {
-            <p class="error-message" data-testid="hit-die-error">El dado de golpe debe estar entre 4 y 12.</p>
-          }
-        }
-      </div>
+      <!-- Tab: Identidad -->
+      @if (currentTab === 'identidad') {
+        <div class="tab-content">
+          <div class="form-grid">
+            <div class="col-left">
 
-      <!-- Saving Throws field -->
-      <div class="field-group" formGroupName="savingThrows">
-        <label class="field-label">Tiradas de Salvación <span class="required">*</span></label>
-        <div class="saving-throws-grid">
-          @for (key of savingThrowKeys; track key) {
-            <div class="saving-throw-item">
-              <ion-checkbox
-                [formControlName]="key"
-                [attr.data-testid]="'saving-throw-' + key">
-              </ion-checkbox>
-              <span class="saving-throw-label">{{ savingThrowLabels[key] }}</span>
-            </div>
+      <!-- S1 IDENTIDAD -->
+      <div class="form-section">
+        <h2 class="section-title">Identidad</h2>
+        <div class="field-group">
+          <label class="field-label">Nombre <span class="required">*</span></label>
+          <ion-input class="forge-input" formControlName="name" placeholder="Nombre de la clase"
+            data-testid="name-input" [class.input-error]="form.get('name')?.invalid && form.get('name')?.touched">
+          </ion-input>
+          @if (form.get('name')?.invalid && form.get('name')?.touched) {
+            <p class="error-message" data-testid="name-error">El nombre es obligatorio.</p>
           }
         </div>
-        @if (form.get('savingThrows')?.invalid && form.get('savingThrows')?.touched) {
+        <div class="field-group">
+          <label class="field-label">Descripción <span class="optional-tag">opcional</span></label>
+          <ion-textarea class="forge-input forge-textarea" formControlName="description"
+            placeholder="Descripción narrativa de la clase…" rows="3" data-testid="description-input">
+          </ion-textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Precio <span class="optional-tag">opcional</span></label>
+          <ion-input class="forge-input" type="number" formControlName="price" placeholder="0"
+            data-testid="price-input" [class.input-error]="form.get('price')?.invalid && form.get('price')?.touched">
+          </ion-input>
+          @if (form.get('price')?.invalid && form.get('price')?.touched) {
+            <p class="error-message" data-testid="price-error">El precio no puede ser negativo.</p>
+          }
+        </div>
+        <div class="field-group">
+          <label class="field-label">Dado de Golpe <span class="required">*</span></label>
+          <select class="forge-select-native" formControlName="hitDie" data-testid="hit-die-input"
+            [class.input-error]="form.get('hitDie')?.invalid && form.get('hitDie')?.touched">
+            <option value="" disabled>Selecciona un dado…</option>
+            @for (die of hitDice; track die) {
+              <option [value]="die">{{ die }}</option>
+            }
+          </select>
+          @if (form.get('hitDie')?.invalid && form.get('hitDie')?.touched) {
+            <p class="error-message" data-testid="hit-die-error">El dado de golpe es obligatorio.</p>
+          }
+        </div>
+      </div>
+
+            </div><!-- .col-left -->
+            <div class="col-right">
+
+      <!-- S3 HABILIDAD PRINCIPAL + NIVEL DE SUBCLASE -->
+      <div class="form-section">
+        <h2 class="section-title">Habilidad Principal</h2>
+        <div class="field-group">
+          <label class="field-label">Habilidad Principal <span class="required">*</span></label>
+          <select class="forge-select-native" formControlName="primaryAbility" data-testid="primary-ability-input"
+            [class.input-error]="form.get('primaryAbility')?.invalid && form.get('primaryAbility')?.touched">
+            <option value="" disabled>Selecciona una habilidad…</option>
+            @for (ab of abilities; track ab) {
+              <option [value]="ab">{{ ab }}</option>
+            }
+          </select>
+          @if (form.get('primaryAbility')?.invalid && form.get('primaryAbility')?.touched) {
+            <p class="error-message" data-testid="primary-ability-error">La habilidad principal es obligatoria.</p>
+          }
+        </div>
+        <div class="field-group">
+          <label class="field-label">Nivel de Subclase <span class="required">*</span></label>
+          <ion-input class="forge-input" type="number" formControlName="subclassLevel" placeholder="3"
+            data-testid="subclass-level-input"
+            [class.input-error]="form.get('subclassLevel')?.invalid && form.get('subclassLevel')?.touched">
+          </ion-input>
+          @if (form.get('subclassLevel')?.invalid && form.get('subclassLevel')?.touched) {
+            <p class="error-message" data-testid="subclass-level-error">El nivel de subclase debe estar entre 1 y 20.</p>
+          }
+        </div>
+      </div>
+
+            </div><!-- .col-right -->
+          </div><!-- .form-grid -->
+        </div><!-- .tab-content identidad -->
+      }
+      <!-- Tab: Competencias -->
+      @if (currentTab === 'competencias') {
+        <div class="tab-content">
+          <div class="form-grid">
+            <div class="col-left">
+
+      <!-- S2 TIRADAS DE SALVACIÓN -->
+      <div class="form-section" formGroupName="savingThrows">
+        <h2 class="section-title">Tiradas de Salvación <span class="required">*</span></h2>
+        <div class="chip-grid" data-testid="saving-throws-input">
+          @for (st of savingThrows; track st; let i = $index) {
+            <button type="button" class="chip"
+              [class.chip--active]="savingThrowChips[i]"
+              (click)="toggleSavingThrow(i)"
+              [attr.data-testid]="'saving-throw-chip-' + st.toLowerCase()">
+              {{ st }}
+            </button>
+          }
+        </div>
+        @if (form.get('savingThrows')?.errors?.['atLeastOneRequired'] && form.get('savingThrows')?.touched) {
           <p class="error-message" data-testid="saving-throws-error">Selecciona al menos una tirada de salvación.</p>
         }
       </div>
 
-      <!-- Price field -->
-      <div class="field-group">
-        <label class="field-label">Precio <span class="required">*</span></label>
-        <ion-input
-          class="forge-input"
-          type="number"
-          formControlName="price"
-          placeholder="0.00"
-          data-testid="price-input"
-          [class.input-error]="form.get('price')?.invalid && form.get('price')?.touched">
-        </ion-input>
-        @if (form.get('price')?.invalid && form.get('price')?.touched) {
-          @if (form.get('price')?.errors?.['required']) {
-            <p class="error-message" data-testid="price-error">El precio es obligatorio.</p>
-          } @else if (form.get('price')?.errors?.['min']) {
-            <p class="error-message" data-testid="price-error">El precio no puede ser negativo.</p>
-          }
+      <!-- S4 COMPETENCIAS DE HABILIDAD -->
+      <div class="form-section">
+        <h2 class="section-title">Competencias de Habilidad <span class="section-badge">opcional</span></h2>
+
+        @if (skillDropdownOpen) {
+          <div class="dropdown-overlay" (click)="closeSkillDropdown()"></div>
+        }
+
+        <div class="skill-picker-row">
+          <div class="custom-dropdown" [class.custom-dropdown--open]="skillDropdownOpen">
+            <button type="button" class="custom-dropdown-trigger" (click)="toggleSkillDropdown()"
+              data-testid="skill-picker-select">
+              <span [class.custom-dropdown-placeholder]="!pendingSkillName">
+                {{ pendingSkillName || 'Selecciona una habilidad…' }}
+              </span>
+              <span class="custom-dropdown-arrow">{{ skillDropdownOpen ? '▲' : '▼' }}</span>
+            </button>
+            @if (skillDropdownOpen) {
+              <div class="custom-dropdown-panel" (click)="$event.stopPropagation()">
+                @for (skill of availableSkillNames; track skill) {
+                  <button type="button" class="custom-dropdown-option" (click)="selectSkillFromDropdown(skill)">
+                    {{ skill }}
+                  </button>
+                }
+                @if (availableSkillNames.length === 0) {
+                  <span class="custom-dropdown-empty">Todas las habilidades añadidas</span>
+                }
+              </div>
+            }
+          </div>
+          <button type="button" class="btn-add" [disabled]="!pendingSkillName" (click)="confirmAddSkill()"
+            data-testid="add-skill-button">+ Añadir</button>
+        </div>
+
+        @if (selectedSkillNames.length > 0) {
+          <div class="skill-tags" data-testid="skill-tags">
+            @for (skill of selectedSkillNames; track skill) {
+              <div class="skill-tag">
+                <span class="skill-tag-name">{{ skill }}</span>
+                <button type="button" class="skill-tag-remove" (click)="removeSkillEntry(skill)">×</button>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="empty-hint">Sin competencias de habilidad.</p>
+        }
+
+        <div class="field-group" style="margin-top: 1rem; max-width: 200px;">
+          <label class="field-label">Número de elecciones <span class="optional-tag">opcional</span></label>
+          <ion-input class="forge-input" type="number" formControlName="skillChoiceCount"
+            placeholder="Ej: 2" data-testid="skill-choice-count">
+          </ion-input>
+        </div>
+      </div>
+
+      <!-- S7 COMPETENCIAS CON HERRAMIENTAS -->
+      <div class="form-section">
+        <h2 class="section-title">Competencias con Herramientas <span class="section-badge">opcional</span></h2>
+        <div class="skill-picker-row">
+          <ion-input class="forge-input" [(ngModel)]="pendingToolProf" [ngModelOptions]="{standalone: true}"
+            placeholder="Ej: Herramientas de artesano…" data-testid="tool-prof-input">
+          </ion-input>
+          <button type="button" class="btn-add" (click)="addCustomToolProf()">Añadir</button>
+        </div>
+        @if (customToolProfs.length > 0) {
+          <div class="skill-tags">
+            @for (tp of customToolProfs; track $index) {
+              <div class="skill-tag">
+                <span class="skill-tag-name">{{ tp }}</span>
+                <button type="button" class="skill-tag-remove" (click)="removeCustomProf(customToolProfs, $index)">×</button>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="empty-hint">Sin competencias con herramientas.</p>
         }
       </div>
 
-      <!-- Form actions -->
-      <div class="form-actions">
-        <button
-          type="submit"
-          class="btn-submit"
-          [disabled]="submitting"
-          data-testid="submit-button"
-        >
-          @if (submitting) {
-            <ion-spinner name="crescent"></ion-spinner>
+            </div><!-- .col-left -->
+            <div class="col-right">
+
+      <!-- S5 COMPETENCIAS CON ARMAS -->
+      <div class="form-section">
+        <h2 class="section-title">Competencias con Armas <span class="section-badge">opcional</span></h2>
+        <div class="chip-grid" data-testid="weapon-profs-input">
+          @for (wp of weaponProfs; track wp; let i = $index) {
+            <button type="button" class="chip" [class.chip--active]="weaponChips[i]"
+              (click)="toggleWeaponChip(i)" [attr.data-testid]="'weapon-chip-' + i">
+              {{ wp }}
+            </button>
           }
-          Crear Clase
-        </button>
+        </div>
+        <div class="skill-picker-row" style="margin-top: 0.5rem;">
+          <ion-input class="forge-input" [(ngModel)]="pendingWeaponProf" [ngModelOptions]="{standalone: true}"
+            placeholder="Arma personalizada…" data-testid="weapon-prof-input">
+          </ion-input>
+          <button type="button" class="btn-add" (click)="addCustomWeaponProf()">Añadir</button>
+        </div>
+        @if (customWeaponProfs.length > 0) {
+          <div class="skill-tags">
+            @for (wp of customWeaponProfs; track $index) {
+              <div class="skill-tag">
+                <span class="skill-tag-name">{{ wp }}</span>
+                <button type="button" class="skill-tag-remove" (click)="removeCustomProf(customWeaponProfs, $index)">×</button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- S6 COMPETENCIAS CON ARMADURAS -->
+      <div class="form-section">
+        <h2 class="section-title">Competencias con Armaduras <span class="section-badge">opcional</span></h2>
+        <div class="chip-grid" data-testid="armor-profs-input">
+          @for (ap of armorProfs; track ap; let i = $index) {
+            <button type="button" class="chip" [class.chip--active]="armorChips[i]"
+              (click)="toggleArmorChip(i)" [attr.data-testid]="'armor-chip-' + i">
+              {{ ap }}
+            </button>
+          }
+        </div>
+        <div class="skill-picker-row" style="margin-top: 0.5rem;">
+          <ion-input class="forge-input" [(ngModel)]="pendingArmorProf" [ngModelOptions]="{standalone: true}"
+            placeholder="Armadura personalizada…" data-testid="armor-prof-input">
+          </ion-input>
+          <button type="button" class="btn-add" (click)="addCustomArmorProf()">Añadir</button>
+        </div>
+        @if (customArmorProfs.length > 0) {
+          <div class="skill-tags">
+            @for (ap of customArmorProfs; track $index) {
+              <div class="skill-tag">
+                <span class="skill-tag-name">{{ ap }}</span>
+                <button type="button" class="skill-tag-remove" (click)="removeCustomProf(customArmorProfs, $index)">×</button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+            </div><!-- .col-right -->
+          </div><!-- .form-grid -->
+        </div><!-- .tab-content competencias -->
+      }
+      <!-- Tab: Defensas -->
+      @if (currentTab === 'defensas') {
+        <div class="tab-content">
+          <div class="form-grid">
+            <div class="col-left">
+
+      <!-- S8 RESISTENCIAS AL DAÑO -->
+      <div class="form-section">
+        <h2 class="section-title">Resistencias al Daño <span class="section-badge">opcional</span></h2>
+        <div class="chip-grid" data-testid="damage-resistances-input">
+          @for (type of damageTypes; track type; let i = $index) {
+            <button type="button" class="chip" [class.chip--active]="damageResistances.at(i).value"
+              (click)="toggleDamageResistanceChip(i)"
+              [attr.data-testid]="'resistance-chip-' + type.toLowerCase()">
+              {{ type }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- S9 INMUNIDADES AL DAÑO -->
+      <div class="form-section">
+        <h2 class="section-title">Inmunidades al Daño <span class="section-badge">opcional</span></h2>
+        <div class="chip-grid" data-testid="damage-immunities-input">
+          @for (type of damageTypes; track type; let i = $index) {
+            <button type="button" class="chip" [class.chip--active]="damageImmunities.at(i).value"
+              (click)="toggleDamageImmunityChip(i)"
+              [attr.data-testid]="'immunity-chip-' + type.toLowerCase()">
+              {{ type }}
+            </button>
+          }
+        </div>
+      </div>
+
+            </div><!-- .col-left -->
+            <div class="col-right">
+
+      <!-- S10 INMUNIDADES A CONDICIONES -->
+      <div class="form-section">
+        <h2 class="section-title">Inmunidades a Condiciones <span class="section-badge">opcional</span></h2>
+        <div class="chip-grid" data-testid="condition-immunities-input">
+          @for (cond of conditions; track cond; let i = $index) {
+            <button type="button" class="chip" [class.chip--active]="conditionImmunities.at(i).value"
+              (click)="toggleConditionImmunityChip(i)"
+              [attr.data-testid]="'condition-chip-' + cond.toLowerCase()">
+              {{ cond }}
+            </button>
+          }
+        </div>
+      </div>
+
+            </div><!-- .col-right -->
+          </div><!-- .form-grid -->
+        </div><!-- .tab-content defensas -->
+      }
+
+      <!-- Tab: Rasgos -->
+      @if (currentTab === 'rasgos') {
+        <div class="tab-content">
+          <div class="form-grid">
+            <div class="col-left">
+
+      <!-- S11 EQUIPO INICIAL -->
+      <div class="form-section">
+        <h2 class="section-title">Equipo Inicial <span class="section-badge">opcional</span></h2>
+        <app-starting-equipment-picker
+          [initialValue]="equipmentInitialValue"
+          [legacyText]="equipmentLegacyText"
+          (equipmentChange)="onEquipmentChange($event)"
+          (validityChange)="onPickerValidityChange($event)"
+          data-testid="starting-equipment-picker">
+        </app-starting-equipment-picker>
+      </div>
+
+            </div><!-- .col-left -->
+            <div class="col-right">
+
+      <!-- S15 RASGOS DE CLASE -->
+      <div class="form-section">
+        <div class="section-header-row">
+          <h2 class="section-title">Rasgos de Clase <span class="section-badge">opcional</span></h2>
+          <button type="button" class="btn-add" (click)="addFeature()" data-testid="add-feature-button">
+            + Añadir
+          </button>
+        </div>
+
+        @if (features.length === 0) {
+          <p class="empty-hint">Sin rasgos de clase definidos.</p>
+        }
+
+        @for (feature of features.controls; track $index) {
+          <div class="entry-card" [formGroup]="$any(feature)" [attr.data-testid]="'feature-entry-' + $index">
+            <input type="hidden" formControlName="id">
+
+            <div class="field-group">
+              <label class="field-label">Nombre <span class="required">*</span></label>
+              <ion-input class="forge-input" formControlName="name"
+                placeholder="Ej: Furia, Defensa sin Armadura"
+                [attr.data-testid]="'feature-name-' + $index"
+                [class.input-error]="$any(feature).get('name')?.invalid && $any(feature).get('name')?.touched">
+              </ion-input>
+              @if ($any(feature).get('name')?.invalid && $any(feature).get('name')?.touched) {
+                <p class="error-message" [attr.data-testid]="'feature-name-error-' + $index">El nombre del rasgo es obligatorio.</p>
+              }
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Descripción <span class="required">*</span></label>
+              <ion-textarea class="forge-input forge-textarea" formControlName="description"
+                placeholder="Describe el efecto del rasgo…" rows="3"
+                [attr.data-testid]="'feature-description-' + $index"
+                [class.input-error]="$any(feature).get('description')?.invalid && $any(feature).get('description')?.touched">
+              </ion-textarea>
+              @if ($any(feature).get('description')?.invalid && $any(feature).get('description')?.touched) {
+                <p class="error-message" [attr.data-testid]="'feature-description-error-' + $index">La descripción es obligatoria.</p>
+              }
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Nivel Requerido <span class="required">*</span></label>
+              <ion-input class="forge-input" type="number" formControlName="levelRequired"
+                placeholder="1"
+                [attr.data-testid]="'feature-level-' + $index"
+                [class.input-error]="$any(feature).get('levelRequired')?.invalid && $any(feature).get('levelRequired')?.touched">
+              </ion-input>
+              @if ($any(feature).get('levelRequired')?.invalid && $any(feature).get('levelRequired')?.touched) {
+                <p class="error-message" [attr.data-testid]="'feature-level-error-' + $index">El nivel debe estar entre 1 y 20.</p>
+              }
+            </div>
+
+            <button type="button" class="btn-remove" (click)="removeFeature($index)"
+              [attr.data-testid]="'remove-feature-' + $index">Eliminar</button>
+          </div>
+        }
+      </div>
+
+            </div><!-- .col-right -->
+          </div><!-- .form-grid -->
+        </div><!-- .tab-content rasgos -->
+      }
+      <!-- Tab: Multiclase -->
+      @if (currentTab === 'multiclase') {
+        <div class="tab-content">
+          <div class="form-grid">
+            <div class="col-left">
+
+      <!-- S12 PRERREQUISITOS DE MULTICLASE -->
+      <div class="form-section">
+        <div class="section-header-row">
+          <h2 class="section-title">Prerrequisitos de Multiclase <span class="section-badge">opcional</span></h2>
+          <button type="button" class="btn-add" (click)="addMulticlassingPrerequisite()" data-testid="add-prereq-button">
+            + Añadir
+          </button>
+        </div>
+
+        @if (multiclassingPrerequisites.length > 0) {
+          <div class="field-group" style="margin-bottom: 0.75rem;">
+            <label class="field-label">Lógica entre prerrequisitos</label>
+            <select class="forge-select-native" formControlName="multiclassingLogic" data-testid="multiclassing-logic">
+              <option value="AND">AND (todos deben cumplirse)</option>
+              <option value="OR">OR (al menos uno debe cumplirse)</option>
+            </select>
+          </div>
+        }
+
+        @for (prereq of multiclassingPrerequisites.controls; track $index) {
+          <div class="entry-card" [formGroup]="$any(prereq)" [attr.data-testid]="'prereq-entry-' + $index">
+            <div class="entry-card-fields">
+              <div class="field-group">
+                <label class="field-label">Habilidad <span class="required">*</span></label>
+                <select class="forge-select-native" formControlName="ability"
+                  [attr.data-testid]="'prereq-ability-' + $index">
+                  <option value="" disabled>Habilidad…</option>
+                  @for (ab of abilities; track ab) {
+                    <option [value]="ab">{{ ab }}</option>
+                  }
+                </select>
+              </div>
+              <div class="field-group">
+                <label class="field-label">Puntuación mínima <span class="required">*</span></label>
+                <ion-input class="forge-input" type="number" formControlName="minScore" placeholder="13"
+                  [attr.data-testid]="'prereq-min-score-' + $index">
+                </ion-input>
+              </div>
+            </div>
+            <button type="button" class="btn-remove" (click)="removeMulticlassingPrerequisite($index)"
+              [attr.data-testid]="'remove-prereq-' + $index">Eliminar</button>
+          </div>
+        }
+        @if (multiclassingPrerequisites.length === 0) {
+          <p class="empty-hint">Sin prerrequisitos de multiclase.</p>
+        }
+      </div>
+
+            </div><!-- .col-left -->
+            <div class="col-right">
+
+      <!-- S13 CONCESIONES DE COMPETENCIA AL MULTICLASEAR -->
+      <div class="form-section">
+        <h2 class="section-title">Competencias al Multiclasear <span class="section-badge">opcional</span></h2>
+        <p class="section-hint">Competencias otorgadas cuando otro personaje multiclasea en esta clase.</p>
+
+        <!-- Armor grants -->
+        <div class="field-group">
+          <label class="field-label">Armaduras</label>
+          <div class="chip-grid">
+            @for (ap of armorProfs; track ap; let i = $index) {
+              <button type="button" class="chip" [class.chip--active]="multiclassingArmorChips[i]"
+                (click)="toggleMulticlassingArmorChip(i)"
+                [attr.data-testid]="'mc-armor-chip-' + i">
+                {{ ap }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Weapon grants -->
+        <div class="field-group">
+          <label class="field-label">Armas</label>
+          <div class="chip-grid">
+            @for (wp of weaponProfs; track wp; let i = $index) {
+              <button type="button" class="chip" [class.chip--active]="multiclassingWeaponChips[i]"
+                (click)="toggleMulticlassingWeaponChip(i)"
+                [attr.data-testid]="'mc-weapon-chip-' + i">
+                {{ wp }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Tool grants -->
+        <div class="field-group">
+          <label class="field-label">Herramientas</label>
+          <div class="skill-picker-row">
+            <ion-input class="forge-input" [(ngModel)]="pendingMulticlassingToolGrant"
+              [ngModelOptions]="{standalone: true}"
+              placeholder="Ej: Herramientas de artesano…" data-testid="mc-tool-grant-input">
+            </ion-input>
+            <button type="button" class="btn-add" (click)="addCustomMulticlassingToolGrant()">Añadir</button>
+          </div>
+          @if (customMulticlassingToolGrants.length > 0) {
+            <div class="skill-tags">
+              @for (tg of customMulticlassingToolGrants; track $index) {
+                <div class="skill-tag">
+                  <span class="skill-tag-name">{{ tg }}</span>
+                  <button type="button" class="skill-tag-remove"
+                    (click)="removeCustomProf(customMulticlassingToolGrants, $index)">×</button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+            </div><!-- .col-right -->
+          </div><!-- .form-grid -->
+        </div><!-- .tab-content multiclase -->
+      }
+      <!-- Tab: Conjuros -->
+      @if (currentTab === 'conjuros') {
+        <div class="tab-content">
+          <div class="form-grid">
+            <div class="col-left">
+
+      <!-- S14 LANZAMIENTO DE CONJUROS -->
+      <div class="form-section">
+        <div class="section-header-row">
+          <h2 class="section-title">Lanzamiento de Conjuros <span class="section-badge">opcional</span></h2>
+          <label class="spellcasting-toggle-label">
+            <input type="checkbox" formControlName="spellcastingEnabled"
+              (change)="toggleSpellcasting()" data-testid="spellcasting-toggle">
+            <span>Activar</span>
+          </label>
+        </div>
+      </div>
+
+            </div><!-- .col-left -->
+            <div class="col-right">
+              <!-- empty -->
+            </div><!-- .col-right -->
+          </div><!-- .form-grid -->
+
+          @if (spellcastingEnabled) {
+
+            <!-- Config row — horizontal, full width -->
+            <div class="form-section" style="margin-top: 20px;">
+              <div class="spellcasting-config-row">
+                <div class="field-group">
+                  <label class="field-label">Habilidad de Conjuros <span class="required">*</span></label>
+                  <select class="forge-select-native" formControlName="spellcastingAbility"
+                    data-testid="spellcasting-ability-input"
+                    [class.input-error]="form.get('spellcastingAbility')?.invalid && form.get('spellcastingAbility')?.touched">
+                    <option value="" disabled>Selecciona una habilidad…</option>
+                    @for (ab of spellcastingAbilities; track ab) {
+                      <option [value]="ab">{{ ab }}</option>
+                    }
+                  </select>
+                  @if (form.get('spellcastingAbility')?.invalid && form.get('spellcastingAbility')?.touched) {
+                    <p class="error-message" data-testid="spellcasting-ability-error">La habilidad de conjuros es obligatoria.</p>
+                  }
+                </div>
+
+                <div class="field-group">
+                  <label class="field-label">
+                    Tipo de Lanzador <span class="required">*</span>
+                    @if (spellSlotsCustomized) {
+                      <span class="customized-badge">Personalizado</span>
+                    }
+                  </label>
+                  <select class="forge-select-native" formControlName="spellcastingType"
+                    data-testid="spellcasting-type-input"
+                    [class.input-error]="form.get('spellcastingType')?.invalid && form.get('spellcastingType')?.touched"
+                    (change)="onSpellcastingTypeChange()">
+                    <option value="" disabled>Selecciona un tipo…</option>
+                    @for (st of spellcastingTypes; track st) {
+                      <option [value]="st">{{ st }}</option>
+                    }
+                  </select>
+                  @if (form.get('spellcastingType')?.invalid && form.get('spellcastingType')?.touched) {
+                    <p class="error-message" data-testid="spellcasting-type-error">El tipo de lanzador es obligatorio.</p>
+                  }
+                </div>
+
+                <div class="field-group">
+                  <label class="field-label">Estilo de Preparación <span class="required">*</span></label>
+                  <select class="forge-select-native" formControlName="preparationStyle"
+                    (change)="onPreparationStyleChange()" data-testid="preparation-style-input">
+                    <option value="PREPARED">Preparado (elige diariamente)</option>
+                    <option value="KNOWN">Conocido (lista fija)</option>
+                  </select>
+                </div>
+
+                <div class="field-group spellcasting-ritual-field">
+                  <label class="field-label">Rituales</label>
+                  <div class="natural-armor-toggle-row">
+                    <input type="checkbox" id="ritual-casting-toggle" formControlName="ritualCasting"
+                      data-testid="ritual-casting-toggle">
+                    <label for="ritual-casting-toggle" class="toggle-label">Puede lanzar como rituales</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tables — full width below the config card -->
+            <div class="spellcasting-tables-col" style="margin-top: 20px;">
+
+              <!-- Spells known — horizontal (only for KNOWN style) -->
+              @if (showSpellsKnown) {
+                <div class="spellcasting-table-col">
+                  <label class="field-label">Conjuros Conocidos por Nivel</label>
+                  <div class="spellcasting-table-wrapper">
+                    <table class="spellcasting-table spellcasting-table--horizontal">
+                      <thead>
+                        <tr>
+                          @for (row of levelRange; track row) { <th>{{ row }}</th> }
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          @for (row of levelRange; track row; let i = $index) {
+                            <td>
+                              <ion-input class="forge-input table-input" type="number"
+                                [formControl]="$any(spellsKnown.at(i))"
+                                placeholder="—" [attr.data-testid]="'spells-known-' + i">
+                              </ion-input>
+                            </td>
+                          }
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+
+              <!-- Cantrips (narrow) + Spell Slots (fills remaining width) -->
+              <div class="spellcasting-tables-row">
+
+                <div class="spellcasting-table-col">
+                  <label class="field-label">Trucos Conocidos por Nivel</label>
+                  <div class="spellcasting-table-wrapper">
+                    <table class="spellcasting-table">
+                      <thead><tr><th>Nivel</th><th>Trucos</th></tr></thead>
+                      <tbody>
+                        @for (row of levelRange; track row; let i = $index) {
+                          <tr>
+                            <td class="level-cell">{{ row }}</td>
+                            <td>
+                              <ion-input class="forge-input table-input" type="number"
+                                [formControl]="$any(cantripsKnown.at(i))"
+                                placeholder="—" [attr.data-testid]="'cantrips-known-' + i">
+                              </ion-input>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div class="spellcasting-table-col spellcasting-table-col--wide">
+                  <label class="field-label">
+                    Espacios de Conjuro por Nivel
+                    @if (spellSlotsCustomized) {
+                      <span class="customized-badge">Personalizado</span>
+                    }
+                  </label>
+                  <div class="spellcasting-table-wrapper">
+                    <table class="spellcasting-table spell-slots-table">
+                      <thead>
+                        <tr>
+                          <th>Nivel</th>
+                          @for (sl of spellLevelRange; track sl) { <th>{{ sl }}º</th> }
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (row of levelRange; track row; let i = $index) {
+                          <tr>
+                            <td class="level-cell">{{ row }}</td>
+                            @for (sl of spellLevelRange; track sl; let j = $index) {
+                              <td>
+                                <ion-input class="forge-input table-input" type="number"
+                                  [formControl]="$any($any(spellSlots.at(i)).at(j))"
+                                  placeholder="—" [attr.data-testid]="'spell-slot-' + i + '-' + j"
+                                  (ionInput)="checkSpellSlotsCustomized()">
+                                </ion-input>
+                              </td>
+                            }
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+              </div><!-- .spellcasting-tables-row -->
+            </div><!-- .spellcasting-tables-col -->
+          }
+
+        </div><!-- .tab-content conjuros -->
+      }
+
+      <!-- Form actions — always visible -->
+      <div class="form-actions">
+        <ion-button expand="block" type="submit" class="btn-submit" [disabled]="submitting"
+          data-testid="submit-button">
+          @if (submitting) {
+            <ion-spinner name="crescent" slot="start"></ion-spinner>
+          }
+          {{ editMode ? 'Guardar Cambios' : 'Crear Clase' }}
+        </ion-button>
       </div>
 
     </form>
-
   </div>
 </div>
+
+<!-- end of form -->

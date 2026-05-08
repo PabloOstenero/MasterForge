@@ -36,9 +36,11 @@ class DndClassController(
 
         val dndClass = DndClass(
             name = dto.name,
+            description = dto.description,
             price = dto.price,
             hitDie = dto.hitDie,
             savingThrows = dto.savingThrows,
+            classFeatures = dto.classFeatures,
             author = author
         )
         return dndClassRepository.save(dndClass)
@@ -67,9 +69,11 @@ class DndClassController(
 
         val updatedClass = existingClass.copy(
             name = dto.name,
+            description = dto.description,
             price = dto.price,
             hitDie = dto.hitDie,
             savingThrows = dto.savingThrows,
+            classFeatures = dto.classFeatures,
             author = author
         )
         return dndClassRepository.save(updatedClass)

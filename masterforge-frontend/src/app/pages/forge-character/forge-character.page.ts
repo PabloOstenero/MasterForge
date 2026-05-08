@@ -10,15 +10,18 @@ import {
 } from '@ionic/angular/standalone';
 import { ApiService } from '../../services/api';
 import { AuthService } from '../../services/auth.service';
+import { isStructuredEquipment, resolveInventory, StructuredEquipment, ResolvedInventoryLine } from '../../models/equipment.models';
 
 // ─── Step definitions ────────────────────────────────────────────────────────
-const STEPS = ['identity', 'race', 'class', 'ability-scores', 'skills', 'review'] as const;
-type Step = typeof STEPS[number];
+const BASE_STEPS = ['identity', 'race', 'class', 'ability-scores', 'skills', 'review'] as const;
+type BaseStep = typeof BASE_STEPS[number];
+type Step = BaseStep | 'equipment';
 
 export const STEP_LABELS: Record<Step, string> = {
   'identity': 'Identidad',
   'race': 'Raza',
   'class': 'Clase',
+  'equipment': 'Equipamiento',
   'ability-scores': 'Puntuaciones',
   'skills': 'Habilidades',
   'review': 'Revisión'
@@ -79,12 +82,15 @@ export interface CharacterFormData {
   selectedClass: any | null;
   selectedSubclass: any | null;
 
-  // Step 3: Ability Scores
+  // Step 3 (dynamic): Equipment — maps choiceSet index → selected option index
+  equipmentSelections: Record<number, number>;
+
+  // Step 3/4: Ability Scores
   scoreMode: 'standard' | 'manual';
   tokenAssignments: { [abilityKey: string]: number | null };
   manualScores: { str: number; dex: number; con: number; int: number; wis: number; cha: number };
 
-  // Step 4: Skills
+  // Step 4/5: Skills
   selectedSkills: string[];
 
   // Derived (computed at review/submit)
@@ -111,8 +117,17 @@ export interface CharacterFormData {
 export class ForgeCharacterPage implements OnInit {
 
   // ─── Step state ─────────────────────────────────────────────────────────────
-  readonly steps = STEPS;
   currentStep: number = 0;
+
+  /** Dynamically computed step list — inserts 'equipment' after 'class' when needed. */
+  get activeSteps(): string[] {
+    const equipment = this.formData.selectedClass?.classFeatures?.startingEquipment;
+    const hasChoiceSets = isStructuredEquipment(equipment) && equipment.choiceSets.length > 0;
+    if (hasChoiceSets) {
+      return ['identity', 'race', 'class', 'equipment', 'ability-scores', 'skills', 'review'];
+    }
+    return [...BASE_STEPS];
+  }
 
   // ─── Form data ──────────────────────────────────────────────────────────────
   formData: CharacterFormData = {
@@ -123,6 +138,7 @@ export class ForgeCharacterPage implements OnInit {
     selectedRace: null,
     selectedClass: null,
     selectedSubclass: null,
+    equipmentSelections: {},
     scoreMode: 'standard',
     tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
     manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
@@ -189,7 +205,7 @@ export class ForgeCharacterPage implements OnInit {
       return;
     }
 
-    if (this.currentStep < STEPS.length - 1) {
+    if (this.currentStep < this.activeSteps.length - 1) {
       this.currentStep++;
       this._loadDataForStep(this.currentStep);
     }
@@ -265,6 +281,7 @@ export class ForgeCharacterPage implements OnInit {
   selectClass(cls: any): void {
     this.formData.selectedClass = cls;
     this.formData.selectedSubclass = null;
+    this.formData.equipmentSelections = {};
     this.filteredSubclasses = [];
     if (this.validationErrors['class']) {
       delete this.validationErrors['class'];
@@ -289,6 +306,25 @@ export class ForgeCharacterPage implements OnInit {
       this.formData.selectedSubclass = null;
     } else {
       this.formData.selectedSubclass = sc;
+    }
+  }
+
+  // ─── Equipment step ──────────────────────────────────────────────────────────
+
+  /** Returns the structured equipment for the selected class, or null. */
+  get structuredEquipment(): StructuredEquipment | null {
+    const equipment = this.formData.selectedClass?.classFeatures?.startingEquipment;
+    return isStructuredEquipment(equipment) ? equipment : null;
+  }
+
+  /** Selects an option for a given choice set, replacing any previous selection. */
+  selectEquipmentOption(setIndex: number, optionIndex: number): void {
+    this.formData.equipmentSelections = {
+      ...this.formData.equipmentSelections,
+      [setIndex]: optionIndex
+    };
+    if (this.validationErrors['equipment']) {
+      delete this.validationErrors['equipment'];
     }
   }
 
@@ -401,16 +437,40 @@ export class ForgeCharacterPage implements OnInit {
   // ─── Skills step ─────────────────────────────────────────────────────────────
 
   /**
+   * Returns the number of skills the character must choose, based on the selected
+   * class's classFeatures.skillProficiencies.choiceCount. Falls back to 2.
+   */
+  get requiredSkillCount(): number {
+    const choiceCount = this.formData.selectedClass?.classFeatures?.skillProficiencies?.choiceCount;
+    return (choiceCount != null && choiceCount > 0) ? choiceCount : 2;
+  }
+
+  /**
+   * Returns the list of skills available for selection, filtered by the selected
+   * class's classFeatures.skillProficiencies.choicePool when defined and non-empty.
+   * Falls back to all 18 standard D&D skills.
+   */
+  get availableSkills(): { id: string; name: string; stat: AbilityKey }[] {
+    const choicePool: string[] | undefined = this.formData.selectedClass?.classFeatures?.skillProficiencies?.choicePool;
+    if (choicePool && choicePool.length > 0) {
+      // Map pool entries (English names) to DND_SKILLS entries by matching name case-insensitively
+      const poolLower = choicePool.map((s: string) => s.toLowerCase());
+      return DND_SKILLS.filter(skill => poolLower.includes(skill.name.toLowerCase()));
+    }
+    return DND_SKILLS;
+  }
+
+  /**
    * Toggles a skill selection. If the skill is already selected, deselects it.
-   * If fewer than 2 skills are selected, selects it.
-   * Does nothing if 2 skills are already selected and this skill is not one of them.
+   * If fewer than requiredSkillCount skills are selected, selects it.
+   * Does nothing if requiredSkillCount skills are already selected and this skill is not one of them.
    */
   toggleSkill(skillId: string): void {
     const idx = this.formData.selectedSkills.indexOf(skillId);
     if (idx !== -1) {
       // Deselect
       this.formData.selectedSkills = this.formData.selectedSkills.filter(id => id !== skillId);
-    } else if (this.formData.selectedSkills.length < 2) {
+    } else if (this.formData.selectedSkills.length < this.requiredSkillCount) {
       // Select
       this.formData.selectedSkills = [...this.formData.selectedSkills, skillId];
     }
@@ -419,9 +479,24 @@ export class ForgeCharacterPage implements OnInit {
     }
   }
 
-  /** Returns true when a skill option should be disabled (2 already selected and this one isn't). */
+  /**
+   * Returns true when a skill option should be disabled:
+   * - The skill is not in the class choicePool (when a pool is defined), or
+   * - The maximum number of skills has been reached and this skill is not selected.
+   */
   isSkillDisabled(skillId: string): boolean {
-    return this.formData.selectedSkills.length >= 2 && !this.formData.selectedSkills.includes(skillId);
+    // Disable skills not in the choicePool when a pool is defined
+    const choicePool: string[] | undefined = this.formData.selectedClass?.classFeatures?.skillProficiencies?.choicePool;
+    if (choicePool && choicePool.length > 0) {
+      const poolLower = choicePool.map((s: string) => s.toLowerCase());
+      const skill = DND_SKILLS.find(sk => sk.id === skillId);
+      if (skill && !poolLower.includes(skill.name.toLowerCase())) {
+        return true;
+      }
+    }
+    // Disable skills beyond requiredSkillCount once max selections reached
+    return this.formData.selectedSkills.length >= this.requiredSkillCount &&
+      !this.formData.selectedSkills.includes(skillId);
   }
 
   /** Computed HP preview using the selected class hit die and final CON. */
@@ -449,7 +524,13 @@ export class ForgeCharacterPage implements OnInit {
     };
     const hp = calculateHp(this.formData.selectedClass?.hitDie ?? 8, finalCon);
 
-    const dto = buildCharacterDto(this.formData, finalScores, hp, this.authService.getUserIdFromToken());
+    // Resolve inventory from structured equipment + player selections
+    const equipment = this.structuredEquipment;
+    const inventory: ResolvedInventoryLine[] = equipment
+      ? resolveInventory(equipment, this.formData.equipmentSelections)
+      : [];
+
+    const dto = buildCharacterDto(this.formData, finalScores, hp, this.authService.getUserIdFromToken(), inventory);
 
     this.apiService.createCharacter(dto).subscribe({
       next: (response: any) => {
@@ -466,14 +547,27 @@ export class ForgeCharacterPage implements OnInit {
   // ─── Per-step validation ─────────────────────────────────────────────────────
 
   private _validateCurrentStep(): { [key: string]: string } {
-    switch (this.currentStep) {
-      case 0: return validateIdentityStep(this.formData);
-      case 1: return this.formData.selectedRace ? {} : { race: 'Selecciona una raza para continuar.' };
-      case 2: return this.formData.selectedClass ? {} : { class: 'Selecciona una clase para continuar.' };
-      case 3: return this._validateAbilityScoresStep();
-      case 4: return this.formData.selectedSkills.length === 2 ? {} : { skills: 'Selecciona exactamente 2 habilidades.' };
+    const stepName = this.activeSteps[this.currentStep];
+    switch (stepName) {
+      case 'identity': return validateIdentityStep(this.formData);
+      case 'race': return this.formData.selectedRace ? {} : { race: 'Selecciona una raza para continuar.' };
+      case 'class': return this.formData.selectedClass ? {} : { class: 'Selecciona una clase para continuar.' };
+      case 'equipment': return this._validateEquipmentStep();
+      case 'ability-scores': return this._validateAbilityScoresStep();
+      case 'skills': return this.formData.selectedSkills.length === this.requiredSkillCount ? {} : { skills: `Selecciona exactamente ${this.requiredSkillCount} habilidades.` };
       default: return {};
     }
+  }
+
+  private _validateEquipmentStep(): { [key: string]: string } {
+    const equipment = this.structuredEquipment;
+    if (!equipment) return {};
+    for (let i = 0; i < equipment.choiceSets.length; i++) {
+      if (this.formData.equipmentSelections[i] == null) {
+        return { equipment: 'Debes seleccionar una opción para cada conjunto de equipamiento.' };
+      }
+    }
+    return {};
   }
 
   private _validateAbilityScoresStep(): { [key: string]: string } {
@@ -495,7 +589,7 @@ export class ForgeCharacterPage implements OnInit {
   // ─── Helpers ────────────────────────────────────────────────────────────────
 
   get currentStepName(): Step {
-    return STEPS[this.currentStep];
+    return this.activeSteps[this.currentStep] as Step;
   }
 
   get currentStepLabel(): string {
@@ -622,12 +716,14 @@ export function validateManualScore(value: number): string | null {
  * @param finalScores  The final ability scores (base + racial bonus) for each ability
  * @param hp  The calculated starting HP (hitDie + conModifier)
  * @param userId  The authenticated user's ID from the JWT token
+ * @param inventory  Resolved inventory lines from structured equipment (empty array for legacy/no equipment)
  */
 export function buildCharacterDto(
   formData: CharacterFormData,
   finalScores: { str: number; dex: number; con: number; int: number; wis: number; cha: number },
   hp: number,
-  userId: string | null
+  userId: string | null,
+  inventory: ResolvedInventoryLine[] = []
 ): any {
   const skillProficiencies: { [key: string]: boolean } = {};
   for (const skillId of formData.selectedSkills) {
@@ -661,6 +757,6 @@ export function buildCharacterDto(
     dndRace: { id: formData.selectedRace?.id },
     dndClass: { id: formData.selectedClass?.id },
     subclassId: formData.selectedSubclass?.id ?? null,
-    inventory: []
+    inventory
   };
 }

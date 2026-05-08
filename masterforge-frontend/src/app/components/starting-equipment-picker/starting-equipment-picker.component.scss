@@ -1,0 +1,430 @@
+@use 'src/theme/variables' as *;
+
+// ─── Design tokens (matching homebrew-class-form.page.scss) ──────────────────
+$gold:        #C5A059;
+$gold-hover:  #d9b96e;
+$bg-page:     #121212;
+$bg-surface:  #1E1E1E;
+$bg-card:     #1a1a1a;
+$border:      #2e2e2e;
+$border-card: #383838;
+$text-white:  #f0e6d3;
+$text-muted:  #888;
+$text-dim:    #555;
+$red:         #C62828;
+
+// ─── Host ─────────────────────────────────────────────────────────────────────
+:host {
+  display: block;
+}
+
+// ─── Root wrapper ─────────────────────────────────────────────────────────────
+.equipment-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// ─── Legacy equipment display ─────────────────────────────────────────────────
+.legacy-equipment {
+  background: $bg-surface;
+  border: 1px solid $border;
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.legacy-text {
+  color: $text-white;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0 0 8px;
+  white-space: pre-wrap;
+}
+
+.legacy-hint {
+  color: $text-muted;
+  font-size: 0.8rem;
+  font-style: italic;
+  margin: 0;
+}
+
+// ─── Catalog loading / error ──────────────────────────────────────────────────
+.catalog-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+}
+
+.catalog-spinner {
+  color: $gold;
+  --color: #{$gold};
+}
+
+.catalog-loading-text {
+  color: $text-muted;
+  font-size: 0.88rem;
+}
+
+.catalog-error {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+// ─── Form sections ────────────────────────────────────────────────────────────
+.form-section {
+  background: $bg-surface;
+  border: 1px solid $border;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.section-title {
+  color: $gold;
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0;
+}
+
+.section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+// ─── Entry cards ──────────────────────────────────────────────────────────────
+.entry-card {
+  background: $bg-card;
+  border: 1px solid $border-card;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 10px;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+}
+
+// ─── Field groups ─────────────────────────────────────────────────────────────
+.field-group {
+  margin-bottom: 12px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &--half {
+    max-width: 140px;
+
+    @media (max-width: 480px) {
+      max-width: 100%;
+    }
+  }
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: start;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field-label {
+  display: block;
+  color: $text-muted;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 5px;
+  font-weight: bold;
+
+  .required {
+    color: $gold;
+  }
+}
+
+// ─── Plain text input (not Ionic) ─────────────────────────────────────────────
+.forge-input-plain {
+  display: block;
+  width: 100%;
+  background: #141414;
+  color: $text-white;
+  border: 1px solid $border-card;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.88rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+
+  &::placeholder {
+    color: $text-dim;
+  }
+
+  &:focus {
+    border-color: rgba(197, 160, 89, 0.5);
+  }
+
+  &.input-error {
+    border-color: $red;
+  }
+
+  // Number input — hide spinners for cleaner look
+  &[type='number'] {
+    -moz-appearance: textfield;
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+}
+
+// ─── Item type badge ──────────────────────────────────────────────────────────
+.item-type-badge {
+  display: inline-block;
+  margin-top: 4px;
+  background: rgba(197, 160, 89, 0.1);
+  color: $gold;
+  border: 1px solid rgba(197, 160, 89, 0.3);
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  text-transform: uppercase;
+}
+
+// ─── Error message ────────────────────────────────────────────────────────────
+.error-message {
+  color: $red;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  padding-left: 2px;
+}
+
+// ─── Empty hint ───────────────────────────────────────────────────────────────
+.empty-hint {
+  color: $text-dim;
+  font-size: 0.85rem;
+  font-style: italic;
+  text-align: center;
+  padding: 12px 0 4px;
+}
+
+// ─── Add button ───────────────────────────────────────────────────────────────
+.btn-add {
+  background: rgba(197, 160, 89, 0.12);
+  color: $gold;
+  border: 1px solid rgba(197, 160, 89, 0.35);
+  border-radius: 8px;
+  padding: 5px 14px;
+  font-size: 0.82rem;
+  font-weight: bold;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+
+  &:hover {
+    background: rgba(197, 160, 89, 0.22);
+    border-color: $gold;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &--small {
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    margin-top: 8px;
+  }
+}
+
+// ─── Remove button ────────────────────────────────────────────────────────────
+.btn-remove {
+  background: transparent;
+  color: #e57373;
+  border: 1px solid rgba(198, 40, 40, 0.4);
+  border-radius: 7px;
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: block;
+  margin-top: 8px;
+  margin-left: auto;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: rgba(198, 40, 40, 0.15);
+    border-color: $red;
+  }
+
+  &--inline {
+    display: inline-block;
+    margin-top: 0;
+    margin-left: 0;
+  }
+
+  &--small {
+    padding: 3px 10px;
+    font-size: 0.75rem;
+    margin-top: 6px;
+  }
+}
+
+// ─── Custom dropdown ──────────────────────────────────────────────────────────
+.custom-dropdown {
+  position: relative;
+}
+
+.custom-dropdown-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #1a1a1a;
+  border: 1px solid $border-card;
+  border-radius: 8px;
+  z-index: 100;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $border-card;
+    border-radius: 2px;
+  }
+}
+
+.custom-dropdown-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  color: $text-white;
+  padding: 9px 14px;
+  font-size: 0.88rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+
+  &:hover {
+    background: rgba(197, 160, 89, 0.12);
+    color: $gold;
+  }
+
+  & + & {
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+  }
+}
+
+.option-item-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.option-item-type {
+  color: $text-muted;
+  font-size: 0.75rem;
+  margin-left: 8px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.custom-dropdown-empty {
+  display: block;
+  padding: 10px 14px;
+  color: $text-dim;
+  font-size: 0.82rem;
+  font-style: italic;
+}
+
+// ─── Dropdown overlay ─────────────────────────────────────────────────────────
+.dropdown-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+}
+
+// ─── Options list ─────────────────────────────────────────────────────────────
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.option-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(56, 56, 56, 0.8);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.option-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.option-label {
+  color: $text-muted;
+  font-size: 0.78rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+// ─── Item lines ───────────────────────────────────────────────────────────────
+.item-line {
+  padding: 8px 0;
+  border-top: 1px solid rgba(56, 56, 56, 0.5);
+
+  &:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+}
+
+// ─── Choice set footer ────────────────────────────────────────────────────────
+.choice-set-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(56, 56, 56, 0.5);
+
+  .btn-remove {
+    margin-top: 0;
+    margin-left: 0;
+  }
+}

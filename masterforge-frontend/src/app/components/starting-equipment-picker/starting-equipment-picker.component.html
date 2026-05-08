@@ -1,0 +1,335 @@
+<div class="equipment-picker">
+
+  <!-- ─── Legacy text mode ─────────────────────────────────────────────────── -->
+  @if (legacyText) {
+    <div class="legacy-equipment" data-testid="legacy-equipment">
+      <p class="legacy-text">{{ legacyText }}</p>
+      <p class="legacy-hint">
+        Este equipo fue definido en formato de texto libre y no puede editarse con el selector estructurado.
+      </p>
+    </div>
+  } @else {
+
+    <!-- ─── Loading state ──────────────────────────────────────────────────── -->
+    @if (catalogLoading) {
+      <div class="catalog-loading" data-testid="catalog-loading">
+        <ion-spinner name="crescent" class="catalog-spinner"></ion-spinner>
+        <span class="catalog-loading-text">Cargando catálogo de objetos…</span>
+      </div>
+    }
+
+    <!-- ─── Error state ────────────────────────────────────────────────────── -->
+    @if (catalogError) {
+      <div class="catalog-error" data-testid="catalog-error">
+        <p class="error-message">No se pudo cargar el catálogo de objetos.</p>
+        <button
+          class="btn-add"
+          type="button"
+          data-testid="retry-button"
+          (click)="loadCatalog()"
+        >
+          Reintentar
+        </button>
+      </div>
+    }
+
+    <!-- ─── Main picker UI ─────────────────────────────────────────────────── -->
+    @if (!catalogLoading && !catalogError) {
+
+      <!-- ── Fixed Grants section ──────────────────────────────────────────── -->
+      <div class="form-section" data-testid="fixed-grants-section">
+        <div class="section-header-row">
+          <h3 class="section-title">Objetos Fijos</h3>
+          <button
+            class="btn-add"
+            type="button"
+            data-testid="add-fixed-grant-button"
+            (click)="addFixedGrant()"
+          >
+            + Añadir objeto
+          </button>
+        </div>
+
+        @if (fixedGrants.length === 0) {
+          <p class="empty-hint">No hay objetos fijos definidos.</p>
+        }
+
+        @for (grantIndex of indices(fixedGrants); track grantIndex) {
+          <div class="entry-card" [attr.data-testid]="'fixed-grant-' + grantIndex">
+
+            <div class="field-row">
+              <!-- Item search -->
+              <div class="field-group">
+                <label class="field-label">
+                  Objeto <span class="required">*</span>
+                </label>
+
+                <div class="custom-dropdown" [class.custom-dropdown--open]="isSearchActiveFor({ type: 'fixed', index: grantIndex })">
+                  <input
+                    class="forge-input-plain"
+                    type="text"
+                    placeholder="Buscar objeto…"
+                    autocomplete="off"
+                    [attr.data-testid]="'fixed-grant-search-' + grantIndex"
+                    [value]="getFixedGrantItemName(grantIndex)"
+                    (input)="onSearchInput($any($event.target).value, { type: 'fixed', index: grantIndex })"
+                    (focus)="onSearchInput($any($event.target).value, { type: 'fixed', index: grantIndex })"
+                  />
+
+                  @if (isSearchActiveFor({ type: 'fixed', index: grantIndex }) && filteredItems.length > 0) {
+                    <div class="custom-dropdown-panel" [attr.data-testid]="'fixed-grant-dropdown-' + grantIndex">
+                      @for (item of filteredItems; track item.id) {
+                        <button
+                          class="custom-dropdown-option"
+                          type="button"
+                          (click)="selectItem({ type: 'fixed', index: grantIndex }, item)"
+                        >
+                          <span class="option-item-name">{{ item.name }}</span>
+                          <span class="option-item-type">{{ item.type }}</span>
+                        </button>
+                      }
+                    </div>
+                  }
+
+                  @if (isSearchActiveFor({ type: 'fixed', index: grantIndex }) && searchQuery.length > 0 && filteredItems.length === 0) {
+                    <div class="custom-dropdown-panel">
+                      <span class="custom-dropdown-empty">No se encontraron objetos.</span>
+                    </div>
+                  }
+                </div>
+
+                @if (fixedGrantHasItem(grantIndex)) {
+                  <span class="item-type-badge">{{ getFixedGrantItemType(grantIndex) }}</span>
+                }
+
+                @if (getFixedGrantGroup(grantIndex).get('itemId')?.invalid && getFixedGrantGroup(grantIndex).get('itemId')?.touched) {
+                  <p class="error-message">Selecciona un objeto del catálogo.</p>
+                }
+              </div>
+
+              <!-- Quantity -->
+              <div class="field-group field-group--half">
+                <label class="field-label" [attr.for]="'fixed-qty-' + grantIndex">
+                  Cantidad <span class="required">*</span>
+                </label>
+                <input
+                  class="forge-input-plain"
+                  type="number"
+                  min="1"
+                  [id]="'fixed-qty-' + grantIndex"
+                  [attr.data-testid]="'fixed-grant-qty-' + grantIndex"
+                  [formControl]="$any(getFixedGrantGroup(grantIndex).get('quantity'))"
+                />
+                @if (getFixedGrantGroup(grantIndex).get('quantity')?.invalid && getFixedGrantGroup(grantIndex).get('quantity')?.touched) {
+                  <p class="error-message">La cantidad debe ser al menos 1.</p>
+                }
+              </div>
+            </div>
+
+            <button
+              class="btn-remove"
+              type="button"
+              [attr.data-testid]="'remove-fixed-grant-' + grantIndex"
+              (click)="removeFixedGrant(grantIndex)"
+            >
+              Eliminar objeto
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- ── Choice Sets section ───────────────────────────────────────────── -->
+      <div class="form-section" data-testid="choice-sets-section">
+        <div class="section-header-row">
+          <h3 class="section-title">Conjuntos de Elección</h3>
+          <button
+            class="btn-add"
+            type="button"
+            data-testid="add-choice-set-button"
+            (click)="addChoiceSet()"
+          >
+            + Añadir conjunto
+          </button>
+        </div>
+
+        @if (choiceSets.length === 0) {
+          <p class="empty-hint">No hay conjuntos de elección definidos.</p>
+        }
+
+        @for (setIndex of indices(choiceSets); track setIndex) {
+          <div class="entry-card" [attr.data-testid]="'choice-set-' + setIndex">
+
+            <!-- Choice set label -->
+            <div class="field-group">
+              <label class="field-label" [attr.for]="'cs-label-' + setIndex">
+                Etiqueta <span class="required">*</span>
+              </label>
+              <input
+                class="forge-input-plain"
+                type="text"
+                maxlength="101"
+                [id]="'cs-label-' + setIndex"
+                [attr.data-testid]="'choice-set-label-' + setIndex"
+                [formControl]="$any(getChoiceSet(setIndex).get('label'))"
+              />
+              @if (getChoiceSet(setIndex).get('label')?.hasError('required') && getChoiceSet(setIndex).get('label')?.touched) {
+                <p class="error-message">La etiqueta es obligatoria.</p>
+              }
+              @if (getChoiceSet(setIndex).get('label')?.hasError('maxlength') && getChoiceSet(setIndex).get('label')?.touched) {
+                <p class="error-message">La etiqueta no puede superar los 100 caracteres.</p>
+              }
+            </div>
+
+            <!-- Options list -->
+            <div class="options-list">
+              @for (optIndex of indices(getOptions(setIndex)); track optIndex) {
+                <div class="option-card" [attr.data-testid]="'option-' + setIndex + '-' + optIndex">
+
+                  <div class="option-header">
+                    <span class="option-label">Opción {{ optIndex + 1 }}</span>
+                    <button
+                      class="btn-remove btn-remove--inline"
+                      type="button"
+                      [attr.data-testid]="'remove-option-' + setIndex + '-' + optIndex"
+                      (click)="removeOption(setIndex, optIndex)"
+                    >
+                      Eliminar opción
+                    </button>
+                  </div>
+
+                  <!-- Item lines -->
+                  @for (lineIndex of indices(getLines(setIndex, optIndex)); track lineIndex) {
+                    <div class="item-line" [attr.data-testid]="'item-line-' + setIndex + '-' + optIndex + '-' + lineIndex">
+
+                      <div class="field-row">
+                        <!-- Item search -->
+                        <div class="field-group">
+                          <label class="field-label">Objeto <span class="required">*</span></label>
+
+                          <div class="custom-dropdown" [class.custom-dropdown--open]="isSearchActiveFor({ type: 'option', setIndex: setIndex, optIndex: optIndex, lineIndex: lineIndex })">
+                            <input
+                              class="forge-input-plain"
+                              type="text"
+                              placeholder="Buscar objeto…"
+                              autocomplete="off"
+                              [attr.data-testid]="'line-search-' + setIndex + '-' + optIndex + '-' + lineIndex"
+                              [value]="getLineItemName(setIndex, optIndex, lineIndex)"
+                              (input)="onSearchInput($any($event.target).value, { type: 'option', setIndex: setIndex, optIndex: optIndex, lineIndex: lineIndex })"
+                              (focus)="onSearchInput($any($event.target).value, { type: 'option', setIndex: setIndex, optIndex: optIndex, lineIndex: lineIndex })"
+                            />
+
+                            @if (isSearchActiveFor({ type: 'option', setIndex: setIndex, optIndex: optIndex, lineIndex: lineIndex }) && filteredItems.length > 0) {
+                              <div class="custom-dropdown-panel" [attr.data-testid]="'line-dropdown-' + setIndex + '-' + optIndex + '-' + lineIndex">
+                                @for (item of filteredItems; track item.id) {
+                                  <button
+                                    class="custom-dropdown-option"
+                                    type="button"
+                                    (click)="selectItem({ type: 'option', setIndex: setIndex, optIndex: optIndex, lineIndex: lineIndex }, item)"
+                                  >
+                                    <span class="option-item-name">{{ item.name }}</span>
+                                    <span class="option-item-type">{{ item.type }}</span>
+                                  </button>
+                                }
+                              </div>
+                            }
+
+                            @if (isSearchActiveFor({ type: 'option', setIndex: setIndex, optIndex: optIndex, lineIndex: lineIndex }) && searchQuery.length > 0 && filteredItems.length === 0) {
+                              <div class="custom-dropdown-panel">
+                                <span class="custom-dropdown-empty">No se encontraron objetos.</span>
+                              </div>
+                            }
+                          </div>
+
+                          @if (lineHasItem(setIndex, optIndex, lineIndex)) {
+                            <span class="item-type-badge">{{ getLineItemType(setIndex, optIndex, lineIndex) }}</span>
+                          }
+
+                          @if (getLineGroup(setIndex, optIndex, lineIndex).get('itemId')?.invalid && getLineGroup(setIndex, optIndex, lineIndex).get('itemId')?.touched) {
+                            <p class="error-message">Selecciona un objeto del catálogo.</p>
+                          }
+                        </div>
+
+                        <!-- Quantity -->
+                        <div class="field-group field-group--half">
+                          <label class="field-label" [attr.for]="'line-qty-' + setIndex + '-' + optIndex + '-' + lineIndex">
+                            Cantidad <span class="required">*</span>
+                          </label>
+                          <input
+                            class="forge-input-plain"
+                            type="number"
+                            min="1"
+                            [id]="'line-qty-' + setIndex + '-' + optIndex + '-' + lineIndex"
+                            [attr.data-testid]="'line-qty-' + setIndex + '-' + optIndex + '-' + lineIndex"
+                            [formControl]="$any(getLineGroup(setIndex, optIndex, lineIndex).get('quantity'))"
+                          />
+                          @if (getLineGroup(setIndex, optIndex, lineIndex).get('quantity')?.invalid && getLineGroup(setIndex, optIndex, lineIndex).get('quantity')?.touched) {
+                            <p class="error-message">La cantidad debe ser al menos 1.</p>
+                          }
+                        </div>
+                      </div>
+
+                      @if (getLines(setIndex, optIndex).length > 1) {
+                        <button
+                          class="btn-remove btn-remove--small"
+                          type="button"
+                          [attr.data-testid]="'remove-line-' + setIndex + '-' + optIndex + '-' + lineIndex"
+                          (click)="removeItemLine(setIndex, optIndex, lineIndex)"
+                        >
+                          Eliminar línea
+                        </button>
+                      }
+                    </div>
+                  }
+
+                  @if (optionHasMinLinesError(setIndex, optIndex)) {
+                    <p class="error-message">Cada opción debe tener al menos 1 objeto.</p>
+                  }
+
+                  <button
+                    class="btn-add btn-add--small"
+                    type="button"
+                    [attr.data-testid]="'add-line-' + setIndex + '-' + optIndex"
+                    (click)="addItemLine(setIndex, optIndex)"
+                  >
+                    + Añadir línea
+                  </button>
+                </div>
+              }
+            </div>
+
+            @if (choiceSetHasMinOptionsError(setIndex)) {
+              <p class="error-message">Cada conjunto debe tener al menos 2 opciones.</p>
+            }
+
+            <div class="choice-set-footer">
+              <button
+                class="btn-add"
+                type="button"
+                [attr.data-testid]="'add-option-' + setIndex"
+                (click)="addOption(setIndex)"
+              >
+                + Añadir opción
+              </button>
+
+              <button
+                class="btn-remove"
+                type="button"
+                [attr.data-testid]="'remove-choice-set-' + setIndex"
+                (click)="removeChoiceSet(setIndex)"
+              >
+                Eliminar conjunto
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+    }
+  }
+
+  <!-- Dropdown overlay to close search on outside click -->
+  @if (activeSearchContext) {
+    <div class="dropdown-overlay" (click)="clearSearch()"></div>
+  }
+
+</div>

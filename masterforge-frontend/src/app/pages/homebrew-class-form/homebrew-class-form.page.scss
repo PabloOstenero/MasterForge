@@ -1,24 +1,31 @@
 @use 'src/theme/variables' as *;
 
-$gold:       #C5A059;
-$gold-hover: #d9b96e;
-$bg-page:    #121212;
-$bg-surface: #1E1E1E;
-$border:     #2e2e2e;
-$border-card:#383838;
-$text-white: #f0e6d3;
-$text-muted: #888;
-$text-dim:   #555;
-$red:        #C62828;
+// ─── Design tokens ────────────────────────────────────────────────────────────
+$gold:        #C5A059;
+$gold-hover:  #d9b96e;
+$bg-page:     #121212;
+$bg-surface:  #1E1E1E;
+$bg-card:     #1a1a1a;
+$border:      #2e2e2e;
+$border-card: #383838;
+$text-white:  #f0e6d3;
+$text-muted:  #888;
+$text-dim:    #555;
+$red:         #C62828;
 
-:host { display: block; }
+// ─── Host ─────────────────────────────────────────────────────────────────────
+:host {
+  display: block;
+}
 
+// ─── Page wrapper ─────────────────────────────────────────────────────────────
 .homebrew-form-wrapper {
   min-height: 100%;
   background: $bg-page;
   color: $text-white;
 }
 
+// ─── Top bar ──────────────────────────────────────────────────────────────────
 .homebrew-form-topbar {
   display: flex;
   align-items: center;
@@ -40,6 +47,7 @@ $red:        #C62828;
   padding: 4px 0;
   white-space: nowrap;
   flex-shrink: 0;
+
   &:hover { color: $gold-hover; }
 }
 
@@ -50,18 +58,137 @@ $red:        #C62828;
   margin: 0;
   flex: 1;
   text-align: center;
-  padding-right: 60px;
+  padding-right: 60px; // compensate for back-btn width so title looks centered
 }
 
+// ─── Content area ─────────────────────────────────────────────────────────────
 .homebrew-form-content {
   padding: 20px 16px 40px;
-  max-width: 640px;
+  max-width: 1280px;
   margin: 0 auto;
 }
 
+// ─── Form grid (two columns on wide screens) ──────────────────────────────────
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+
+  @media (min-width: 900px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+}
+
+.col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  @media (min-width: 900px) {
+    grid-column: 1;
+    gap: 20px;
+  }
+}
+
+.col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  @media (min-width: 900px) {
+    grid-column: 2;
+    gap: 20px;
+  }
+}
+
+.col-full {
+  @media (min-width: 900px) {
+    grid-column: 1 / -1;
+  }
+}
+
+// ─── Error banner ─────────────────────────────────────────────────────────────
+.form-error-banner {
+  background: rgba(198, 40, 40, 0.12);
+  border: 1px solid rgba(198, 40, 40, 0.4);
+  border-radius: 8px;
+  color: #e57373;
+  font-size: 0.9rem;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+}
+
+// ─── Form sections ────────────────────────────────────────────────────────────
+.form-section {
+  background: $bg-surface;
+  border: 1px solid $border;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.section-title {
+  color: $gold;
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-badge {
+  color: $text-dim;
+  font-size: 0.7rem;
+  font-weight: normal;
+  text-transform: lowercase;
+  letter-spacing: 0;
+  border: 1px solid $border-card;
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+
+.section-hint {
+  color: $text-muted;
+  font-size: 0.8rem;
+  margin: -8px 0 14px;
+  line-height: 1.4;
+}
+
+.section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+
+  .section-title {
+    margin-bottom: 0;
+  }
+}
+
+// ─── Field group ──────────────────────────────────────────────────────────────
 .field-group {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+
   &:last-child { margin-bottom: 0; }
+
+  &--half {
+    max-width: 50%;
+
+    @media (max-width: 480px) { max-width: 100%; }
+  }
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .field-label {
@@ -72,9 +199,19 @@ $red:        #C62828;
   letter-spacing: 0.05em;
   margin-bottom: 5px;
   font-weight: bold;
+
   .required { color: $gold; }
 }
 
+.optional-tag {
+  color: $text-dim;
+  font-size: 0.7rem;
+  font-weight: normal;
+  text-transform: lowercase;
+  letter-spacing: 0;
+}
+
+// ─── Inputs ───────────────────────────────────────────────────────────────────
 .forge-input {
   --background: #141414;
   --color: #{$text-white};
@@ -85,10 +222,41 @@ $red:        #C62828;
   border: 1px solid $border-card;
   border-radius: 8px;
   transition: border-color 0.15s;
-  &:focus-within { border-color: rgba(197, 160, 89, 0.5); }
+
+  &:focus-within {
+    border-color: rgba(197, 160, 89, 0.5);
+  }
+
+  &.input-error {
+    border-color: $red;
+  }
+}
+
+.forge-textarea {
+  --padding-top: 10px;
+  --padding-bottom: 10px;
+}
+
+.forge-select-native {
+  background: #141414;
+  color: $text-white;
+  border: 1px solid $border-card;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.88rem;
+  cursor: pointer;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s;
+
+  option { background: #1e1e1e; }
+
+  &:focus { border-color: rgba(197, 160, 89, 0.5); }
+
   &.input-error { border-color: $red; }
 }
 
+// ─── Error message ────────────────────────────────────────────────────────────
 .error-message {
   color: $red;
   font-size: 0.8rem;
@@ -96,47 +264,584 @@ $red:        #C62828;
   padding-left: 2px;
 }
 
-.saving-throws-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 10px;
+// ─── Entry cards (class features / multiclassing prerequisites) ───────────────
+.entry-card {
+  background: $bg-card;
+  border: 1px solid $border-card;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 10px;
 
-  @media (max-width: 560px) {
-    grid-template-columns: repeat(3, 1fr);
+  &:last-of-type { margin-bottom: 0; }
+}
+
+.entry-card-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
   }
 }
 
-.saving-throw-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.saving-throw-label {
-  color: $text-white;
-  font-size: 0.78rem;
-  font-weight: bold;
-  text-transform: uppercase;
+// ─── Empty state hint ─────────────────────────────────────────────────────────
+.empty-hint {
+  color: $text-dim;
+  font-size: 0.85rem;
+  font-style: italic;
   text-align: center;
+  padding: 12px 0 4px;
 }
 
-.text-muted { color: $text-muted; }
+// ─── Add button ───────────────────────────────────────────────────────────────
+.btn-add {
+  background: rgba(197, 160, 89, 0.12);
+  color: $gold;
+  border: 1px solid rgba(197, 160, 89, 0.35);
+  border-radius: 8px;
+  padding: 5px 14px;
+  font-size: 0.82rem;
+  font-weight: bold;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
 
-.form-actions { margin-top: 24px; }
+  &:hover {
+    background: rgba(197, 160, 89, 0.22);
+    border-color: $gold;
+  }
 
-.btn-submit {
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+// ─── Remove button ────────────────────────────────────────────────────────────
+.btn-remove {
+  background: transparent;
+  color: #e57373;
+  border: 1px solid rgba(198, 40, 40, 0.4);
+  border-radius: 7px;
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: block;
+  margin-top: 8px;
+  margin-left: auto;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: rgba(198, 40, 40, 0.15);
+    border-color: $red;
+  }
+}
+
+// ─── Chip multi-select ────────────────────────────────────────────────────────
+.chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.chip {
+  background: #1a1a1a;
+  color: $text-muted;
+  border: 1px solid $border-card;
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+
+  &:hover {
+    border-color: rgba(197, 160, 89, 0.4);
+    color: $text-white;
+  }
+
+  &--active {
+    background: rgba(197, 160, 89, 0.15);
+    color: $gold;
+    border-color: $gold;
+    font-weight: 600;
+  }
+}
+
+// ─── Skill picker (custom dropdown + add button) ──────────────────────────────
+.skill-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.custom-dropdown {
+  position: relative;
+  flex: 1;
+  min-width: 180px;
+}
+
+.custom-dropdown-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #141414;
+  color: $text-white;
+  border: 1px solid $border-card;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.88rem;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s;
+
+  &:hover, .custom-dropdown--open & {
+    border-color: rgba(197, 160, 89, 0.5);
+  }
+}
+
+.custom-dropdown-placeholder {
+  color: $text-dim;
+}
+
+.custom-dropdown-arrow {
+  color: $text-muted;
+  font-size: 0.65rem;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.custom-dropdown-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #1a1a1a;
+  border: 1px solid $border-card;
+  border-radius: 8px;
+  z-index: 100;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: $border-card; border-radius: 2px; }
+}
+
+.custom-dropdown-option {
   display: block;
   width: 100%;
-  padding: 14px;
-  background: #C5A059;
+  background: none;
+  border: none;
+  color: $text-white;
+  padding: 9px 14px;
+  font-size: 0.88rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+
+  &:hover {
+    background: rgba(197, 160, 89, 0.12);
+    color: $gold;
+  }
+
+  & + & {
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+  }
+}
+
+.custom-dropdown-empty {
+  display: block;
+  padding: 10px 14px;
+  color: $text-dim;
+  font-size: 0.82rem;
+  font-style: italic;
+}
+
+.dropdown-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+}
+
+// ─── Selected skill / proficiency tags ───────────────────────────────────────
+.skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.skill-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(197, 160, 89, 0.12);
+  border: 1px solid rgba(197, 160, 89, 0.4);
+  border-radius: 20px;
+  padding: 4px 10px 4px 12px;
+  font-size: 0.82rem;
+}
+
+.skill-tag-name {
+  color: $text-white;
+  font-weight: 500;
+}
+
+.skill-tag-remove {
+  background: none;
+  border: none;
+  color: $text-muted;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+  transition: color 0.15s;
+
+  &:hover { color: #e57373; }
+}
+
+// ─── Toggle row (spellcasting enable, ritual casting) ─────────────────────────
+.natural-armor-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: $gold;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .toggle-label {
+    color: $text-white;
+    font-size: 0.88rem;
+    cursor: pointer;
+    line-height: 1.4;
+  }
+}
+
+// ─── Spellcasting tables ──────────────────────────────────────────────────────
+.spellcasting-table-wrapper {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid $border-card;
+
+  &::-webkit-scrollbar { height: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: $border-card; border-radius: 2px; }
+}
+
+.spellcasting-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+
+  th {
+    background: $bg-card;
+    color: $text-muted;
+    font-size: 0.72rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 7px 10px;
+    text-align: center;
+    border-bottom: 1px solid $border-card;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 4px 6px;
+    border-bottom: 1px solid rgba(56, 56, 56, 0.5);
+    text-align: center;
+    vertical-align: middle;
+
+    &:last-child { border-right: none; }
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:nth-child(even) td {
+    background: rgba(255, 255, 255, 0.02);
+  }
+}
+
+// Wider spell slots table — allow horizontal scroll on narrow screens
+.spell-slots-table {
+  min-width: 560px;
+}
+
+.level-cell {
+  color: $text-muted;
+  font-weight: bold;
+  font-size: 0.78rem;
+  text-align: center;
+  white-space: nowrap;
+  padding: 4px 10px;
+  background: $bg-card;
+  border-right: 1px solid $border-card;
+}
+
+// Compact number input inside table cells
+.table-input {
+  --padding-start: 6px;
+  --padding-end: 6px;
+  --padding-top: 4px;
+  --padding-bottom: 4px;
+  font-size: 0.82rem;
+  min-width: 48px;
+  max-width: 64px;
+  border-radius: 6px;
+  border-color: transparent;
+  text-align: center;
+
+  &:focus-within {
+    border-color: rgba(197, 160, 89, 0.4);
+  }
+}
+
+// ─── Spellcasting compact card ────────────────────────────────────────────────
+
+.spellcasting-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: $text-white;
+  font-size: 0.88rem;
+  cursor: pointer;
+
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: $gold;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+}
+
+.customized-badge {
+  display: inline-block;
+  background: rgba(197, 160, 89, 0.15);
+  color: $gold;
+  border: 1px solid rgba(197, 160, 89, 0.4);
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  margin-left: 6px;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.btn-configure {  background: rgba(197, 160, 89, 0.12);
+  color: $gold;
+  border: 1px solid rgba(197, 160, 89, 0.35);
+  border-radius: 8px;
+  padding: 6px 16px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+
+  &:hover {
+    background: rgba(197, 160, 89, 0.22);
+    border-color: $gold;
+  }
+}
+
+// ─── Spellcasting full-screen panel ──────────────────────────────────────────
+.spellcasting-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: $bg-page;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.spellcasting-panel-topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px 12px;
+  background: $bg-page;
+  border-bottom: 1px solid $border;
+  flex-shrink: 0;
+}
+
+.spellcasting-panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 20px 40px;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: $border-card; border-radius: 3px; }
+}
+
+// Config row inside panel
+.spellcasting-config-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.spellcasting-ritual-field {
+  display: flex;
+  flex-direction: column;
+}
+
+// Tables column inside panel — vertical stack, full width
+.spellcasting-tables-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+// Side-by-side row: cantrips (narrow) + spell slots (fills remaining width)
+.spellcasting-tables-row {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+}
+
+.spellcasting-table-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 0 0 auto;
+
+  &--wide {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+
+// Horizontal variant: levels as columns, single value row
+.spellcasting-table--horizontal {
+  min-width: 100%;
+
+  th, td {
+    min-width: 56px;
+    text-align: center;
+  }
+}
+
+.spellcasting-panel-actions {
+  margin-top: 32px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-save-panel {
+  background: $gold;
   color: #121212;
   border: none;
-  border-radius: 12px;
-  font-size: 1rem;
+  border-radius: 10px;
+  padding: 10px 28px;
+  font-size: 0.95rem;
   font-weight: bold;
   cursor: pointer;
   transition: background 0.15s;
-  &:hover:not(:disabled) { background: #d9b96e; }
-  &:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  &:hover { background: $gold-hover; }
+}
+
+
+// ─── Tab bar ──────────────────────────────────────────────────────────────────
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid $border;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding-bottom: 0;
+
+  &::-webkit-scrollbar { height: 3px; }
+  &::-webkit-scrollbar-thumb { background: $border-card; border-radius: 2px; }
+}
+
+.tab-btn {
+  position: relative;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: $text-muted;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 8px 16px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+
+  &:hover {
+    color: $text-white;
+  }
+
+  &--active {
+    color: $gold;
+    border-bottom-color: $gold;
+    font-weight: 600;
+  }
+}
+
+.tab-error-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: $red;
+  border-radius: 50%;
+  margin-left: 5px;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+}
+
+.tab-content {
+  min-height: 300px;
+}
+
+// ─── Form actions ─────────────────────────────────────────────────────────────
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-submit {
+  --background: #{$gold};
+  --background-activated: #{$gold-hover};
+  --color: #121212;
+  --border-radius: 12px;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.btn-cancel {
+  --color: #{$gold};
+  --border-color: #{$gold};
+  --border-radius: 12px;
+  font-weight: bold;
+  font-size: 1rem;
 }

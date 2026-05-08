@@ -627,7 +627,6 @@ export class HomebrewItemFormPage implements OnInit {
       type:       v.type,
       weight:     v.weight,
       properties,
-      authorId:   '', // Placeholder — service will override with actual user ID
     };
 
     const request$ = this.editMode && this.editId

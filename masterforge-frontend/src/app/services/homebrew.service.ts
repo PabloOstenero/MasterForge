@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { AuthService } from './auth.service';
+import { ItemSummary, StructuredEquipment } from '../models/equipment.models';
 
 // ---------------------------------------------------------------------------
 // Types and interfaces
@@ -25,11 +26,65 @@ export interface HomebrewSummary {
   items: HomebrewItem[];
 }
 
+export interface SkillProficiencies {
+  fixed: string[];
+  choicePool: string[];
+  choiceCount: number;
+}
+
+export interface MulticlassingPrerequisite {
+  ability: string;
+  minScore: number;
+}
+
+export interface MulticlassingPrerequisites {
+  requirements: MulticlassingPrerequisite[];
+  logic: 'AND' | 'OR';
+}
+
+export interface MulticlassingProficiencies {
+  armor: string[];
+  weapons: string[];
+  tools: string[];
+}
+
+export interface SpellSlotTable {
+  slots: number[][];
+}
+
+export interface Spellcasting {
+  ability: string;
+  spellcastingType: string;
+  ritualCasting: boolean;
+  preparationStyle: 'PREPARED' | 'KNOWN';
+  cantripsKnown: number[];
+  spellsKnown?: number[];
+  spellSlots: SpellSlotTable;
+}
+
+export interface ClassFeatures {
+  primaryAbility: string;
+  subclassLevel: number;
+  startingEquipment?: string | StructuredEquipment;
+  skillProficiencies: SkillProficiencies;
+  weaponProficiencies: string[];
+  armorProficiencies: string[];
+  toolProficiencies: string[];
+  multiclassingPrerequisites?: MulticlassingPrerequisites;
+  multiclassingProficiencies?: MulticlassingProficiencies;
+  spellcasting?: Spellcasting;
+  damageResistances: string[];
+  damageImmunities: string[];
+  conditionImmunities: string[];
+}
+
 export interface CreateClassDto {
   name: string;
-  hitDie: number;
+  description?: string;
+  hitDie: string;
   savingThrows: Record<string, boolean>;
   price: number;
+  classFeatures: ClassFeatures;
   authorId: string;
 }
 
@@ -100,7 +155,7 @@ export interface CreateItemDto {
   type: string;
   weight: number;
   properties?: Record<string, any>;
-  authorId: string;
+  authorId?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -120,9 +175,32 @@ export class HomebrewService {
     return this.http.get<{ id: number; name: string }[]>('/api/dnd-classes');
   }
 
+  getClass(id: string): Observable<any> {
+    return this.http.get<any>(`/api/dnd-classes/${id}`);
+  }
+
   createClass(dto: CreateClassDto): Observable<any> {
     const authorId = this.authService.getUserIdFromToken();
     return this.http.post<any>('/api/dnd-classes', { ...dto, authorId });
+  }
+
+  updateClass(id: string, dto: CreateClassDto): Observable<any> {
+    const authorId = this.authService.getUserIdFromToken();
+    return this.http.put<any>(`/api/dnd-classes/${id}`, { ...dto, authorId });
+  }
+
+  createClassFeature(dto: { name: string; description: string; levelRequired: number; classId: number }): Observable<any> {
+    const { classId, ...rest } = dto;
+    return this.http.post<any>('/api/class-features', { ...rest, dndClassId: classId });
+  }
+
+  updateClassFeature(id: number, dto: { name: string; description: string; levelRequired: number; classId: number }): Observable<any> {
+    const { classId, ...rest } = dto;
+    return this.http.put<any>(`/api/class-features/${id}`, { ...rest, dndClassId: classId });
+  }
+
+  deleteClassFeature(id: number): Observable<void> {
+    return this.http.delete<void>(`/api/class-features/${id}`);
   }
 
   createSubclass(dto: CreateSubclassDto): Observable<any> {
@@ -190,6 +268,10 @@ export class HomebrewService {
 
   getItem(id: string): Observable<any> {
     return this.http.get<any>(`/api/items/${id}`);
+  }
+
+  getAllItems(): Observable<ItemSummary[]> {
+    return this.http.get<ItemSummary[]>('/api/items');
   }
 
   createItem(dto: CreateItemDto): Observable<any> {

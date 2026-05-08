@@ -69,7 +69,9 @@ export class HomebrewPage implements OnInit {
   }
 
   navigateToEdit(type: ContentType, id: string): void {
-    if (type === 'RACE') {
+    if (type === 'CLASS') {
+      this.router.navigate([`/homebrew/class/${id}/edit`]);
+    } else if (type === 'RACE') {
       this.router.navigate([`/homebrew/race/${id}/edit`]);
     } else if (type === 'MONSTER') {
       this.router.navigate([`/homebrew/monster/${id}/edit`]);

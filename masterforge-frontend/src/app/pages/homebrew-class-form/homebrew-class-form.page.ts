@@ -1,37 +1,298 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  ReactiveFormsModule,
-  FormBuilder,
-  FormGroup,
-  Validators,
-  AbstractControl,
-  ValidationErrors,
-} from '@angular/forms';
-import { Router } from '@angular/router';
-import { IonSpinner, IonInput, IonCheckbox } from '@ionic/angular/standalone';
-
+import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, FormArray, FormControl, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
+import { IonButton, IonSpinner, IonItem, IonLabel, IonInput, IonTextarea } from '@ionic/angular/standalone';
 import { HomebrewService } from '../../services/homebrew.service';
+import { StructuredEquipment, isStructuredEquipment, serializeEquipment } from '../../models/equipment.models';
+import { StartingEquipmentPickerComponent } from '../../components/starting-equipment-picker/starting-equipment-picker.component';
 
-/** The six D&D saving throw keys used in the savingThrows FormGroup. */
-export const SAVING_THROW_KEYS = [
-  'strength',
-  'dexterity',
-  'constitution',
-  'intelligence',
-  'wisdom',
-  'charisma',
-] as const;
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+export const SAVING_THROWS = ['Strength', 'Dexterity', 'Constitution', 'Intelligence', 'Wisdom', 'Charisma'] as const;
+export const HIT_DICE = ['d6', 'd8', 'd10', 'd12'] as const;
+export const SKILL_NAMES = ['Acrobatics', 'Animal Handling', 'Arcana', 'Athletics', 'Deception', 'History', 'Insight', 'Intimidation', 'Investigation', 'Medicine', 'Nature', 'Perception', 'Performance', 'Persuasion', 'Religion', 'Sleight of Hand', 'Stealth', 'Survival'] as const;
+export const WEAPON_PROFS = ['Simple Weapons', 'Martial Weapons', 'Hand Crossbows', 'Longswords', 'Rapiers', 'Shortswords', 'Light Crossbows', 'Longbows', 'Shortbows'] as const;
+export const ARMOR_PROFS = ['Light Armor', 'Medium Armor', 'Heavy Armor', 'Shields'] as const;
+export const DAMAGE_TYPES = ['Acid', 'Bludgeoning', 'Cold', 'Fire', 'Force', 'Lightning', 'Necrotic', 'Piercing', 'Poison', 'Psychic', 'Radiant', 'Slashing', 'Thunder'] as const;
+export const CONDITIONS = ['Blinded', 'Charmed', 'Deafened', 'Exhaustion', 'Frightened', 'Grappled', 'Incapacitated', 'Invisible', 'Paralyzed', 'Petrified', 'Poisoned', 'Prone', 'Restrained', 'Stunned', 'Unconscious'] as const;
+export const ABILITIES = ['Strength', 'Dexterity', 'Constitution', 'Intelligence', 'Wisdom', 'Charisma'] as const;
+export const SPELLCASTING_ABILITIES = ['Intelligence', 'Wisdom', 'Charisma'] as const;
+export const SPELLCASTING_TYPES = ['Full Caster', 'Half Caster', 'Third Caster', 'Pact Magic'] as const;
+export const PREPARATION_STYLES = ['PREPARED', 'KNOWN'] as const;
+
+// ---------------------------------------------------------------------------
+// Standard D&D 5e spell slot progressions
+// Rows = character levels 1–20, columns = spell levels 1st–9th
+// ---------------------------------------------------------------------------
+
+// prettier-ignore
+const FULL_CASTER_SLOTS: number[][] = [
+  [2,0,0,0,0,0,0,0,0],
+  [3,0,0,0,0,0,0,0,0],
+  [4,2,0,0,0,0,0,0,0],
+  [4,3,0,0,0,0,0,0,0],
+  [4,3,2,0,0,0,0,0,0],
+  [4,3,3,0,0,0,0,0,0],
+  [4,3,3,1,0,0,0,0,0],
+  [4,3,3,2,0,0,0,0,0],
+  [4,3,3,3,1,0,0,0,0],
+  [4,3,3,3,2,0,0,0,0],
+  [4,3,3,3,2,1,0,0,0],
+  [4,3,3,3,2,1,0,0,0],
+  [4,3,3,3,2,1,1,0,0],
+  [4,3,3,3,2,1,1,0,0],
+  [4,3,3,3,2,1,1,1,0],
+  [4,3,3,3,2,1,1,1,0],
+  [4,3,3,3,2,1,1,1,1],
+  [4,3,3,3,3,1,1,1,1],
+  [4,3,3,3,3,2,1,1,1],
+  [4,3,3,3,3,2,2,1,1],
+];
+
+// prettier-ignore
+const HALF_CASTER_SLOTS: number[][] = [
+  [0,0,0,0,0,0,0,0,0],
+  [2,0,0,0,0,0,0,0,0],
+  [3,0,0,0,0,0,0,0,0],
+  [3,0,0,0,0,0,0,0,0],
+  [4,2,0,0,0,0,0,0,0],
+  [4,2,0,0,0,0,0,0,0],
+  [4,3,0,0,0,0,0,0,0],
+  [4,3,0,0,0,0,0,0,0],
+  [4,3,2,0,0,0,0,0,0],
+  [4,3,2,0,0,0,0,0,0],
+  [4,3,3,0,0,0,0,0,0],
+  [4,3,3,0,0,0,0,0,0],
+  [4,3,3,1,0,0,0,0,0],
+  [4,3,3,1,0,0,0,0,0],
+  [4,3,3,2,0,0,0,0,0],
+  [4,3,3,2,0,0,0,0,0],
+  [4,3,3,3,1,0,0,0,0],
+  [4,3,3,3,1,0,0,0,0],
+  [4,3,3,3,2,0,0,0,0],
+  [4,3,3,3,2,0,0,0,0],
+];
+
+// prettier-ignore
+const THIRD_CASTER_SLOTS: number[][] = [
+  [0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0],
+  [2,0,0,0,0,0,0,0,0],
+  [3,0,0,0,0,0,0,0,0],
+  [3,0,0,0,0,0,0,0,0],
+  [3,0,0,0,0,0,0,0,0],
+  [4,2,0,0,0,0,0,0,0],
+  [4,2,0,0,0,0,0,0,0],
+  [4,2,0,0,0,0,0,0,0],
+  [4,3,0,0,0,0,0,0,0],
+  [4,3,0,0,0,0,0,0,0],
+  [4,3,0,0,0,0,0,0,0],
+  [4,3,2,0,0,0,0,0,0],
+  [4,3,2,0,0,0,0,0,0],
+  [4,3,2,0,0,0,0,0,0],
+  [4,3,3,0,0,0,0,0,0],
+  [4,3,3,0,0,0,0,0,0],
+  [4,3,3,0,0,0,0,0,0],
+  [4,3,3,1,0,0,0,0,0],
+  [4,3,3,1,0,0,0,0,0],
+];
+
+// Pact Magic (Warlock): all slots are the same level, count increases
+// prettier-ignore
+const PACT_MAGIC_SLOTS: number[][] = [
+  [1,0,0,0,0,0,0,0,0],
+  [2,0,0,0,0,0,0,0,0],
+  [0,2,0,0,0,0,0,0,0],
+  [0,2,0,0,0,0,0,0,0],
+  [0,0,2,0,0,0,0,0,0],
+  [0,0,2,0,0,0,0,0,0],
+  [0,0,0,2,0,0,0,0,0],
+  [0,0,0,2,0,0,0,0,0],
+  [0,0,0,0,2,0,0,0,0],
+  [0,0,0,0,2,0,0,0,0],
+  [0,0,0,0,3,0,0,0,0],
+  [0,0,0,0,3,0,0,0,0],
+  [0,0,0,0,3,0,0,0,0],
+  [0,0,0,0,3,0,0,0,0],
+  [0,0,0,0,3,0,0,0,0],
+  [0,0,0,0,3,0,0,0,0],
+  [0,0,0,0,4,0,0,0,0],
+  [0,0,0,0,4,0,0,0,0],
+  [0,0,0,0,4,0,0,0,0],
+  [0,0,0,0,4,0,0,0,0],
+];
+
+export const SPELL_SLOT_PRESETS: Record<string, number[][]> = {
+  'Full Caster':   FULL_CASTER_SLOTS,
+  'Half Caster':   HALF_CASTER_SLOTS,
+  'Third Caster':  THIRD_CASTER_SLOTS,
+  'Pact Magic':    PACT_MAGIC_SLOTS,
+};
+
+// ---------------------------------------------------------------------------
+// Interfaces
+// ---------------------------------------------------------------------------
+
+export interface ClassFeature {
+  id?: number | null;
+  name: string;
+  description: string;
+  levelRequired: number;
+}
+
+export interface SkillProficiencies {
+  fixed: string[];
+  choicePool: string[];
+  choiceCount: number;
+}
+
+export interface MulticlassingPrerequisite {
+  ability: string;
+  minScore: number;
+}
+
+export interface MulticlassingPrerequisites {
+  requirements: MulticlassingPrerequisite[];
+  logic: 'AND' | 'OR';
+}
+
+export interface MulticlassingProficiencies {
+  armor: string[];
+  weapons: string[];
+  tools: string[];
+}
+
+export interface SpellSlotTable {
+  slots: number[][];
+}
+
+export interface Spellcasting {
+  ability: string;
+  spellcastingType: string;
+  ritualCasting: boolean;
+  preparationStyle: 'PREPARED' | 'KNOWN';
+  cantripsKnown: number[];
+  spellsKnown?: number[];
+  spellSlots: SpellSlotTable;
+}
+
+export interface ClassFeatures {
+  primaryAbility: string;
+  subclassLevel: number;
+  startingEquipment?: string | StructuredEquipment;
+  skillProficiencies: SkillProficiencies;
+  weaponProficiencies: string[];
+  armorProficiencies: string[];
+  toolProficiencies: string[];
+  multiclassingPrerequisites?: MulticlassingPrerequisites;
+  multiclassingProficiencies?: MulticlassingProficiencies;
+  spellcasting?: Spellcasting;
+  damageResistances: string[];
+  damageImmunities: string[];
+  conditionImmunities: string[];
+}
+
+export interface CreateClassDto {
+  name: string;
+  description?: string;
+  price: number;
+  hitDie: string;
+  savingThrows: Record<string, boolean>;
+  classFeatures: ClassFeatures;
+  authorId: string;
+}
+
+// ---------------------------------------------------------------------------
+// Custom validator
+// ---------------------------------------------------------------------------
 
 /**
- * Custom validator for the savingThrows FormGroup.
- * Returns { atLeastOneRequired: true } if no checkbox is checked (all false).
+ * Validator that requires at least one checkbox in a FormGroup to be true.
  */
-export function atLeastOneTrue(control: AbstractControl): ValidationErrors | null {
-  const group = control as FormGroup;
-  const hasTrue = Object.values(group.controls).some(c => c.value === true);
-  return hasTrue ? null : { atLeastOneRequired: true };
+export function atLeastOneSelectedValidator(group: AbstractControl): ValidationErrors | null {
+  const controls = (group as FormGroup).controls;
+  const hasAtLeastOne = Object.values(controls).some(control => control.value === true);
+  return hasAtLeastOne ? null : { atLeastOneRequired: true };
 }
+
+// ---------------------------------------------------------------------------
+// Pure serialization functions
+// ---------------------------------------------------------------------------
+
+/**
+ * Builds the ClassFeatures object from individual form values.
+ * Exported so it can be tested without mounting the component.
+ */
+export function buildClassFeatures(
+  primaryAbility: string,
+  subclassLevel: number,
+  startingEquipment: string,
+  skillProficiencies: SkillProficiencies,
+  weaponProficiencies: string[],
+  armorProficiencies: string[],
+  toolProficiencies: string[],
+  multiclassingPrerequisites: MulticlassingPrerequisites | null,
+  multiclassingProficiencies: MulticlassingProficiencies | null,
+  spellcasting: Spellcasting | null,
+  damageResistances: string[],
+  damageImmunities: string[],
+  conditionImmunities: string[],
+): ClassFeatures {
+  const result: ClassFeatures = {
+    primaryAbility,
+    subclassLevel,
+    skillProficiencies,
+    weaponProficiencies,
+    armorProficiencies,
+    toolProficiencies,
+    damageResistances,
+    damageImmunities,
+    conditionImmunities,
+  };
+
+  if (startingEquipment && startingEquipment.trim() !== '') {
+    result.startingEquipment = startingEquipment.trim();
+  }
+
+  if (multiclassingPrerequisites && multiclassingPrerequisites.requirements.length > 0) {
+    result.multiclassingPrerequisites = multiclassingPrerequisites;
+  }
+
+  if (multiclassingProficiencies && (
+    multiclassingProficiencies.armor.length > 0 ||
+    multiclassingProficiencies.weapons.length > 0 ||
+    multiclassingProficiencies.tools.length > 0
+  )) {
+    result.multiclassingProficiencies = multiclassingProficiencies;
+  }
+
+  if (spellcasting) {
+    result.spellcasting = spellcasting;
+  }
+
+  return result;
+}
+
+/**
+ * Parses a 2D array of spell slots into a SpellSlotTable object.
+ */
+export function parseSpellSlotTable(slots: number[][]): SpellSlotTable {
+  return { slots };
+}
+
+/**
+ * Serializes a SpellSlotTable object into a 2D array.
+ */
+export function serializeSpellSlotTable(table: SpellSlotTable): number[][] {
+  return table.slots;
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 @Component({
   selector: 'app-homebrew-class-form',
@@ -41,75 +302,946 @@ export function atLeastOneTrue(control: AbstractControl): ValidationErrors | nul
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    IonSpinner, IonInput, IonCheckbox,
+    FormsModule,
+    IonButton, IonSpinner,
+    IonItem, IonLabel, IonInput, IonTextarea,
+    StartingEquipmentPickerComponent,
   ],
 })
 export class HomebrewClassFormPage implements OnInit {
 
+  // ---------------------------------------------------------------------------
+  // Core state
+  // ---------------------------------------------------------------------------
+
   form!: FormGroup;
   submitting = false;
   error: string | null = null;
+  editMode = false;
+  editId: string | null = null;
+  originalFeatures: { id: number; name: string; description: string; levelRequired: number }[] = [];
 
-  /** Exposed for template iteration over saving throw checkboxes. */
-  readonly savingThrowKeys = SAVING_THROW_KEYS;
+  // ---------------------------------------------------------------------------
+  // Starting equipment picker state
+  // ---------------------------------------------------------------------------
 
-  /** Human-readable abbreviations for each saving throw key. */
-  readonly savingThrowLabels: Record<string, string> = {
-    strength: 'FUE',
-    dexterity: 'DES',
-    constitution: 'CON',
-    intelligence: 'INT',
-    wisdom: 'SAB',
-    charisma: 'CAR',
-  };
+  currentEquipment: StructuredEquipment | null = null;
+  isPickerValid = true;
+  equipmentInitialValue: StructuredEquipment | null = null;
+  equipmentLegacyText: string | null = null;
+
+  // ---------------------------------------------------------------------------
+  // Tab navigation
+  // ---------------------------------------------------------------------------
+
+  currentTab: 'identidad' | 'competencias' | 'defensas' | 'rasgos' | 'multiclase' | 'conjuros' = 'identidad';
+
+  setTab(tab: typeof this.currentTab): void {
+    this.currentTab = tab;
+  }
+
+  get tabHasError(): Record<string, boolean> {
+    const f = this.form;
+    return {
+      identidad: !!(
+        f.get('name')?.invalid ||
+        f.get('hitDie')?.invalid ||
+        f.get('primaryAbility')?.invalid ||
+        f.get('subclassLevel')?.invalid
+      ),
+      competencias: !!(f.get('savingThrows')?.invalid),
+      defensas: false,
+      rasgos: !!(this.features.controls.some(c => c.invalid) || !this.isPickerValid),
+      multiclase: !!(this.multiclassingPrerequisites.controls.some(c => c.invalid)),
+      conjuros: !!(
+        f.get('spellcastingAbility')?.invalid ||
+        f.get('spellcastingType')?.invalid
+      ),
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Starting equipment picker event handlers
+  // ---------------------------------------------------------------------------
+
+  onEquipmentChange(equipment: StructuredEquipment | null): void {
+    this.currentEquipment = equipment;
+  }
+
+  onPickerValidityChange(valid: boolean): void {
+    this.isPickerValid = valid;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Chip state arrays
+  // ---------------------------------------------------------------------------
+
+  savingThrowChips: boolean[] = SAVING_THROWS.map(() => false);
+  weaponChips: boolean[] = WEAPON_PROFS.map(() => false);
+  armorChips: boolean[] = ARMOR_PROFS.map(() => false);
+  multiclassingArmorChips: boolean[] = ARMOR_PROFS.map(() => false);
+  multiclassingWeaponChips: boolean[] = WEAPON_PROFS.map(() => false);
+
+  // ---------------------------------------------------------------------------
+  // Custom proficiency lists
+  // ---------------------------------------------------------------------------
+
+  customWeaponProfs: string[] = [];
+  customArmorProfs: string[] = [];
+  customToolProfs: string[] = [];
+  customMulticlassingToolGrants: string[] = [];
+  pendingWeaponProf = '';
+  pendingArmorProf = '';
+  pendingToolProf = '';
+  pendingMulticlassingToolGrant = '';
+
+  // ---------------------------------------------------------------------------
+  // Skill picker state
+  // ---------------------------------------------------------------------------
+
+  pendingSkillName = '';
+  skillDropdownOpen = false;
+
+  // ---------------------------------------------------------------------------
+  // Spellcasting state
+  // ---------------------------------------------------------------------------
+
+  spellcastingEnabled = false;
+  showSpellsKnown = false;
+  showSpellcastingPanel = false;
+  spellSlotsCustomized = false;
+
+  // ---------------------------------------------------------------------------
+  // Readonly arrays for template iteration
+  // ---------------------------------------------------------------------------
+
+  readonly savingThrows = SAVING_THROWS;
+  readonly hitDice = HIT_DICE;
+  readonly skillNames = SKILL_NAMES;
+  readonly weaponProfs = WEAPON_PROFS;
+  readonly armorProfs = ARMOR_PROFS;
+  readonly damageTypes = DAMAGE_TYPES;
+  readonly conditions = CONDITIONS;
+  readonly abilities = ABILITIES;
+  readonly spellcastingAbilities = SPELLCASTING_ABILITIES;
+  readonly spellcastingTypes = SPELLCASTING_TYPES;
+  readonly preparationStyles = PREPARATION_STYLES;
+  readonly levelRange = Array.from({ length: 20 }, (_, i) => i + 1);
+  readonly spellLevelRange = Array.from({ length: 9 }, (_, i) => i + 1);
 
   constructor(
     private fb: FormBuilder,
     private homebrewService: HomebrewService,
     private router: Router,
+    private route: ActivatedRoute,
   ) {}
 
+  // ---------------------------------------------------------------------------
+  // Lifecycle
+  // ---------------------------------------------------------------------------
+
   ngOnInit(): void {
-    // Build the savingThrows nested FormGroup — one boolean control per D&D saving throw
+    // Build savingThrows FormGroup — one boolean per SAVING_THROWS entry
     const savingThrowsGroup = this.fb.group(
-      SAVING_THROW_KEYS.reduce((acc, key) => ({ ...acc, [key]: [false] }), {}),
-      { validators: atLeastOneTrue },
+      SAVING_THROWS.reduce((acc, key) => ({ ...acc, [key]: [false] }), {} as Record<string, any>),
+      { validators: atLeastOneSelectedValidator },
     );
 
+    // Build skills FormGroup — one entry per SKILL_NAMES
+    const skillsGroup = SKILL_NAMES.reduce((acc, skill) => ({
+      ...acc,
+      [skill]: this.fb.group({ selected: [false] }),
+    }), {} as Record<string, any>);
+
     this.form = this.fb.group({
-      name: ['', Validators.required],
-      hitDie: [null, [Validators.required, Validators.min(4), Validators.max(12)]],
+      // Identity
+      name:        ['', Validators.required],
+      description: [''],
+      price:       [null, [Validators.required, Validators.min(0)]],
+      hitDie:      ['', Validators.required],
+
+      // Saving throws
       savingThrows: savingThrowsGroup,
-      price: [null, [Validators.required, Validators.min(0)]],
+
+      // Primary ability and subclass level
+      primaryAbility: ['', Validators.required],
+      subclassLevel:  [3, [Validators.required, Validators.min(1), Validators.max(20)]],
+
+      // Skill proficiencies
+      skills:           this.fb.group(skillsGroup),
+      skillChoiceCount: [null, Validators.min(0)],
+
+      // Multiclassing prerequisites
+      multiclassingPrerequisites: this.fb.array([]),
+      multiclassingLogic:         ['AND'],
+
+      // Multiclassing proficiency grants
+      multiclassingArmorGrants:  this.fb.array(ARMOR_PROFS.map(() => false)),
+      multiclassingWeaponGrants: this.fb.array(WEAPON_PROFS.map(() => false)),
+      multiclassingToolGrants:   this.fb.array([]),
+
+      // Damage resistances / immunities / condition immunities
+      damageResistances:   this.fb.array(DAMAGE_TYPES.map(() => false)),
+      damageImmunities:    this.fb.array(DAMAGE_TYPES.map(() => false)),
+      conditionImmunities: this.fb.array(CONDITIONS.map(() => false)),
+
+      // Class features
+      features: this.fb.array([]),
+
+      // Spellcasting
+      spellcastingEnabled:  [false],
+      spellcastingAbility:  [''],
+      spellcastingType:     [''],
+      ritualCasting:        [false],
+      preparationStyle:     ['PREPARED'],
+      cantripsKnown: this.fb.array(Array(20).fill(null).map(() => new FormControl(null))),
+      spellsKnown:   this.fb.array(Array(20).fill(null).map(() => new FormControl(null))),
+      spellSlots:    this.fb.array(
+        Array(20).fill(null).map(() =>
+          this.fb.array(Array(9).fill(null).map(() => new FormControl(null)))
+        )
+      ),
+    });
+
+    // Detect edit mode from route param
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.editMode = true;
+      this.editId = id;
+      this.loadClassForEdit(id);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Edit mode — load and patch
+  // ---------------------------------------------------------------------------
+
+  loadClassForEdit(id: string): void {
+    this.homebrewService.getClass(id).subscribe({
+      next: (cls: any) => {
+        const cf = cls.classFeatures ?? {};
+
+        // Patch basic fields — hitDie comes back as a number (e.g. 8), convert to string ("d8")
+        const hitDieStr = cls.hitDie ? `d${cls.hitDie}` : '';
+        this.form.patchValue({
+          name:        cls.name ?? '',
+          description: cls.description ?? '',
+          price:       cls.price ?? null,
+          hitDie:      hitDieStr,
+        });
+
+        // Patch saving throws — also sync the chip state array
+        if (cls.savingThrows) {
+          SAVING_THROWS.forEach((st, i) => {
+            const ctrl = (this.form.get('savingThrows') as FormGroup).get(st);
+            if (ctrl) {
+              const val = cls.savingThrows[st] === true;
+              ctrl.setValue(val);
+              this.savingThrowChips[i] = val;
+            }
+          });
+        }
+
+        // Patch primaryAbility and subclassLevel
+        this.form.patchValue({
+          primaryAbility: cf.primaryAbility ?? '',
+          subclassLevel:  cf.subclassLevel ?? 3,
+        });
+
+        // Detect legacy vs structured equipment and pass to picker
+        // startingEquipment may be stored as a JSON string inside classFeatures — parse it first
+        const rawEquipment = cf.startingEquipment;
+        let parsedEquipment: any = rawEquipment;
+        if (typeof rawEquipment === 'string') {
+          try { parsedEquipment = JSON.parse(rawEquipment); } catch { parsedEquipment = null; }
+        }
+        if (isStructuredEquipment(parsedEquipment)) {
+          this.equipmentInitialValue = parsedEquipment;
+          this.equipmentLegacyText = null;
+        } else if (typeof rawEquipment === 'string' && rawEquipment.trim() !== '') {
+          this.equipmentLegacyText = rawEquipment;
+          this.equipmentInitialValue = null;
+        } else {
+          this.equipmentInitialValue = null;
+          this.equipmentLegacyText = null;
+        }
+
+        // Restore weapon chips and custom weapon profs
+        if (Array.isArray(cf.weaponProficiencies)) {
+          const wpArr: string[] = cf.weaponProficiencies;
+          WEAPON_PROFS.forEach((wp, i) => {
+            this.weaponChips[i] = wpArr.includes(wp);
+          });
+          this.customWeaponProfs = wpArr.filter((w: string) => !(WEAPON_PROFS as readonly string[]).includes(w));
+        }
+
+        // Restore armor chips and custom armor profs
+        if (Array.isArray(cf.armorProficiencies)) {
+          const apArr: string[] = cf.armorProficiencies;
+          ARMOR_PROFS.forEach((ap, i) => {
+            this.armorChips[i] = apArr.includes(ap);
+          });
+          this.customArmorProfs = apArr.filter((a: string) => !(ARMOR_PROFS as readonly string[]).includes(a));
+        }
+
+        // Restore custom tool profs
+        if (Array.isArray(cf.toolProficiencies)) {
+          this.customToolProfs = [...cf.toolProficiencies];
+        }
+
+        // Restore damage resistances / immunities / condition immunities
+        const toArray = (value: string | string[] | undefined): string[] => {
+          if (!value) return [];
+          if (Array.isArray(value)) return value;
+          return value.split(',').map((s: string) => s.trim()).filter(Boolean);
+        };
+        const patchBoolArray = (controlName: string, labels: readonly string[], value: string | string[] | undefined) => {
+          const selected = toArray(value);
+          const arr = this.form.get(controlName) as FormArray;
+          labels.forEach((label, i) => arr.at(i).setValue(selected.includes(label)));
+        };
+        patchBoolArray('damageResistances',   DAMAGE_TYPES, cf.damageResistances);
+        patchBoolArray('damageImmunities',    DAMAGE_TYPES, cf.damageImmunities);
+        patchBoolArray('conditionImmunities', CONDITIONS,   cf.conditionImmunities);
+
+        // Restore skill proficiencies
+        const sp = cf.skillProficiencies;
+        if (sp) {
+          const allSkills: string[] = [
+            ...(sp.fixed ?? []),
+            ...(sp.choicePool ?? []),
+          ];
+          allSkills.forEach((skillName: string) => {
+            const skillGroup = (this.skills.get(skillName) as FormGroup);
+            if (skillGroup) {
+              skillGroup.patchValue({ selected: true });
+            }
+          });
+          this.form.patchValue({ skillChoiceCount: sp.choiceCount ?? null });
+        }
+
+        // Restore multiclassing prerequisites
+        if (cf.multiclassingPrerequisites) {
+          const prereqs = cf.multiclassingPrerequisites;
+          this.form.patchValue({ multiclassingLogic: prereqs.logic ?? 'AND' });
+          if (Array.isArray(prereqs.requirements)) {
+            prereqs.requirements.forEach((req: any) => {
+              this.multiclassingPrerequisites.push(this.fb.group({
+                ability:  [req.ability ?? '', Validators.required],
+                minScore: [req.minScore ?? null, [Validators.required, Validators.min(1), Validators.max(20)]],
+              }));
+            });
+          }
+        }
+
+        // Restore multiclassing proficiency grants
+        if (cf.multiclassingProficiencies) {
+          const mp = cf.multiclassingProficiencies;
+          if (Array.isArray(mp.armor)) {
+            ARMOR_PROFS.forEach((ap, i) => {
+              this.multiclassingArmorChips[i] = mp.armor.includes(ap);
+              this.multiclassingArmorGrants.at(i).setValue(mp.armor.includes(ap));
+            });
+          }
+          if (Array.isArray(mp.weapons)) {
+            WEAPON_PROFS.forEach((wp, i) => {
+              this.multiclassingWeaponChips[i] = mp.weapons.includes(wp);
+              this.multiclassingWeaponGrants.at(i).setValue(mp.weapons.includes(wp));
+            });
+          }
+          if (Array.isArray(mp.tools)) {
+            this.customMulticlassingToolGrants = [...mp.tools];
+          }
+        }
+
+        // Rebuild features FormArray
+        if (Array.isArray(cls.features)) {
+          cls.features.forEach((f: any) => {
+            this.features.push(this.fb.group({
+              id:           [f.id ?? null],
+              name:         [f.name ?? '', Validators.required],
+              description:  [f.description ?? '', Validators.required],
+              levelRequired:[f.levelRequired ?? null, [Validators.required, Validators.min(1), Validators.max(20)]],
+            }));
+          });
+          this.originalFeatures = cls.features.map((f: any) => ({
+            id:           f.id,
+            name:         f.name,
+            description:  f.description,
+            levelRequired:f.levelRequired,
+          }));
+        }
+
+        // Restore spellcasting
+        if (cf.spellcasting) {
+          this.spellcastingEnabled = true;
+          this.form.patchValue({ spellcastingEnabled: true });
+          const sc = cf.spellcasting;
+          this.form.patchValue({
+            spellcastingAbility: sc.ability ?? '',
+            spellcastingType:    sc.spellcastingType ?? '',
+            ritualCasting:       sc.ritualCasting ?? false,
+            preparationStyle:    sc.preparationStyle ?? 'PREPARED',
+          });
+          this.showSpellsKnown = sc.preparationStyle === 'KNOWN';
+
+          // Add validators for spellcasting fields
+          this.form.get('spellcastingAbility')?.setValidators(Validators.required);
+          this.form.get('spellcastingType')?.setValidators(Validators.required);
+          this.form.get('spellcastingAbility')?.updateValueAndValidity();
+          this.form.get('spellcastingType')?.updateValueAndValidity();
+
+          // Restore cantripsKnown
+          if (Array.isArray(sc.cantripsKnown)) {
+            sc.cantripsKnown.forEach((val: number, i: number) => {
+              if (i < 20) this.cantripsKnown.at(i).setValue(val ?? null);
+            });
+          }
+
+          // Restore spellsKnown
+          if (Array.isArray(sc.spellsKnown)) {
+            sc.spellsKnown.forEach((val: number, i: number) => {
+              if (i < 20) this.spellsKnown.at(i).setValue(val ?? null);
+            });
+          }
+
+          // Restore spellSlots 2D array
+          if (sc.spellSlots?.slots) {
+            const slots: number[][] = sc.spellSlots.slots;
+            slots.forEach((row: number[], levelIdx: number) => {
+              if (levelIdx < 20) {
+                const rowArray = this.spellSlots.at(levelIdx) as FormArray;
+                row.forEach((val: number, slotIdx: number) => {
+                  if (slotIdx < 9) rowArray.at(slotIdx).setValue(val ?? null);
+                });
+              }
+            });
+          }
+        }
+      },
+      error: (_err: any) => {
+        this.error = 'No se pudo cargar la clase para editar.';
+      },
     });
   }
 
+  // ---------------------------------------------------------------------------
+  // FormArray getters
+  // ---------------------------------------------------------------------------
+
+  get features(): FormArray {
+    return this.form.get('features') as FormArray;
+  }
+
+  get multiclassingPrerequisites(): FormArray {
+    return this.form.get('multiclassingPrerequisites') as FormArray;
+  }
+
+  get multiclassingArmorGrants(): FormArray {
+    return this.form.get('multiclassingArmorGrants') as FormArray;
+  }
+
+  get multiclassingWeaponGrants(): FormArray {
+    return this.form.get('multiclassingWeaponGrants') as FormArray;
+  }
+
+  get multiclassingToolGrants(): FormArray {
+    return this.form.get('multiclassingToolGrants') as FormArray;
+  }
+
+  get damageResistances(): FormArray {
+    return this.form.get('damageResistances') as FormArray;
+  }
+
+  get damageImmunities(): FormArray {
+    return this.form.get('damageImmunities') as FormArray;
+  }
+
+  get conditionImmunities(): FormArray {
+    return this.form.get('conditionImmunities') as FormArray;
+  }
+
+  get cantripsKnown(): FormArray {
+    return this.form.get('cantripsKnown') as FormArray;
+  }
+
+  get spellsKnown(): FormArray {
+    return this.form.get('spellsKnown') as FormArray;
+  }
+
+  get spellSlots(): FormArray {
+    return this.form.get('spellSlots') as FormArray;
+  }
+
+  get skills(): FormGroup {
+    return this.form.get('skills') as FormGroup;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Chip toggle helpers
+  // ---------------------------------------------------------------------------
+
+  toggleSavingThrow(index: number): void {
+    const key = SAVING_THROWS[index];
+    const ctrl = (this.form.get('savingThrows') as FormGroup).get(key);
+    if (ctrl) {
+      const newVal = !ctrl.value;
+      ctrl.setValue(newVal);
+      this.savingThrowChips[index] = newVal;
+    }
+  }
+
+  toggleWeaponChip(index: number): void {
+    this.weaponChips[index] = !this.weaponChips[index];
+  }
+
+  toggleArmorChip(index: number): void {
+    this.armorChips[index] = !this.armorChips[index];
+  }
+
+  toggleDamageResistanceChip(index: number): void {
+    const arr = this.damageResistances;
+    arr.at(index).setValue(!arr.at(index).value);
+  }
+
+  toggleDamageImmunityChip(index: number): void {
+    const arr = this.damageImmunities;
+    arr.at(index).setValue(!arr.at(index).value);
+  }
+
+  toggleConditionImmunityChip(index: number): void {
+    const arr = this.conditionImmunities;
+    arr.at(index).setValue(!arr.at(index).value);
+  }
+
+  toggleMulticlassingArmorChip(index: number): void {
+    this.multiclassingArmorChips[index] = !this.multiclassingArmorChips[index];
+    this.multiclassingArmorGrants.at(index).setValue(this.multiclassingArmorChips[index]);
+  }
+
+  toggleMulticlassingWeaponChip(index: number): void {
+    this.multiclassingWeaponChips[index] = !this.multiclassingWeaponChips[index];
+    this.multiclassingWeaponGrants.at(index).setValue(this.multiclassingWeaponChips[index]);
+  }
+
+  // ---------------------------------------------------------------------------
+  // FormArray helpers
+  // ---------------------------------------------------------------------------
+
+  addFeature(): void {
+    this.features.push(this.fb.group({
+      id:           [null],
+      name:         ['', Validators.required],
+      description:  ['', Validators.required],
+      levelRequired:[null, [Validators.required, Validators.min(1), Validators.max(20)]],
+    }));
+  }
+
+  removeFeature(index: number): void {
+    this.features.removeAt(index);
+  }
+
+  addMulticlassingPrerequisite(): void {
+    this.multiclassingPrerequisites.push(this.fb.group({
+      ability:  ['', Validators.required],
+      minScore: [null, [Validators.required, Validators.min(1), Validators.max(20)]],
+    }));
+  }
+
+  removeMulticlassingPrerequisite(index: number): void {
+    this.multiclassingPrerequisites.removeAt(index);
+  }
+
+  addMulticlassingToolGrant(): void {
+    this.multiclassingToolGrants.push(new FormControl(''));
+  }
+
+  removeMulticlassingToolGrant(index: number): void {
+    this.multiclassingToolGrants.removeAt(index);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Custom proficiency helpers
+  // ---------------------------------------------------------------------------
+
+  addCustomWeaponProf(): void {
+    const val = this.pendingWeaponProf.trim();
+    if (val) {
+      this.customWeaponProfs.push(val);
+      this.pendingWeaponProf = '';
+    }
+  }
+
+  addCustomArmorProf(): void {
+    const val = this.pendingArmorProf.trim();
+    if (val) {
+      this.customArmorProfs.push(val);
+      this.pendingArmorProf = '';
+    }
+  }
+
+  addCustomToolProf(): void {
+    const val = this.pendingToolProf.trim();
+    if (val) {
+      this.customToolProfs.push(val);
+      this.pendingToolProf = '';
+    }
+  }
+
+  addCustomMulticlassingToolGrant(): void {
+    const val = this.pendingMulticlassingToolGrant.trim();
+    if (val) {
+      this.customMulticlassingToolGrants.push(val);
+      this.pendingMulticlassingToolGrant = '';
+    }
+  }
+
+  removeCustomProf(list: string[], index: number): void {
+    list.splice(index, 1);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Skill picker logic
+  // ---------------------------------------------------------------------------
+
+  toggleSkillDropdown(): void {
+    this.skillDropdownOpen = !this.skillDropdownOpen;
+  }
+
+  selectSkillFromDropdown(skill: string): void {
+    this.pendingSkillName = skill;
+    this.skillDropdownOpen = false;
+  }
+
+  closeSkillDropdown(): void {
+    this.skillDropdownOpen = false;
+  }
+
+  confirmAddSkill(): void {
+    if (!this.pendingSkillName) return;
+    const skillGroup = this.skills.get(this.pendingSkillName) as FormGroup;
+    if (skillGroup) {
+      skillGroup.patchValue({ selected: true });
+    }
+    this.pendingSkillName = '';
+  }
+
+  removeSkillEntry(skillName: string): void {
+    const skillGroup = this.skills.get(skillName) as FormGroup;
+    if (skillGroup) {
+      skillGroup.patchValue({ selected: false });
+    }
+  }
+
+  isSkillSelected(skillName: string): boolean {
+    return this.skills.get(skillName)?.get('selected')?.value === true;
+  }
+
+  get selectedSkillNames(): string[] {
+    return SKILL_NAMES.filter(s => this.isSkillSelected(s));
+  }
+
+  get availableSkillNames(): string[] {
+    return SKILL_NAMES.filter(s => !this.isSkillSelected(s));
+  }
+
+  // ---------------------------------------------------------------------------
+  // Spellcasting toggle logic
+  // ---------------------------------------------------------------------------
+
+  toggleSpellcasting(): void {
+    this.spellcastingEnabled = !this.spellcastingEnabled;
+    const abilityCtrl = this.form.get('spellcastingAbility');
+    const typeCtrl    = this.form.get('spellcastingType');
+    if (this.spellcastingEnabled) {
+      abilityCtrl?.setValidators(Validators.required);
+      typeCtrl?.setValidators(Validators.required);
+    } else {
+      abilityCtrl?.clearValidators();
+      abilityCtrl?.reset('');
+      typeCtrl?.clearValidators();
+      typeCtrl?.reset('');
+    }
+    abilityCtrl?.updateValueAndValidity();
+    typeCtrl?.updateValueAndValidity();
+  }
+
+  onPreparationStyleChange(): void {
+    const style = this.form.get('preparationStyle')?.value;
+    this.showSpellsKnown = style === 'KNOWN';
+  }
+
+  onSpellcastingTypeChange(): void {
+    const type = this.form.get('spellcastingType')?.value as string;
+    const preset = SPELL_SLOT_PRESETS[type];
+    if (!preset) return;
+
+    // Patch spell slots FormArray with preset values
+    preset.forEach((row, levelIdx) => {
+      const rowArray = this.spellSlots.at(levelIdx) as FormArray;
+      row.forEach((val, slotIdx) => {
+        rowArray.at(slotIdx).setValue(val === 0 ? null : val);
+      });
+    });
+
+    // Reset customized flag — slots now match the preset
+    this.spellSlotsCustomized = false;
+  }
+
+  checkSpellSlotsCustomized(): void {
+    const type = this.form.get('spellcastingType')?.value as string;
+    const preset = SPELL_SLOT_PRESETS[type];
+    if (!preset) {
+      this.spellSlotsCustomized = true;
+      return;
+    }
+
+    for (let i = 0; i < 20; i++) {
+      const rowArray = this.spellSlots.at(i) as FormArray;
+      for (let j = 0; j < 9; j++) {
+        const formVal = rowArray.at(j).value ?? 0;
+        const presetVal = preset[i][j];
+        if (formVal !== presetVal) {
+          this.spellSlotsCustomized = true;
+          return;
+        }
+      }
+    }
+    this.spellSlotsCustomized = false;
+  }
+
+  openSpellcastingPanel(): void { /* no-op, kept for compatibility */ }
+
+  closeSpellcastingPanel(): void { /* no-op, kept for compatibility */ }
+
+  // ---------------------------------------------------------------------------
+  // Reconciliation
+  // ---------------------------------------------------------------------------
+
+  async reconcileClassFeatures(classId: number): Promise<void> {
+    const currentFeatures = this.features.controls.map((ctrl) => ({
+      id:           ctrl.get('id')?.value as number | null,
+      name:         ctrl.get('name')?.value as string,
+      description:  ctrl.get('description')?.value as string,
+      levelRequired:ctrl.get('levelRequired')?.value as number,
+    }));
+
+    const currentIds = new Set(
+      currentFeatures.filter(f => f.id !== null).map(f => f.id as number),
+    );
+
+    const promises: Promise<any>[] = [];
+
+    // POST new features (id === null)
+    for (const feature of currentFeatures) {
+      if (feature.id === null) {
+        promises.push(
+          this.homebrewService.createClassFeature({
+            name:         feature.name,
+            description:  feature.description,
+            levelRequired:feature.levelRequired,
+            classId,
+          }).toPromise(),
+        );
+      }
+    }
+
+    // PUT changed features (id non-null, name/description/levelRequired changed)
+    for (const feature of currentFeatures) {
+      if (feature.id !== null) {
+        const original = this.originalFeatures.find(o => o.id === feature.id);
+        if (original && (
+          original.name !== feature.name ||
+          original.description !== feature.description ||
+          original.levelRequired !== feature.levelRequired
+        )) {
+          promises.push(
+            this.homebrewService.updateClassFeature(feature.id, {
+              name:         feature.name,
+              description:  feature.description,
+              levelRequired:feature.levelRequired,
+              classId,
+            }).toPromise(),
+          );
+        }
+      }
+    }
+
+    // DELETE removed features
+    for (const original of this.originalFeatures) {
+      if (!currentIds.has(original.id)) {
+        promises.push(
+          this.homebrewService.deleteClassFeature(original.id).toPromise(),
+        );
+      }
+    }
+
+    await Promise.all(promises);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Submit
+  // ---------------------------------------------------------------------------
+
   submit(): void {
-    // Mark all controls as touched so validation errors become visible
     this.form.markAllAsTouched();
 
-    if (this.form.invalid) {
+    if (this.form.invalid || !this.isPickerValid) {
       return;
     }
 
     this.submitting = true;
     this.error = null;
 
-    this.homebrewService.createClass(this.form.value).subscribe({
-      next: () => {
-        this.submitting = false;
-        this.router.navigate(['/homebrew']);
+    const v = this.form.value;
+
+    // Serialize savingThrows as Record<string, boolean>
+    const savingThrowsRecord: Record<string, boolean> = {};
+    SAVING_THROWS.forEach((st) => {
+      savingThrowsRecord[st] = !!(v.savingThrows?.[st]);
+    });
+
+    // Serialize skill proficiencies
+    const choiceCount = v.skillChoiceCount ?? 0;
+    const selectedSkills = SKILL_NAMES.filter(s => this.isSkillSelected(s));
+    const skillProficiencies: SkillProficiencies = choiceCount > 0
+      ? { fixed: [], choicePool: selectedSkills, choiceCount }
+      : { fixed: selectedSkills, choicePool: [], choiceCount: 0 };
+
+    // Serialize weapon proficiencies: chips + custom
+    const weaponProficiencies: string[] = [
+      ...WEAPON_PROFS.filter((_, i) => this.weaponChips[i]),
+      ...this.customWeaponProfs,
+    ];
+
+    // Serialize armor proficiencies: chips + custom
+    const armorProficiencies: string[] = [
+      ...ARMOR_PROFS.filter((_, i) => this.armorChips[i]),
+      ...this.customArmorProfs,
+    ];
+
+    // Serialize tool proficiencies
+    const toolProficiencies: string[] = [...this.customToolProfs];
+
+    // Serialize damage resistances / immunities / condition immunities
+    const damageResistances: string[] = DAMAGE_TYPES.filter((_, i) => this.damageResistances.at(i).value === true);
+    const damageImmunities: string[]  = DAMAGE_TYPES.filter((_, i) => this.damageImmunities.at(i).value === true);
+    const conditionImmunities: string[] = CONDITIONS.filter((_, i) => this.conditionImmunities.at(i).value === true);
+
+    // Serialize multiclassing prerequisites
+    const prereqControls = this.multiclassingPrerequisites.controls;
+    const prereqRequirements: MulticlassingPrerequisite[] = prereqControls.map((ctrl) => ({
+      ability:  ctrl.get('ability')?.value as string,
+      minScore: ctrl.get('minScore')?.value as number,
+    }));
+    const multiclassingPrerequisitesObj: MulticlassingPrerequisites | null = prereqRequirements.length > 0
+      ? { requirements: prereqRequirements, logic: (v.multiclassingLogic ?? 'AND') as 'AND' | 'OR' }
+      : null;
+
+    // Serialize multiclassing proficiency grants
+    const mcArmorGrants: string[] = ARMOR_PROFS.filter((_, i) => this.multiclassingArmorGrants.at(i).value === true);
+    const mcWeaponGrants: string[] = WEAPON_PROFS.filter((_, i) => this.multiclassingWeaponGrants.at(i).value === true);
+    const mcToolGrants: string[] = [...this.customMulticlassingToolGrants];
+    const multiclassingProficienciesObj: MulticlassingProficiencies | null =
+      (mcArmorGrants.length > 0 || mcWeaponGrants.length > 0 || mcToolGrants.length > 0)
+        ? { armor: mcArmorGrants, weapons: mcWeaponGrants, tools: mcToolGrants }
+        : null;
+
+    // Serialize spellcasting
+    let spellcastingObj: Spellcasting | null = null;
+    if (this.spellcastingEnabled) {
+      const cantripsKnownArr: number[] = this.cantripsKnown.controls.map(c => c.value ?? 0);
+      const spellsKnownArr: number[] | undefined = this.showSpellsKnown
+        ? this.spellsKnown.controls.map(c => c.value ?? 0)
+        : undefined;
+      const spellSlotsArr: number[][] = (this.spellSlots.controls as FormArray[]).map(
+        (rowArr) => (rowArr as FormArray).controls.map(c => c.value ?? 0)
+      );
+      spellcastingObj = {
+        ability:          v.spellcastingAbility ?? '',
+        spellcastingType: v.spellcastingType ?? '',
+        ritualCasting:    v.ritualCasting ?? false,
+        preparationStyle: (v.preparationStyle ?? 'PREPARED') as 'PREPARED' | 'KNOWN',
+        cantripsKnown:    cantripsKnownArr,
+        spellSlots:       parseSpellSlotTable(spellSlotsArr),
+      };
+      if (spellsKnownArr !== undefined) {
+        spellcastingObj.spellsKnown = spellsKnownArr;
+      }
+    }
+
+    // Serialize starting equipment from picker
+    const startingEquipmentStr: string = this.currentEquipment
+      ? serializeEquipment(this.currentEquipment)
+      : '';
+
+    const classFeatures = buildClassFeatures(
+      v.primaryAbility ?? '',
+      v.subclassLevel ?? 3,
+      startingEquipmentStr,
+      skillProficiencies,
+      weaponProficiencies,
+      armorProficiencies,
+      toolProficiencies,
+      multiclassingPrerequisitesObj,
+      multiclassingProficienciesObj,
+      spellcastingObj,
+      damageResistances,
+      damageImmunities,
+      conditionImmunities,
+    );
+
+    // Backend expects hitDie as a number (e.g. 8 for d8), not a string
+    const hitDieNumber: number = parseInt((v.hitDie ?? '').replace('d', ''), 10);
+
+    const dto: CreateClassDto = {
+      name:          v.name,
+      description:   v.description ?? '',
+      price:         v.price,
+      hitDie:        hitDieNumber as any,
+      savingThrows:  savingThrowsRecord,
+      classFeatures,
+      authorId:      '',
+    };
+
+    const request$ = this.editMode && this.editId
+      ? this.homebrewService.updateClass(this.editId, dto)
+      : this.homebrewService.createClass(dto);
+
+    request$.subscribe({
+      next: (result: any) => {
+        const classId = result?.id ?? (this.editMode ? Number(this.editId) : null);
+        if (classId) {
+          this.reconcileClassFeatures(classId).then(() => {
+            this.submitting = false;
+            this.router.navigate(['/homebrew']);
+          }).catch((err: any) => {
+            this.submitting = false;
+            this.error =
+              err?.error?.message ??
+              err?.message ??
+              'Error al guardar las caracteristicas. La clase fue guardada.';
+          });
+        } else {
+          this.submitting = false;
+          this.router.navigate(['/homebrew']);
+        }
       },
       error: (err: any) => {
         this.submitting = false;
         this.error =
           err?.error?.message ??
           err?.message ??
-          'Error al crear la clase. Por favor, inténtalo de nuevo.';
-        // Form values are retained automatically — no reset needed
+          (this.editMode
+            ? 'Error al actualizar la clase. Por favor, intentalo de nuevo.'
+            : 'Error al crear la clase. Por favor, intentalo de nuevo.');
       },
     });
   }
+
+  // ---------------------------------------------------------------------------
+  // Cancel
+  // ---------------------------------------------------------------------------
 
   cancel(): void {
     this.router.navigate(['/homebrew']);

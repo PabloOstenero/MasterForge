@@ -6,12 +6,12 @@
   <!-- Step indicator -->
   <div class="step-indicator">
     <div class="step-progress">
-      @for (step of steps; track step; let i = $index) {
+      @for (step of activeSteps; track step; let i = $index) {
         <div class="step-dot" [class.active]="i === currentStep" [class.completed]="i < currentStep"></div>
       }
     </div>
     <div class="step-label">
-      Paso {{ currentStep + 1 }} de {{ steps.length }}: <span class="step-name">{{ currentStepLabel }}</span>
+      Paso {{ currentStep + 1 }} de {{ activeSteps.length }}: <span class="step-name">{{ currentStepLabel }}</span>
     </div>
   </div>
 </ion-header>
@@ -20,7 +20,7 @@
   <div class="ion-padding">
 
     <!-- ── Step 0: Identity ─────────────────────────────────────────────── -->
-    @if (currentStep === 0) {
+    @if (currentStepName === 'identity') {
       <div class="step-section">
         <h2 class="section-title">Identidad del Personaje</h2>
 
@@ -91,7 +91,7 @@
     }
 
     <!-- ── Step 1: Race ─────────────────────────────────────────────────── -->
-    @if (currentStep === 1) {
+    @if (currentStepName === 'race') {
       <div class="step-section">
         <h2 class="section-title">Selecciona tu Raza</h2>
 
@@ -142,7 +142,7 @@
     }
 
     <!-- ── Step 2: Class ────────────────────────────────────────────────── -->
-    @if (currentStep === 2) {
+    @if (currentStepName === 'class') {
       <div class="step-section">
         <h2 class="section-title">Selecciona tu Clase</h2>
 
@@ -213,8 +213,73 @@
       </div>
     }
 
+    <!-- ── Equipment Step ──────────────────────────────────────────────── -->
+    @if (currentStepName === 'equipment') {
+      <div class="step-section">
+        <h2 class="section-title">Equipamiento Inicial</h2>
+        <p class="mode-hint">Selecciona una opción para cada conjunto de equipamiento.</p>
+
+        @if (structuredEquipment) {
+
+          <!-- Fixed grants summary (informational) -->
+          @if (structuredEquipment.fixedGrants.length > 0) {
+            <div class="equipment-fixed-grants">
+              <h3 class="subsection-title">Equipo fijo</h3>
+              <div class="fixed-grants-list">
+                @for (grant of structuredEquipment.fixedGrants; track $index) {
+                  <div class="fixed-grant-item">
+                    <span class="grant-name">{{ grant.itemName }}</span>
+                    <span class="grant-qty">×{{ grant.quantity }}</span>
+                    @if (grant.itemType) {
+                      <span class="grant-type">{{ grant.itemType }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Choice sets -->
+          @for (choiceSet of structuredEquipment.choiceSets; track $index; let setIdx = $index) {
+            <div class="choice-set-section">
+              <h3 class="choice-set-label">{{ choiceSet.label }}</h3>
+
+              <div class="options-grid">
+                @for (option of choiceSet.options; track $index; let optIdx = $index) {
+                  <div
+                    class="option-card"
+                    [class.option-selected]="formData.equipmentSelections[setIdx] === optIdx"
+                    (click)="selectEquipmentOption(setIdx, optIdx)">
+                    <div class="option-lines">
+                      @for (line of option.lines; track $index) {
+                        <div class="option-line">
+                          <span class="option-item-name">{{ line.itemName }}</span>
+                          <span class="option-item-qty">×{{ line.quantity }}</span>
+                          @if (line.itemType) {
+                            <span class="option-item-type">{{ line.itemType }}</span>
+                          }
+                        </div>
+                      }
+                    </div>
+                    @if (formData.equipmentSelections[setIdx] === optIdx) {
+                      <div class="option-selected-badge">✓ Seleccionado</div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+        }
+
+        @if (validationErrors['equipment']) {
+          <p class="error-message">{{ validationErrors['equipment'] }}</p>
+        }
+      </div>
+    }
+
     <!-- ── Step 3: Ability Scores ───────────────────────────────────────── -->
-    @if (currentStep === 3) {
+    @if (currentStepName === 'ability-scores') {
       <div class="step-section">
         <h2 class="section-title">Puntuaciones de Habilidad</h2>
 
@@ -318,19 +383,19 @@
     }
 
     <!-- ── Step 4: Skills ───────────────────────────────────────────────── -->
-    @if (currentStep === 4) {
+    @if (currentStepName === 'skills') {
       <div class="step-section">
         <h2 class="section-title">Competencias de Habilidad</h2>
-        <p class="mode-hint">Selecciona exactamente 2 habilidades en las que tu personaje sea competente.</p>
+        <p class="mode-hint">Selecciona exactamente {{ requiredSkillCount }} habilidades en las que tu personaje sea competente.</p>
 
         <div class="skills-count">
-          <span [class.skills-count--complete]="formData.selectedSkills.length === 2">
-            {{ formData.selectedSkills.length }} / 2 seleccionadas
+          <span [class.skills-count--complete]="formData.selectedSkills.length === requiredSkillCount">
+            {{ formData.selectedSkills.length }} / {{ requiredSkillCount }} seleccionadas
           </span>
         </div>
 
         <div class="skills-list">
-          @for (skill of dndSkills; track skill.id) {
+          @for (skill of availableSkills; track skill.id) {
             <button
               class="skill-option"
               [class.skill-selected]="formData.selectedSkills.includes(skill.id)"
@@ -350,7 +415,7 @@
     }
 
     <!-- ── Step 5: Review ───────────────────────────────────────────────── -->
-    @if (currentStep === 5) {
+    @if (currentStepName === 'review') {
       <div class="step-section">
         <h2 class="section-title">Revisión Final</h2>
 
@@ -393,6 +458,39 @@
             }
             @if (formData.selectedSubclass) {
               <div class="review-row"><span class="review-key">Subclase</span><span class="review-val">{{ formData.selectedSubclass.name }}</span></div>
+            }
+          </div>
+        }
+
+        <!-- Equipamiento inicial -->
+        @if (structuredEquipment && (structuredEquipment.fixedGrants.length > 0 || structuredEquipment.choiceSets.length > 0)) {
+          <div class="review-card">
+            <div class="review-card-header">Equipamiento Inicial</div>
+
+            <!-- Fixed grants -->
+            @for (grant of structuredEquipment.fixedGrants; track $index) {
+              <div class="review-row">
+                <span class="review-key">{{ grant.itemName }}</span>
+                <span class="review-val review-val--gold">×{{ grant.quantity }}</span>
+              </div>
+            }
+
+            <!-- Selected options -->
+            @for (choiceSet of structuredEquipment.choiceSets; track $index; let setIdx = $index) {
+              @if (formData.equipmentSelections[setIdx] != null) {
+                @let selectedOpt = structuredEquipment.choiceSets[setIdx].options[formData.equipmentSelections[setIdx]];
+                @if (selectedOpt) {
+                  <div class="review-equipment-choice">
+                    <div class="review-choice-label">{{ choiceSet.label }}</div>
+                    @for (line of selectedOpt.lines; track $index) {
+                      <div class="review-row review-row--indent">
+                        <span class="review-key">{{ line.itemName }}</span>
+                        <span class="review-val review-val--gold">×{{ line.quantity }}</span>
+                      </div>
+                    }
+                  </div>
+                }
+              }
             }
           </div>
         }
@@ -442,15 +540,15 @@
         </ion-button>
       }
 
-      <!-- "Siguiente" button: visible on steps 0–4 -->
-      @if (currentStep < 5) {
+      <!-- "Siguiente" button: visible on all steps except the last -->
+      @if (currentStepName !== 'review') {
         <ion-button expand="block" class="nav-btn-next btn-gold" (click)="nextStep()">
           Siguiente
         </ion-button>
       }
 
-      <!-- "Forjar Personaje" button: only on step 5 -->
-      @if (currentStep === 5) {
+      <!-- "Forjar Personaje" button: only on the review step -->
+      @if (currentStepName === 'review') {
         <ion-button expand="block" class="nav-btn-next btn-gold" [disabled]="isSubmitting" (click)="submitCharacter()">
           @if (isSubmitting) {
             <ion-spinner name="crescent" slot="start"></ion-spinner>

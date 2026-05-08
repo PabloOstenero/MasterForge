@@ -32,9 +32,25 @@ const mockUserId = 'test-user-uuid-1234';
 function makeCreateClassDto() {
   return {
     name: 'Artificer',
-    hitDie: 8,
+    description: 'A master of invention and artifice.',
+    hitDie: 'd8',
     savingThrows: { constitution: true, intelligence: true },
     price: 0,
+    classFeatures: {
+      primaryAbility: 'Intelligence',
+      subclassLevel: 3,
+      skillProficiencies: {
+        fixed: [],
+        choicePool: ['Arcana', 'History', 'Investigation', 'Medicine', 'Nature', 'Perception', 'Sleight of Hand'],
+        choiceCount: 2,
+      },
+      weaponProficiencies: ['Simple Weapons'],
+      armorProficiencies: ['Light Armor', 'Medium Armor', 'Shields'],
+      toolProficiencies: ["Thieves' Tools", "Tinker's Tools"],
+      damageResistances: [],
+      damageImmunities: [],
+      conditionImmunities: [],
+    },
   };
 }
 
@@ -192,7 +208,7 @@ describe('HomebrewService', () => {
       const req = httpMock.expectOne('/api/dnd-classes');
       const body = req.request.body;
       expect(body.name).toBe('Artificer');
-      expect(body.hitDie).toBe(8);
+      expect(body.hitDie).toBe('d8');
       expect(body.savingThrows).toEqual({ constitution: true, intelligence: true });
       expect(body.price).toBe(0);
       req.flush({});
@@ -499,7 +515,8 @@ const nonEmptyString = fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.
 /** Arbitrary for CreateClassDto (without authorId — service injects it) */
 const classFormArb = fc.record({
   name: nonEmptyString,
-  hitDie: fc.integer({ min: 4, max: 12 }),
+  description: fc.option(nonEmptyString, { nil: undefined }),
+  hitDie: fc.constantFrom('d6', 'd8', 'd10', 'd12'),
   savingThrows: fc.record({
     strength: fc.boolean(),
     dexterity: fc.boolean(),
@@ -509,6 +526,21 @@ const classFormArb = fc.record({
     charisma: fc.boolean(),
   }),
   price: fc.float({ min: 0, max: 1000, noNaN: true }),
+  classFeatures: fc.record({
+    primaryAbility: fc.constantFrom('Strength', 'Dexterity', 'Constitution', 'Intelligence', 'Wisdom', 'Charisma'),
+    subclassLevel: fc.integer({ min: 1, max: 20 }),
+    skillProficiencies: fc.record({
+      fixed: fc.array(nonEmptyString),
+      choicePool: fc.array(nonEmptyString),
+      choiceCount: fc.integer({ min: 0, max: 6 }),
+    }),
+    weaponProficiencies: fc.array(nonEmptyString),
+    armorProficiencies: fc.array(nonEmptyString),
+    toolProficiencies: fc.array(nonEmptyString),
+    damageResistances: fc.array(nonEmptyString),
+    damageImmunities: fc.array(nonEmptyString),
+    conditionImmunities: fc.array(nonEmptyString),
+  }),
 });
 
 /** Arbitrary for CreateSubclassDto (without authorId) */

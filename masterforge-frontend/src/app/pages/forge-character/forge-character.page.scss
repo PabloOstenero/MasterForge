@@ -649,3 +649,143 @@ ion-segment-button {
   margin-top: 8px;
   text-align: center;
 }
+
+// ─── Equipment step ───────────────────────────────────────────────────────────
+
+.equipment-fixed-grants {
+  margin-bottom: 20px;
+}
+
+.fixed-grants-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fixed-grant-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #1E1E1E;
+  border: 1px solid #333;
+  border-radius: 8px;
+
+  .grant-name {
+    color: #e0e0e0;
+    font-size: 0.9rem;
+    flex: 1;
+  }
+
+  .grant-qty {
+    color: #C5A059;
+    font-weight: bold;
+    font-size: 0.9rem;
+  }
+
+  .grant-type {
+    color: #666;
+    font-size: 0.75rem;
+    font-style: italic;
+  }
+}
+
+.choice-set-section {
+  margin-bottom: 24px;
+}
+
+.choice-set-label {
+  color: #C5A059;
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option-card {
+  background: #1E1E1E;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+
+  &.option-selected {
+    border: 2px solid #C5A059;
+    background: #252010;
+  }
+
+  &:active {
+    background: #2a2a2a;
+  }
+}
+
+.option-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.option-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .option-item-name {
+    color: #e0e0e0;
+    font-size: 0.9rem;
+    flex: 1;
+  }
+
+  .option-item-qty {
+    color: #C5A059;
+    font-weight: bold;
+    font-size: 0.9rem;
+  }
+
+  .option-item-type {
+    color: #666;
+    font-size: 0.75rem;
+    font-style: italic;
+  }
+}
+
+.option-selected-badge {
+  margin-top: 8px;
+  color: #C5A059;
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-align: right;
+}
+
+// ─── Review step — equipment additions ───────────────────────────────────────
+
+.review-equipment-choice {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #2a2a2a;
+
+  &:first-of-type {
+    border-top: none;
+  }
+}
+
+.review-choice-label {
+  color: #888;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+.review-row--indent {
+  padding-left: 12px;
+}

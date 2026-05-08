@@ -1,6 +1,7 @@
 package com.masterforge.masterforge_backend.model.entity
 
 import jakarta.persistence.*
+import com.fasterxml.jackson.annotation.JsonIgnore
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import java.math.BigDecimal
@@ -52,6 +53,7 @@ data class DndRace(
     @Column(name = "race_features", columnDefinition = "jsonb")
     val raceFeatures: Map<String, Any> = emptyMap(),
 
+    @JsonIgnore
     @OneToMany(mappedBy = "race", cascade = [CascadeType.ALL])
     val traits: MutableList<RaceTrait> = mutableListOf(),
 

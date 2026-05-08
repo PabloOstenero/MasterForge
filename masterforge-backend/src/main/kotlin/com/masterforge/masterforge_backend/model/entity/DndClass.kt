@@ -1,6 +1,7 @@
 package com.masterforge.masterforge_backend.model.entity
 
 import jakarta.persistence.*
+import com.fasterxml.jackson.annotation.JsonIgnore
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import java.math.BigDecimal
@@ -19,6 +20,9 @@ data class DndClass(
     @Column(nullable = false)
     val name: String,
 
+    @Column(nullable = true, columnDefinition = "TEXT")
+    val description: String? = null,
+
     @Column(nullable = false)
     val price: BigDecimal,
 
@@ -29,9 +33,14 @@ data class DndClass(
     @Column(name = "saving_throws", columnDefinition = "jsonb", nullable = false)
     val savingThrows: Map<String, Any> = emptyMap(),
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "class_features", columnDefinition = "jsonb", nullable = true)
+    val classFeatures: Map<String, Any>? = null,
+
     @OneToMany(mappedBy = "dndClass", cascade = [CascadeType.ALL])
     val features: MutableList<ClassFeature> = mutableListOf(),
 
+    @JsonIgnore
     @OneToMany(mappedBy = "parentClass", cascade = [CascadeType.ALL])
     val subclasses: MutableList<DndSubclass> = mutableListOf(),
 

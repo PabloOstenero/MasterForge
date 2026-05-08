@@ -118,6 +118,7 @@ data class Character(
     @Column(name = "choices_json", columnDefinition = "jsonb")
     val choicesJson: Map<String, Any> = emptyMap(),
 
+    @JsonIgnore
     @OneToMany(mappedBy = "character", cascade = [CascadeType.ALL], orphanRemoval = true)
     val inventory: MutableList<InventorySlot> = mutableListOf()
 )

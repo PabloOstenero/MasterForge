@@ -25,7 +25,11 @@ import { TestBed } from '@angular/core/testing';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import * as fc from 'fast-check';
 
-import { SAVING_THROW_KEYS, atLeastOneTrue } from './homebrew-class-form/homebrew-class-form.page';
+import { SAVING_THROWS, atLeastOneSelectedValidator } from './homebrew-class-form/homebrew-class-form.page';
+
+// Aliases for backward compatibility within this file
+const SAVING_THROW_KEYS = SAVING_THROWS;
+const atLeastOneTrue = atLeastOneSelectedValidator;
 import { ABILITY_BONUS_KEYS } from './homebrew-race-form/homebrew-race-form.page';
 import { MONSTER_SIZES, MONSTER_ABILITY_KEYS } from './homebrew-monster-form/homebrew-monster-form.page';
 
@@ -39,7 +43,7 @@ import { MONSTER_SIZES, MONSTER_ABILITY_KEYS } from './homebrew-monster-form/hom
  */
 function isValidClassData(data: any): boolean {
   if (!data.name || data.name.trim() === '') return false;
-  if (data.hitDie == null || data.hitDie < 4 || data.hitDie > 12) return false;
+  if (!data.hitDie) return false;
   if (data.price == null || data.price < 0) return false;
   // At least one saving throw must be true
   const savingThrows = data.savingThrows || {};
@@ -106,19 +110,20 @@ function isValidItemData(data: any): boolean {
 // --- Class form arbitraries ---
 
 const savingThrowsArb = fc.record({
-  strength: fc.boolean(),
-  dexterity: fc.boolean(),
-  constitution: fc.boolean(),
-  intelligence: fc.boolean(),
-  wisdom: fc.boolean(),
-  charisma: fc.boolean(),
+  Strength: fc.boolean(),
+  Dexterity: fc.boolean(),
+  Constitution: fc.boolean(),
+  Intelligence: fc.boolean(),
+  Wisdom: fc.boolean(),
+  Charisma: fc.boolean(),
 });
 
 const classFormDataArb = fc.record({
   name: fc.string({ minLength: 0, maxLength: 60 }),
   hitDie: fc.oneof(
-    fc.constant(null),
-    fc.integer({ min: -5, max: 20 }) // includes invalid values
+    fc.constant(''),
+    fc.constantFrom('d6', 'd8', 'd10', 'd12'),
+    fc.string({ minLength: 1, maxLength: 5 }) // includes invalid values
   ),
   savingThrows: savingThrowsArb,
   price: fc.oneof(
@@ -201,13 +206,13 @@ const itemFormDataArb = fc.record({
 
 function buildClassForm(fb: FormBuilder, data: any): FormGroup {
   const savingThrowsGroup = fb.group(
-    SAVING_THROW_KEYS.reduce((acc, key) => ({ ...acc, [key]: [data.savingThrows?.[key] ?? false] }), {}),
+    SAVING_THROW_KEYS.reduce((acc: Record<string, any>, key: string) => ({ ...acc, [key]: [data.savingThrows?.[key] ?? false] }), {}),
     { validators: atLeastOneTrue }
   );
 
   return fb.group({
     name: [data.name ?? '', Validators.required],
-    hitDie: [data.hitDie ?? null, [Validators.required, Validators.min(4), Validators.max(12)]],
+    hitDie: [data.hitDie ?? '', Validators.required],
     savingThrows: savingThrowsGroup,
     price: [data.price ?? null, [Validators.required, Validators.min(0)]],
   });

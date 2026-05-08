@@ -26,6 +26,7 @@ export const routes: Routes = [
       { path: 'forge-character', loadComponent: () => import('./pages/forge-character/forge-character.page').then(m => m.ForgeCharacterPage) },
       { path: 'homebrew', loadComponent: () => import('./pages/homebrew/homebrew.page').then(m => m.HomebrewPage) },
       { path: 'homebrew/class/new', loadComponent: () => import('./pages/homebrew-class-form/homebrew-class-form.page').then(m => m.HomebrewClassFormPage) },
+      { path: 'homebrew/class/:id/edit', loadComponent: () => import('./pages/homebrew-class-form/homebrew-class-form.page').then(m => m.HomebrewClassFormPage) },
       { path: 'homebrew/subclass/new', loadComponent: () => import('./pages/homebrew-subclass-form/homebrew-subclass-form.page').then(m => m.HomebrewSubclassFormPage) },
       { path: 'homebrew/race/new', loadComponent: () => import('./pages/homebrew-race-form/homebrew-race-form.page').then(m => m.HomebrewRaceFormPage) },
       { path: 'homebrew/race/:id/edit', loadComponent: () => import('./pages/homebrew-race-form/homebrew-race-form.page').then(m => m.HomebrewRaceFormPage) },

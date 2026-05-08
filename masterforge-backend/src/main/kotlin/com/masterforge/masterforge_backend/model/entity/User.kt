@@ -1,6 +1,7 @@
 package com.masterforge.masterforge_backend.model.entity
 
 import jakarta.persistence.*
+import com.fasterxml.jackson.annotation.JsonIgnore
 import java.math.BigDecimal
 import java.util.UUID
 
@@ -33,6 +34,7 @@ data class User(
     @Column(name = "is_active", nullable = false)
     val isActive: Boolean = true,
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     val characters: MutableList<Character> = mutableListOf()
 )
