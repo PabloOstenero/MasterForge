@@ -163,8 +163,8 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    &.filled { background: white; border: 2px solid #888; }
-    &.outline { background: black; border: 2px solid #888; }
+    &.filled { background: #121212; border: 2px solid #888; }
+    &.outline { background: white; border: 2px solid #888; }
   }
 
   h2 { color: white; font-weight: bold; }
@@ -402,13 +402,13 @@ ion-segment-button {
     width: 12px;
     height: 12px;
     border-radius: 50%;
+    &.proficient { 
+      background: #121212; 
+      border: 1px solid white; 
+    }
     &.unproficient { 
       background: white; 
       border: 1px solid #444; 
-    }
-    &.proficient { 
-      background: #121212; /* Fondo oscuro para que parezca hueco */
-      border: 1px solid white; /* Borde blanco */
     }
   }
 
@@ -529,4 +529,198 @@ ion-segment-button {
 .heal-alert .alert-button:last-child { 
   background: #C5A059 !important; 
   color: #121212 !important;
+}
+
+/* --- Enhanced Header Details --- */
+.info-line {
+  font-size: 0.85rem;
+  margin-bottom: 2px;
+  color: #ccc;
+  strong { color: #C5A059; }
+}
+
+/* --- Subclass feature badge --- */
+.subclass-badge {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #2a1f0e;
+  color: #C5A059;
+  border: 1px solid #C5A059;
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* --- Proficiency Group Styling --- */
+.info-box-medium {
+  background: #1E1E1E;
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #333;
+  margin-bottom: 20px;
+
+  .prof-group {
+    margin-bottom: 12px;
+    &:last-child { margin-bottom: 0; }
+    
+    .prof-label {
+      color: #888;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      font-weight: bold;
+      margin-bottom: 3px;
+    }
+    .prof-values {
+      color: white;
+      font-size: 0.95rem;
+    }
+  }
+}
+
+/* --- Magic Tab Styles --- */
+.spell-level-section {
+  margin-bottom: 30px;
+}
+
+.spell-level-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #333;
+  padding-bottom: 8px;
+  margin-bottom: 15px;
+
+  h3 {
+    margin: 0;
+    color: #C5A059;
+    font-size: 1.1rem;
+    font-weight: bold;
+  }
+}
+
+.spell-slots {
+  display: flex;
+  gap: 6px;
+
+  .slot-dot {
+    width: 14px;
+    height: 14px;
+    border: 1px solid #C5A059;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &.filled {
+      background: #C5A059;
+    }
+  }
+}
+
+.spell-item {
+  margin-bottom: 8px !important;
+  --min-height: 60px;
+
+  .spell-school-badge {
+    font-size: 0.65rem;
+    color: #888;
+    background: #121212;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #333;
+  }
+}
+
+/* Spellcasting header with DC / attack bonus / ability */
+.spellcasting-header {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 4px;
+
+  .spell-stat-box {
+    flex: 1;
+    background: #1E1E1E;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 10px 5px;
+    text-align: center;
+
+    .spell-stat-label {
+      color: #888;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .spell-stat-value {
+      color: #C5A059;
+      font-size: 1.4rem;
+      font-weight: bold;
+    }
+  }
+}
+
+/* Spell name states */
+.spell-prepared { color: #C5A059 !important; }
+.spell-unprepared { color: #555 !important; }
+
+/* Concentration / Ritual pill tags */
+.spell-tag {
+  display: inline-block;
+  font-size: 0.55rem;
+  font-weight: bold;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: #333;
+  color: #C5A059;
+  border: 1px solid #C5A059;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+/* Slot count label next to dots */
+.slot-count {
+  font-size: 0.7rem;
+  color: #888;
+  margin-left: 6px;
+  align-self: center;
+}
+
+/* Spell Slots Summary Bar */
+.slots-summary-bar {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 4px;
+  margin-bottom: 20px;
+  background: #1e1e1e;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #333;
+
+  .slot-summary-box {
+    text-align: center;
+    border-right: 1px solid #333;
+    &:last-child { border-right: none; }
+
+    .slot-lvl {
+      font-size: 0.6rem;
+      color: #888;
+      text-transform: uppercase;
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+    .slot-val {
+      font-size: 0.75rem;
+      color: #C5A059;
+      font-weight: bold;
+    }
+
+    &.no-slots {
+      opacity: 0.3;
+      .slot-val { color: #555; }
+    }
+  }
 }

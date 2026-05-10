@@ -1,10 +1,12 @@
 package com.masterforge.masterforge_backend.controller
 
 import com.masterforge.masterforge_backend.model.dto.CharacterDto
-import com.masterforge.masterforge_backend.model.entity.Character
-import com.masterforge.masterforge_backend.model.entity.InventorySlot
 import com.masterforge.masterforge_backend.model.dto.CharacterResponseDto
 import com.masterforge.masterforge_backend.model.dto.CharacterSummaryDto
+import com.masterforge.masterforge_backend.model.dto.SpellDto
+import com.masterforge.masterforge_backend.model.entity.Character
+import com.masterforge.masterforge_backend.model.entity.CharacterSpell
+import com.masterforge.masterforge_backend.model.entity.InventorySlot
 import com.masterforge.masterforge_backend.repository.*
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -18,6 +20,8 @@ data class HpUpdateDto(val currentHp: Int)
 data class TempHpUpdateDto(val tempHp: Int)
 data class HitDiceUpdateDto(val hitDiceSpent: Int)
 data class MoneyUpdateDto(val cp: Int, val sp: Int, val ep: Int, val gp: Int, val pp: Int)
+data class AddSpellDto(val spellId: java.util.UUID, val isPrepared: Boolean = false)
+data class SpellSlotsUpdateDto(val spellSlots: Map<String, Any>)
 
 @RestController
 @RequestMapping("/api/characters")
@@ -29,7 +33,9 @@ class CharacterController(
     private val dndRaceRepository: DndRaceRepository,
     private val dndClassRepository: DndClassRepository,
     private val dndSubclassRepository: DndSubclassRepository,
-    private val itemRepository: ItemRepository
+    private val itemRepository: ItemRepository,
+    private val characterSpellRepository: CharacterSpellRepository,
+    private val spellRepository: SpellRepository
 ) {
 
     @GetMapping
@@ -131,12 +137,162 @@ class CharacterController(
     @GetMapping("/{id}")
     @Transactional // Ensure lazy-loaded relationships are fetched for DTO mapping
     fun getCharacterById(@PathVariable id: UUID): ResponseEntity<CharacterResponseDto> {
-        val character = characterRepository.findById(id)
-        return if (character.isPresent) {
-            ResponseEntity.ok(CharacterResponseDto.fromEntity(character.get()))
-        } else {
-            ResponseEntity.notFound().build()
+        val characterOptional = characterRepository.findById(id)
+        if (characterOptional.isEmpty) {
+            return ResponseEntity.notFound().build()
         }
+        val character = characterOptional.get()
+        val spells = characterSpellRepository.findByCharacterId(id)
+        return ResponseEntity.ok(CharacterResponseDto.fromEntity(character, spells))
+    }
+
+    /** Returns all spells whose spellClasses contains the character's class name,
+     *  excluding spells the character already has in their spellbook and spells higher than their current capacity. */
+    @GetMapping("/{id}/available-spells")
+    @Transactional
+    fun getAvailableSpells(@PathVariable id: UUID): ResponseEntity<List<SpellDto>> {
+        val character = characterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        val className = character.dndClass.name
+        val knownSpellIds = characterSpellRepository.findByCharacterId(id).map { it.spell.id }.toSet()
+        val maxLevel = getMaxSpellLevel(character)
+
+        val available = spellRepository.findBySpellClassesContainingIgnoreCase(className)
+            .filter { it.id !in knownSpellIds && (it.level == 0 || it.level <= maxLevel) }
+            .map { spell -> SpellDto(
+                id = spell.id,
+                name = spell.name,
+                level = spell.level,
+                school = spell.school,
+                castingTime = spell.castingTime,
+                range = spell.range,
+                duration = spell.duration,
+                verbal = spell.verbal,
+                somatic = spell.somatic,
+                material = spell.material,
+                materialComponent = spell.materialComponent,
+                concentration = spell.concentration,
+                ritual = spell.ritual,
+                damageTypes = spell.damageTypes?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() },
+                savingThrow = spell.savingThrow,
+                spellClasses = spell.spellClasses?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() },
+                higherLevelDescription = spell.higherLevelDescription,
+                description = spell.description,
+                authorId = spell.author?.id
+            )}
+        return ResponseEntity.ok(available)
+    }
+
+    /** Adds a spell to the character's spellbook. */
+    @PostMapping("/{id}/spells")
+    @Transactional
+    fun addSpell(@PathVariable id: UUID, @RequestBody dto: AddSpellDto): ResponseEntity<CharacterResponseDto> {
+        val character = characterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        val spell = spellRepository.findById(dto.spellId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Spell not found") }
+        
+        // Final safety check: level must be within capacity
+        val maxLevel = getMaxSpellLevel(character)
+        if (spell.level > maxLevel && spell.level != 0) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Spell level too high for character capacity")
+        }
+
+        val alreadyKnown = characterSpellRepository.findByCharacterId(id).any { it.spell.id == dto.spellId }
+        if (!alreadyKnown) {
+            characterSpellRepository.save(CharacterSpell(character = character, spell = spell, isPrepared = dto.isPrepared))
+        }
+        val spells = characterSpellRepository.findByCharacterId(id)
+        return ResponseEntity.ok(CharacterResponseDto.fromEntity(character, spells))
+    }
+
+    /** Removes a spell from the character's spellbook. */
+    @DeleteMapping("/{id}/spells/{characterSpellId}")
+    @Transactional
+    fun removeSpell(@PathVariable id: UUID, @PathVariable characterSpellId: Int): ResponseEntity<CharacterResponseDto> {
+        val character = characterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        characterSpellRepository.deleteById(characterSpellId)
+        val spells = characterSpellRepository.findByCharacterId(id)
+        return ResponseEntity.ok(CharacterResponseDto.fromEntity(character, spells))
+    }
+
+    /** Toggles the preparation status of a spell. */
+    @PutMapping("/{id}/spells/{characterSpellId}/toggle-prepare")
+    @Transactional
+    fun toggleSpellPrepare(@PathVariable id: UUID, @PathVariable characterSpellId: Int): ResponseEntity<CharacterResponseDto> {
+        val character = characterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        val charSpell = characterSpellRepository.findById(characterSpellId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character spell not found") }
+        
+        val updated = charSpell.copy(isPrepared = !charSpell.isPrepared)
+        characterSpellRepository.save(updated)
+        
+        val spells = characterSpellRepository.findByCharacterId(id)
+        return ResponseEntity.ok(CharacterResponseDto.fromEntity(character, spells))
+    }
+
+    /** Bulk adds all available class spells to the character (for prepared casters). */
+    @PostMapping("/{id}/spells/sync-class")
+    @Transactional
+    fun syncClassSpells(@PathVariable id: UUID): ResponseEntity<CharacterResponseDto> {
+        val character = characterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        val className = character.dndClass.name
+        val knownSpellIds = characterSpellRepository.findByCharacterId(id).map { it.spell.id }.toSet()
+        val maxLevel = getMaxSpellLevel(character)
+        
+        val available = spellRepository.findBySpellClassesContainingIgnoreCase(className)
+            .filter { it.id !in knownSpellIds && it.level > 0 && it.level <= maxLevel }
+
+        available.forEach { spell ->
+            characterSpellRepository.save(CharacterSpell(character = character, spell = spell, isPrepared = false))
+        }
+
+        val spells = characterSpellRepository.findByCharacterId(id)
+        return ResponseEntity.ok(CharacterResponseDto.fromEntity(character, spells))
+    }
+
+    private fun getMaxSpellLevel(character: Character): Int {
+        var max = 0
+        for (i in 1..9) {
+            val key = "level_$i"
+            val raw = character.spellSlots?.get(key)
+            if (raw != null) {
+                val maxSlots = when (raw) {
+                    is Map<*, *> -> (raw["max"] as? Number)?.toInt() ?: 0
+                    is Number -> raw.toInt()
+                    else -> 0
+                }
+                if (maxSlots > 0) max = i
+            }
+        }
+        
+        // If no slots found in character, fall back to class automated slots
+        if (max == 0) {
+            val classFeatures = character.dndClass.classFeatures ?: return 0
+            val spellcasting = classFeatures["spellcasting"] as? Map<*, *> ?: return 0
+            
+            // Try to get from explicit slot table in classFeatures
+            val spellSlots = spellcasting["spellSlots"] as? Map<*, *> ?: spellcasting["spell_slots"] as? Map<*, *>
+            val table = spellSlots?.get("slots") as? List<List<Int>>
+            if (table != null && table.size >= character.level) {
+                val row = table[character.level - 1]
+                return row.indexOfLast { it > 0 } + 1
+            }
+
+            // Standard progression fallback based on type
+            val type = spellcasting["spellcastingType"] as? String ?: spellcasting["type"] as? String
+            return when (type) {
+                "Full Caster" -> if (character.level >= 1) 1 else 0
+                "Half Caster" -> if (character.level >= 2) 1 else 0
+                "Pact Magic" -> 1
+                else -> 0
+            }
+        }
+        
+        return max
     }
 
     @PutMapping("/{characterId}/campaign/{campaignId}")
@@ -272,6 +428,18 @@ class CharacterController(
         return ResponseEntity.ok().build()
     }
 
+    @PutMapping("/{id}/spell-slots")
+    @Transactional
+    fun updateSpellSlots(@PathVariable id: UUID, @RequestBody dto: SpellSlotsUpdateDto): ResponseEntity<Void> {
+        val character = characterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found with id $id") }
+
+        val updatedCharacter = character.copy(spellSlots = dto.spellSlots)
+        characterRepository.save(updatedCharacter)
+        
+        return ResponseEntity.ok().build()
+    }
+
     @PutMapping("/{id}/money")
     @Transactional
     fun updateMoney(@PathVariable id: UUID, @RequestBody dto: MoneyUpdateDto): ResponseEntity<Void> {
@@ -390,6 +558,7 @@ class CharacterController(
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     fun deleteCharacter(@PathVariable id: UUID): ResponseEntity<Void> {
         if (!characterRepository.existsById(id)) {
             return ResponseEntity.notFound().build()

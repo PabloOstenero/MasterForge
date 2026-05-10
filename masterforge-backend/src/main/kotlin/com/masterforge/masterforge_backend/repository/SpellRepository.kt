@@ -8,4 +8,5 @@ import java.util.UUID
 @Repository
 interface SpellRepository : JpaRepository<Spell, UUID> {
     fun findByAuthorId(authorId: UUID): List<Spell>
+    fun findBySpellClassesContainingIgnoreCase(className: String): List<Spell>
 }

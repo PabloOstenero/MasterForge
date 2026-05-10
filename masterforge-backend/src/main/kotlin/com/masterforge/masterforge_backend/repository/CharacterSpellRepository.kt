@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface CharacterSpellRepository : JpaRepository<CharacterSpell, Int>
+interface CharacterSpellRepository : JpaRepository<CharacterSpell, Int> {
+    fun findByCharacterId(characterId: java.util.UUID): List<CharacterSpell>
+}

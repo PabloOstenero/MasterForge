@@ -120,5 +120,9 @@ data class Character(
 
     @JsonIgnore
     @OneToMany(mappedBy = "character", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val inventory: MutableList<InventorySlot> = mutableListOf()
+    val inventory: MutableList<InventorySlot> = mutableListOf(),
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "character", cascade = [CascadeType.ALL], orphanRemoval = true)
+    val spells: MutableList<CharacterSpell> = mutableListOf()
 )

@@ -66,6 +66,31 @@ export class ApiService {
     return this.http.post(`${this.apiUrl}/characters/${charId}/inventory/${itemId}`, {});
   }
 
+  // Fetches spells available for a character (filtered by class, excluding already known)
+  getAvailableSpells(charId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/characters/${charId}/available-spells`);
+  }
+
+  // Adds a spell to the character's spellbook
+  addSpellToCharacter(charId: string, spellId: string, isPrepared = false): Observable<any> {
+    return this.http.post(`${this.apiUrl}/characters/${charId}/spells`, { spellId, isPrepared });
+  }
+
+  // Removes a spell from the character's spellbook by CharacterSpell row ID
+  removeSpellFromCharacter(charId: string, characterSpellId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/characters/${charId}/spells/${characterSpellId}`);
+  }
+
+  // Toggles the preparation status of a spell
+  toggleSpellPrepare(charId: string, characterSpellId: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/characters/${charId}/spells/${characterSpellId}/toggle-prepare`, {});
+  }
+
+  // Syncs all available class spells to the character
+  syncClassSpells(charId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/characters/${charId}/spells/sync-class`, {});
+  }
+
   /**
  * Actualiza los puntos de vida temporales del personaje en la base de datos.
  * @param characterId UUID del personaje.
@@ -74,6 +99,10 @@ export class ApiService {
 updateTempHp(characterId: string, tempHp: number): Observable<any> {
   // Cambiamos PATCH a PUT para mantener la consistencia con el resto de la API de MasterForge
   return this.http.put(`${this.apiUrl}/characters/${characterId}/temp-hp`, { tempHp: Number(tempHp) });
+}
+
+updateSpellSlots(characterId: string, spellSlots: any): Observable<any> {
+  return this.http.put(`${this.apiUrl}/characters/${characterId}/spell-slots`, { spellSlots });
 }
 
   // Fetch all campaigns
@@ -136,6 +165,11 @@ updateTempHp(characterId: string, tempHp: number): Observable<any> {
   // Fetch all available D&D subclasses
   getSubclasses(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/dnd-subclasses`);
+  }
+
+  // Delete a character by ID
+  deleteCharacter(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/characters/${id}`);
   }
 
   // Create a new character
@@ -263,6 +297,27 @@ export interface CharacterSimpleDto {
   dndRace: string;
 }
 
+export interface ClassFeatureDto {
+  id: number | null;
+  name: string;
+  description: string;
+  levelRequired: number;
+  dndClassId: number;
+}
+
+export interface RaceTraitDto {
+  id: number | null;
+  name: string;
+  description: string;
+  raceId: number;
+}
+
+export interface CharacterSpellResponseDto {
+  id: number | null;
+  spell: any; // We can refine this if needed, but 'any' is safe for now given the complexity of SpellDto
+  isPrepared: boolean;
+}
+
 export interface CampaignPlayerDto {
   id: string;
   name: string;
@@ -296,5 +351,58 @@ export interface SessionSummaryDto {
 export interface CharacterResponseDto {
   id: string;
   name: string;
+  level: number;
+  maxHp: number;
+  currentHp: number;
+  tempHp: number;
+  speed: number;
+  hitDiceTotal: number;
+  hitDiceSpent: number;
+  background: string;
+  alignment: string;
+  xp: number;
+  cp: number;
+  sp: number;
+  ep: number;
+  gp: number;
+  pp: number;
+  baseStr: number;
+  baseDex: number;
+  baseCon: number;
+  baseInt: number;
+  baseWis: number;
+  baseCha: number;
+  savingThrowsProficiencies: Record<string, any>;
+  skillProficiencies: Record<string, any>;
+  spellSlots: Record<string, any>;
+  dndRace: {
+    id: number;
+    name: string;
+    bonusStr: number;
+    bonusDex: number;
+    bonusCon: number;
+    bonusInt: number;
+    bonusWis: number;
+    bonusCha: number;
+    traits: RaceTraitDto[];
+    raceFeatures?: Record<string, any>;
+  };
+  dndClass: {
+    id: number;
+    name: string;
+    hitDie: number;
+    savingThrows: Record<string, any>;
+    features: ClassFeatureDto[];
+    classFeatures?: Record<string, any>;
+  };
   campaign: { id: string } | null;
+  subclass?: {
+    id: number;
+    name: string;
+    subclassFeatures?: Record<string, any>;
+  } | null;
+
+  choicesJson: Record<string, any>;
+  inventory: any[];
+  spells: CharacterSpellResponseDto[];
 }

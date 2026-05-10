@@ -32,9 +32,14 @@
     <ion-row data-testid="characters-list">
       @for (char of characters; track char.id) {
         <ion-col size="12" size-md="6">
-          <ion-card button (click)="goToSheet(char.id)" class="character-card" data-testid="character-card">
-            <ion-card-content>
-              <strong class="gold-title" style="font-size: 1.2rem;">{{ char.name }}</strong>
+          <ion-card class="character-card" data-testid="character-card" style="position: relative;">
+            <ion-card-content (click)="goToSheet(char.id)" style="cursor: pointer;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <strong class="gold-title" style="font-size: 1.2rem;">{{ char.name }}</strong>
+                <ion-button fill="clear" color="danger" (click)="$event.stopPropagation(); confirmDelete(char)" style="margin: -10px -10px 0 0;">
+                   <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+                </ion-button>
+              </div>
               <p>{{ char.dndClass }}{{ char.subclass ? ' (' + char.subclass + ')' : '' }} — Nivel {{ char.level }}</p>
               <p class="text-muted">{{ char.dndRace }}</p>
             </ion-card-content>

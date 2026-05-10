@@ -1,11 +1,7 @@
 package com.masterforge.masterforge_backend.model.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.masterforge.masterforge_backend.model.entity.Character
-import com.masterforge.masterforge_backend.model.entity.DndClass
-import com.masterforge.masterforge_backend.model.entity.DndRace
-import com.masterforge.masterforge_backend.model.entity.InventorySlot
-import com.masterforge.masterforge_backend.model.entity.Item
+import com.masterforge.masterforge_backend.model.entity.*
 import java.util.UUID
 
 // Simplified DTO for User in Character response to avoid recursion
@@ -24,7 +20,9 @@ data class DndRaceSummaryDto(
     val bonusCon: Int,
     val bonusInt: Int,
     val bonusWis: Int,
-    val bonusCha: Int
+    val bonusCha: Int,
+    val traits: List<RaceTraitDto> = emptyList(),
+    val raceFeatures: Map<String, Any> = emptyMap()
     // Add other fields from DndRace entity as needed, e.g., traits, author, price
 ) {
     companion object {
@@ -37,7 +35,48 @@ data class DndRaceSummaryDto(
                 bonusCon = race.bonusCon,
                 bonusInt = race.bonusInt,
                 bonusWis = race.bonusWis,
-                bonusCha = race.bonusCha
+                bonusCha = race.bonusCha,
+                traits = race.traits.map { RaceTraitDto(it.id, it.name, it.description, race.id!!) },
+                raceFeatures = race.raceFeatures
+            )
+        }
+    }
+}
+
+data class CharacterSpellResponseDto(
+    val id: Int?,
+    val spell: SpellDto,
+    @JsonProperty("isPrepared")
+    val isPrepared: Boolean
+) {
+    companion object {
+        fun fromEntity(characterSpell: CharacterSpell): CharacterSpellResponseDto {
+            val s = characterSpell.spell
+            val spellDto = SpellDto(
+                id = s.id,
+                name = s.name,
+                level = s.level,
+                school = s.school,
+                castingTime = s.castingTime,
+                range = s.range,
+                duration = s.duration,
+                verbal = s.verbal,
+                somatic = s.somatic,
+                material = s.material,
+                materialComponent = s.materialComponent,
+                concentration = s.concentration,
+                ritual = s.ritual,
+                damageTypes = s.damageTypes?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() },
+                savingThrow = s.savingThrow,
+                spellClasses = s.spellClasses?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() },
+                higherLevelDescription = s.higherLevelDescription,
+                description = s.description,
+                authorId = s.author?.id
+            )
+            return CharacterSpellResponseDto(
+                id = characterSpell.id,
+                spell = spellDto,
+                isPrepared = characterSpell.isPrepared
             )
         }
     }
@@ -48,16 +87,46 @@ data class DndClassResponseDto(
     val id: Int,
     val name: String,
     val hitDie: Int,
-    val savingThrows: Map<String, Any>
-    // Add other fields from DndClass entity as needed, e.g., features, subclasses, author, price
+    val savingThrows: Map<String, Any>,
+    val features: List<ClassFeatureDto> = emptyList(),
+    val classFeatures: Map<String, Any> = emptyMap()
 ) {
     companion object {
-        fun fromEntity(dndClass: DndClass): DndClassResponseDto {
+        fun fromEntity(dndClass: DndClass, characterLevel: Int): DndClassResponseDto {
             return DndClassResponseDto(
                 id = dndClass.id!!,
                 name = dndClass.name,
                 hitDie = dndClass.hitDie,
-                savingThrows = dndClass.savingThrows
+                savingThrows = dndClass.savingThrows,
+                features = dndClass.features
+                    .filter { it.levelRequired <= characterLevel }
+                    .map { ClassFeatureDto(it.id, it.name, it.description, it.levelRequired, dndClass.id!!) },
+                classFeatures = dndClass.classFeatures ?: emptyMap()
+            )
+        }
+    }
+}
+
+data class SubclassResponseDto(
+    val id: Int,
+    val name: String,
+    val subclassFeatures: Map<String, Any> = emptyMap()
+) {
+    companion object {
+        fun fromEntity(subclass: DndSubclass, characterLevel: Int): SubclassResponseDto {
+            val rawFeatures = subclass.subclassFeatures ?: emptyMap()
+            // subclassFeatures JSON has a "features" array — filter by levelRequired
+            val filteredFeatures = (rawFeatures["features"] as? List<*>)?.filter { entry ->
+                val level = (entry as? Map<*, *>)?.get("levelRequired") as? Int ?: 0
+                level <= characterLevel
+            } ?: emptyList<Any>()
+            val filteredMap = if (rawFeatures.isNotEmpty())
+                rawFeatures.toMutableMap().apply { put("features", filteredFeatures) }
+            else emptyMap()
+            return SubclassResponseDto(
+                id = subclass.id!!,
+                name = subclass.name,
+                subclassFeatures = filteredMap
             )
         }
     }
@@ -139,9 +208,10 @@ data class CharacterResponseDto(
     @JsonProperty("dndClass")
     val dndClass: DndClassResponseDto,
     val campaign: CampaignRef? = null,
-    val subclass: ClassRef? = null, // User's output JSON has "subclass": null
+    val subclass: SubclassResponseDto? = null,
     val choicesJson: Map<String, Any>,
-    val inventory: List<InventorySlotResponseDto>
+    val inventory: List<InventorySlotResponseDto>,
+    val spells: List<CharacterSpellResponseDto> = emptyList()
 ) {
     companion object {
         fun fromEntity(character: Character): CharacterResponseDto {
@@ -180,11 +250,18 @@ data class CharacterResponseDto(
                 spellSlots = character.spellSlots,
                 user = userSimpleDto,
                 dndRace = DndRaceSummaryDto.fromEntity(character.dndRace),
-                dndClass = DndClassResponseDto.fromEntity(character.dndClass),
+                dndClass = DndClassResponseDto.fromEntity(character.dndClass, character.level),
                 campaign = character.campaign?.let { CampaignRef(it.id!!) },
-                subclass = character.subclass?.let { ClassRef(it.id!!) }, // Map subclass to ClassRef if not null
+                subclass = character.subclass?.let { SubclassResponseDto.fromEntity(it, character.level) },
                 choicesJson = character.choicesJson,
                 inventory = character.inventory.map { InventorySlotResponseDto.fromEntity(it) }
+            )
+        }
+
+        fun fromEntity(character: Character, spells: List<CharacterSpell>): CharacterResponseDto {
+            val dto = fromEntity(character)
+            return dto.copy(
+                spells = spells.map { CharacterSpellResponseDto.fromEntity(it) }
             )
         }
     }
