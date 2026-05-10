@@ -36,7 +36,16 @@ data class DndRaceSummaryDto(
                 bonusInt = race.bonusInt,
                 bonusWis = race.bonusWis,
                 bonusCha = race.bonusCha,
-                traits = race.traits.map { RaceTraitDto(it.id, it.name, it.description, race.id!!) },
+                traits = race.traits.map {
+                    RaceTraitDto(
+                        id = it.id,
+                        name = it.name,
+                        description = it.description,
+                        levelRequired = it.levelRequired,
+                        raceId = race.id!!,
+                        options = it.options
+                    )
+                },
                 raceFeatures = race.raceFeatures
             )
         }
@@ -100,7 +109,7 @@ data class DndClassResponseDto(
                 savingThrows = dndClass.savingThrows,
                 features = dndClass.features
                     .filter { it.levelRequired <= characterLevel }
-                    .map { ClassFeatureDto(it.id, it.name, it.description, it.levelRequired, dndClass.id!!) },
+                    .map { ClassFeatureDto(it.id, it.name, it.description, it.levelRequired, dndClass.id!!, it.options) },
                 classFeatures = dndClass.classFeatures ?: emptyMap()
             )
         }

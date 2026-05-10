@@ -269,7 +269,7 @@ export class HomebrewClassFormPage implements OnInit {
   error: string | null = null;
   editMode = false;
   editId: string | null = null;
-  originalFeatures: { id: number; name: string; description: string; levelRequired: number }[] = [];
+  originalFeatures: { id: number; name: string; description: string; levelRequired: number; options?: any }[] = [];
 
   // ---------------------------------------------------------------------------
   // Starting equipment picker state
@@ -622,11 +622,27 @@ export class HomebrewClassFormPage implements OnInit {
         // Rebuild features FormArray
         if (Array.isArray(cls.features)) {
           cls.features.forEach((f: any) => {
+            const optionsGroup = this.fb.group({
+              choiceCount: [f.options?.choiceCount ?? null],
+              options: this.fb.array((f.options?.options ?? []).map((opt: any) => this.fb.group({
+                id: [opt.id ?? null],
+                name: [opt.name ?? '', Validators.required],
+                description: [opt.description ?? '', Validators.required],
+                levelRequired: [opt.levelRequired ?? f.levelRequired, [Validators.required, Validators.min(1), Validators.max(20)]]
+              }))),
+              progression: this.fb.array((f.options?.progression ?? []).map((p: any) => this.fb.group({
+                level: [p.level, [Validators.required, Validators.min(1), Validators.max(20)]],
+                additionalChoices: [p.additionalChoices, [Validators.required, Validators.min(1)]]
+              })))
+            });
+
             this.features.push(this.fb.group({
               id:           [f.id ?? null],
               name:         [f.name ?? '', Validators.required],
               description:  [f.description ?? '', Validators.required],
               levelRequired:[f.levelRequired ?? null, [Validators.required, Validators.min(1), Validators.max(20)]],
+              hasOptions:   [!!f.options],
+              options:      optionsGroup
             }));
           });
           this.originalFeatures = cls.features.map((f: any) => ({
@@ -634,6 +650,7 @@ export class HomebrewClassFormPage implements OnInit {
             name:         f.name,
             description:  f.description,
             levelRequired:f.levelRequired,
+            options:      f.options
           }));
         }
 
@@ -799,11 +816,45 @@ export class HomebrewClassFormPage implements OnInit {
       name:         ['', Validators.required],
       description:  ['', Validators.required],
       levelRequired:[null, [Validators.required, Validators.min(1), Validators.max(20)]],
+      hasOptions:   [false],
+      options:      this.fb.group({
+        choiceCount: [null],
+        options: this.fb.array([]),
+        progression: this.fb.array([])
+      })
     }));
   }
 
   removeFeature(index: number): void {
     this.features.removeAt(index);
+  }
+
+  addFeatureOption(featureIndex: number): void {
+    const optionsArray = this.features.at(featureIndex).get('options.options') as FormArray;
+    optionsArray.push(this.fb.group({
+      id: [null],
+      name: ['', Validators.required],
+      description: ['', Validators.required],
+      levelRequired: [this.features.at(featureIndex).get('levelRequired')?.value ?? 1, [Validators.required, Validators.min(1), Validators.max(20)]]
+    }));
+  }
+
+  removeFeatureOption(featureIndex: number, optionIndex: number): void {
+    const optionsArray = this.features.at(featureIndex).get('options.options') as FormArray;
+    optionsArray.removeAt(optionIndex);
+  }
+
+  addFeatureProgression(featureIndex: number): void {
+    const progArray = this.features.at(featureIndex).get('options.progression') as FormArray;
+    progArray.push(this.fb.group({
+      level: [null, [Validators.required, Validators.min(1), Validators.max(20)]],
+      additionalChoices: [1, [Validators.required, Validators.min(1)]]
+    }));
+  }
+
+  removeFeatureProgression(featureIndex: number, progIndex: number): void {
+    const progArray = this.features.at(featureIndex).get('options.progression') as FormArray;
+    progArray.removeAt(progIndex);
   }
 
   addMulticlassingPrerequisite(): void {
@@ -998,14 +1049,24 @@ export class HomebrewClassFormPage implements OnInit {
     const promises: Promise<any>[] = [];
 
     // POST new features (id === null)
-    for (const feature of currentFeatures) {
-      if (feature.id === null) {
+    for (let i = 0; i < this.features.length; i++) {
+      const ctrl = this.features.at(i);
+      const id = ctrl.get('id')?.value;
+      if (id === null) {
+        const hasOptions = ctrl.get('hasOptions')?.value;
+        const options = hasOptions ? {
+          choiceCount: ctrl.get('options.choiceCount')?.value,
+          options: ctrl.get('options.options')?.value,
+          progression: ctrl.get('options.progression')?.value
+        } : null;
+
         promises.push(
           this.homebrewService.createClassFeature({
-            name:         feature.name,
-            description:  feature.description,
-            levelRequired:feature.levelRequired,
+            name:         ctrl.get('name')?.value,
+            description:  ctrl.get('description')?.value,
+            levelRequired:ctrl.get('levelRequired')?.value,
             classId,
+            options: options as any
           }).toPromise(),
         );
       }
@@ -1015,10 +1076,21 @@ export class HomebrewClassFormPage implements OnInit {
     for (const feature of currentFeatures) {
       if (feature.id !== null) {
         const original = this.originalFeatures.find(o => o.id === feature.id);
+        // Also check if options changed
+        const currentFormFeature = this.features.controls.find(c => c.get('id')?.value === feature.id);
+        const options = currentFormFeature?.get('hasOptions')?.value 
+          ? { 
+              choiceCount: currentFormFeature.get('options.choiceCount')?.value,
+              options: currentFormFeature.get('options.options')?.value,
+              progression: currentFormFeature.get('options.progression')?.value
+            } 
+          : null;
+
         if (original && (
           original.name !== feature.name ||
           original.description !== feature.description ||
-          original.levelRequired !== feature.levelRequired
+          original.levelRequired !== feature.levelRequired ||
+          JSON.stringify(original.options) !== JSON.stringify(options)
         )) {
           promises.push(
             this.homebrewService.updateClassFeature(feature.id, {
@@ -1026,6 +1098,7 @@ export class HomebrewClassFormPage implements OnInit {
               description:  feature.description,
               levelRequired:feature.levelRequired,
               classId,
+              options: options as any
             }).toPromise(),
           );
         }

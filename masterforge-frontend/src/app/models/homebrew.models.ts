@@ -48,11 +48,23 @@ export interface SenseObject {
   passivePerception?: number;
 }
 
+export interface FeatureOptionProgression {
+  level: number;
+  additionalChoices: number;
+}
+
+export interface FeatureOptionPool {
+  choiceCount: number;
+  options: FeatureEntry[];
+  progression?: FeatureOptionProgression[];
+}
+
 export interface FeatureEntry {
   id?: number | null;
   name: string;
   description: string;
-  levelRequired?: number;
+  levelRequired: number;
+  options?: FeatureOptionPool;
 }
 
 /**

@@ -589,6 +589,46 @@
       </div>
     }
 
+    <!-- ── STEP: FEATURE OPTIONS ─────────────────────────────────────────── -->
+    @if (currentStepName === 'feature-options') {
+      <div class="step-section" data-testid="step-feature-options">
+        <h2 class="section-title">Opciones de Rasgos</h2>
+        <p class="section-hint">Selecciona las opciones para tus rasgos de clase.</p>
+
+        <div class="feature-options-container">
+          @for (feature of availableFeatureChoices; track feature.name) {
+            <div class="feature-choice-card">
+              <div class="feature-choice-header">
+                <h3 class="subsection-title">{{ feature.name }}</h3>
+                <span class="feature-choice-badge" [class.feature-choice-badge--complete]="(formData.featureSelections[feature.name] || []).length === feature.calculatedMaxChoices">
+                  Elige {{ feature.calculatedMaxChoices }}
+                  ({{ (formData.featureSelections[feature.name] || []).length }} seleccionados)
+                </span>
+              </div>
+              <p class="feature-choice-desc">{{ feature.description }}</p>
+
+              <div class="options-grid">
+                @for (opt of feature.filteredOptions; track opt.name) {
+                  <button
+                    class="skill-option"
+                    [class.skill-selected]="isFeatureOptionSelected(feature.name, opt.name)"
+                    (click)="toggleFeatureOption(feature.name, opt.name, feature.calculatedMaxChoices)">
+                    <div class="skill-option-content">
+                      <span class="skill-name">{{ opt.name }}</span>
+                      <span class="option-level-badge">Nivel {{ opt.levelRequired || feature.levelRequired }}</span>
+                    </div>
+                    @if (isFeatureOptionSelected(feature.name, opt.name)) {
+                      <ion-icon name="checkmark-circle" color="secondary" style="margin-left: 8px;"></ion-icon>
+                    }
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
     <!-- ── Step 5: Review ───────────────────────────────────────────────── -->
     @if (currentStepName === 'review') {
       <div class="step-section">
@@ -599,6 +639,18 @@
           <div class="review-hp-banner">
             <span class="review-hp-label">Puntos de Vida Iniciales</span>
             <span class="review-hp-value">{{ previewHp }}</span>
+          </div>
+        }
+
+        @if (availableFeatureChoices.length > 0) {
+          <div class="review-card">
+            <div class="review-card-header">Opciones de Rasgos</div>
+            @for (choice of availableFeatureChoices; track choice.name) {
+              <div class="review-row">
+                <span class="review-key">{{ choice.name }}</span>
+                <span class="review-val">{{ (formData.featureSelections[choice.name] || []).join(', ') || 'Ninguna' }}</span>
+              </div>
+            }
           </div>
         }
 

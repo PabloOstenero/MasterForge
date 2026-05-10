@@ -140,6 +140,14 @@
                 }
               </h2>
               <p>{{ feature.description }}</p>
+              @if (feature.selectedOptions?.length > 0) {
+                <div class="selected-options-sheet">
+                  <strong>Opciones:</strong>
+                  @for (opt of feature.selectedOptions; track opt) {
+                    <span class="option-tag-sheet">{{ opt }}</span>
+                  }
+                </div>
+              }
             </ion-label>
           </ion-item>
         } @empty {
@@ -155,6 +163,14 @@
             <ion-label>
               <h2 style="color: #C5A059;">{{ trait.name }}</h2>
               <p>{{ trait.description }}</p>
+              @if (trait.selectedOptions?.length > 0) {
+                <div class="selected-options-sheet">
+                  <strong>Opciones:</strong>
+                  @for (opt of trait.selectedOptions; track opt) {
+                    <span class="option-tag-sheet">{{ opt }}</span>
+                  }
+                </div>
+              }
             </ion-label>
           </ion-item>
         } @empty {

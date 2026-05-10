@@ -30,6 +30,7 @@ class ClassFeatureController(
             name = dto.name,
             description = dto.description,
             levelRequired = dto.levelRequired,
+            options = dto.options,
             dndClass = dndClass
         )
         return classFeatureRepository.save(classFeature)
@@ -57,6 +58,7 @@ class ClassFeatureController(
             name = dto.name,
             description = dto.description,
             levelRequired = dto.levelRequired,
+            options = dto.options,
             dndClass = dndClass
         )
         return classFeatureRepository.save(updatedFeature)

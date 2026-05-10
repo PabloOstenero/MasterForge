@@ -4,5 +4,7 @@ data class RaceTraitDto(
     val id: Int?,
     val name: String,
     val description: String,
-    val raceId: Int
+    val levelRequired: Int = 1,
+    val raceId: Int,
+    val options: Map<String, Any>? = null
 )

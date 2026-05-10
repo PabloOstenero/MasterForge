@@ -232,7 +232,7 @@ export class HomebrewRaceFormPage implements OnInit {
   editId: string | null = null;
 
   /** Original traits loaded in edit mode for reconciliation */
-  originalTraits: { id: number; name: string; description: string }[] = [];
+  originalTraits: { id: number; name: string; description: string; levelRequired: number; options?: any }[] = [];
 
   // ---------------------------------------------------------------------------
   // Proficiency chip state
@@ -531,16 +531,47 @@ export class HomebrewRaceFormPage implements OnInit {
         // Rebuild traits FormArray
         if (Array.isArray(race.traits)) {
           race.traits.forEach((t: any) => {
-            this.traits.push(this.fb.group({
-              id:          [t.id ?? null],
-              name:        [t.name ?? '', Validators.required],
+            const options = t.options || {};
+            const traitGroup = this.fb.group({
+              id: [t.id ?? null],
+              name: [t.name ?? '', Validators.required],
               description: [t.description ?? '', Validators.required],
-            }));
+              levelRequired: [t.levelRequired ?? 1, [Validators.required, Validators.min(1)]],
+              hasOptions: [!!(options.options && options.options.length > 0)],
+              choiceCount: [options.choiceCount ?? 1],
+              options: this.fb.array([]),
+              progression: this.fb.array([])
+            });
+
+            if (options.options) {
+              const optsArray = traitGroup.get('options') as FormArray;
+              options.options.forEach((opt: any) => {
+                optsArray.push(this.fb.group({
+                  name: [opt.name, Validators.required],
+                  description: [opt.description, Validators.required],
+                  levelRequired: [opt.levelRequired ?? 1]
+                }));
+              });
+            }
+
+            if (options.progression) {
+              const progArray = traitGroup.get('progression') as FormArray;
+              options.progression.forEach((p: any) => {
+                progArray.push(this.fb.group({
+                  level: [p.level, [Validators.required, Validators.min(1)]],
+                  additionalChoices: [p.additionalChoices, [Validators.required, Validators.min(1)]]
+                }));
+              });
+            }
+
+            this.traits.push(traitGroup);
           });
           this.originalTraits = race.traits.map((t: any) => ({
-            id:          t.id,
-            name:        t.name,
+            id: t.id,
+            name: t.name,
             description: t.description,
+            levelRequired: t.levelRequired,
+            options: t.options
           }));
         }
 
@@ -736,11 +767,31 @@ export class HomebrewRaceFormPage implements OnInit {
    * - DELETE traits in originalTraits not present in current array
    */
   async reconcileTraits(raceId: number): Promise<void> {
-    const currentTraits = this.traits.controls.map((ctrl) => ({
-      id:          ctrl.get('id')?.value as number | null,
-      name:        ctrl.get('name')?.value as string,
-      description: ctrl.get('description')?.value as string,
-    }));
+    const currentTraits = this.traits.controls.map((ctrl) => {
+      const hasOptions = ctrl.get('hasOptions')?.value;
+      const options = ctrl.get('options')?.value;
+      const progression = ctrl.get('progression')?.value;
+      const choiceCount = ctrl.get('choiceCount')?.value;
+
+      return {
+        id:          ctrl.get('id')?.value as number | null,
+        name:        ctrl.get('name')?.value as string,
+        description: ctrl.get('description')?.value as string,
+        levelRequired: ctrl.get('levelRequired')?.value as number,
+        options: hasOptions ? {
+          choiceCount,
+          options: options.map((o: any) => ({
+            name: o.name,
+            description: o.description,
+            levelRequired: o.levelRequired
+          })),
+          progression: progression.map((p: any) => ({
+            level: p.level,
+            additionalChoices: p.additionalChoices
+          }))
+        } : null
+      };
+    });
 
     const currentIds = new Set(
       currentTraits.filter(t => t.id !== null).map(t => t.id as number),
@@ -755,6 +806,8 @@ export class HomebrewRaceFormPage implements OnInit {
           this.homebrewService.createRaceTrait({
             name:        trait.name,
             description: trait.description,
+            levelRequired: trait.levelRequired,
+            options:     trait.options,
             raceId,
           }).toPromise(),
         );
@@ -765,11 +818,20 @@ export class HomebrewRaceFormPage implements OnInit {
     for (const trait of currentTraits) {
       if (trait.id !== null) {
         const original = this.originalTraits.find(o => o.id === trait.id);
-        if (original && (original.name !== trait.name || original.description !== trait.description)) {
+        const hasChanged = original && (
+          original.name !== trait.name || 
+          original.description !== trait.description || 
+          original.levelRequired !== trait.levelRequired ||
+          JSON.stringify(original.options) !== JSON.stringify(trait.options)
+        );
+
+        if (hasChanged) {
           promises.push(
             this.homebrewService.updateRaceTrait(trait.id, {
               name:        trait.name,
               description: trait.description,
+              levelRequired: trait.levelRequired,
+              options:     trait.options,
               raceId,
             }).toPromise(),
           );
@@ -829,7 +891,45 @@ export class HomebrewRaceFormPage implements OnInit {
       id:          [null],
       name:        ['', Validators.required],
       description: ['', Validators.required],
+      levelRequired: [1, [Validators.required, Validators.min(1)]],
+      hasOptions:  [false],
+      choiceCount: [1],
+      options:     this.fb.array([]),
+      progression: this.fb.array([])
     }));
+  }
+
+  getTraitOptions(traitIndex: number): FormArray {
+    return this.traits.at(traitIndex).get('options') as FormArray;
+  }
+
+  addTraitOption(traitIndex: number): void {
+    const arr = this.getTraitOptions(traitIndex);
+    arr.push(this.fb.group({
+      name: ['', Validators.required],
+      description: ['', Validators.required],
+      levelRequired: [1]
+    }));
+  }
+
+  removeTraitOption(traitIndex: number, optionIndex: number): void {
+    this.getTraitOptions(traitIndex).removeAt(optionIndex);
+  }
+
+  getTraitProgression(traitIndex: number): FormArray {
+    return this.traits.at(traitIndex).get('progression') as FormArray;
+  }
+
+  addTraitProgression(traitIndex: number): void {
+    const arr = this.getTraitProgression(traitIndex);
+    arr.push(this.fb.group({
+      level: [1, [Validators.required, Validators.min(1)]],
+      additionalChoices: [1, [Validators.required, Validators.min(1)]]
+    }));
+  }
+
+  removeTraitProgression(traitIndex: number, progressionIndex: number): void {
+    this.getTraitProgression(traitIndex).removeAt(progressionIndex);
   }
 
   removeTrait(index: number): void {

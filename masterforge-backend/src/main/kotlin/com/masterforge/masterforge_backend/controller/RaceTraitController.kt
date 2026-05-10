@@ -29,6 +29,8 @@ class RaceTraitController(
         val raceTrait = RaceTrait(
             name = dto.name,
             description = dto.description,
+            levelRequired = dto.levelRequired,
+            options = dto.options,
             race = race
         )
         return raceTraitRepository.save(raceTrait)
@@ -55,6 +57,8 @@ class RaceTraitController(
         val updatedTrait = existingTrait.copy(
             name = dto.name,
             description = dto.description,
+            levelRequired = dto.levelRequired,
+            options = dto.options,
             race = race
         )
         return raceTraitRepository.save(updatedTrait)

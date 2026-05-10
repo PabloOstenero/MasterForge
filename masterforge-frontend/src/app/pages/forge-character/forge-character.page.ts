@@ -18,7 +18,7 @@ import { switchMap } from 'rxjs/operators';
 // ─── Step definitions ────────────────────────────────────────────────────────
 const BASE_STEPS = ['identity', 'race', 'class', 'ability-scores', 'skills', 'review'] as const;
 type BaseStep = typeof BASE_STEPS[number];
-type Step = BaseStep | 'subclass' | 'equipment' | 'spells' | 'languages';
+type Step = BaseStep | 'subclass' | 'equipment' | 'spells' | 'languages' | 'feature-options';
 
 export const STEP_LABELS: Record<Step, string> = {
   'identity': 'Identidad',
@@ -30,6 +30,7 @@ export const STEP_LABELS: Record<Step, string> = {
   'ability-scores': 'Puntuaciones',
   'skills': 'Habilidades',
   'spells': 'Conjuros',
+  'feature-options': 'Rasgos',
   'review': 'Revisión'
 };
 
@@ -145,6 +146,9 @@ export interface CharacterFormData {
   // Step (dynamic): Spells
   selectedSpells: string[];
 
+  // Step (dynamic): Feature Options
+  featureSelections: Record<string, string[]>;
+
   // Derived (computed at review/submit)
   finalScores: { str: number; dex: number; con: number; int: number; wis: number; cha: number };
   calculatedHp: number;
@@ -198,8 +202,73 @@ export class ForgeCharacterPage implements OnInit {
       steps.push('spells');
     }
 
+    if (this.availableFeatureChoices.length > 0) {
+      steps.push('feature-options');
+    }
+
     steps.push('review');
     return steps;
+  }
+
+  /** Features at current level that grant choices. */
+  get availableFeatureChoices(): any[] {
+    const choices: any[] = [];
+    const currentLevel = this.formData.level;
+
+    const findChoices = (features: any[]) => {
+      if (!features) return;
+      features.forEach(f => {
+        if (f.levelRequired <= currentLevel && f.options && f.options.options?.length > 0) {
+          const max = this.calculateMaxChoices(f);
+          const filteredOptions = (f.options.options || []).filter((opt: any) => {
+            const req = opt.levelRequired ?? f.levelRequired;
+            return req <= currentLevel;
+          });
+
+          if (filteredOptions.length > 0) {
+            choices.push({
+              ...f,
+              calculatedMaxChoices: max,
+              filteredOptions: filteredOptions
+            });
+          }
+        }
+      });
+    };
+
+    // Race traits
+    if (this.formData.selectedRace?.traits) {
+      findChoices(this.formData.selectedRace.traits);
+    }
+
+    // Class features
+    if (this.formData.selectedClass?.features) {
+      findChoices(this.formData.selectedClass.features);
+    }
+    // Subclass features
+    const sf = this.formData.selectedSubclass?.subclassFeatures;
+    if (sf?.features) {
+      findChoices(sf.features);
+    } else if (sf?.subclassFeatureEntries) {
+      findChoices(sf.subclassFeatureEntries);
+    }
+
+    return choices;
+  }
+
+  /** Calculates total allowed choices for a feature based on progression. */
+  calculateMaxChoices(feature: any): number {
+    const currentLevel = this.formData.level;
+    let total = feature.options?.choiceCount ?? 0;
+    
+    if (feature.options?.progression) {
+      feature.options.progression.forEach((p: any) => {
+        if (p.level <= currentLevel) {
+          total += p.additionalChoices;
+        }
+      });
+    }
+    return total;
   }
 
   // ─── Form data ──────────────────────────────────────────────────────────────
@@ -221,6 +290,7 @@ export class ForgeCharacterPage implements OnInit {
     hpRolledValue: 0,
     selectedSkills: [],
     selectedSpells: [],
+    featureSelections: {},
     finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
     calculatedHp: 0
   };
@@ -969,6 +1039,21 @@ export class ForgeCharacterPage implements OnInit {
     return errors;
   }
 
+  toggleFeatureOption(featureName: string, optionName: string, maxChoices: number): void {
+    const current = this.formData.featureSelections[featureName] || [];
+    if (current.includes(optionName)) {
+      this.formData.featureSelections[featureName] = current.filter(o => o !== optionName);
+    } else {
+      if (current.length < maxChoices) {
+        this.formData.featureSelections[featureName] = [...current, optionName];
+      }
+    }
+  }
+
+  isFeatureOptionSelected(featureName: string, optionName: string): boolean {
+    return (this.formData.featureSelections[featureName] || []).includes(optionName);
+  }
+
   // ─── Helpers ────────────────────────────────────────────────────────────────
 
   get currentStepName(): Step {
@@ -1190,7 +1275,10 @@ export function buildCharacterDto(
     savingThrowsProficiencies,
     skillProficiencies,
     spellSlots: {},
-    choicesJson: formData.selectedLanguages?.length > 0 ? { languages: formData.selectedLanguages } : {},
+    choicesJson: {
+      ...(formData.selectedLanguages?.length > 0 ? { languages: formData.selectedLanguages } : {}),
+      ...(Object.keys(formData.featureSelections || {}).length > 0 ? { featureOptions: formData.featureSelections } : {})
+    },
     cp: 0, sp: 0, ep: 0, gp: 0, pp: 0,
     dndRace: { id: Number(formData.selectedRace?.id) },
     dndClass: { id: Number(formData.selectedClass?.id) },

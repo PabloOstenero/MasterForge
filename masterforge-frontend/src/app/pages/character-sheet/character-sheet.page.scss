@@ -116,6 +116,41 @@
   height: 50px;
 }
 
+.selected-options-sheet {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(197, 160, 89, 0.05);
+  border-left: 2px solid #C5A059;
+  border-radius: 4px;
+
+  strong {
+    display: block;
+    font-size: 0.75rem;
+    color: #888;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  .option-tag-sheet {
+    display: inline-block;
+    background: rgba(197, 160, 89, 0.1);
+    color: #C5A059;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-right: 8px;
+    margin-bottom: 6px;
+    border: 1px solid rgba(197, 160, 89, 0.3);
+    transition: background 0.2s;
+
+    &:hover {
+      background: rgba(197, 160, 89, 0.2);
+    }
+  }
+}
+
 .section-title {
   color: #C5A059;
   margin-bottom: 20px;

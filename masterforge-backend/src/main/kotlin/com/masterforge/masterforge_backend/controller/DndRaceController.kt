@@ -60,7 +60,9 @@ class DndRaceController(
                 RaceTraitSummary(
                     id = trait.id ?: 0,
                     name = trait.name,
-                    description = trait.description
+                    description = trait.description,
+                    levelRequired = trait.levelRequired,
+                    options = trait.options
                 )
             }
             val responseDto = DndRaceResponseDto(

@@ -374,20 +374,34 @@
               formControlName="id"
               [attr.data-testid]="'trait-id-' + $index">
 
-            <!-- Nombre del rasgo -->
-            <div class="field-group">
-              <label class="field-label">Nombre <span class="required">*</span></label>
-              <ion-input
-                class="forge-input"
-                formControlName="name"
-                placeholder="Ej: Ventaja en Salvaciones"
-                [attr.data-testid]="'trait-name-' + $index"
-                [class.input-error]="$any(trait).get('name')?.invalid && $any(trait).get('name')?.touched">
-              </ion-input>
-              @if ($any(trait).get('name')?.invalid && $any(trait).get('name')?.touched) {
-                <p class="error-message" [attr.data-testid]="'trait-name-error-' + $index">El nombre del rasgo es obligatorio.</p>
-              }
+            <div class="option-entry-grid">
+              <!-- Nombre del rasgo -->
+              <div class="field-group">
+                <label class="field-label">Nombre <span class="required">*</span></label>
+                <ion-input
+                  class="forge-input"
+                  formControlName="name"
+                  placeholder="Ej: Ventaja en Salvaciones"
+                  [attr.data-testid]="'trait-name-' + $index"
+                  [class.input-error]="$any(trait).get('name')?.invalid && $any(trait).get('name')?.touched">
+                </ion-input>
+              </div>
+
+              <!-- Nivel Requerido -->
+              <div class="field-group">
+                <label class="field-label">Nivel Req. <span class="required">*</span></label>
+                <ion-input
+                  class="forge-input"
+                  type="number"
+                  formControlName="levelRequired"
+                  placeholder="1"
+                  [attr.data-testid]="'trait-level-' + $index">
+                </ion-input>
+              </div>
             </div>
+            @if ($any(trait).get('name')?.invalid && $any(trait).get('name')?.touched) {
+              <p class="error-message" [attr.data-testid]="'trait-name-error-' + $index">El nombre del rasgo es obligatorio.</p>
+            }
 
             <!-- Descripción del rasgo -->
             <div class="field-group">
@@ -405,8 +419,76 @@
               }
             </div>
 
+            <!-- ── Configuración de Opciones ── -->
+            <div class="checkbox-group">
+              <input type="checkbox" formControlName="hasOptions" [id]="'hasOpt-' + $index" (change)="$any(trait).get('hasOptions').value ? addTraitOption($index) : null">
+              <label [for]="'hasOpt-' + $index" style="margin-left: 8px;">Este rasgo permite elegir opciones (ej: Invocaciones, Maniobras...)</label>
+            </div>
+
+            @if ($any(trait).get('hasOptions').value) {
+              <div class="feature-options-section" style="margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px dashed #444;">
+                <div class="field-group" style="max-width: 200px;">
+                  <label class="field-label">Elecciones Iniciales <span class="required">*</span></label>
+                  <ion-input class="forge-input" type="number" formControlName="choiceCount" placeholder="1"></ion-input>
+                </div>
+
+                <!-- Lista de opciones disponibles -->
+                <div class="subsection-header-row" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                  <h4 class="field-label" style="margin-bottom: 0;">Opciones Disponibles</h4>
+                  <button type="button" class="btn-add" (click)="addTraitOption($index)">+ Añadir Opción</button>
+                </div>
+
+                <div formArrayName="options" style="margin-top: 0.5rem;">
+                  @for (opt of getTraitOptions($index).controls; track $index; let optIdx = $index) {
+                    <div [formGroupName]="optIdx" class="entry-card" style="background: #252525; border: 1px solid #333;">
+                      <div class="option-entry-grid">
+                        <div class="field-group">
+                          <label class="field-label">Nombre Opción</label>
+                          <ion-input class="forge-input" formControlName="name" placeholder="Ej: Agility Boost"></ion-input>
+                        </div>
+                        <div class="field-group">
+                          <label class="field-label">Nivel Req.</label>
+                          <ion-input class="forge-input" type="number" formControlName="levelRequired" placeholder="1"></ion-input>
+                        </div>
+                      </div>
+                      <div class="field-group">
+                        <label class="field-label">Descripción</label>
+                        <ion-textarea class="forge-input" formControlName="description" rows="2"></ion-textarea>
+                      </div>
+                      <button type="button" class="btn-remove" (click)="removeTraitOption($index, optIdx)">Eliminar Opción</button>
+                    </div>
+                  }
+                </div>
+
+                <!-- Progresión de elecciones -->
+                <div class="subsection-header-row" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem;">
+                  <h4 class="field-label" style="margin-bottom: 0;">Progresión de elecciones adicionales</h4>
+                  <button type="button" class="btn-add" (click)="addTraitProgression($index)">+ Añadir Nivel</button>
+                </div>
+
+                <div formArrayName="progression" class="progression-list">
+                  @for (prog of getTraitProgression($index).controls; track $index; let progIdx = $index) {
+                    <div [formGroupName]="progIdx" class="progression-entry-row">
+                      <div class="field-group" style="margin-bottom: 0;">
+                        <label class="field-label" style="font-size: 0.65rem;">Al Nivel</label>
+                        <ion-input class="forge-input" type="number" formControlName="level" placeholder="Nivel"></ion-input>
+                      </div>
+                      <div class="field-group" style="margin-bottom: 0;">
+                        <label class="field-label" style="font-size: 0.65rem;">+ Elecciones</label>
+                        <ion-input class="forge-input" type="number" formControlName="additionalChoices" placeholder="Ejs: 1"></ion-input>
+                      </div>
+                      <button type="button" class="btn-remove-prog" (click)="removeTraitProgression($index, progIdx)">×</button>
+                    </div>
+                  }
+                  @if (getTraitProgression($index).length === 0) {
+                    <p class="empty-hint" style="font-size: 0.75rem;">Sin progresión adicional (elecciones fijas).</p>
+                  }
+                </div>
+              </div>
+            }
+
             <button type="button" class="btn-remove" (click)="removeTrait($index)" [attr.data-testid]="'remove-trait-' + $index">
-              Eliminar
+              Eliminar Rasgo
             </button>
           </div>
         }

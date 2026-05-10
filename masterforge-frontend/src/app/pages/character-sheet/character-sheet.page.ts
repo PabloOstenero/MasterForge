@@ -246,11 +246,17 @@ export class CharacterSheetPage implements OnInit {
           traits: [
             ...(data.dndRace?.traits || []),
             ...this.extractInnateSpellsAsFeatures(data.dndRace?.raceFeatures?.innateSpells)
-          ],
+          ].map(t => ({
+            ...t,
+            selectedOptions: (data.choicesJson?.featureOptions?.[t.name] || [])
+          })),
           features: [
             ...(data.dndClass?.features || []),
             ...this.extractSubclassFeatures(data.subclass?.subclassFeatures)
-          ],
+          ].map(f => ({
+            ...f,
+            selectedOptions: (data.choicesJson?.featureOptions?.[f.name] || [])
+          })),
             proficiencies: {
               armor: this.extractArrayFromClassFeatures(data.dndClass?.classFeatures, 'armorProficiencies'),
               weapons: this.extractArrayFromClassFeatures(data.dndClass?.classFeatures, 'weaponProficiencies'),

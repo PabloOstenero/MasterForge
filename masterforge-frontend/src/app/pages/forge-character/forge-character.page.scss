@@ -581,6 +581,19 @@ ion-segment-button {
     color: #C5A059;
     font-weight: bold;
   }
+
+  .skill-option-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .option-level-badge {
+    font-size: 0.7rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
 }
 
 // ─── Review step ──────────────────────────────────────────────────────────────
@@ -795,4 +808,52 @@ ion-segment-button {
 
 .review-row--indent {
   padding-left: 12px;
+}
+
+/* Feature Choice Styles */
+.feature-options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.feature-choice-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.feature-choice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.feature-choice-badge {
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: 20px;
+  color: #aaa;
+}
+
+.feature-choice-badge--complete {
+  background: rgba(var(--ion-color-secondary-rgb), 0.2);
+  color: var(--ion-color-secondary);
+}
+
+.feature-choice-desc {
+  font-size: 0.88rem;
+  color: #aaa;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.options-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }

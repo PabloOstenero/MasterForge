@@ -426,8 +426,85 @@
               }
             </div>
 
+            <div class="field-group checkbox-group">
+              <label class="spellcasting-toggle-label">
+                <input type="checkbox" formControlName="hasOptions" [attr.data-testid]="'feature-has-options-' + $index">
+                <span>¿Tiene opciones seleccionables? (ej: Invocaciones)</span>
+              </label>
+            </div>
+
+            @if ($any(feature).get('hasOptions')?.value) {
+              <div class="options-pool-section" [formGroup]="$any(feature).get('options')">
+                <div class="field-group">
+                  <label class="field-label">Cantidad de opciones inicial <span class="required">*</span></label>
+                  <ion-input class="forge-input" type="number" formControlName="choiceCount"
+                    placeholder="2" [attr.data-testid]="'feature-choice-count-' + $index">
+                  </ion-input>
+                </div>
+
+                <!-- Progression section -->
+                <div class="progression-list">
+                  <div class="section-header-row">
+                    <h3 class="subsection-title">Progresión de elecciones</h3>
+                    <button type="button" class="btn-add btn-small" (click)="addFeatureProgression($index)"
+                      [attr.data-testid]="'add-progression-' + $index">
+                      + Añadir Nivel
+                    </button>
+                  </div>
+
+                  <div formArrayName="progression">
+                    @for (p of $any(feature).get('options.progression').controls; track $pIndex; let $pIndex = $index) {
+                      <div class="progression-entry-row" [formGroup]="$any(p)">
+                        <div class="field-group">
+                          <label class="field-label">A Nivel</label>
+                          <ion-input class="forge-input" type="number" formControlName="level" placeholder="5"></ion-input>
+                        </div>
+                        <div class="field-group">
+                          <label class="field-label">+ Elecciones</label>
+                          <ion-input class="forge-input" type="number" formControlName="additionalChoices" placeholder="1"></ion-input>
+                        </div>
+                        <button type="button" class="btn-remove-prog" (click)="removeFeatureProgression($index, $pIndex)">×</button>
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <div class="options-list">
+                  <div class="section-header-row">
+                    <h3 class="subsection-title">Opciones disponibles</h3>
+                    <button type="button" class="btn-add btn-small" (click)="addFeatureOption($index)"
+                      [attr.data-testid]="'add-option-' + $index">
+                      + Añadir Opción
+                    </button>
+                  </div>
+
+                  <div formArrayName="options">
+                    @for (opt of $any(feature).get('options.options').controls; track $optIndex; let $optIndex = $index) {
+                      <div class="option-entry-card" [formGroup]="$any(opt)">
+                        <div class="option-entry-grid">
+                          <div class="field-group">
+                            <label class="field-label">Nombre de la opción <span class="required">*</span></label>
+                            <ion-input class="forge-input" formControlName="name" placeholder="Ej: Agonizing Blast"></ion-input>
+                          </div>
+                          <div class="field-group">
+                            <label class="field-label">Nivel Req. <span class="required">*</span></label>
+                            <ion-input class="forge-input" type="number" formControlName="levelRequired" placeholder="1"></ion-input>
+                          </div>
+                        </div>
+                        <div class="field-group">
+                          <label class="field-label">Descripción de la opción <span class="required">*</span></label>
+                          <ion-textarea class="forge-input forge-textarea" formControlName="description" rows="2"></ion-textarea>
+                        </div>
+                        <button type="button" class="btn-remove btn-small" (click)="removeFeatureOption($index, $optIndex)">Eliminar Opción</button>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+
             <button type="button" class="btn-remove" (click)="removeFeature($index)"
-              [attr.data-testid]="'remove-feature-' + $index">Eliminar</button>
+              [attr.data-testid]="'remove-feature-' + $index">Eliminar Rasgo</button>
           </div>
         }
       </div>

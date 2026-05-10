@@ -583,10 +583,26 @@ export class HomebrewSubclassFormPage implements OnInit {
         // ---------------------------------------------------------------
         this.features.clear();
         (sf.features ?? sf.subclassFeatureEntries ?? []).forEach((entry: FeatureEntry) => {
+          const optionsGroup = this.fb.group({
+            choiceCount: [entry.options?.choiceCount ?? null],
+            options: this.fb.array((entry.options?.options ?? []).map((opt: any) => this.fb.group({
+              id: [opt.id ?? null],
+              name: [opt.name ?? '', Validators.required],
+              description: [opt.description ?? '', Validators.required],
+              levelRequired: [opt.levelRequired ?? entry.levelRequired, [Validators.required, Validators.min(1), Validators.max(20)]]
+            }))),
+            progression: this.fb.array((entry.options?.progression ?? []).map((p: any) => this.fb.group({
+              level: [p.level, [Validators.required, Validators.min(1), Validators.max(20)]],
+              additionalChoices: [p.additionalChoices, [Validators.required, Validators.min(1)]]
+            })))
+          });
+
           this.features.push(this.fb.group({
             name:          [entry.name,          Validators.required],
             description:   [entry.description,   Validators.required],
             levelRequired: [entry.levelRequired,  [Validators.required, Validators.min(1), Validators.max(20)]],
+            hasOptions:    [!!entry.options],
+            options:       optionsGroup
           }));
         });
 
@@ -723,12 +739,46 @@ export class HomebrewSubclassFormPage implements OnInit {
     this.features.push(this.fb.group({
       name:          ['', Validators.required],
       description:   ['', Validators.required],
-      levelRequired: [1, [Validators.required, Validators.min(1), Validators.max(20)]],
+      levelRequired: [null, [Validators.required, Validators.min(1), Validators.max(20)]],
+      hasOptions:    [false],
+      options:       this.fb.group({
+        choiceCount: [null],
+        options: this.fb.array([]),
+        progression: this.fb.array([])
+      })
     }));
   }
 
   removeFeature(index: number): void {
     this.features.removeAt(index);
+  }
+
+  addFeatureOption(featureIndex: number): void {
+    const optionsArray = this.features.at(featureIndex).get('options.options') as FormArray;
+    optionsArray.push(this.fb.group({
+      id: [null],
+      name: ['', Validators.required],
+      description: ['', Validators.required],
+      levelRequired: [this.features.at(featureIndex).get('levelRequired')?.value ?? 1, [Validators.required, Validators.min(1), Validators.max(20)]]
+    }));
+  }
+
+  removeFeatureOption(featureIndex: number, optionIndex: number): void {
+    const optionsArray = this.features.at(featureIndex).get('options.options') as FormArray;
+    optionsArray.removeAt(optionIndex);
+  }
+
+  addFeatureProgression(featureIndex: number): void {
+    const progArray = this.features.at(featureIndex).get('options.progression') as FormArray;
+    progArray.push(this.fb.group({
+      level: [null, [Validators.required, Validators.min(1), Validators.max(20)]],
+      additionalChoices: [1, [Validators.required, Validators.min(1)]]
+    }));
+  }
+
+  removeFeatureProgression(featureIndex: number, progIndex: number): void {
+    const progArray = this.features.at(featureIndex).get('options.progression') as FormArray;
+    progArray.removeAt(progIndex);
   }
 
   // ---------------------------------------------------------------------------
@@ -955,12 +1005,20 @@ export class HomebrewSubclassFormPage implements OnInit {
     const conditionImmunities = CONDITIONS.filter((_, i) => this.conditionImmunities.at(i).value);
 
     // ---- Serialize subclass feature entries ----
-    const subclassFeatureEntries: SubclassFeatureEntry[] = this.features.controls.map(ctrl => {
+    const subclassFeatureEntries: FeatureEntry[] = this.features.controls.map(ctrl => {
       const g = ctrl as FormGroup;
+      const hasOptions = g.get('hasOptions')?.value;
+      const options = hasOptions ? {
+        choiceCount: g.get('options.choiceCount')?.value,
+        options: g.get('options.options')?.value,
+        progression: g.get('options.progression')?.value
+      } : null;
+
       return {
         name: g.get('name')?.value,
         description: g.get('description')?.value,
         levelRequired: g.get('levelRequired')?.value,
+        options: options as any
       };
     });
 
