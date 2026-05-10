@@ -101,6 +101,10 @@ updateTempHp(characterId: string, tempHp: number): Observable<any> {
   return this.http.put(`${this.apiUrl}/characters/${characterId}/temp-hp`, { tempHp: Number(tempHp) });
 }
 
+performLongRest(characterId: string): Observable<any> {
+  return this.http.post(`${this.apiUrl}/characters/${characterId}/long-rest`, {});
+}
+
 updateSpellSlots(characterId: string, spellSlots: any): Observable<any> {
   return this.http.put(`${this.apiUrl}/characters/${characterId}/spell-slots`, { spellSlots });
 }

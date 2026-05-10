@@ -586,6 +586,27 @@ export class CharacterSheetPage implements OnInit {
     this.currentTab = event.detail.value;
   }
 
+  // Performs a long rest
+  async performLongRest() {
+    const alert = await this.alertController.create({
+      header: 'Descanso Largo',
+      message: '¿Estás seguro de que quieres realizar un descanso largo? Se restaurarán tus HP, espacios de conjuro y parte de tus dados de golpe.',
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Descansar',
+          handler: () => {
+            this.apiService.performLongRest(this.characterId!).subscribe({
+              next: () => this.loadCharacter(this.characterId!),
+              error: (err) => console.error('Error performing long rest:', err)
+            });
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
   // Handles taking damage
   async takeDamage() {
     const alert = await this.alertController.create({

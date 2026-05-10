@@ -557,6 +557,45 @@ class CharacterController(
         return ResponseEntity.ok().build()
     }
 
+    @PostMapping("/{id}/long-rest")
+    @Transactional
+    fun performLongRest(@PathVariable id: UUID): ResponseEntity<CharacterResponseDto> {
+        val character = characterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        
+        // 1. Restore HP
+        val restoredHp = character.maxHp
+        
+        // 2. Restore Spell Slots
+        val updatedSlots = character.spellSlots?.toMutableMap() ?: mutableMapOf()
+        updatedSlots.keys.forEach { key ->
+            val slotData = updatedSlots[key]
+            if (slotData is Map<*, *>) {
+                val mutableSlotData = slotData.toMutableMap()
+                mutableSlotData["available"] = mutableSlotData["max"] ?: 0
+                updatedSlots[key] = mutableSlotData
+            }
+        }
+        
+        // 3. Restore Hit Dice (Half of total, minimum 1)
+        val recoveryAmount = Math.max(1, character.hitDiceTotal / 2)
+        val updatedHitDiceSpent = Math.max(0, character.hitDiceSpent - recoveryAmount)
+        
+        // 4. Reset Temp HP
+        val updatedTempHp = 0
+        
+        val updatedCharacter = character.copy(
+            currentHp = restoredHp,
+            spellSlots = updatedSlots,
+            hitDiceSpent = updatedHitDiceSpent,
+            tempHp = updatedTempHp
+        )
+        
+        val saved = characterRepository.save(updatedCharacter)
+        val spells = characterSpellRepository.findByCharacterId(id)
+        return ResponseEntity.ok(CharacterResponseDto.fromEntity(saved, spells))
+    }
+
     @DeleteMapping("/{id}")
     @Transactional
     fun deleteCharacter(@PathVariable id: UUID): ResponseEntity<Void> {
