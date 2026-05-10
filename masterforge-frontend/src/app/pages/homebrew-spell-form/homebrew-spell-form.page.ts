@@ -8,7 +8,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { IonButton, IonSpinner, IonInput, IonTextarea } from '@ionic/angular/standalone';
+import { IonButton, IonSpinner, IonInput, IonTextarea, IonBadge } from '@ionic/angular/standalone';
+import { ApiService } from '../../services/api';
 
 import { HomebrewService, CreateSpellDto } from '../../services/homebrew.service';
 import { AuthService } from '../../services/auth.service';
@@ -125,11 +126,13 @@ export class HomebrewSpellFormPage implements OnInit {
   readonly spellSchools = SPELL_SCHOOLS;
   readonly savingThrows = SAVING_THROWS;
   readonly damageTypes  = DAMAGE_TYPES;
-  readonly spellClasses = SPELL_CLASSES;
+  dynamicSpellClasses: string[] = [];
+  classesLoading = false;
 
   constructor(
     private fb: FormBuilder,
     private homebrewService: HomebrewService,
+    private apiService: ApiService,
     private router: Router,
     private route: ActivatedRoute,
     private authService: AuthService,
@@ -170,13 +173,35 @@ export class HomebrewSpellFormPage implements OnInit {
       }
     });
 
-    // Detect edit mode from route param
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.editMode = true;
-      this.editId = id;
-      this.loadSpellForEdit(id);
-    }
+    this.loadClassesAndInit();
+  }
+
+  private loadClassesAndInit(): void {
+    this.classesLoading = true;
+    this.apiService.getClasses().subscribe({
+      next: (classes) => {
+        this.dynamicSpellClasses = classes.map((c: any) => c.name).sort();
+        
+        // Re-initialize spellClasses array with dynamic labels
+        const scArray = this.form.get('spellClasses') as FormArray;
+        scArray.clear();
+        this.dynamicSpellClasses.forEach(() => scArray.push(this.fb.control(false)));
+
+        this.classesLoading = false;
+
+        // Detect edit mode from route param after classes are loaded
+        const id = this.route.snapshot.paramMap.get('id');
+        if (id) {
+          this.editMode = true;
+          this.editId = id;
+          this.loadSpellForEdit(id);
+        }
+      },
+      error: () => {
+        this.classesLoading = false;
+        this.error = 'Error al cargar la lista de clases.';
+      }
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -229,7 +254,7 @@ export class HomebrewSpellFormPage implements OnInit {
         const dtValues = deserializeChips(spell.damageTypes ?? '', DAMAGE_TYPES);
         dtValues.forEach((val, i) => this.damageTypesArray.at(i).setValue(val));
 
-        const scValues = deserializeChips(spell.spellClasses ?? '', SPELL_CLASSES);
+        const scValues = deserializeChips(spell.spellClasses ?? '', this.dynamicSpellClasses);
         scValues.forEach((val, i) => this.spellClassesArray.at(i).setValue(val));
       },
       error: () => {
@@ -257,7 +282,7 @@ export class HomebrewSpellFormPage implements OnInit {
 
     // Serialize chip arrays into comma-separated strings
     const damageTypesStr  = serializeChips(this.damageTypesArray.value as boolean[], DAMAGE_TYPES);
-    const spellClassesStr = serializeChips(this.spellClassesArray.value as boolean[], SPELL_CLASSES);
+    const spellClassesStr = serializeChips(this.spellClassesArray.value as boolean[], this.dynamicSpellClasses);
 
     // Build the DTO — authorId is a placeholder; the service overrides it
     const dto: CreateSpellDto = {

@@ -154,6 +154,7 @@ export interface SubclassFeatures extends CommonHomebrewFeatures {
   expandedSpellList: ExpandedSpellEntry[];
   resourcePools: ResourcePool[];
   spellcasting?: Spellcasting;
+  additionalSpellClass?: string; // e.g. "Cleric" for Divine Soul Sorcerer
   subclassFeatureEntries?: FeatureEntry[]; // Legacy support
 }
 

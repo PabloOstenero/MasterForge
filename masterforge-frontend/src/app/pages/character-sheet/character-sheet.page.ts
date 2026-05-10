@@ -11,6 +11,7 @@ import {
 import { ApiService } from '../../services/api';
 import { addIcons } from 'ionicons';
 import { statsChart, sparkles, shield, briefcase, trash, add, addCircleOutline, trashOutline, syncOutline, book, bookOutline, settingsOutline } from 'ionicons/icons';
+import { getProficiencyBonus, getModifier, calculatePassive } from '../../utils/dnd-utils';
 
 export const DND_SKILLS = [
   { id: 'acrobatics', name: 'Acrobacias', stat: 'dex' },
@@ -158,12 +159,12 @@ export class CharacterSheetPage implements OnInit {
           cha: data.baseCha || 10
         };
 
-        // Dex modifier calculation for AC: (Score - 10) / 2
-        const dexMod = Math.floor((stats.dex - 10) / 2);
-        const wisMod = Math.floor((stats.wis - 10) / 2);
+        // Dex modifier calculation for AC
+        const dexMod = getModifier(stats.dex);
+        const wisMod = getModifier(stats.wis);
 
         // Cálculo del Bono de Competencia
-        const proficiencyBonus = Math.floor((data.level - 1) / 4) + 2;
+        const proficiencyBonus = getProficiencyBonus(data.level);
 
         // --- CÁLCULO DINÁMICO DE CA (REGLAS 5E) ---
         const inventorySlots = data.inventory || [];
@@ -185,7 +186,7 @@ export class CharacterSheetPage implements OnInit {
 
         // Cálculo de Percepción Pasiva
         const isPerceptionProficient = !!data.skillProficiencies?.perception;
-        const passivePerception = 10 + wisMod + (isPerceptionProficient ? proficiencyBonus : 0);
+        const passivePerception = calculatePassive(wisMod, proficiencyBonus, isPerceptionProficient);
 
         // Merge saving throw proficiencies (Class + Character)
         const classSaves = data.dndClass?.savingThrows || {};

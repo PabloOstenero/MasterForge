@@ -257,19 +257,33 @@
 
         <!-- Clases de hechicero (chip multi-select) -->
         <div class="field-group">
-          <label class="field-label">Clases</label>
-          <div class="chip-grid" data-testid="spell-classes-input">
-            @for (cls of spellClasses; track cls; let i = $index) {
-              <button
-                type="button"
-                class="chip"
-                [class.chip--active]="spellClassesArray.at(i).value"
-                (click)="toggleChip(spellClassesArray, i)"
-                [attr.data-testid]="'spell-class-chip-' + cls.toLowerCase()">
-                {{ cls }}
-              </button>
-            }
-          </div>
+          <label class="field-label">Clases que pueden usar este hechizo</label>
+          
+          @if (classesLoading) {
+            <div class="loading-classes">
+              <ion-spinner name="dots" color="warning"></ion-spinner>
+              <span>Cargando clases…</span>
+            </div>
+          }
+
+          @if (!classesLoading && dynamicSpellClasses.length > 0) {
+            <div class="chip-grid" data-testid="spell-classes-input">
+              @for (cls of dynamicSpellClasses; track cls; let i = $index) {
+                <button
+                  type="button"
+                  class="chip"
+                  [class.chip--active]="spellClassesArray.at(i)?.value"
+                  (click)="toggleChip(spellClassesArray, i)"
+                  [attr.data-testid]="'spell-class-chip-' + cls.toLowerCase()">
+                  {{ cls }}
+                </button>
+              }
+            </div>
+          }
+
+          @if (!classesLoading && dynamicSpellClasses.length === 0) {
+            <p class="empty-hint">No hay clases disponibles en el sistema.</p>
+          }
         </div>
       </div>
 

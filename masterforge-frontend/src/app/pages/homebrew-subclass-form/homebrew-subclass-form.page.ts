@@ -186,6 +186,7 @@ export function buildSubclassFeatures(
   expandedSpellList: ExpandedSpellEntry[],
   resourcePools: ResourcePool[],
   spellcasting: Spellcasting | null,
+  additionalSpellClass: string | null,
 ): SubclassFeatures {
   const result: SubclassFeatures = {
     weaponProficiencies,
@@ -202,6 +203,10 @@ export function buildSubclassFeatures(
 
   if (spellcasting) {
     result.spellcasting = spellcasting;
+  }
+
+  if (additionalSpellClass) {
+    result.additionalSpellClass = additionalSpellClass;
   }
 
   return result;
@@ -371,6 +376,9 @@ export class HomebrewSubclassFormPage implements OnInit {
       // Skill proficiencies
       skills:           this.fb.group(skillsGroup),
       skillChoiceCount: [0, Validators.min(0)],
+
+      // Magic Lists
+      additionalSpellClass: [''],
     });
 
     this.loadClasses();
@@ -509,14 +517,15 @@ export class HomebrewSubclassFormPage implements OnInit {
     this.homebrewService.getSubclass(id).subscribe({
       next: (subclass: any) => {
         const pId = subclass.parentClassId ?? subclass.parentClass?.id;
+        const sf: SubclassFeatures = subclass.subclassFeatures ?? {};
+        
         // Patch basic identity fields
         this.form.patchValue({
           name:          subclass.name          ?? '',
           description:   subclass.description   ?? '',
           parentClassId: pId ? Number(pId) : null,
+          additionalSpellClass: sf.additionalSpellClass ?? '',
         });
-
-        const sf: SubclassFeatures = subclass.subclassFeatures ?? {};
 
         // ---------------------------------------------------------------
         // Weapon chips + custom weapon profs
@@ -1075,6 +1084,7 @@ export class HomebrewSubclassFormPage implements OnInit {
       expandedSpellListEntries,
       resourcePoolEntries,
       spellcasting,
+      this.form.get('additionalSpellClass')?.value || null
     );
 
     // ---- Build DTO ----

@@ -509,6 +509,17 @@
                 <span>Activar</span>
               </label>
             </div>
+
+            <div class="field-group" style="margin-top: 15px;">
+              <label class="field-label">Acceso a Lista de Conjuros Adicional <span class="optional-tag">opcional</span></label>
+              <p class="section-hint">Permite a esta subclase elegir conjuros de otra clase (ej: Hechicero con lista de Clérigo).</p>
+              <select class="forge-select-native" formControlName="additionalSpellClass" data-testid="additional-spell-class-input">
+                <option value="">Ninguna</option>
+                @for (cls of availableClasses; track cls.id) {
+                  <option [value]="cls.name">{{ cls.name }}</option>
+                }
+              </select>
+            </div>
           </div>
 
           @if (form.get('spellcastingEnabled')?.value) {

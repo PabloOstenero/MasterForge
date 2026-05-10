@@ -878,11 +878,60 @@ export class ForgeCharacterPage implements OnInit {
   // ─── Spells step logic ───────────────────────────────────────────────────────
 
   get availableCantrips(): any[] {
-    return this.allSpells.filter(s => s.level === 0);
+    const className = this.formData.selectedClass?.name;
+    const additionalClass = this.formData.selectedSubclass?.subclassFeatures?.additionalSpellClass;
+    const expandedSpells = (this.formData.selectedSubclass?.subclassFeatures?.expandedSpellList || [])
+      .map((s: any) => s.name);
+
+    if (!className) return [];
+    return this.allSpells.filter(s => 
+      s.level === 0 && 
+      (
+        s.spellClasses?.split(',').map((c: string) => c.trim()).includes(className) ||
+        (additionalClass && s.spellClasses?.split(',').map((c: string) => c.trim()).includes(additionalClass)) ||
+        expandedSpells.includes(s.name)
+      )
+    );
   }
 
   get availableNonCantrips(): any[] {
-    return this.allSpells.filter(s => s.level > 0);
+    const className = this.formData.selectedClass?.name;
+    const additionalClass = this.formData.selectedSubclass?.subclassFeatures?.additionalSpellClass;
+    const expandedSpells = (this.formData.selectedSubclass?.subclassFeatures?.expandedSpellList || [])
+      .map((s: any) => s.name);
+
+    if (!className) return [];
+
+    const maxLevel = this.maxSpellLevel;
+
+    return this.allSpells.filter(s => 
+      s.level > 0 && 
+      s.level <= maxLevel &&
+      (
+        s.spellClasses?.split(',').map((c: string) => c.trim()).includes(className) ||
+        (additionalClass && s.spellClasses?.split(',').map((c: string) => c.trim()).includes(additionalClass)) ||
+        expandedSpells.includes(s.name)
+      )
+    );
+  }
+
+  get maxSpellLevel(): number {
+    const cls = this.formData.selectedClass;
+    const sc = this.formData.selectedSubclass?.subclassFeatures?.spellcasting || cls?.classFeatures?.spellcasting;
+    if (!sc || !sc.spellSlots?.slots) return 9; // Fallback to level 9 if no slot table (should not happen for casters)
+
+    const level = this.formData.level;
+    const idx = Math.min(Math.max(level - 1, 0), 19);
+    const slotsAtLevel = sc.spellSlots.slots[idx] || [];
+
+    // Find the highest index that has a non-zero slot value
+    let highest = 0;
+    for (let i = 0; i < slotsAtLevel.length; i++) {
+      if (slotsAtLevel[i] > 0) {
+        highest = i + 1;
+      }
+    }
+    return highest || 1; // At least level 1 if they have spellcasting
   }
 
   get cantripsAllowed(): number {
