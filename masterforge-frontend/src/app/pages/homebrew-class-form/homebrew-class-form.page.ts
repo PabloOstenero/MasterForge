@@ -13,7 +13,8 @@ import {
   FeatureEntry,
   MulticlassingPrerequisite,
   MulticlassingPrerequisites,
-  MulticlassingProficiencies
+  MulticlassingProficiencies,
+  SKILL_DATA
 } from '../../models/homebrew.models';
 import { StructuredEquipment, isStructuredEquipment, serializeEquipment } from '../../models/equipment.models';
 import { StartingEquipmentPickerComponent } from '../../components/starting-equipment-picker/starting-equipment-picker.component';
@@ -33,6 +34,15 @@ export const ABILITIES = ['Strength', 'Dexterity', 'Constitution', 'Intelligence
 export const SPELLCASTING_ABILITIES = ['Intelligence', 'Wisdom', 'Charisma'] as const;
 export const SPELLCASTING_TYPES = ['Full Caster', 'Half Caster', 'Third Caster', 'Pact Magic'] as const;
 export const PREPARATION_STYLES = ['PREPARED', 'KNOWN'] as const;
+
+export const ABILITY_ABBREVIATIONS: Record<string, string> = {
+  'Strength': 'FU',
+  'Dexterity': 'DES',
+  'Constitution': 'CON',
+  'Intelligence': 'INT',
+  'Wisdom': 'SAB',
+  'Charisma': 'CAR'
+};
 
 // ---------------------------------------------------------------------------
 // Standard D&D 5e spell slot progressions
@@ -310,6 +320,18 @@ export class HomebrewClassFormPage implements OnInit {
 
   onPickerValidityChange(valid: boolean): void {
     this.isPickerValid = valid;
+  }
+
+  skillData = SKILL_DATA;
+  abilityAbbr = ABILITY_ABBREVIATIONS;
+
+  getSkillAbility(skill: string): string {
+    return this.skillData[skill] || '';
+  }
+
+  getSkillAbbr(skill: string): string {
+    const ability = this.getSkillAbility(skill);
+    return this.abilityAbbr[ability] || '';
   }
 
   // ---------------------------------------------------------------------------

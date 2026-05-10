@@ -302,9 +302,9 @@
       <div class="form-section col-right">
         <h2 class="section-title">Idiomas <span class="section-badge">opcional</span></h2>
 
-        <!-- Chip selector de idiomas -->
+        <!-- Chip selector de idiomas FIJOS -->
         <div class="field-group">
-          <label class="field-label">Idiomas conocidos</label>
+          <label class="field-label">Idiomas garantizados (fijos)</label>
           <div class="chip-grid">
             @for (lang of languages; track lang; let i = $index) {
               <button
@@ -319,9 +319,27 @@
           </div>
         </div>
 
+        <!-- Chip selector de idiomas POOL -->
+        <div class="field-group" style="margin-top: 1.5rem;">
+          <label class="field-label">Opciones para elegir (pool)</label>
+          <p class="field-hint">Selecciona los idiomas entre los que el personaje podrá elegir.</p>
+          <div class="chip-grid">
+            @for (lang of languages; track lang; let i = $index) {
+              <button
+                type="button"
+                class="chip chip--secondary"
+                [class.chip--active]="languagePoolChips[i]"
+                (click)="toggleLanguagePoolChip(i)"
+                [attr.data-testid]="'language-pool-chip-' + lang.toLowerCase().replace(' ', '-')">
+                {{ lang }}
+              </button>
+            }
+          </div>
+        </div>
+
         <!-- Elecciones de idioma adicionales -->
         <div class="field-group">
-          <label class="field-label">Elecciones adicionales <span class="optional-tag">opcional</span></label>
+          <label class="field-label">Número de elecciones <span class="optional-tag">opcional</span></label>
           <ion-input
             class="forge-input"
             type="number"
@@ -428,7 +446,8 @@
                     type="button"
                     class="custom-dropdown-option"
                     (click)="selectSkillFromDropdown(skill)">
-                    {{ skill }}
+                    <span class="skill-option-name">{{ skill }}</span>
+                    <span class="skill-option-stat">{{ getSkillAbbr(skill) }}</span>
                   </button>
                 }
                 @if (availableSkillNames.length === 0) {
@@ -453,7 +472,7 @@
           <div class="skill-tags" data-testid="skill-tags">
             @for (skill of selectedSkillNames; track skill) {
               <div class="skill-tag" [attr.data-testid]="'skill-tag-' + skill.toLowerCase().replace(' ', '-')">
-                <span class="skill-tag-name">{{ skill }}</span>
+                <span class="skill-tag-name">{{ skill }} ({{ getSkillAbbr(skill) }})</span>
                 <button
                   type="button"
                   class="skill-tag-remove"

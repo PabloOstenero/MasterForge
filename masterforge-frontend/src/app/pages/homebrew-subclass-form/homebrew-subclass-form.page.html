@@ -240,7 +240,7 @@
                     data-testid="skill-picker-select">
                     <option value="" disabled>Selecciona una habilidad…</option>
                     @for (skill of skillNames; track skill) {
-                      <option [value]="skill">{{ skill }}</option>
+                      <option [value]="skill">{{ skill }} ({{ getSkillAbbr(skill) }})</option>
                     }
                   </select>
                   <button type="button" class="btn-add" [disabled]="!skillInput" (click)="addSkill()"
@@ -251,7 +251,7 @@
                   <div class="skill-tags" data-testid="skill-tags">
                     @for (skill of getSelectedSkills(); track skill) {
                       <div class="skill-tag">
-                        <span class="skill-tag-name">{{ skill }}</span>
+                        <span class="skill-tag-name">{{ skill }} ({{ getSkillAbbr(skill) }})</span>
                         <button type="button" class="skill-tag-remove" (click)="removeSkill(skill)"
                           [attr.data-testid]="'remove-skill-' + skill">×</button>
                       </div>

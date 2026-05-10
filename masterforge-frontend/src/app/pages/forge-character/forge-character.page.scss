@@ -310,6 +310,13 @@
   padding: 0;
 }
 
+.languages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
 // ─── Ion segment (reused from character-sheet.page.scss) ─────────────────────
 ion-segment {
   --background: #1E1E1E;

@@ -12,6 +12,7 @@ import { switchMap } from 'rxjs/operators';
 import { HomebrewService, CreateRaceDto } from '../../services/homebrew.service';
 import {
   SkillProficiencies,
+  LanguageProficiencies,
   SpeedObject,
   SenseObject,
   NaturalArmor,
@@ -19,7 +20,8 @@ import {
   CommonHomebrewFeatures,
   FeatureEntry,
   RaceFeatures,
-  InnateSpell
+  InnateSpell,
+  SKILL_DATA
 } from '../../models/homebrew.models';
 
 // ---------------------------------------------------------------------------
@@ -57,12 +59,16 @@ export const CONDITIONS = [
   'Prone', 'Restrained', 'Stunned', 'Unconscious',
 ] as const;
 
-export const SKILL_NAMES = [
-  'Acrobatics', 'Animal Handling', 'Arcana', 'Athletics', 'Deception',
-  'History', 'Insight', 'Intimidation', 'Investigation', 'Medicine',
-  'Nature', 'Perception', 'Performance', 'Persuasion', 'Religion',
-  'Sleight of Hand', 'Stealth', 'Survival',
-] as const;
+export const SKILL_NAMES = Object.keys(SKILL_DATA).sort() as string[];
+
+export const ABILITY_ABBREVIATIONS: Record<string, string> = {
+  'Strength': 'FU',
+  'Dexterity': 'DES',
+  'Constitution': 'CON',
+  'Intelligence': 'INT',
+  'Wisdom': 'SAB',
+  'Charisma': 'CAR'
+};
 
 export const ABILITY_BONUS_KEYS = [
   'bonusStr', 'bonusDex', 'bonusCon', 'bonusInt', 'bonusWis', 'bonusCha',
@@ -94,7 +100,8 @@ export function buildRaceFeatures(
   // ── Existing parameters (unchanged) ──────────────────────────────────────
   speeds: { walk: number | null; swim: number | null; climb: number | null; fly: number | null },
   senses: { darkvision: number | null; blindsight: number | null; tremorsense: number | null; truesight: number | null },
-  languages: string[],
+  fixedLanguages: string[],
+  poolLanguages: string[],
   extraLanguageChoices: number,
   skillProficiencies: SkillProficiencies,
   weaponProficiencies: string[],
@@ -143,12 +150,19 @@ export function buildRaceFeatures(
     return val ? val.split(',').map(s => s.trim()).filter(Boolean) : [];
   };
 
+  const languageProficiencies: LanguageProficiencies = {
+    fixed: toArray(fixedLanguages),
+    choicePool: toArray(poolLanguages),
+    choiceCount: extraLanguageChoices
+  };
+
   // ── Base result (existing fields always present) ──────────────────────────
   const result: RaceFeatures = {
     speeds: filteredSpeeds,
     senses: filteredSenses,
-    languages: toArray(languages),
+    languages: toArray(fixedLanguages),
     extraLanguageChoices,
+    languageProficiencies,
     skillProficiencies,
     weaponProficiencies,
     armorProficiencies,
@@ -227,6 +241,10 @@ export class HomebrewRaceFormPage implements OnInit {
   weaponChips: boolean[] = WEAPON_PROFS.map(() => false);
   armorChips: boolean[] = ARMOR_PROFS.map(() => false);
   languageChips: boolean[] = LANGUAGES.map(() => false);
+  languagePoolChips: boolean[] = LANGUAGES.map(() => false);
+
+  skillData = SKILL_DATA;
+  abilityAbbr = ABILITY_ABBREVIATIONS;
 
   customWeaponProfs: string[] = [];
   customArmorProfs: string[] = [];
@@ -288,6 +306,15 @@ export class HomebrewRaceFormPage implements OnInit {
     private route: ActivatedRoute,
   ) {}
 
+  getSkillAbility(skill: string): string {
+    return this.skillData[skill] || '';
+  }
+
+  getSkillAbbr(skill: string): string {
+    const ability = this.getSkillAbility(skill);
+    return this.abilityAbbr[ability] || '';
+  }
+
   // ---------------------------------------------------------------------------
   // Lifecycle
   // ---------------------------------------------------------------------------
@@ -336,6 +363,7 @@ export class HomebrewRaceFormPage implements OnInit {
 
       // Languages
       languages:            this.fb.array(LANGUAGES.map(() => false)),
+      languagePool:         this.fb.array(LANGUAGES.map(() => false)),
       extraLanguageChoices: [null, Validators.min(0)],
 
       // Skill proficiencies
@@ -423,8 +451,19 @@ export class HomebrewRaceFormPage implements OnInit {
           this.form.get('senses')?.patchValue(rf.senses);
         }
 
-        // Restore language chips — handle both old string and new array format
-        if (rf.languages) {
+        // Restore language chips — prioritize new languageProficiencies format
+        const lp = rf.languageProficiencies;
+        if (lp) {
+          LANGUAGES.forEach((lang, i) => {
+            const isFixed = (lp.fixed ?? []).includes(lang);
+            const isInPool = (lp.choicePool ?? []).includes(lang);
+            this.languageChips[i] = isFixed;
+            this.languagePoolChips[i] = isInPool;
+            this.languagesArray.at(i).setValue(isFixed);
+            this.languagePoolArray.at(i).setValue(isInPool);
+          });
+          this.form.patchValue({ extraLanguageChoices: lp.choiceCount });
+        } else if (rf.languages) {
           const selected: string[] = Array.isArray(rf.languages)
             ? rf.languages
             : (rf.languages as string).split(',').map((s: string) => s.trim());
@@ -624,6 +663,7 @@ export class HomebrewRaceFormPage implements OnInit {
       v.speeds ?? { walk: null, swim: null, climb: null, fly: null },
       v.senses ?? { darkvision: null, blindsight: null, tremorsense: null, truesight: null },
       this.selectedLabels(this.languagesArray, LANGUAGES),
+      this.selectedLabels(this.languagePoolArray, LANGUAGES),
       v.extraLanguageChoices ?? 0,
       skillProficiencies,
       weaponProficiencies,
@@ -765,9 +805,8 @@ export class HomebrewRaceFormPage implements OnInit {
     return this.form.get('skills') as FormGroup;
   }
 
-  get languagesArray(): FormArray {
-    return this.form.get('languages') as FormArray;
-  }
+  get languagesArray(): FormArray { return this.form.get('languages') as FormArray; }
+  get languagePoolArray(): FormArray { return this.form.get('languagePool') as FormArray; }
 
   get damageResistances(): FormArray {
     return this.form.get('damageResistances') as FormArray;
@@ -891,6 +930,11 @@ export class HomebrewRaceFormPage implements OnInit {
   toggleLanguageChip(index: number): void {
     this.languageChips[index] = !this.languageChips[index];
     this.languagesArray.at(index).setValue(this.languageChips[index]);
+  }
+
+  toggleLanguagePoolChip(index: number): void {
+    this.languagePoolChips[index] = !this.languagePoolChips[index];
+    this.languagePoolArray.at(index).setValue(this.languagePoolChips[index]);
   }
 
   /** Toggle a weapon proficiency chip. */

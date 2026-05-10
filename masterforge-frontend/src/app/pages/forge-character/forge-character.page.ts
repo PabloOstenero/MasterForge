@@ -10,7 +10,7 @@ import {
 } from '@ionic/angular/standalone';
 import { ApiService } from '../../services/api';
 import { AuthService } from '../../services/auth.service';
-import { isStructuredEquipment, resolveInventory, StructuredEquipment, ResolvedInventoryLine } from '../../models/equipment.models';
+import { isStructuredEquipment, resolveInventory, StructuredEquipment, ResolvedInventoryLine, ItemSummary, deserializeEquipment } from '../../models/equipment.models';
 import { HomebrewService } from '../../services/homebrew.service';
 import { forkJoin, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
@@ -18,11 +18,12 @@ import { switchMap } from 'rxjs/operators';
 // ─── Step definitions ────────────────────────────────────────────────────────
 const BASE_STEPS = ['identity', 'race', 'class', 'ability-scores', 'skills', 'review'] as const;
 type BaseStep = typeof BASE_STEPS[number];
-type Step = BaseStep | 'subclass' | 'equipment' | 'spells';
+type Step = BaseStep | 'subclass' | 'equipment' | 'spells' | 'languages';
 
 export const STEP_LABELS: Record<Step, string> = {
   'identity': 'Identidad',
   'race': 'Raza',
+  'languages': 'Idiomas',
   'class': 'Clase',
   'subclass': 'Subclase',
   'equipment': 'Equipamiento',
@@ -103,6 +104,12 @@ function poolNameToSkillId(poolEntry: string): string | undefined {
   return ENGLISH_SKILL_TO_ID[poolEntry.toLowerCase()];
 }
 
+export const LANGUAGES = [
+  'Común', 'Enano', 'Élfico', 'Gigante', 'Gnomo', 'Goblin',
+  'Mediano', 'Orco', 'Abisal', 'Celestial', 'Dracónico', 'Habla Profunda',
+  'Infernal', 'Primordial', 'Silvano', 'Infracomún',
+] as const;
+
 // ─── CharacterFormData interface ──────────────────────────────────────────────
 export interface CharacterFormData {
   // Step 0: Identity
@@ -114,6 +121,9 @@ export interface CharacterFormData {
 
   // Step 1: Race
   selectedRace: any | null;
+
+  // Step (dynamic): Languages
+  selectedLanguages: string[];
 
   // Step 2: Class
   selectedClass: any | null;
@@ -163,16 +173,22 @@ export class ForgeCharacterPage implements OnInit {
 
   /** Dynamically computed step list — inserts 'equipment' after 'class' when needed. */
   get activeSteps(): string[] {
-    const steps: string[] = ['identity', 'race', 'class'];
+    const steps: string[] = ['identity', 'race'];
+
+    if (this.extraLanguageChoicesCount > 0) {
+      steps.push('languages');
+    }
+
+    steps.push('class');
 
     const cls = this.formData.selectedClass;
     if (cls && cls.classFeatures?.subclassLevel && this.formData.level >= cls.classFeatures.subclassLevel) {
       steps.push('subclass');
     }
 
-    const equipment = cls?.classFeatures?.startingEquipment;
-    const hasChoiceSets = isStructuredEquipment(equipment) && equipment.choiceSets.length > 0;
-    if (hasChoiceSets) {
+    const structEq = this.structuredEquipment;
+    const hasEquipment = structEq && (structEq.choiceSets.length > 0 || structEq.fixedGrants.length > 0);
+    if (hasEquipment) {
       steps.push('equipment');
     }
 
@@ -194,6 +210,7 @@ export class ForgeCharacterPage implements OnInit {
     xp: 0,
     level: 1,
     selectedRace: null,
+    selectedLanguages: [],
     selectedClass: null,
     selectedSubclass: null,
     equipmentSelections: {},
@@ -241,6 +258,7 @@ export class ForgeCharacterPage implements OnInit {
   readonly abilityKeys = ABILITY_KEYS;
   readonly abilityLabels = ABILITY_LABELS;
   readonly dndSkills = DND_SKILLS;
+  readonly languagesPool = LANGUAGES;
 
   // ─── Submit error state ──────────────────────────────────────────────────────
   submitError: boolean = false;
@@ -249,6 +267,11 @@ export class ForgeCharacterPage implements OnInit {
   allSpells: any[] = [];
   spellsLoading: boolean = false;
   spellsError: boolean = false;
+
+  // ─── Equipment step state ───────────────────────────────────────────────────
+  itemCatalog: ItemSummary[] = [];
+  catalogLoading: boolean = false;
+  catalogError: boolean = false;
 
   constructor(
     private apiService: ApiService,
@@ -259,6 +282,22 @@ export class ForgeCharacterPage implements OnInit {
 
   ngOnInit(): void {
     this.loadSpells();
+    this.loadCatalog();
+  }
+
+  loadCatalog(): void {
+    this.catalogLoading = true;
+    this.catalogError = false;
+    this.homebrewService.getAllItems().subscribe({
+      next: (data) => {
+        this.itemCatalog = data;
+        this.catalogLoading = false;
+      },
+      error: () => {
+        this.catalogLoading = false;
+        this.catalogError = true;
+      }
+    });
   }
 
   loadSpells(): void {
@@ -301,11 +340,12 @@ export class ForgeCharacterPage implements OnInit {
 
   // ─── Lazy data loading ───────────────────────────────────────────────────────
 
-  private _loadDataForStep(step: number): void {
-    if (step === 1 && !this._racesLoaded) {
+  private _loadDataForStep(stepIndex: number): void {
+    const stepName = this.activeSteps[stepIndex];
+    if (stepName === 'race' && !this._racesLoaded) {
       this._loadRaces();
     }
-    if (step === 2 && !this._classesLoaded) {
+    if (stepName === 'class' && !this._classesLoaded) {
       this._loadClasses();
     }
   }
@@ -333,8 +373,51 @@ export class ForgeCharacterPage implements OnInit {
 
   selectRace(race: any): void {
     this.formData.selectedRace = race;
+    this.formData.selectedLanguages = []; // Reset language choices
     if (this.validationErrors['race']) {
       delete this.validationErrors['race'];
+    }
+  }
+
+  // ─── Languages step logic ───────────────────────────────────────────────────
+
+  get languagesGrantedByRace(): string[] {
+    const rf = this.formData.selectedRace?.raceFeatures;
+    if (!rf) return [];
+    if (rf.languageProficiencies?.fixed) return rf.languageProficiencies.fixed;
+    const langs = rf.languages;
+    if (Array.isArray(langs)) return langs;
+    if (typeof langs === 'string') return langs.split(',').map(s => s.trim()).filter(Boolean);
+    return [];
+  }
+
+  get extraLanguageChoicesCount(): number {
+    const rf = this.formData.selectedRace?.raceFeatures;
+    return rf?.languageProficiencies?.choiceCount ?? rf?.extraLanguageChoices ?? 0;
+  }
+
+  get availableExtraLanguages(): string[] {
+    const rf = this.formData.selectedRace?.raceFeatures;
+    const pool = rf?.languageProficiencies?.choicePool;
+    if (pool && pool.length > 0) {
+      return pool;
+    }
+    
+    // If we have choices but no pool (or empty pool), fallback to standard LANGUAGES
+    // excluding those already granted by the race fixed list.
+    const granted = new Set(this.languagesGrantedByRace.map(l => l.toLowerCase()));
+    return LANGUAGES.filter(l => !granted.has(l.toLowerCase()));
+  }
+
+  toggleLanguage(lang: string): void {
+    const idx = this.formData.selectedLanguages.indexOf(lang);
+    if (idx !== -1) {
+      this.formData.selectedLanguages.splice(idx, 1);
+    } else if (this.formData.selectedLanguages.length < this.extraLanguageChoicesCount) {
+      this.formData.selectedLanguages.push(lang);
+    }
+    if (this.validationErrors['languages']) {
+      delete this.validationErrors['languages'];
     }
   }
 
@@ -396,6 +479,12 @@ export class ForgeCharacterPage implements OnInit {
   /** Returns the structured equipment for the selected class, or null. */
   get structuredEquipment(): StructuredEquipment | null {
     const equipment = this.formData.selectedClass?.classFeatures?.startingEquipment;
+    if (!equipment) return null;
+
+    if (typeof equipment === 'string') {
+      return deserializeEquipment(equipment, this.itemCatalog);
+    }
+
     return isStructuredEquipment(equipment) ? equipment : null;
   }
 
@@ -526,41 +615,148 @@ export class ForgeCharacterPage implements OnInit {
   // ─── Skills step ─────────────────────────────────────────────────────────────
 
   /**
-   * Returns the number of skills the character must choose, based on the selected
-   * class's classFeatures.skillProficiencies.choiceCount. Falls back to 2.
+   * Returns the total number of skills the character must choose from pools, 
+   * aggregating from both the selected class AND selected race.
    */
+  getSkillName(skillId: string): string {
+    return DND_SKILLS.find(s => s.id === skillId)?.name || skillId;
+  }
+
   get requiredSkillCount(): number {
-    const choiceCount = this.formData.selectedClass?.classFeatures?.skillProficiencies?.choiceCount;
-    return (choiceCount != null && choiceCount > 0) ? choiceCount : 2;
+    let count = 0;
+    
+    // Class skills choice count
+    const classChoices = this.formData.selectedClass?.classFeatures?.skillProficiencies?.choiceCount;
+    if (classChoices != null) {
+      count += classChoices;
+    } else if (this.formData.selectedClass) {
+      // Fallback for legacy classes that might not have the structured field yet
+      count += 2;
+    }
+    
+    // Race skills choice count
+    const raceChoices = this.formData.selectedRace?.raceFeatures?.skillProficiencies?.choiceCount;
+    if (raceChoices != null) {
+      count += raceChoices;
+    }
+
+    // Subclass skills choice count
+    const subclassChoices = this.formData.selectedSubclass?.subclassFeatures?.skillProficiencies?.choiceCount;
+    if (subclassChoices != null) {
+      count += subclassChoices;
+    }
+    
+    return count;
   }
 
   /**
-   * Returns the list of skills available for selection, filtered by the selected
-   * class's classFeatures.skillProficiencies.choicePool when defined and non-empty.
-   * Falls back to all 18 standard D&D skills.
+   * Returns the list of fixed skills granted by race and class.
+   */
+  get fixedSkills(): string[] {
+    const fixed = new Set<string>();
+    
+    // Class fixed skills
+    const classFixed = this.formData.selectedClass?.classFeatures?.skillProficiencies?.fixed;
+    if (Array.isArray(classFixed)) {
+      classFixed.forEach(s => {
+        const id = poolNameToSkillId(s);
+        if (id) fixed.add(id);
+      });
+    }
+
+    // Race fixed skills
+    const raceFixed = this.formData.selectedRace?.raceFeatures?.skillProficiencies?.fixed;
+    if (Array.isArray(raceFixed)) {
+      raceFixed.forEach(s => {
+        const id = poolNameToSkillId(s);
+        if (id) fixed.add(id);
+      });
+    }
+
+    // Subclass fixed skills
+    const subclassFixed = this.formData.selectedSubclass?.subclassFeatures?.skillProficiencies?.fixed;
+    if (Array.isArray(subclassFixed)) {
+      subclassFixed.forEach(s => {
+        const id = poolNameToSkillId(s);
+        if (id) fixed.add(id);
+      });
+    }
+
+    return Array.from(fixed);
+  }
+
+  /**
+   * Returns the list of skills available for selection, filtered by the aggregated
+   * choice pools of the selected class and race.
    */
   get availableSkills(): { id: string; name: string; stat: AbilityKey }[] {
-    const choicePool: string[] | undefined = this.formData.selectedClass?.classFeatures?.skillProficiencies?.choicePool;
-    if (choicePool && choicePool.length > 0) {
-      // Convert English pool names to internal DND_SKILLS ids
-      const poolIds = new Set(choicePool.map(poolNameToSkillId).filter(Boolean));
-      return DND_SKILLS.filter(skill => poolIds.has(skill.id));
+    const classPool: string[] | undefined = this.formData.selectedClass?.classFeatures?.skillProficiencies?.choicePool;
+    const racePool: string[] | undefined = this.formData.selectedRace?.raceFeatures?.skillProficiencies?.choicePool;
+    const subclassPool: string[] | undefined = this.formData.selectedSubclass?.subclassFeatures?.skillProficiencies?.choicePool;
+    
+    const classChoices = this.formData.selectedClass?.classFeatures?.skillProficiencies?.choiceCount;
+    const raceChoices = this.formData.selectedRace?.raceFeatures?.skillProficiencies?.choiceCount;
+    const subclassChoices = this.formData.selectedSubclass?.subclassFeatures?.skillProficiencies?.choiceCount;
+
+    // If all are undefined, fallback to all skills (legacy support)
+    if (classChoices === undefined && raceChoices === undefined && subclassChoices === undefined) return DND_SKILLS;
+
+    const aggregatePoolIds = new Set<string>();
+    let useAllSkills = false;
+
+    // Handle Class Pool
+    if (classPool && classPool.length > 0) {
+      classPool.forEach(p => {
+        const id = poolNameToSkillId(p);
+        if (id) aggregatePoolIds.add(id);
+      });
+    } else if (this.formData.selectedClass && classChoices > 0) {
+      // If class has choices > 0 but no pool, it means any skill
+      useAllSkills = true;
     }
-    return DND_SKILLS;
+
+    // Handle Race Pool
+    if (racePool && racePool.length > 0) {
+      racePool.forEach(p => {
+        const id = poolNameToSkillId(p);
+        if (id) aggregatePoolIds.add(id);
+      });
+    } else if (this.formData.selectedRace && (raceChoices ?? 0) > 0) {
+      // If race has choices > 0 but no pool, it means any skill
+      useAllSkills = true;
+    }
+
+    // Handle Subclass Pool
+    if (subclassPool && subclassPool.length > 0) {
+      subclassPool.forEach(p => {
+        const id = poolNameToSkillId(p);
+        if (id) aggregatePoolIds.add(id);
+      });
+    } else if (this.formData.selectedSubclass && (subclassChoices ?? 0) > 0) {
+      // If subclass has choices > 0 but no pool, it means any skill
+      useAllSkills = true;
+    }
+
+    let skills = useAllSkills ? DND_SKILLS : DND_SKILLS.filter(skill => aggregatePoolIds.has(skill.id));
+    
+    // If we have an aggregate pool but it's empty (and not useAllSkills), return all as fallback for safety
+    if (!useAllSkills && aggregatePoolIds.size === 0 && ( (classChoices ?? 0) > 0 || (raceChoices ?? 0) > 0 || (subclassChoices ?? 0) > 0 ) ) {
+        return DND_SKILLS;
+    }
+
+    // Exclude fixed skills from the selection list to avoid confusion
+    const fixed = new Set(this.fixedSkills);
+    return skills.filter(s => !fixed.has(s.id));
   }
 
   /**
-   * Toggles a skill selection. If the skill is already selected, deselects it.
-   * If fewer than requiredSkillCount skills are selected, selects it.
-   * Does nothing if requiredSkillCount skills are already selected and this skill is not one of them.
+   * Toggles a skill selection.
    */
   toggleSkill(skillId: string): void {
     const idx = this.formData.selectedSkills.indexOf(skillId);
     if (idx !== -1) {
-      // Deselect
       this.formData.selectedSkills = this.formData.selectedSkills.filter(id => id !== skillId);
     } else if (this.formData.selectedSkills.length < this.requiredSkillCount) {
-      // Select
       this.formData.selectedSkills = [...this.formData.selectedSkills, skillId];
     }
     if (this.validationErrors['skills']) {
@@ -569,19 +765,31 @@ export class ForgeCharacterPage implements OnInit {
   }
 
   /**
-   * Returns true when a skill option should be disabled:
-   * - The skill is not in the class choicePool (when a pool is defined), or
-   * - The maximum number of skills has been reached and this skill is not selected.
+   * Returns true when a skill option should be disabled.
    */
   isSkillDisabled(skillId: string): boolean {
-    // Disable skills not in the choicePool when a pool is defined
-    const choicePool: string[] | undefined = this.formData.selectedClass?.classFeatures?.skillProficiencies?.choicePool;
-    if (choicePool && choicePool.length > 0) {
-      const poolIds = new Set(choicePool.map(poolNameToSkillId).filter(Boolean));
-      if (!poolIds.has(skillId)) {
+    // Aggregated pool check
+    const classPool: string[] | undefined = this.formData.selectedClass?.classFeatures?.skillProficiencies?.choicePool;
+    const racePool: string[] | undefined = this.formData.selectedRace?.raceFeatures?.skillProficiencies?.choicePool;
+    
+    const hasClassPool = classPool && classPool.length > 0;
+    const hasRacePool = racePool && racePool.length > 0;
+
+    if (hasClassPool || hasRacePool) {
+      const poolIds = new Set<string>();
+      if (hasClassPool) classPool?.forEach(p => { const id = poolNameToSkillId(p); if(id) poolIds.add(id); });
+      if (hasRacePool) racePool?.forEach(p => { const id = poolNameToSkillId(p); if(id) poolIds.add(id); });
+      
+      // If a pool is defined but doesn't contain the skill, disable it
+      // UNLESS the other one allows ALL skills
+      const classAllowsAll = this.formData.selectedClass && !hasClassPool && (this.formData.selectedClass.classFeatures?.skillProficiencies?.choiceCount > 0);
+      const raceAllowsAll = this.formData.selectedRace && !hasRacePool && (this.formData.selectedRace.raceFeatures?.skillProficiencies?.choiceCount > 0);
+      
+      if (!poolIds.has(skillId) && !classAllowsAll && !raceAllowsAll) {
         return true;
       }
     }
+
     // Disable skills beyond requiredSkillCount once max selections reached
     return this.formData.selectedSkills.length >= this.requiredSkillCount &&
       !this.formData.selectedSkills.includes(skillId);
@@ -592,7 +800,9 @@ export class ForgeCharacterPage implements OnInit {
     if (!this.formData.selectedClass) return null;
     const finalCon = this.getFinalScore('con');
     if (finalCon === null) return null;
-    return calculateHp(this.formData.selectedClass.hitDie, finalCon, this.formData.level, this.formData.hpGenerationMode, this.formData.hpRolledValue);
+    const rawHitDie = this.formData.selectedClass.hitDie;
+    const hitDieValue = typeof rawHitDie === 'string' ? parseInt(rawHitDie.replace('d', ''), 10) : (rawHitDie ?? 8);
+    return calculateHp(hitDieValue, finalCon, this.formData.level, this.formData.hpGenerationMode, this.formData.hpRolledValue);
   }
 
   // ─── Spells step logic ───────────────────────────────────────────────────────
@@ -666,7 +876,9 @@ export class ForgeCharacterPage implements OnInit {
       wis: this.getFinalScore('wis') ?? 10,
       cha: this.getFinalScore('cha') ?? 10,
     };
-    const hp = calculateHp(this.formData.selectedClass?.hitDie ?? 8, finalCon, this.formData.level, this.formData.hpGenerationMode, this.formData.hpRolledValue);
+    const rawHitDie = this.formData.selectedClass?.hitDie;
+    const hitDieValue = typeof rawHitDie === 'string' ? parseInt(rawHitDie.replace('d', ''), 10) : (rawHitDie ?? 8);
+    const hp = calculateHp(hitDieValue, finalCon, this.formData.level, this.formData.hpGenerationMode, this.formData.hpRolledValue);
 
     // Resolve inventory from structured equipment + player selections
     const equipment = this.structuredEquipment;
@@ -712,6 +924,7 @@ export class ForgeCharacterPage implements OnInit {
     switch (stepName) {
       case 'identity': return validateIdentityStep(this.formData);
       case 'race': return this.formData.selectedRace ? {} : { race: 'Selecciona una raza para continuar.' };
+      case 'languages': return this.formData.selectedLanguages.length === this.extraLanguageChoicesCount ? {} : { languages: `Selecciona exactamente ${this.extraLanguageChoicesCount} idiomas.` };
       case 'class': return this.formData.selectedClass ? {} : { class: 'Selecciona una clase para continuar.' };
       case 'subclass': return this.formData.selectedSubclass ? {} : { subclass: 'Selecciona una subclase para continuar.' };
       case 'equipment': return this._validateEquipmentStep();
@@ -908,12 +1121,55 @@ export function buildCharacterDto(
   userId: string | null,
   inventory: ResolvedInventoryLine[] = []
 ): any {
+  // Initialize ALL 6 saving throws as false to avoid backend null-to-boolean errors
+  const savingThrowsProficiencies: { [key: string]: boolean } = {
+    str: false, dex: false, con: false, int: false, wis: false, cha: false
+  };
+  const classSaves = formData.selectedClass?.savingThrows ?? {};
+  const SAVE_MAPPING: { [key: string]: string } = {
+    'Strength': 'str', 'Dexterity': 'dex', 'Constitution': 'con',
+    'Intelligence': 'int', 'Wisdom': 'wis', 'Charisma': 'cha',
+    'str': 'str', 'dex': 'dex', 'con': 'con', 'int': 'int', 'wis': 'wis', 'cha': 'cha'
+  };
+  Object.entries(classSaves).forEach(([key, value]) => {
+    const normalizedKey = SAVE_MAPPING[key] || key.toLowerCase();
+    if (value) savingThrowsProficiencies[normalizedKey] = true;
+  });
+
+  // Initialize ALL 18 skills as false to avoid backend null-to-boolean errors
   const skillProficiencies: { [key: string]: boolean } = {};
+  DND_SKILLS.forEach(s => skillProficiencies[s.id] = false);
+  
+  // Include fixed skills
+  const classFixed = formData.selectedClass?.classFeatures?.skillProficiencies?.fixed;
+  if (Array.isArray(classFixed)) {
+    classFixed.forEach(s => {
+      const id = ENGLISH_SKILL_TO_ID[s.toLowerCase().trim()];
+      if (id) skillProficiencies[id] = true;
+    });
+  }
+  const raceFixed = formData.selectedRace?.raceFeatures?.skillProficiencies?.fixed;
+  if (Array.isArray(raceFixed)) {
+    raceFixed.forEach(s => {
+      const id = ENGLISH_SKILL_TO_ID[s.toLowerCase().trim()];
+      if (id) skillProficiencies[id] = true;
+    });
+  }
+  const subclassFixed = formData.selectedSubclass?.subclassFeatures?.skillProficiencies?.fixed;
+  if (Array.isArray(subclassFixed)) {
+    subclassFixed.forEach(s => {
+      const id = ENGLISH_SKILL_TO_ID[s.toLowerCase().trim()];
+      if (id) skillProficiencies[id] = true;
+    });
+  }
+
+  // Include selected skills from pools
   for (const skillId of formData.selectedSkills) {
     skillProficiencies[skillId] = true;
   }
 
   return {
+    user: { id: userId },
     name: formData.name,
     background: formData.background,
     alignment: formData.alignment,
@@ -931,15 +1187,20 @@ export function buildCharacterDto(
     baseInt: finalScores.int,
     baseWis: finalScores.wis,
     baseCha: finalScores.cha,
-    savingThrowsProficiencies: formData.selectedClass?.savingThrows ?? {},
+    savingThrowsProficiencies,
     skillProficiencies,
     spellSlots: {},
-    choicesJson: {},
+    choicesJson: formData.selectedLanguages?.length > 0 ? { languages: formData.selectedLanguages } : {},
     cp: 0, sp: 0, ep: 0, gp: 0, pp: 0,
-    user: { id: userId },
-    dndRace: { id: formData.selectedRace?.id },
-    dndClass: { id: formData.selectedClass?.id },
-    subclassId: formData.selectedSubclass?.id ?? null,
-    inventory
+    dndRace: { id: Number(formData.selectedRace?.id) },
+    dndClass: { id: Number(formData.selectedClass?.id) },
+    subclassId: formData.selectedSubclass ? Number(formData.selectedSubclass.id) : null,
+    inventory: inventory.map(line => ({
+      item: { id: line.itemId },
+      quantity: line.quantity,
+      isEquipped: false,
+      isAttuned: false,
+      characterId: '00000000-0000-0000-0000-000000000000' // Required by backend DTO even if ignored
+    }))
   };
 }

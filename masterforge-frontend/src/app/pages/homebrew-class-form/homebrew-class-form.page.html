@@ -1,4 +1,4 @@
-﻿<div class="homebrew-form-wrapper">
+<div class="homebrew-form-wrapper">
 
   <!-- Top bar -->
   <div class="homebrew-form-topbar">
@@ -173,7 +173,8 @@
               <div class="custom-dropdown-panel" (click)="$event.stopPropagation()">
                 @for (skill of availableSkillNames; track skill) {
                   <button type="button" class="custom-dropdown-option" (click)="selectSkillFromDropdown(skill)">
-                    {{ skill }}
+                    <span class="skill-option-name">{{ skill }}</span>
+                    <span class="skill-option-stat">{{ getSkillAbbr(skill) }}</span>
                   </button>
                 }
                 @if (availableSkillNames.length === 0) {
@@ -190,7 +191,7 @@
           <div class="skill-tags" data-testid="skill-tags">
             @for (skill of selectedSkillNames; track skill) {
               <div class="skill-tag">
-                <span class="skill-tag-name">{{ skill }}</span>
+                <span class="skill-tag-name">{{ skill }} ({{ getSkillAbbr(skill) }})</span>
                 <button type="button" class="skill-tag-remove" (click)="removeSkillEntry(skill)">×</button>
               </div>
             }

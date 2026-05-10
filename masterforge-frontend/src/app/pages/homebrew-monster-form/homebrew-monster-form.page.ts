@@ -16,7 +16,8 @@ import {
   AttackEntry,
   MonsterSkillEntry as SkillEntry,
   MonsterSavingThrows as SavingThrows,
-  CombatMechanics
+  CombatMechanics,
+  SKILL_DATA
 } from '../../models/homebrew.models';
 
 /** Valid size options for a D&D monster. */
@@ -77,26 +78,16 @@ export const CONDITIONS = [
 ] as const;
 
 /** All skills in D&D 5e. */
-export const SKILL_NAMES = [
-  'Acrobatics',
-  'Animal Handling',
-  'Arcana',
-  'Athletics',
-  'Deception',
-  'History',
-  'Insight',
-  'Intimidation',
-  'Investigation',
-  'Medicine',
-  'Nature',
-  'Perception',
-  'Performance',
-  'Persuasion',
-  'Religion',
-  'Sleight of Hand',
-  'Stealth',
-  'Survival',
-] as const;
+export const SKILL_NAMES = Object.keys(SKILL_DATA).sort() as string[];
+
+export const ABILITY_ABBREVIATIONS: Record<string, string> = {
+  'Strength': 'FU',
+  'Dexterity': 'DES',
+  'Constitution': 'CON',
+  'Intelligence': 'INT',
+  'Wisdom': 'SAB',
+  'Charisma': 'CAR'
+};
 
 /** The six base ability score fields for a monster. */
 export const MONSTER_ABILITY_KEYS = ['str', 'dex', 'con', 'intStat', 'wis', 'cha'] as const;
@@ -210,6 +201,15 @@ export class HomebrewMonsterFormPage implements OnInit {
     this.skillDropdownOpen = false;
   }
 
+  getSkillAbility(skill: string): string {
+    return this.skillData[skill] || '';
+  }
+
+  getSkillAbbr(skill: string): string {
+    const ability = this.getSkillAbility(skill);
+    return this.abilityAbbr[ability] || '';
+  }
+
   /** Exposed for template iteration. */
   readonly monsterSizes = MONSTER_SIZES;
   readonly monsterTypes = MONSTER_TYPES;
@@ -217,6 +217,8 @@ export class HomebrewMonsterFormPage implements OnInit {
   readonly conditions   = CONDITIONS;
   readonly skillNames   = SKILL_NAMES;
   readonly abilityKeys  = MONSTER_ABILITY_KEYS;
+  readonly skillData    = SKILL_DATA;
+  readonly abilityAbbr  = ABILITY_ABBREVIATIONS;
 
   /** Human-readable labels for each ability score key. */
   readonly abilityLabels: Record<string, string> = {

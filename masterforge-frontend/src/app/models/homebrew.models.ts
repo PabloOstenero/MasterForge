@@ -5,6 +5,33 @@ export interface SkillProficiencies {
   choiceCount: number;
 }
 
+export interface LanguageProficiencies {
+  fixed: string[];
+  choicePool: string[];
+  choiceCount: number;
+}
+
+export const SKILL_DATA: Record<string, string> = {
+  'Acrobatics': 'Dexterity',
+  'Animal Handling': 'Wisdom',
+  'Arcana': 'Intelligence',
+  'Athletics': 'Strength',
+  'Deception': 'Charisma',
+  'History': 'Intelligence',
+  'Insight': 'Wisdom',
+  'Intimidation': 'Charisma',
+  'Investigation': 'Intelligence',
+  'Medicine': 'Wisdom',
+  'Nature': 'Intelligence',
+  'Perception': 'Wisdom',
+  'Performance': 'Charisma',
+  'Persuasion': 'Charisma',
+  'Religion': 'Intelligence',
+  'Sleight of Hand': 'Dexterity',
+  'Stealth': 'Dexterity',
+  'Survival': 'Wisdom',
+};
+
 export interface SpeedObject {
   walk?: number;
   swim?: number;
@@ -36,6 +63,7 @@ export interface CommonHomebrewFeatures {
   armorProficiencies: string[];
   toolProficiencies: string[];
   skillProficiencies: SkillProficiencies;
+  languageProficiencies?: LanguageProficiencies;
   damageResistances: string[];
   damageImmunities: string[];
   conditionImmunities: string[];
@@ -127,8 +155,8 @@ export interface InnateSpell {
 }
 
 export interface RaceFeatures extends CommonHomebrewFeatures {
-  languages: string[];
-  extraLanguageChoices: number;
+  languages?: string[]; // Deprecated: use languageProficiencies
+  extraLanguageChoices?: number; // Deprecated: use languageProficiencies
   innateSpells: InnateSpell[];
   naturalArmor?: NaturalArmor;
   naturalWeapons?: NaturalWeapon[];

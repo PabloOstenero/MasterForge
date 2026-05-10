@@ -34,7 +34,8 @@ function callBuildRaceFeatures(overrides: Partial<Parameters<typeof buildRaceFea
   const defaults: Parameters<typeof buildRaceFeatures> = [
     { walk: 30, swim: null, climb: null, fly: null },
     { darkvision: null, blindsight: null, tremorsense: null, truesight: null },
-    [],
+    [], // fixed
+    [], // pool
     0,
     { fixed: [], choicePool: [], choiceCount: 0 },
     [],
@@ -68,7 +69,7 @@ describe('Property 2: Speed serialization omits zero/null values', () => {
           const result = buildRaceFeatures(
             speeds,
             { darkvision: null, blindsight: null, tremorsense: null, truesight: null },
-            [],
+            [], [],
             0,
             { fixed: [], choicePool: [], choiceCount: 0 },
             [], [], [], [], [], [], [],
@@ -120,7 +121,7 @@ describe('Property 3: Senses serialization omits zero/null values', () => {
           const result = buildRaceFeatures(
             { walk: 30, swim: null, climb: null, fly: null },
             senses,
-            [],
+            [], [],
             0,
             { fixed: [], choicePool: [], choiceCount: 0 },
             [], [], [], [], [], [], [],
@@ -177,6 +178,7 @@ describe('Property 4: Languages round-trip', () => {
             { walk: 30, swim: null, climb: null, fly: null },
             { darkvision: null, blindsight: null, tremorsense: null, truesight: null },
             selectedLanguages,
+            [],
             0,
             { fixed: [], choicePool: [], choiceCount: 0 },
             [], [], [], [], [], [], [],
@@ -214,7 +216,7 @@ describe('Property 5: Skill proficiencies placement by choiceCount', () => {
           const result = buildRaceFeatures(
             { walk: 30, swim: null, climb: null, fly: null },
             { darkvision: null, blindsight: null, tremorsense: null, truesight: null },
-            [],
+            [], [],
             0,
             skillProficiencies,
             [], [], [], [], [], [], [],
@@ -290,7 +292,7 @@ describe('Property 6: Proficiency merging (chips + free-text)', () => {
           const result = buildRaceFeatures(
             { walk: 30, swim: null, climb: null, fly: null },
             { darkvision: null, blindsight: null, tremorsense: null, truesight: null },
-            [],
+            [], [],
             0,
             { fixed: [], choicePool: [], choiceCount: 0 },
             weaponProficiencies,
@@ -353,7 +355,7 @@ describe('Property 7: Damage type / condition chip round-trip', () => {
           const result = buildRaceFeatures(
             { walk: 30, swim: null, climb: null, fly: null },
             { darkvision: null, blindsight: null, tremorsense: null, truesight: null },
-            [],
+            [], [],
             0,
             { fixed: [], choicePool: [], choiceCount: 0 },
             [], [], [],
@@ -399,7 +401,7 @@ describe('Property 8: Innate spell serialization completeness', () => {
           const result = buildRaceFeatures(
             { walk: 30, swim: null, climb: null, fly: null },
             { darkvision: null, blindsight: null, tremorsense: null, truesight: null },
-            [],
+            [], [],
             extraLanguageChoices,
             { fixed: [], choicePool: [], choiceCount: 0 },
             [], [], [], [], [], [],
@@ -575,7 +577,7 @@ describe('Property 5 (extended): Whitespace-only flyRestriction omission', () =>
         fc.string({ minLength: 0, maxLength: 10 }).map(s => s.replace(/[^\s]/g, ' ')),
         (flyRestriction) => {
           const result = buildRaceFeatures(
-            DEF_SPEEDS, DEF_SENSES, [], 0, DEF_SKILLS, [], [], [], [], [], [], DEF_SPELLS,
+            DEF_SPEEDS, DEF_SENSES, [], [], 0, DEF_SKILLS, [], [], [], [], [], [], DEF_SPELLS,
             undefined,       // naturalArmor
             undefined,       // naturalWeapons
             undefined,       // creatureType
@@ -594,7 +596,7 @@ describe('Property 5 (extended): Whitespace-only flyRestriction omission', () =>
         fc.string({ minLength: 1 }).filter(s => s.trim() !== ''),
         (flyRestriction) => {
           const result = buildRaceFeatures(
-            DEF_SPEEDS, DEF_SENSES, [], 0, DEF_SKILLS, [], [], [], [], [], [], DEF_SPELLS,
+            DEF_SPEEDS, DEF_SENSES, [], [], 0, DEF_SKILLS, [], [], [], [], [], [], DEF_SPELLS,
             undefined,       // naturalArmor
             undefined,       // naturalWeapons
             undefined,       // creatureType
@@ -628,7 +630,7 @@ describe('Property 6 (extended): Natural armor conditional serialization', () =>
             : null;
 
           const result = buildRaceFeatures(
-            DEF_SPEEDS, DEF_SENSES, [], 0, DEF_SKILLS, [], [], [], [], [], [], DEF_SPELLS,
+            DEF_SPEEDS, DEF_SENSES, [], [], 0, DEF_SKILLS, [], [], [], [], [], [], DEF_SPELLS,
             naturalArmor,  // naturalArmor
           );
 
@@ -666,7 +668,7 @@ describe('Property 7 (extended): Natural weapons serialization completeness', ()
         fc.array(naturalWeaponArb, { minLength: 0, maxLength: 10 }),
         (naturalWeapons) => {
           const result = buildRaceFeatures(
-            DEF_SPEEDS, DEF_SENSES, [], 0, DEF_SKILLS, [], [], [], [], [], [], DEF_SPELLS,
+            DEF_SPEEDS, DEF_SENSES, [], [], 0, DEF_SKILLS, [], [], [], [], [], [], DEF_SPELLS,
             undefined,       // naturalArmor
             naturalWeapons as NaturalWeapon[],  // naturalWeapons
           );
@@ -740,7 +742,7 @@ describe('Property 9 (extended): Non-regression — existing keys preserved', ()
 
           // Call with all new args included
           const resultFull = buildRaceFeatures(
-            speeds, senses, languages, extraLanguageChoices, skillProficiencies,
+            speeds, senses, languages, [], extraLanguageChoices, skillProficiencies,
             weaponProficiencies, armorProficiencies, toolProficiencies,
             damageResistances, damageImmunities, conditionImmunities, innateSpells,
             undefined,        // naturalArmor
@@ -749,9 +751,9 @@ describe('Property 9 (extended): Non-regression — existing keys preserved', ()
             undefined,        // flyRestriction
           );
 
-          // Call with only the first 12 args (baseline)
+          // Call with only the first 13 args (baseline)
           const resultBase = buildRaceFeatures(
-            speeds, senses, languages, extraLanguageChoices, skillProficiencies,
+            speeds, senses, languages, [], extraLanguageChoices, skillProficiencies,
             weaponProficiencies, armorProficiencies, toolProficiencies,
             damageResistances, damageImmunities, conditionImmunities, innateSpells,
           );

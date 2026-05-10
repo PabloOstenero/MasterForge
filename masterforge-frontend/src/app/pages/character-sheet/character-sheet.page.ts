@@ -251,12 +251,16 @@ export class CharacterSheetPage implements OnInit {
             ...(data.dndClass?.features || []),
             ...this.extractSubclassFeatures(data.subclass?.subclassFeatures)
           ],
-          proficiencies: {
-            armor: this.extractArrayFromClassFeatures(data.dndClass?.classFeatures, 'armorProficiencies'),
-            weapons: this.extractArrayFromClassFeatures(data.dndClass?.classFeatures, 'weaponProficiencies'),
-            tools: this.extractArrayFromClassFeatures(data.dndClass?.classFeatures, 'toolProficiencies'),
-            languages: this.extractArrayFromRaceFeatures(data.dndRace?.raceFeatures, 'languages')
-          },
+            proficiencies: {
+              armor: this.extractArrayFromClassFeatures(data.dndClass?.classFeatures, 'armorProficiencies'),
+              weapons: this.extractArrayFromClassFeatures(data.dndClass?.classFeatures, 'weaponProficiencies'),
+              tools: this.extractArrayFromClassFeatures(data.dndClass?.classFeatures, 'toolProficiencies'),
+              languages: [
+                ...(data.dndRace?.raceFeatures?.languageProficiencies?.fixed || 
+                   this.extractArrayFromRaceFeatures(data.dndRace?.raceFeatures, 'languages')),
+                ...(data.choicesJson?.languages || [])
+              ]
+            },
           background: data.background || 'Aventurero',
           alignment: data.alignment || 'Neutral',
           xp: data.xp || 0,

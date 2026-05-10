@@ -1132,7 +1132,7 @@ describe('Property 12: HP calculation correctness', () => {
             finalScores: { str: 10, dex: 10, con: finalCon, int: 10, wis: 10, cha: 10 },
             calculatedHp: hp,
             equipmentSelections: {},
-            level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: []
+            selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: []
           };
           const finalScores = { str: 10, dex: 10, con: finalCon, int: 10, wis: 10, cha: 10 };
           const dto = buildCharacterDto(formData, finalScores, hp, 'user-1');
@@ -1194,7 +1194,7 @@ describe('Property 13: CharacterDto defaults are always fixed', () => {
             finalScores: { str: 10, dex: 10, con: finalCon, int: 10, wis: 10, cha: 10 },
             calculatedHp: hp,
             equipmentSelections: {},
-            level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: []
+            selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: []
           };
           const finalScores = { str: 10, dex: 10, con: finalCon, int: 10, wis: 10, cha: 10 };
           const dto = buildCharacterDto(formData, finalScores, hp, 'user-1');
@@ -1235,7 +1235,7 @@ describe('Property 13: CharacterDto defaults are always fixed', () => {
             tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
             manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-            level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+            selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
             equipmentSelections: {}
           };
           const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
@@ -1271,7 +1271,7 @@ describe('Property 14: DTO user ID matches JWT token', () => {
             tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
             manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-            level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+            selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
             equipmentSelections: {}
           };
           const dto = buildCharacterDto(formData, formData.finalScores, 8, userId);
@@ -1300,7 +1300,7 @@ describe('Property 14: DTO user ID matches JWT token', () => {
             tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
             manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-            level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+            selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
             equipmentSelections: {}
           };
           const dto = buildCharacterDto(formData, formData.finalScores, 8, extractedId);
@@ -1319,7 +1319,7 @@ describe('Property 14: DTO user ID matches JWT token', () => {
       tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
       manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-      level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+      selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
       equipmentSelections: {}
     };
     const dto = buildCharacterDto(formData, formData.finalScores, 8, null);
@@ -1348,7 +1348,7 @@ describe('Property 15: DTO saving throws match selected class', () => {
             tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
             manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-            level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+            selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
             equipmentSelections: {}
           };
           const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
@@ -1367,7 +1367,7 @@ describe('Property 15: DTO saving throws match selected class', () => {
       tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
       manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-      level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+      selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
       equipmentSelections: {}
     };
     const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
@@ -1394,7 +1394,7 @@ describe('Property 16: DTO skill proficiencies match selected skills', () => {
             tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
             manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedSkills, finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-            level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+            selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
             equipmentSelections: {}
           };
           const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
@@ -1425,7 +1425,7 @@ describe('Property 16: DTO skill proficiencies match selected skills', () => {
       tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
       manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-      level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+      selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
       equipmentSelections: {}
     };
     const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
@@ -1456,7 +1456,7 @@ describe('ForgeCharacterPage: submit flow', () => {
       manualScores: { str: 15, dex: 12, con: 14, int: 10, wis: 10, cha: 8 },
       selectedSkills: ['athletics', 'perception'],
       finalScores: { str: 16, dex: 12, con: 14, int: 10, wis: 10, cha: 8 },
-      level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 12,
+      selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 12,
       equipmentSelections: {}
     };
     component.currentStep = 5;
@@ -1593,7 +1593,7 @@ function makeFormDataWithClass(cls: any): CharacterFormData {
     manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
     selectedSkills: [],
     finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-    level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+    selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
   };
 }
 
@@ -1642,11 +1642,11 @@ describe('ForgeCharacterPage: activeSteps getter', () => {
     expect(component.activeSteps).toContain('equipment');
   });
 
-  it('should NOT include "equipment" when selected class has StructuredEquipment with 0 choice sets (fixed grants only)', () => {
+  it('should include "equipment" when selected class has StructuredEquipment even with 0 choice sets (for transparency of fixed grants)', () => {
     const equipment = makeStructuredEquipment(0, 2); // 0 choice sets, 2 fixed grants
     component.formData.selectedClass = { id: 'c1', classFeatures: { startingEquipment: equipment } };
 
-    expect(component.activeSteps).not.toContain('equipment');
+    expect(component.activeSteps).toContain('equipment');
   });
 
   it('should NOT include "equipment" when selected class has legacy equipment (plain string)', () => {
@@ -1865,7 +1865,7 @@ describe('buildCharacterDto: resolveInventory integration', () => {
     manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
     selectedSkills: [],
     finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-    level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+    selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
   };
 
   it('should include correct inventory lines for structured equipment with fixed grants only', () => {
@@ -1991,7 +1991,7 @@ describe('ForgeCharacterPage: submitCharacter with structured equipment', () => 
       manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedSkills: [],
       finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-      level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+      selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
     };
 
     component.submitCharacter();
@@ -2018,7 +2018,7 @@ describe('ForgeCharacterPage: submitCharacter with structured equipment', () => 
       manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedSkills: [],
       finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-      level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+      selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
     };
 
     component.submitCharacter();
@@ -2042,12 +2042,60 @@ describe('ForgeCharacterPage: submitCharacter with structured equipment', () => 
       manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedSkills: [],
       finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-      level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+      selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
     };
 
     component.submitCharacter();
 
     const callArgs = apiServiceSpy.createCharacter.calls.mostRecent().args[0];
     expect(callArgs.inventory).toEqual([]);
+  });
+});
+
+describe('ForgeCharacterPage: Language pools', () => {
+  let component: ForgeCharacterPage;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ForgeCharacterPage, HttpClientTestingModule],
+      providers: [
+        { provide: ApiService, useValue: { getRaces: () => of([]), getClasses: () => of([]) } },
+        provideRouter([]),
+      ],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(ForgeCharacterPage);
+    component = fixture.componentInstance;
+  });
+
+  it('should restrict available languages to the choice pool if defined', () => {
+    component.formData.selectedRace = {
+      id: 'r1',
+      raceFeatures: {
+        languageProficiencies: {
+          fixed: ['Común'],
+          choicePool: ['Enano', 'Gigante'],
+          choiceCount: 1
+        }
+      }
+    };
+    expect(component.availableExtraLanguages).toEqual(['Enano', 'Gigante']);
+    expect(component.extraLanguageChoicesCount).toBe(1);
+    expect(component.languagesGrantedByRace).toEqual(['Común']);
+  });
+
+  it('should fallback to global languages if choice pool is empty but count > 0', () => {
+     component.formData.selectedRace = {
+      id: 'r1',
+      raceFeatures: {
+        languageProficiencies: {
+          fixed: ['Común'],
+          choicePool: [],
+          choiceCount: 1
+        }
+      }
+    };
+    // Should contain more than just Dwarf/Giant (it's the full list minus Common)
+    expect(component.availableExtraLanguages.length).toBeGreaterThan(5);
+    expect(component.availableExtraLanguages).toContain('Élfico');
   });
 });

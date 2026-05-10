@@ -25,7 +25,8 @@ import {
   SubclassFeatureEntry,
   SubclassFeatures,
   ExpandedSpellEntry,
-  ResourcePool
+  ResourcePool,
+  SKILL_DATA
 } from '../../models/homebrew.models';
 
 // ---------------------------------------------------------------------------
@@ -44,6 +45,15 @@ export const PREPARATION_STYLES = ['PREPARED', 'KNOWN'] as const;
 export const DIE_TYPES = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20'] as const;
 export const RECHARGE_OPTIONS = ['At Will', 'Short Rest', 'Long Rest'] as const;
 export const EXPANDED_SPELL_PREPARATION_TYPES = ['ALWAYS_PREPARED', 'ALWAYS_KNOWN'] as const;
+
+export const ABILITY_ABBREVIATIONS: Record<string, string> = {
+  'Strength': 'FU',
+  'Dexterity': 'DES',
+  'Constitution': 'CON',
+  'Intelligence': 'INT',
+  'Wisdom': 'SAB',
+  'Charisma': 'CAR'
+};
 
 // ---------------------------------------------------------------------------
 // Standard D&D 5e spell slot progressions
@@ -273,6 +283,15 @@ export class HomebrewSubclassFormPage implements OnInit {
   customArmorInput = '';
   customToolInput = '';
 
+  getSkillAbility(skill: string): string {
+    return this.skillData[skill] || '';
+  }
+
+  getSkillAbbr(skill: string): string {
+    const ability = this.getSkillAbility(skill);
+    return this.abilityAbbr[ability] || '';
+  }
+
   // ---------------------------------------------------------------------------
   // Spellcasting state
   // ---------------------------------------------------------------------------
@@ -295,6 +314,8 @@ export class HomebrewSubclassFormPage implements OnInit {
   readonly dieTypes = DIE_TYPES;
   readonly rechargeOptions = RECHARGE_OPTIONS;
   readonly expandedSpellPrepTypes = EXPANDED_SPELL_PREPARATION_TYPES;
+  readonly skillData = SKILL_DATA;
+  readonly abilityAbbr = ABILITY_ABBREVIATIONS;
   readonly levelRange = Array.from({ length: 20 }, (_, i) => i + 1);
   readonly spellLevelRange = Array.from({ length: 9 }, (_, i) => i + 1);
 

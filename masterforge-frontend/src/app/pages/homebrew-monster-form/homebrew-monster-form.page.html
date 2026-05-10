@@ -401,7 +401,8 @@
                     type="button"
                     class="custom-dropdown-option"
                     (click)="selectSkillFromDropdown(skill)">
-                    {{ skill }}
+                    <span class="skill-option-name">{{ skill }}</span>
+                    <span class="skill-option-stat">{{ getSkillAbbr(skill) }}</span>
                   </button>
                 }
                 @if (availableSkillNames.length === 0) {
@@ -438,7 +439,7 @@
           <div class="skill-tags" data-testid="skill-tags">
             @for (skill of selectedSkillNames; track skill) {
               <div class="skill-tag" [attr.data-testid]="'skill-tag-' + skill.toLowerCase().replace(' ', '-')">
-                <span class="skill-tag-name">{{ skill }}</span>
+                <span class="skill-tag-name">{{ skill }} ({{ getSkillAbbr(skill) }})</span>
                 <span class="skill-tag-bonus">+{{ getSkillBonus(skill) ?? 0 }}</span>
                 <button
                   type="button"

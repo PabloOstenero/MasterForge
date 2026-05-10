@@ -158,6 +158,34 @@
       </div>
     }
 
+    <!-- ── Step 1.5: Languages ────────────────────────────────────────── -->
+    @if (currentStepName === 'languages') {
+      <div class="step-section">
+        <h2 class="section-title">Idiomas Adicionales</h2>
+        <p class="mode-hint">Tu raza te permite elegir {{ extraLanguageChoicesCount }} idioma(s) adicional(es).</p>
+        
+        @if (availableExtraLanguages.length > 0) {
+          <div class="languages-grid">
+            @for (lang of availableExtraLanguages; track lang) {
+              <div 
+                class="selectable-card selectable-card--small"
+                [class.selected]="formData.selectedLanguages.includes(lang)"
+                [class.disabled]="formData.selectedLanguages.length >= extraLanguageChoicesCount && !formData.selectedLanguages.includes(lang)"
+                (click)="toggleLanguage(lang)">
+                <div class="card-title">{{ lang }}</div>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="empty-message">No hay idiomas adicionales disponibles para seleccionar.</p>
+        }
+
+        @if (validationErrors['languages']) {
+          <p class="error-message">{{ validationErrors['languages'] }}</p>
+        }
+      </div>
+    }
+
     <!-- ── Step 2: Class ────────────────────────────────────────────────── -->
     @if (currentStepName === 'class') {
       <div class="step-section">
@@ -460,9 +488,22 @@
 
         <div class="skills-count">
           <span [class.skills-count--complete]="formData.selectedSkills.length === requiredSkillCount">
-            {{ formData.selectedSkills.length }} / {{ requiredSkillCount }} seleccionadas
+            Selección: {{ formData.selectedSkills.length }} / {{ requiredSkillCount }}
           </span>
         </div>
+
+        @if (fixedSkills.length > 0) {
+          <div class="fixed-skills-summary">
+            <h3 class="subsection-title">Competencias fijas (otorgadas)</h3>
+            <div class="fixed-skills-badges">
+              @for (skillId of fixedSkills; track skillId) {
+                <ion-badge color="success" class="skill-badge">
+                  {{ getSkillName(skillId) }}
+                </ion-badge>
+              }
+            </div>
+          </div>
+        }
 
         <div class="skills-list">
           @for (skill of availableSkills; track skill.id) {
@@ -596,6 +637,21 @@
             }
           </div>
         }
+
+        <!-- Idiomas -->
+        <div class="review-card">
+          <div class="review-card-header">Idiomas</div>
+          <div class="review-row">
+            <span class="review-key">Innatos</span>
+            <span class="review-val">{{ languagesGrantedByRace.join(', ') || 'Común' }}</span>
+          </div>
+          @if (formData.selectedLanguages.length > 0) {
+            <div class="review-row">
+              <span class="review-key">Elegidos</span>
+              <span class="review-val review-val--gold">{{ formData.selectedLanguages.join(', ') }}</span>
+            </div>
+          }
+        </div>
 
         <!-- Equipamiento inicial -->
         @if (structuredEquipment && (structuredEquipment.fixedGrants.length > 0 || structuredEquipment.choiceSets.length > 0)) {
