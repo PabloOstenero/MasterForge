@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, FormArray, FormControl, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { IonButton, IonSpinner, IonItem, IonLabel, IonInput, IonTextarea } from '@ionic/angular/standalone';
+import { IonButton, IonSpinner, IonItem, IonLabel, IonInput, IonTextarea, IonIcon } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { flash, shield, hammer, moon } from 'ionicons/icons';
 import { HomebrewService, CreateClassDto } from '../../services/homebrew.service';
 import {
   SkillProficiencies,
@@ -153,6 +155,40 @@ export const SPELL_SLOT_PRESETS: Record<string, number[][]> = {
   'Pact Magic':    PACT_MAGIC_SLOTS,
 };
 
+// prettier-ignore
+const FULL_CASTER_KNOWN: number[] = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 12, 13, 13, 14, 14, 15, 15, 15, 15];
+// prettier-ignore
+const FULL_CASTER_CANTRIPS: number[] = [3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5];
+
+// prettier-ignore
+const HALF_CASTER_KNOWN: number[] = [0, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11];
+// prettier-ignore
+const HALF_CASTER_CANTRIPS: number[] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+// prettier-ignore
+const THIRD_CASTER_KNOWN: number[] = [0, 0, 3, 4, 4, 4, 5, 6, 6, 7, 8, 8, 9, 10, 10, 11, 11, 11, 12, 13];
+// prettier-ignore
+const THIRD_CASTER_CANTRIPS: number[] = [0, 0, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3];
+
+// prettier-ignore
+const PACT_MAGIC_KNOWN: number[] = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15];
+// prettier-ignore
+const PACT_MAGIC_CANTRIPS: number[] = [2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4];
+
+export const SPELLS_KNOWN_PRESETS: Record<string, number[]> = {
+  'Full Caster': FULL_CASTER_KNOWN,
+  'Half Caster': HALF_CASTER_KNOWN,
+  'Third Caster': THIRD_CASTER_KNOWN,
+  'Pact Magic': PACT_MAGIC_KNOWN,
+};
+
+export const CANTRIPS_KNOWN_PRESETS: Record<string, number[]> = {
+  'Full Caster': FULL_CASTER_CANTRIPS,
+  'Half Caster': HALF_CASTER_CANTRIPS,
+  'Third Caster': THIRD_CASTER_CANTRIPS,
+  'Pact Magic': PACT_MAGIC_CANTRIPS,
+};
+
 
 
 // ---------------------------------------------------------------------------
@@ -254,7 +290,7 @@ export function serializeSpellSlotTable(table: SpellSlotTable): number[][] {
     ReactiveFormsModule,
     FormsModule,
     IonButton, IonSpinner,
-    IonItem, IonLabel, IonInput, IonTextarea,
+    IonItem, IonLabel, IonInput, IonTextarea, IonIcon,
     StartingEquipmentPickerComponent,
   ],
 })
@@ -396,7 +432,9 @@ export class HomebrewClassFormPage implements OnInit {
     private homebrewService: HomebrewService,
     private router: Router,
     private route: ActivatedRoute,
-  ) {}
+  ) {
+    addIcons({ flash, shield, hammer, moon });
+  }
 
   // ---------------------------------------------------------------------------
   // Lifecycle
@@ -1002,6 +1040,35 @@ export class HomebrewClassFormPage implements OnInit {
 
     // Reset customized flag — slots now match the preset
     this.spellSlotsCustomized = false;
+  }
+
+  applySpellcastingPreset(type: string): void {
+    const knownPreset = SPELLS_KNOWN_PRESETS[type];
+    const cantripPreset = CANTRIPS_KNOWN_PRESETS[type];
+    const slotsPreset = SPELL_SLOT_PRESETS[type];
+
+    if (knownPreset) {
+      knownPreset.forEach((val, i) => this.spellsKnown.at(i).setValue(val));
+    }
+    if (cantripPreset) {
+      cantripPreset.forEach((val, i) => this.cantripsKnown.at(i).setValue(val));
+    }
+    if (slotsPreset) {
+      slotsPreset.forEach((row, levelIdx) => {
+        const rowArray = this.spellSlots.at(levelIdx) as FormArray;
+        row.forEach((val, slotIdx) => {
+          rowArray.at(slotIdx).setValue(val === 0 ? null : val);
+        });
+      });
+      this.spellSlotsCustomized = false;
+    }
+    
+    // Auto-select the type in the dropdown for visual consistency
+    this.form.patchValue({ spellcastingType: type });
+    if (type === 'Full Caster' || type === 'Pact Magic') {
+      this.form.patchValue({ preparationStyle: 'KNOWN' });
+      this.showSpellsKnown = true;
+    }
   }
 
   checkSpellSlotsCustomized(): void {

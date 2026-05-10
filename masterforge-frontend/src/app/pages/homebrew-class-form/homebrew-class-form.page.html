@@ -656,6 +656,24 @@
           </div><!-- .form-grid -->
 
           @if (spellcastingEnabled) {
+            <!-- Presets Section -->
+            <div class="form-section presets-section" style="margin-top: 10px;">
+              <h3 class="subsection-title" style="margin-bottom: 8px;">Preajustes Rápidos (Auto-completar tablas)</h3>
+              <div class="preset-buttons">
+                <button type="button" class="btn-preset" (click)="applySpellcastingPreset('Full Caster')">
+                  <ion-icon name="flash" slot="start"></ion-icon> Full Caster (Mago/Hechicero)
+                </button>
+                <button type="button" class="btn-preset" (click)="applySpellcastingPreset('Half Caster')">
+                  <ion-icon name="shield" slot="start"></ion-icon> Half Caster (Paladín/Ranger)
+                </button>
+                <button type="button" class="btn-preset" (click)="applySpellcastingPreset('Third Caster')">
+                  <ion-icon name="hammer" slot="start"></ion-icon> Third Caster (E. Knight)
+                </button>
+                <button type="button" class="btn-preset" (click)="applySpellcastingPreset('Pact Magic')">
+                  <ion-icon name="moon" slot="start"></ion-icon> Pact Magic (Brujo)
+                </button>
+              </div>
+            </div>
 
             <!-- Config row — horizontal, full width -->
             <div class="form-section" style="margin-top: 20px;">

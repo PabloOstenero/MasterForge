@@ -886,16 +886,29 @@ export class ForgeCharacterPage implements OnInit {
   }
 
   get cantripsAllowed(): number {
-    const sc = this.formData.selectedSubclass?.subclassFeatures?.spellcasting || this.formData.selectedClass?.classFeatures?.spellcasting;
+    const cls = this.formData.selectedClass;
+    const sc = this.formData.selectedSubclass?.subclassFeatures?.spellcasting || cls?.classFeatures?.spellcasting;
     if (!sc) return 0;
     const idx = Math.min(Math.max(this.formData.level - 1, 0), 19);
     return sc.cantripsKnown?.[idx] || 0;
   }
 
   get spellsAllowed(): number {
-    const sc = this.formData.selectedSubclass?.subclassFeatures?.spellcasting || this.formData.selectedClass?.classFeatures?.spellcasting;
+    const cls = this.formData.selectedClass;
+    const sc = this.formData.selectedSubclass?.subclassFeatures?.spellcasting || cls?.classFeatures?.spellcasting;
     if (!sc) return 0;
-    const idx = Math.min(Math.max(this.formData.level - 1, 0), 19);
+
+    const level = this.formData.level;
+    const idx = Math.min(Math.max(level - 1, 0), 19);
+
+    // Wizard / Book Caster formula: 6 at lvl 1, +2 per level thereafter
+    // In D&D, Prepared casters usually 'know' their whole list, 
+    // but Wizards have a Spellbook with this specific progression.
+    if (cls?.name?.toLowerCase() === 'wizard' || sc.preparationStyle === 'PREPARED') {
+      return 6 + (level - 1) * 2;
+    }
+
+    // Known Casters: Check the spellsKnown table from the JSON
     return sc.spellsKnown?.[idx] || 0;
   }
 
@@ -1000,6 +1013,14 @@ export class ForgeCharacterPage implements OnInit {
       case 'equipment': return this._validateEquipmentStep();
       case 'ability-scores': return this._validateAbilityScoresStep();
       case 'skills': return this.formData.selectedSkills.length === this.requiredSkillCount ? {} : { skills: `Selecciona exactamente ${this.requiredSkillCount} habilidades.` };
+      case 'spells': {
+        const cantripDiff = this.cantripsAllowed - this.selectedCantripsCount;
+        const spellDiff = this.spellsAllowed - this.selectedNonCantripsCount;
+        if (cantripDiff > 0 || spellDiff > 0) {
+          return { spells: `Te faltan elegir ${cantripDiff > 0 ? cantripDiff + ' trucos' : ''}${cantripDiff > 0 && spellDiff > 0 ? ' y ' : ''}${spellDiff > 0 ? spellDiff + ' conjuros' : ''}.` };
+        }
+        return {};
+      }
       default: return {};
     }
   }
