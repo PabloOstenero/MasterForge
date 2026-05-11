@@ -10,9 +10,10 @@ import {
 } from '@ionic/angular/standalone';
 import { 
   informationCircleOutline, sparkles, flashOutline, shield, flaskOutline, briefcase, bookOutline,
-  checkmarkCircle, peopleOutline, ribbonOutline
+  checkmarkCircle, peopleOutline, ribbonOutline, addOutline, addCircleOutline, removeCircleOutline, trashOutline
 } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
+import { getProficiencyBonus, getModifier, calculatePassive, calculateMulticlassHp } from '../../utils/dnd-utils';
 import { ApiService } from '../../services/api';
 import { AuthService } from '../../services/auth.service';
 import { isStructuredEquipment, resolveInventory, StructuredEquipment, ResolvedInventoryLine, ItemSummary, deserializeEquipment } from '../../models/equipment.models';
@@ -23,7 +24,7 @@ import { switchMap } from 'rxjs/operators';
 // ─── Step definitions ────────────────────────────────────────────────────────
 const BASE_STEPS = ['identity', 'race', 'class', 'ability-scores', 'skills', 'review'] as const;
 type BaseStep = typeof BASE_STEPS[number];
-type Step = BaseStep | 'subclass' | 'equipment' | 'spells' | 'languages' | 'feature-options';
+type Step = BaseStep | 'subclass' | 'equipment' | 'spells' | 'languages' | 'feature-options' | 'multiclass';
 
 export const STEP_LABELS: Record<Step, string> = {
   'identity': 'Identidad',
@@ -36,6 +37,7 @@ export const STEP_LABELS: Record<Step, string> = {
   'skills': 'Habilidades',
   'spells': 'Conjuros',
   'feature-options': 'Rasgos',
+  'multiclass': 'Multiclase',
   'review': 'Revisión'
 };
 
@@ -117,6 +119,14 @@ export const LANGUAGES = [
 ] as const;
 
 // ─── CharacterFormData interface ──────────────────────────────────────────────
+export interface MulticlassEntry {
+  classId: number;
+  subclassId: number | null;
+  subclass?: any | null;
+  level: number;
+  dndClass: any;
+}
+
 export interface CharacterFormData {
   // Step 0: Identity
   name: string;
@@ -134,6 +144,7 @@ export interface CharacterFormData {
   // Step 2: Class
   selectedClass: any | null;
   selectedSubclass: any | null;
+  multiclasses: MulticlassEntry[];
 
   // Step 3 (dynamic): Equipment — maps choiceSet index → selected option index
   equipmentSelections: Record<number, number>;
@@ -206,7 +217,13 @@ export class ForgeCharacterPage implements OnInit {
       steps.push('equipment');
     }
 
-    steps.push('ability-scores', 'skills');
+    steps.push('ability-scores');
+
+    if (this.formData.level > 1) {
+      steps.push('multiclass');
+    }
+
+    steps.push('skills');
 
     if (cls?.classFeatures?.spellcasting || this.formData.selectedSubclass?.subclassFeatures?.spellcasting) {
       steps.push('spells');
@@ -223,21 +240,22 @@ export class ForgeCharacterPage implements OnInit {
   /** Features at current level that grant choices. */
   get availableFeatureChoices(): any[] {
     const choices: any[] = [];
-    const currentLevel = this.formData.level;
-
-    const findChoices = (features: any[]) => {
+    
+    const findChoices = (features: any[], level: number, sourceName: string) => {
       if (!features) return;
       features.forEach(f => {
-        if (f.levelRequired <= currentLevel && f.options && f.options.options?.length > 0) {
-          const max = this.calculateMaxChoices(f);
-          const filteredOptions = (f.options.options || []).filter((opt: any) => {
+        if (f.levelRequired <= level && f.options) {
+          const max = this.calculateMaxChoices(f, level);
+          const optsArray = this.getFeatureOptionsArray(f);
+          const filteredOptions = optsArray.filter((opt: any) => {
             const req = opt.levelRequired ?? f.levelRequired;
-            return req <= currentLevel;
+            return parseInt(req, 10) <= level;
           });
 
           if (filteredOptions.length > 0) {
             choices.push({
               ...f,
+              sourceName, // To show which class/race provides the feature
               calculatedMaxChoices: max,
               filteredOptions: filteredOptions
             });
@@ -248,37 +266,77 @@ export class ForgeCharacterPage implements OnInit {
 
     // Race traits
     if (this.formData.selectedRace?.traits) {
-      findChoices(this.formData.selectedRace.traits);
+      findChoices(this.formData.selectedRace.traits, this.formData.level, this.formData.selectedRace.name);
     }
 
-    // Class features
+    // Primary Class
+    const mcTotal = this.formData.multiclasses.reduce((sum, mc) => sum + mc.level, 0);
+    const primaryLevel = this.formData.level - mcTotal;
+    
     if (this.formData.selectedClass?.features) {
-      findChoices(this.formData.selectedClass.features);
+      findChoices(this.formData.selectedClass.features, primaryLevel, this.formData.selectedClass.name);
     }
-    // Subclass features
     const sf = this.formData.selectedSubclass?.subclassFeatures;
     if (sf?.features) {
-      findChoices(sf.features);
-    } else if (sf?.subclassFeatureEntries) {
-      findChoices(sf.subclassFeatureEntries);
+      findChoices(sf.features, primaryLevel, this.formData.selectedSubclass?.name || 'Subclase');
     }
+
+    // Multiclasses
+    this.formData.multiclasses.forEach(mc => {
+      const cls = this.classes.find(c => c.id === mc.classId);
+      if (cls?.features) {
+        findChoices(cls.features, mc.level, cls.name);
+      }
+      const mcsf = mc.subclass?.subclassFeatures;
+      if (mcsf?.features) {
+        findChoices(mcsf.features, mc.level, mc.subclass?.name || 'Subclase');
+      }
+    });
 
     return choices;
   }
 
   /** Calculates total allowed choices for a feature based on progression. */
-  calculateMaxChoices(feature: any): number {
-    const currentLevel = this.formData.level;
-    let total = feature.options?.choiceCount ?? 0;
-    
-    if (feature.options?.progression) {
-      feature.options.progression.forEach((p: any) => {
-        if (p.level <= currentLevel) {
-          total += p.additionalChoices;
-        }
-      });
+  calculateMaxChoices(feature: any, level?: number): number {
+    const lvl = level || this.formData.level;
+    const options = feature.options;
+    if (!options) return 0;
+
+    let total = options.choiceCount || 0;
+
+    if (options.progression && Array.isArray(options.progression)) {
+      const applicable = options.progression
+        .filter((p: any) => lvl >= p.level)
+        .reduce((sum: number, p: any) => sum + (p.additionalChoices || 0), 0);
+      total += applicable;
     }
+
+    // Fallback: if there are options but total is 0, assume at least 1 choice is allowed
+    if (total === 0 && this.getFeatureOptionsArray(feature).length > 0) return 1;
+
     return total;
+  }
+
+  getFeatureOptionsArray(feature: any): any[] {
+    if (!feature) return [];
+    if (Array.isArray(feature.choices)) return feature.choices;
+    if (Array.isArray(feature.options)) return feature.options;
+
+    const opt = feature.options;
+    if (!opt || typeof opt !== 'object') return [];
+
+    if (Array.isArray(opt.options)) return opt.options;
+    if (Array.isArray(opt.choices)) return opt.choices;
+    if (Array.isArray(opt.choicePool)) return opt.choicePool;
+    if (Array.isArray(opt.choice_pool)) return opt.choice_pool;
+    if (Array.isArray(opt.pool)) return opt.pool;
+
+    for (const key of Object.keys(opt)) {
+      if (Array.isArray(opt[key]) && opt[key].length > 0) {
+        return opt[key];
+      }
+    }
+    return [];
   }
 
   // ─── Form data ──────────────────────────────────────────────────────────────
@@ -292,6 +350,7 @@ export class ForgeCharacterPage implements OnInit {
     selectedLanguages: [],
     selectedClass: null,
     selectedSubclass: null,
+    multiclasses: [],
     equipmentSelections: {},
     scoreMode: 'standard',
     tokenAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
@@ -369,7 +428,11 @@ export class ForgeCharacterPage implements OnInit {
       'book-outline': bookOutline,
       'checkmark-circle': checkmarkCircle,
       'people-outline': peopleOutline,
-      'ribbon-outline': ribbonOutline
+      'ribbon-outline': ribbonOutline,
+      'add-outline': addOutline,
+      'add-circle-outline': addCircleOutline,
+      'remove-circle-outline': removeCircleOutline,
+      'trash-outline': trashOutline
     });
   }
 
@@ -660,6 +723,95 @@ export class ForgeCharacterPage implements OnInit {
     } else {
       this.formData.selectedSubclass = sc;
     }
+  }
+
+  // ─── Multiclassing helpers ────────────────────────────────────────────────
+  
+  get totalAssignedLevels(): number {
+    let total = 1; // Start with 1 for primary class
+    this.formData.multiclasses.forEach(m => total += m.level);
+    return total;
+  }
+
+  get remainingLevels(): number {
+    return this.formData.level - this.totalAssignedLevels;
+  }
+
+  canAddMulticlass(): boolean {
+    return this.remainingLevels > 0;
+  }
+
+  addMulticlass(cls: any): void {
+    if (!this.canAddMulticlass()) return;
+    
+    // Check if already present
+    if (this.formData.selectedClass?.id === cls.id || this.formData.multiclasses.some(m => m.classId === cls.id)) {
+      return;
+    }
+
+    this.formData.multiclasses.push({
+      classId: cls.id,
+      subclassId: null,
+      level: 1,
+      dndClass: cls
+    });
+  }
+
+  removeMulticlass(index: number): void {
+    this.formData.multiclasses.splice(index, 1);
+  }
+
+  updateMulticlassLevel(index: number, delta: number): void {
+    const m = this.formData.multiclasses[index];
+    const newVal = m.level + delta;
+    if (newVal >= 1 && (delta < 0 || this.remainingLevels > 0)) {
+      m.level = newVal;
+    }
+  }
+
+  isClassAvailableForMulticlass(classId: number): boolean {
+    if (!this.formData.selectedClass) return true;
+    if (this.formData.selectedClass.id === classId) return false;
+    return !this.formData.multiclasses.some((m: MulticlassEntry) => m.classId === classId);
+  }
+
+  validatePrereq(cls: any): { met: boolean; text: string } {
+    const prereqs = cls.classFeatures?.multiclassingPrerequisites;
+    if (!prereqs || !prereqs.requirements || prereqs.requirements.length === 0) {
+      return { met: true, text: 'Sin requisitos' };
+    }
+
+    const requirements = prereqs.requirements;
+    const logic = prereqs.logic || 'AND';
+    const scores = this.calculateFinalScores();
+
+    const results = requirements.map((req: any) => {
+      const ability = (req.ability || '').toUpperCase();
+      const minScore = req.minScore || 13;
+      const key = ability.substring(0, 3).toLowerCase() as AbilityKey;
+      const score = scores[key] || 0;
+      return { 
+        ability: ABILITY_LABELS[key] || ability, 
+        met: score >= minScore, 
+        current: score, 
+        required: minScore 
+      };
+    });
+
+    const metCount = results.filter((r: any) => r.met).length;
+    const isMet = logic === 'OR' ? metCount > 0 : metCount === results.length;
+    
+    const text = results.map((r: any) => `${r.ability} ${r.required}`).join(logic === 'OR' ? ' o ' : ' y ');
+    return { met: isMet, text };
+  }
+
+  calculateFinalScores(): { str: number; dex: number; con: number; int: number; wis: number; cha: number } {
+    const scores = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
+    for (const key of ABILITY_KEYS) {
+      const base = this.getBaseScore(key) || 10;
+      scores[key] = base + this.getRacialBonus(key);
+    }
+    return scores;
   }
 
   // ─── Equipment step ──────────────────────────────────────────────────────────
@@ -988,9 +1140,27 @@ export class ForgeCharacterPage implements OnInit {
     if (!this.formData.selectedClass) return null;
     const finalCon = this.getFinalScore('con');
     if (finalCon === null) return null;
+    const conMod = getModifier(finalCon);
+
     const rawHitDie = this.formData.selectedClass.hitDie;
-    const hitDieValue = typeof rawHitDie === 'string' ? parseInt(rawHitDie.replace('d', ''), 10) : (rawHitDie ?? 8);
-    return calculateHp(hitDieValue, finalCon, this.formData.level, this.formData.hpGenerationMode, this.formData.hpRolledValue);
+    const primaryHitDie = typeof rawHitDie === 'string' ? parseInt(rawHitDie.replace('d', ''), 10) : (rawHitDie ?? 8);
+
+    const multiclassLevels = this.formData.multiclasses.reduce((sum, mc) => sum + mc.level, 0);
+    const primaryLevel = this.formData.level - multiclassLevels;
+
+    const mcData = this.formData.multiclasses.map(mc => ({
+      hitDie: typeof mc.dndClass.hitDie === 'string' ? parseInt(mc.dndClass.hitDie.replace('d', ''), 10) : (mc.dndClass.hitDie ?? 8),
+      level: mc.level
+    }));
+
+    return calculateMulticlassHp(
+      primaryHitDie,
+      conMod,
+      primaryLevel,
+      mcData,
+      this.formData.hpGenerationMode,
+      this.formData.hpRolledValue
+    );
   }
 
   // ─── Spells step logic ───────────────────────────────────────────────────────
@@ -1126,9 +1296,26 @@ export class ForgeCharacterPage implements OnInit {
       wis: this.getFinalScore('wis') ?? 10,
       cha: this.getFinalScore('cha') ?? 10,
     };
+    const conMod = getModifier(finalCon);
     const rawHitDie = this.formData.selectedClass?.hitDie;
-    const hitDieValue = typeof rawHitDie === 'string' ? parseInt(rawHitDie.replace('d', ''), 10) : (rawHitDie ?? 8);
-    const hp = calculateHp(hitDieValue, finalCon, this.formData.level, this.formData.hpGenerationMode, this.formData.hpRolledValue);
+    const primaryHitDie = typeof rawHitDie === 'string' ? parseInt(rawHitDie.replace('d', ''), 10) : (rawHitDie ?? 8);
+
+    const multiclassLevels = this.formData.multiclasses.reduce((sum, mc) => sum + mc.level, 0);
+    const primaryLevel = this.formData.level - multiclassLevels;
+
+    const mcData = this.formData.multiclasses.map(mc => ({
+      hitDie: typeof mc.dndClass.hitDie === 'string' ? parseInt(mc.dndClass.hitDie.replace('d', ''), 10) : (mc.dndClass.hitDie ?? 8),
+      level: mc.level
+    }));
+
+    const hp = calculateMulticlassHp(
+      primaryHitDie,
+      conMod,
+      primaryLevel,
+      mcData,
+      this.formData.hpGenerationMode,
+      this.formData.hpRolledValue
+    );
 
     // Resolve inventory from structured equipment + player selections
     const equipment = this.structuredEquipment;
@@ -1346,25 +1533,6 @@ export function formatRaceBonuses(race: any): string {
   return parts.join(', ');
 }
 
-/**
- * Calculates the starting HP for a level-1 character.
- * Formula: hitDie + Math.floor((finalCon - 10) / 2)
- * @param hitDie  The class hit die value (e.g. 8 for d8)
- * @param finalCon  The final Constitution score (base + racial bonus)
- */
-export function calculateHp(hitDie: number, finalCon: number, level: number = 1, mode: 'average' | 'roll' = 'average', rolledValue: number = 0): number {
-  const conModifier = Math.floor((finalCon - 10) / 2);
-  const firstLevelHp = hitDie + conModifier;
-  
-  if (level <= 1) return firstLevelHp;
-
-  if (mode === 'average') {
-    const avgHpPerLevel = Math.floor(hitDie / 2) + 1 + conModifier;
-    return firstLevelHp + ((level - 1) * avgHpPerLevel);
-  } else {
-    return firstLevelHp + rolledValue + ((level - 1) * conModifier);
-  }
-}
 
 /**
  * Validates a single manual ability score value.
@@ -1471,12 +1639,24 @@ export function buildCharacterDto(
     dndRace: { id: Number(formData.selectedRace?.id) },
     dndClass: { id: Number(formData.selectedClass?.id) },
     subclassId: formData.selectedSubclass ? Number(formData.selectedSubclass.id) : null,
+    classLevels: [
+      { 
+        classId: Number(formData.selectedClass?.id), 
+        subclassId: formData.selectedSubclass ? Number(formData.selectedSubclass.id) : null, 
+        level: formData.level - formData.multiclasses.reduce((sum, m) => sum + m.level, 0)
+      },
+      ...formData.multiclasses.map(m => ({ 
+        classId: m.classId, 
+        subclassId: m.subclassId, 
+        level: m.level 
+      }))
+    ],
     inventory: inventory.map(line => ({
       item: { id: line.itemId },
       quantity: line.quantity,
       isEquipped: false,
       isAttuned: false,
-      characterId: '00000000-0000-0000-0000-000000000000' // Required by backend DTO even if ignored
+      characterId: '00000000-0000-0000-0000-000000000000' 
     }))
   };
 }

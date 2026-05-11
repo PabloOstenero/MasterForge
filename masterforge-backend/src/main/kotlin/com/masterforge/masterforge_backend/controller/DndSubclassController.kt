@@ -24,6 +24,11 @@ class DndSubclassController(
     fun getAllDndSubclasses(): List<DndSubclass> {
         return dndSubclassRepository.findAll()
     }
+    
+    @GetMapping("/class/{classId}")
+    fun getSubclassesByParentClass(@PathVariable classId: Int): List<DndSubclass> {
+        return dndSubclassRepository.findByParentClassId(classId)
+    }
 
     @PostMapping
     fun createDndSubclass(@RequestBody dto: DndSubclassDto): DndSubclass {

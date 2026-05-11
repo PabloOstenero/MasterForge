@@ -240,10 +240,10 @@
           @if (classes.length === 0 && !classesLoading) {
             <p class="empty-message">No hay clases disponibles.</p>
           }
+        }
 
-          @if (validationErrors['class']) {
-            <p class="error-message">{{ validationErrors['class'] }}</p>
-          }
+        @if (validationErrors['class']) {
+          <p class="error-message">{{ validationErrors['class'] }}</p>
         }
       </div>
     }
@@ -501,7 +501,76 @@
       </div>
     }
 
-    <!-- ── Step 4: Skills ───────────────────────────────────────────────── -->
+    <!-- ── Step 4.5: Multiclassing ──────────────────────────────────────── -->
+    @if (currentStepName === 'multiclass') {
+      <div class="step-section">
+        <h2 class="section-title">Multiclase</h2>
+        <p class="mode-hint">Distribuye tus niveles adicionales en otras clases si cumples los requisitos.</p>
+
+        <div class="multiclass-section" style="margin-top: 0; padding-top: 0; border-top: none;">
+          <h3 class="subsection-title gold-text">Distribución de Niveles</h3>
+          <p class="mode-hint">Niveles totales: {{ formData.level }} | Niveles por asignar: <span [class.gold-text]="remainingLevels > 0">{{ remainingLevels }}</span></p>
+          
+          <div class="multiclass-list">
+            <!-- Primary Class -->
+            <div class="mc-item mc-item--primary">
+              <div class="mc-info">
+                <span class="mc-name">{{ formData.selectedClass?.name }}</span>
+                <span class="mc-tag">Primaria</span>
+              </div>
+              <div class="mc-controls">
+                <span class="mc-level-display">Nivel {{ formData.level - totalAssignedLevels + 1 }}</span>
+              </div>
+            </div>
+
+            <!-- Multiclasses -->
+            @for (mc of formData.multiclasses; track $index; let idx = $index) {
+              <div class="mc-item">
+                <div class="mc-info">
+                  <span class="mc-name">{{ mc.dndClass.name }}</span>
+                </div>
+                <div class="mc-controls">
+                  <ion-button fill="clear" size="small" (click)="updateMulticlassLevel(idx, -1)" [disabled]="mc.level <= 1">
+                    <ion-icon name="remove-circle-outline"></ion-icon>
+                  </ion-button>
+                  <span class="mc-level-display">{{ mc.level }}</span>
+                  <ion-button fill="clear" size="small" (click)="updateMulticlassLevel(idx, 1)" [disabled]="remainingLevels === 0">
+                    <ion-icon name="add-circle-outline"></ion-icon>
+                  </ion-button>
+                  <ion-button fill="clear" size="small" color="danger" (click)="removeMulticlass(idx)">
+                    <ion-icon name="trash-outline"></ion-icon>
+                  </ion-button>
+                </div>
+              </div>
+            }
+          </div>
+
+          @if (canAddMulticlass()) {
+            <h4 class="subsection-title" style="font-size: 1rem; margin-top: 24px;">Añadir otra clase</h4>
+            <div class="mc-available-grid">
+              @for (cls of classes; track cls.id) {
+                @if (isClassAvailableForMulticlass(cls.id)) {
+                  @let prereq = validatePrereq(cls);
+                  <div class="mc-add-card" [class.mc-add-card--disabled]="!prereq.met" (click)="prereq.met && addMulticlass(cls)">
+                    <div class="mc-add-info">
+                      <span class="mc-add-name">{{ cls.name }}</span>
+                      <span class="mc-add-prereq" [class.mc-add-prereq--met]="prereq.met">
+                        {{ prereq.met ? '✓ ' : '✗ ' }}{{ prereq.text }}
+                      </span>
+                    </div>
+                    @if (prereq.met) {
+                      <ion-icon name="add-outline"></ion-icon>
+                    }
+                  </div>
+                }
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ── Step 5: Skills ────────────────────────────────────────────────── -->
     @if (currentStepName === 'skills') {
       <div class="step-section">
         <h2 class="section-title">Competencias de Habilidad</h2>

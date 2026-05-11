@@ -175,6 +175,22 @@ data class InventorySlotResponseDto(
     }
 }
 
+data class CharacterClassLevelResponseDto(
+    val dndClass: DndClassResponseDto,
+    val subclass: SubclassResponseDto? = null,
+    val level: Int
+) {
+    companion object {
+        fun fromEntity(entity: CharacterClassLevel): CharacterClassLevelResponseDto {
+            return CharacterClassLevelResponseDto(
+                dndClass = DndClassResponseDto.fromEntity(entity.dndClass, entity.level),
+                subclass = entity.subclass?.let { SubclassResponseDto.fromEntity(it, entity.level) },
+                level = entity.level
+            )
+        }
+    }
+}
+
 data class CharacterResponseDto(
     val id: UUID,
     val name: String,
@@ -210,6 +226,7 @@ data class CharacterResponseDto(
     val dndClass: DndClassResponseDto,
     val campaign: CampaignRef? = null,
     val subclass: SubclassResponseDto? = null,
+    val classLevels: List<CharacterClassLevelResponseDto> = emptyList(),
     val choicesJson: Map<String, Any>,
     val inventory: List<InventorySlotResponseDto>,
     val spells: List<CharacterSpellResponseDto> = emptyList()
@@ -255,6 +272,7 @@ data class CharacterResponseDto(
                 dndClass = DndClassResponseDto.fromEntity(character.dndClass, character.level),
                 campaign = character.campaign?.let { CampaignRef(it.id!!) },
                 subclass = character.subclass?.let { SubclassResponseDto.fromEntity(it, character.level) },
+                classLevels = character.classLevels.map { CharacterClassLevelResponseDto.fromEntity(it) },
                 choicesJson = character.choicesJson,
                 inventory = character.inventory.map { InventorySlotResponseDto.fromEntity(it) }
             )

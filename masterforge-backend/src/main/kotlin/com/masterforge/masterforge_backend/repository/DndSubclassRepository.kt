@@ -8,4 +8,5 @@ import java.util.UUID
 @Repository
 interface DndSubclassRepository : JpaRepository<DndSubclass, Int> {
     fun findByAuthorId(authorId: UUID): List<DndSubclass>
+    fun findByParentClassId(parentClassId: Int): List<DndSubclass>
 }

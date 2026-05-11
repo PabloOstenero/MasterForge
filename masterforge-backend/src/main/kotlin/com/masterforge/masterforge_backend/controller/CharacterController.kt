@@ -4,10 +4,7 @@ import com.masterforge.masterforge_backend.model.dto.CharacterDto
 import com.masterforge.masterforge_backend.model.dto.CharacterResponseDto
 import com.masterforge.masterforge_backend.model.dto.CharacterSummaryDto
 import com.masterforge.masterforge_backend.model.dto.SpellDto
-import com.masterforge.masterforge_backend.model.entity.Character
-import com.masterforge.masterforge_backend.model.entity.CharacterSpell
-import com.masterforge.masterforge_backend.model.entity.Spell
-import com.masterforge.masterforge_backend.model.entity.InventorySlot
+import com.masterforge.masterforge_backend.model.entity.*
 import com.masterforge.masterforge_backend.repository.*
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -25,10 +22,13 @@ data class MoneyUpdateDto(val cp: Int, val sp: Int, val ep: Int, val gp: Int, va
 data class AddSpellDto(val spellId: java.util.UUID, val isPrepared: Boolean = false)
 data class SpellSlotsUpdateDto(val spellSlots: Map<String, Any>)
 data class LevelUpDto(
-    val maxHp: Int,
-    val stats: Map<String, Int>,
+    val hpBonus: Int,
+    val statChanges: Map<String, Int>,
     val choicesJson: Map<String, Any>,
-    val newSpells: List<UUID> = emptyList()
+    val newSpells: List<UUID> = emptyList(),
+    val multiclassId: Int? = null,
+    val classToLevelId: Int? = null,
+    val subclassId: Int? = null
 )
 
 @RestController
@@ -43,7 +43,8 @@ class CharacterController(
     private val dndSubclassRepository: DndSubclassRepository,
     private val itemRepository: ItemRepository,
     private val characterSpellRepository: CharacterSpellRepository,
-    private val spellRepository: SpellRepository
+    private val spellRepository: SpellRepository,
+    private val characterClassLevelRepository: CharacterClassLevelRepository
 ) {
 
     @GetMapping
@@ -139,7 +140,36 @@ class CharacterController(
             ))
         }
 
-        return CharacterResponseDto.fromEntity(characterRepository.save(character))
+        val savedCharacter = characterRepository.save(character)
+
+        // Initialize class levels
+        if (dto.classLevels.isNotEmpty()) {
+            dto.classLevels.forEach { clDto ->
+                val clClass = dndClassRepository.findById(clDto.classId).get()
+                val clSubclass = clDto.subclassId?.let { dndSubclassRepository.findById(it).orElse(null) }
+                characterClassLevelRepository.save(com.masterforge.masterforge_backend.model.entity.CharacterClassLevel(
+                    character = savedCharacter,
+                    dndClass = clClass,
+                    subclass = clSubclass,
+                    level = clDto.level
+                ))
+            }
+        } else {
+            // Fallback for single class creation
+            characterClassLevelRepository.save(com.masterforge.masterforge_backend.model.entity.CharacterClassLevel(
+                character = savedCharacter,
+                dndClass = dndClass,
+                subclass = subclass,
+                level = dto.level
+            ))
+        }
+
+        // Final recalculation of slots for multiclassing
+        val finalCharacter = characterRepository.findById(savedCharacter.id!!).get()
+        val slots = com.masterforge.masterforge_backend.util.SpellcastingUtils.calculateMulticlassSlots(finalCharacter)
+        characterRepository.save(finalCharacter.copy(spellSlots = slots))
+
+        return CharacterResponseDto.fromEntity(characterRepository.findById(savedCharacter.id!!).get())
     }
 
     @GetMapping("/{id}")
@@ -740,72 +770,114 @@ class CharacterController(
     fun levelUp(@PathVariable id: UUID, @RequestBody dto: LevelUpDto): ResponseEntity<CharacterResponseDto> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
-        
-        val newLevel = character.level + 1
-        
+
         // Update basic stats
-        var updatedCharacter = character.copy(
-            level = newLevel,
-            maxHp = dto.maxHp,
-            currentHp = dto.maxHp, // Heal to full on level up
-            hitDiceTotal = newLevel,
-            baseStr = dto.stats["str"] ?: character.baseStr,
-            baseDex = dto.stats["dex"] ?: character.baseDex,
-            baseCon = dto.stats["con"] ?: character.baseCon,
-            baseInt = dto.stats["int"] ?: character.baseInt,
-            baseWis = dto.stats["wis"] ?: character.baseWis,
-            baseCha = dto.stats["cha"] ?: character.baseCha,
+        val updatedCharacter = character.copy(
+            level = character.level + 1,
+            maxHp = character.maxHp + dto.hpBonus,
+            baseStr = character.baseStr + (dto.statChanges["str"] ?: 0),
+            baseDex = character.baseDex + (dto.statChanges["dex"] ?: 0),
+            baseCon = character.baseCon + (dto.statChanges["con"] ?: 0),
+            baseInt = character.baseInt + (dto.statChanges["int"] ?: 0),
+            baseWis = character.baseWis + (dto.statChanges["wis"] ?: 0),
+            baseCha = character.baseCha + (dto.statChanges["cha"] ?: 0),
             choicesJson = dto.choicesJson
         )
-
-        // Recalculate Spell Slots based on class/subclass table
-        val classFeatures = character.dndClass.classFeatures
-        val subclassFeatures = character.subclass?.subclassFeatures
-        
-        val spellcasting = subclassFeatures?.get("spellcasting") as? Map<*, *> 
-                          ?: classFeatures?.get("spellcasting") as? Map<*, *>
-        
-        if (spellcasting != null) {
-            val spellSlots = spellcasting["spellSlots"] as? Map<*, *> ?: spellcasting["spell_slots"] as? Map<*, *>
-            val table = spellSlots?.get("slots") as? List<List<Int>>
-            if (table != null && table.size >= newLevel) {
-                val row = table[newLevel - 1]
-                val updatedCharSlots = updatedCharacter.spellSlots?.toMutableMap() ?: mutableMapOf()
-                
-                row.forEachIndexed { i, max ->
-                    val levelKey = "level_${i + 1}"
-                    if (max > 0) {
-                        val currentSlotData = (updatedCharSlots[levelKey] as? Map<String, Any>)?.toMutableMap() 
-                            ?: mutableMapOf<String, Any>("available" to 0, "max" to 0)
-                        
-                        currentSlotData["max"] = max
-                        currentSlotData["available"] = max // Refresh slots on level up
-                        updatedCharSlots[levelKey] = currentSlotData
-                    }
-                }
-                updatedCharacter = updatedCharacter.copy(spellSlots = updatedCharSlots)
-            }
-        }
         
         val saved = characterRepository.save(updatedCharacter)
+
+        // Handle multiclassing or leveling existing class
+        if (dto.multiclassId != null) {
+            val newClass = dndClassRepository.findById(dto.multiclassId)
+                .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Clase no encontrada") }
+            
+            // Check prerequisites for ALL current classes and the new one
+            validatePrerequisites(saved, newClass)
+            saved.classLevels.forEach { validatePrerequisites(saved, it.dndClass) }
+
+            val subclass = if (dto.subclassId != null) {
+                dndSubclassRepository.findById(dto.subclassId)
+                    .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Subclase no encontrada") }
+            } else null
+
+            characterClassLevelRepository.save(com.masterforge.masterforge_backend.model.entity.CharacterClassLevel(
+                character = saved,
+                dndClass = newClass,
+                subclass = subclass,
+                level = 1
+            ))
+        } else if (dto.classToLevelId != null) {
+            val cl = saved.classLevels.find { it.dndClass.id == dto.classToLevelId }
+                ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "El personaje no tiene esta clase")
+
+            val subclass = if (dto.subclassId != null) {
+                dndSubclassRepository.findById(dto.subclassId)
+                    .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Subclase no encontrada") }
+            } else cl.subclass
+
+            characterClassLevelRepository.save(cl.copy(level = cl.level + 1, subclass = subclass))
+            
+            // Sync with main character fields if it's the primary class
+            if (cl.dndClass.id == saved.dndClass.id && subclass != null) {
+                characterRepository.save(saved.copy(subclass = subclass))
+            }
+        } else {
+            // Default to primary class if nothing specified
+            val cl = saved.classLevels.find { it.dndClass.id == saved.dndClass.id }
+            if (cl != null) {
+                characterClassLevelRepository.save(cl.copy(level = cl.level + 1))
+            }
+        }
 
         // Save new spells selected during level up
         dto.newSpells.forEach { spellId ->
             val spell = spellRepository.findById(spellId)
                 .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Spell not found: $spellId") }
             
-            // Check if character already has this spell
             if (!characterSpellRepository.existsByCharacterIdAndSpellId(id, spellId)) {
                 characterSpellRepository.save(CharacterSpell(
                     character = saved,
                     spell = spell,
-                    isPrepared = true // New spells are usually prepared/known
+                    isPrepared = true
                 ))
             }
         }
 
+        // Recalculate Spell Slots using Multiclass logic
+        val finalCharacter = characterRepository.findById(id).get()
+        val slots = com.masterforge.masterforge_backend.util.SpellcastingUtils.calculateMulticlassSlots(finalCharacter)
+        val finalSaved = characterRepository.save(finalCharacter.copy(spellSlots = slots))
+        
         val spells = characterSpellRepository.findByCharacterId(id)
-        return ResponseEntity.ok(CharacterResponseDto.fromEntity(saved, spells))
+        return ResponseEntity.ok(CharacterResponseDto.fromEntity(finalSaved, spells))
+    }
+
+    private fun validatePrerequisites(character: Character, dndClass: DndClass) {
+        val classFeatures = dndClass.classFeatures
+        val prereqs = classFeatures?.get("multiclassingPrerequisites") as? Map<*, *> ?: return
+
+        val requirements = prereqs["requirements"] as? List<Map<String, Any>> ?: return
+        val logic = prereqs["logic"] as? String ?: "AND"
+
+        val metCount = requirements.count { req ->
+            val ability = (req["ability"] as? String)?.uppercase() ?: ""
+            val minScore = (req["minScore"] as? Number)?.toInt() ?: 13
+            val currentScore = when (ability) {
+                "STRENGTH", "STR" -> character.baseStr
+                "DEXTERITY", "DEX" -> character.baseDex
+                "CONSTITUTION", "CON" -> character.baseCon
+                "INTELLIGENCE", "INT" -> character.baseInt
+                "WISDOM", "WIS" -> character.baseWis
+                "CHARISMA", "CHA" -> character.baseCha
+                else -> 0
+            }
+            currentScore >= minScore
+        }
+
+        val isMet = if (logic == "OR") metCount > 0 else metCount == requirements.size
+        if (!isMet) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "No cumples los requisitos de multiclase para ${dndClass.name}")
+        }
     }
 
     @DeleteMapping("/{id}")

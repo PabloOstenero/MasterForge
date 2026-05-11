@@ -11,7 +11,7 @@ import {
 import { ApiService } from '../../services/api';
 import { addIcons } from 'ionicons';
 import { statsChart, sparkles, shield, briefcase, trash, add, addCircleOutline, checkmarkCircle, trashOutline, syncOutline, book, bookOutline, settingsOutline, trendingUpOutline, removeCircleOutline, refreshOutline, sparklesOutline, flaskOutline, hammerOutline, flashOutline } from 'ionicons/icons';
-import { getProficiencyBonus, getModifier, calculatePassive } from '../../utils/dnd-utils';
+import { getProficiencyBonus, getModifier, calculatePassive, calculateMulticlassHp } from '../../utils/dnd-utils';
 
 export const DND_SKILLS = [
   { id: 'acrobatics', name: 'Acrobacias', stat: 'dex' },
@@ -113,13 +113,21 @@ export class CharacterSheetPage implements OnInit {
     hpBonus: 0,
     statChanges: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
     choicesJson: {},
-    selectedSpells: []
+    selectedSpells: [],
+    newClassId: null,
+    classToLevelId: null
   };
 
+  levelUpMode: 'EXISTING' | 'MULTICLASS' = 'EXISTING';
+  allClasses: any[] = [];
+  classesLoading = false;
+
+  levelUpNewFeatures: any[] = [];
   levelUpAvailableSpells: any[] = [];
+  levelUpSubclasses: any[] = [];
+  showSubclassPicker = false;
   spellsToChoose: number = 0;
   cantripsToChoose: number = 0;
-  levelUpNewFeatures: any[] = [];
   private characterId: string | null = null;
 
   // Detail Modal State
@@ -171,6 +179,21 @@ export class CharacterSheetPage implements OnInit {
     } else {
       console.error("No character ID provided in the URL");
     }
+
+    this.loadAllClasses();
+  }
+
+  loadAllClasses() {
+    this.classesLoading = true;
+    this.apiService.getClasses().subscribe({
+      next: (data) => {
+        this.allClasses = data;
+        this.classesLoading = false;
+      },
+      error: () => {
+        this.classesLoading = false;
+      }
+    });
   }
 
   // Helper: Calculate effective stats and values considering item bonuses/overrides
@@ -212,6 +235,30 @@ export class CharacterSheetPage implements OnInit {
 
     return { stats, itemBonusMaxHp };
   }
+
+  get currentLevelUpHitDie(): number {
+    if (this.levelUpMode === 'MULTICLASS' && this.levelUpData.newClassId) {
+      const cls = this.allClasses.find(c => c.id === this.levelUpData.newClassId);
+      return typeof cls?.hitDie === 'string' ? parseInt(cls.hitDie.replace('d', ''), 10) : (cls?.hitDie || 8);
+    }
+    if (this.levelUpMode === 'EXISTING' && this.levelUpData.classToLevelId) {
+       // Find in character's existing classes
+       if (this.rawCharacter?.dndClass?.id === this.levelUpData.classToLevelId) {
+         const hd = this.rawCharacter.dndClass.hitDie;
+         return typeof hd === 'string' ? parseInt(hd.replace('d', ''), 10) : (hd || 8);
+       }
+       const cl = (this.rawCharacter?.classLevels || []).find((l: any) => l.dndClass.id === this.levelUpData.classToLevelId);
+       const hd = cl?.dndClass?.hitDie;
+       return typeof hd === 'string' ? parseInt(hd.replace('d', ''), 10) : (hd || 8);
+    }
+    return typeof this.pj.hitDieType === 'string' ? parseInt(this.pj.hitDieType.replace('d', ''), 10) : (this.pj.hitDieType || 8);
+  }
+
+  get currentLevelUpAverageHp(): number {
+    return Math.floor(this.currentLevelUpHitDie / 2) + 1;
+  }
+
+  protected Math = Math;
 
   // --- BACKEND CONNECTION LOGIC ---
   loadCharacter(id: string) {
@@ -286,6 +333,9 @@ export class CharacterSheetPage implements OnInit {
           level: data.level,
           dndClass: data.dndClass?.name || 'Aventurero',
           subclass: data.subclass?.name || 'Sin subclase',
+          fullClassName: (data.classLevels && data.classLevels.length > 0) 
+            ? data.classLevels.map((cl: any) => `${cl.dndClass.name} ${cl.level}`).join(' / ')
+            : `${data.dndClass?.name || 'Aventurero'} ${data.level}`,
           choicesJson: data.choicesJson || {},
           maxHp: data.maxHp ?? 10,
           currentHp: data.currentHp ?? 10,
@@ -334,15 +384,32 @@ export class CharacterSheetPage implements OnInit {
             ...t,
             selectedOptions: (data.choicesJson?.featureOptions?.[t.name] || [])
           })),
-          features: [
-            ...(data.dndClass?.features || []),
-            ...(data.dndClass?.classFeatures?.features || []),
-            ...this.extractSubclassFeatures(data.subclass?.subclassFeatures)
-          ].filter(f => parseInt(f.levelRequired, 10) <= data.level)
-            .map(f => ({
+          features: (() => {
+            const allFeats: any[] = [];
+            // We use classLevels to correctly filter features by the level IN THAT class
+            if (data.classLevels && data.classLevels.length > 0) {
+              data.classLevels.forEach((cl: any) => {
+                const classFeats = [
+                  ...(cl.dndClass?.features || []),
+                  ...(cl.dndClass?.classFeatures?.features || []),
+                  ...this.extractSubclassFeatures(cl.subclass?.subclassFeatures)
+                ];
+                allFeats.push(...classFeats.filter(f => parseInt(f.levelRequired, 10) <= cl.level));
+              });
+            } else {
+              // Fallback for legacy data/safety: use primary class and total level
+              const classFeats = [
+                ...(data.dndClass?.features || []),
+                ...(data.dndClass?.classFeatures?.features || []),
+                ...this.extractSubclassFeatures(data.subclass?.subclassFeatures)
+              ];
+              allFeats.push(...classFeats.filter(f => parseInt(f.levelRequired, 10) <= data.level));
+            }
+            return allFeats.map(f => ({
               ...f,
               selectedOptions: (data.choicesJson?.featureOptions?.[f.name] || [])
-            })),
+            }));
+          })(),
           proficiencies: {
             armor: this.extractArrayFromClassFeatures(data.dndClass?.classFeatures, 'armorProficiencies'),
             weapons: this.extractArrayFromClassFeatures(data.dndClass?.classFeatures, 'weaponProficiencies'),
@@ -764,27 +831,68 @@ export class CharacterSheetPage implements OnInit {
     this.currentTab = event.detail.value;
   }
 
-  // --- LEVEL UP LOGIC ---
   openLevelUpModal() {
     if (!this.rawCharacter) return;
 
     this.isLevelUpModalOpen = true;
-    const nextLevel = this.pj.level + 1;
-
+    
     // Reset data
     this.levelUpData = {
       hpBonus: 0,
       statChanges: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
-      choicesJson: JSON.parse(JSON.stringify(this.pj.choicesJson)), // Deep copy
-      selectedSpells: []
+      choicesJson: JSON.parse(JSON.stringify(this.pj.choicesJson || {})), // Deep copy
+      selectedSpells: [],
+      subclassId: null
     };
 
-    // Build the list of features that grant choices at this level
-    // (Mimicking availableFeatureChoices from ForgeCharacterPage)
+    this.showSubclassPicker = false;
+    this.levelUpSubclasses = [];
+
+    this.levelUpNewFeatures = [];
+    this.cantripsToChoose = 0;
+    this.spellsToChoose = 0;
+    this.levelUpAvailableSpells = [];
+
+    // If there's only one class and it's not multiclassing, we can pre-select it
+    if (!this.rawCharacter.classLevels || this.rawCharacter.classLevels.length <= 1) {
+      this.selectExistingClass(this.rawCharacter.dndClass.id);
+    }
+  }
+
+  updateLevelUpFeatures() {
+    if (!this.rawCharacter) return;
+    
+    // Determine which class we are leveling up and what its NEW level will be
+    let targetClass: any = null;
+    let targetSubclass: any = null;
+    let newClassLevel = 1;
+
+    if (this.levelUpMode === 'MULTICLASS' && this.levelUpData.newClassId) {
+      targetClass = this.allClasses.find(c => c.id === this.levelUpData.newClassId);
+      newClassLevel = 1;
+    } else if (this.levelUpMode === 'EXISTING' && this.levelUpData.classToLevelId) {
+       const cl = (this.rawCharacter.classLevels || []).find((l: any) => l.dndClass.id === this.levelUpData.classToLevelId);
+       if (cl) {
+         targetClass = cl.dndClass;
+         targetSubclass = cl.subclass;
+         newClassLevel = cl.level + 1;
+       } else if (this.rawCharacter.dndClass?.id === this.levelUpData.classToLevelId) {
+         targetClass = this.rawCharacter.dndClass;
+         targetSubclass = this.rawCharacter.subclass;
+         newClassLevel = this.pj.level + 1; // Fallback if classLevels missing
+       }
+    }
+
+    if (!targetClass) {
+      this.levelUpNewFeatures = [];
+      return;
+    }
+
+    // Build the list of features that grant choices for the NEW level of THIS class
     const allPossibleFeatures = [
-      ...(this.rawCharacter.dndClass?.features || []),
-      ...(this.rawCharacter.dndClass?.classFeatures?.features || []),
-      ...this.extractSubclassFeatures(this.rawCharacter.subclass?.subclassFeatures)
+      ...(targetClass.features || []),
+      ...(targetClass.classFeatures?.features || []),
+      ...this.extractSubclassFeatures(targetSubclass?.subclassFeatures)
     ];
 
     this.levelUpNewFeatures = [];
@@ -792,12 +900,14 @@ export class CharacterSheetPage implements OnInit {
 
     allPossibleFeatures.forEach(f => {
       const reqLevel = parseInt(f.levelRequired, 10);
-      if (reqLevel <= nextLevel && !seenNames.has(f.name)) {
-        const isNew = reqLevel === nextLevel;
+      // We only care about features gained at THIS specific level of THIS class
+      // OR features that gain new choices at this level (like Warlock Invocations)
+      if (reqLevel <= newClassLevel && !seenNames.has(f.name)) {
+        const isNew = reqLevel === newClassLevel;
 
-        // Calculate max choices for current level vs next level
-        const currentMax = this.calculateMaxChoices(f, this.pj.level);
-        const nextMax = this.calculateMaxChoices(f, nextLevel);
+        // Calculate max choices for current class level vs next class level
+        const currentMax = this.calculateMaxChoices(f, newClassLevel - 1);
+        const nextMax = this.calculateMaxChoices(f, newClassLevel);
         const gainedNewChoices = nextMax > currentMax;
 
         if (isNew || gainedNewChoices) {
@@ -806,7 +916,7 @@ export class CharacterSheetPage implements OnInit {
           // Filter options by level
           const filteredOptions = optsArray.filter((opt: any) => {
             const optReq = opt.levelRequired ?? f.levelRequired;
-            return parseInt(optReq, 10) <= nextLevel;
+            return parseInt(optReq, 10) <= newClassLevel;
           });
 
           if (isNew || (gainedNewChoices && filteredOptions.length > 0)) {
@@ -821,13 +931,30 @@ export class CharacterSheetPage implements OnInit {
       }
     });
 
-    // Calculate Spells/Cantrips to choose
-    this.calculateSpellsToChoose(nextLevel);
+    // Check if we gain a subclass at this level
+    const subclassLevel = targetClass.classFeatures?.subclassLevel || 3;
+    if (newClassLevel >= subclassLevel && !targetSubclass && !this.levelUpData.subclassId) {
+      this.showSubclassPicker = true;
+      this.apiService.getSubclasses(targetClass.id).subscribe({
+        next: (subs) => this.levelUpSubclasses = subs,
+        error: (err) => console.error('Error fetching subclasses:', err)
+      });
+    } else {
+      this.showSubclassPicker = false;
+    }
+
+    // Calculate Spells/Cantrips to choose for this class level
+    this.calculateSpellsToChoose(targetClass, targetSubclass, newClassLevel);
   }
 
-  private calculateSpellsToChoose(nextLevel: number) {
-    const cls = this.rawCharacter.dndClass;
-    const sc = this.rawCharacter.subclass?.subclassFeatures?.spellcasting || cls?.classFeatures?.spellcasting;
+  selectLevelUpSubclass(sub: any) {
+    this.levelUpData.subclassId = sub.id;
+    // We might need to refresh features to include the new subclass's features
+    this.updateLevelUpFeatures();
+  }
+
+  private calculateSpellsToChoose(dndClass: any, subclass: any, newClassLevel: number) {
+    const sc = subclass?.subclassFeatures?.spellcasting || dndClass?.classFeatures?.spellcasting;
     if (!sc) {
       this.cantripsToChoose = 0;
       this.spellsToChoose = 0;
@@ -835,18 +962,18 @@ export class CharacterSheetPage implements OnInit {
       return;
     }
 
-    const currentIdx = Math.min(Math.max(this.pj.level - 1, 0), 19);
-    const nextIdx = Math.min(Math.max(nextLevel - 1, 0), 19);
+    const currentIdx = Math.min(Math.max(newClassLevel - 2, 0), 19);
+    const nextIdx = Math.min(Math.max(newClassLevel - 1, 0), 19);
 
     const style = sc.preparationStyle || sc.preparation_style || 'KNOWN';
     const type = sc.spellcastingType || sc.spellcasting_type || sc.type;
-    const lowName = cls?.name?.toLowerCase() || '';
+    const lowName = dndClass?.name?.toLowerCase() || '';
 
     const spellsKnownTable = sc.spellsKnown || sc.spells_known;
     const hasSpellsKnownTable = Array.isArray(spellsKnownTable) && spellsKnownTable.length > 0;
 
     const cantripsKnownTable = sc.cantripsKnown || sc.cantrips_known;
-    const currentCantrips = cantripsKnownTable?.[currentIdx] || 0;
+    const currentCantrips = newClassLevel === 1 ? 0 : (cantripsKnownTable?.[currentIdx] || 0);
     const nextCantrips = cantripsKnownTable?.[nextIdx] || 0;
     this.cantripsToChoose = Math.max(0, nextCantrips - currentCantrips);
 
@@ -856,17 +983,17 @@ export class CharacterSheetPage implements OnInit {
     const knowledgeStyle = sc.knowledgeStyle || sc.knowledge_style || (lowName.includes('wizard') || lowName.includes('mago') ? 'LEARNED' : 'ALL_LIST');
 
     if (hasSpellsKnownTable) {
-      currentSpells = spellsKnownTable[currentIdx] || 0;
+      currentSpells = newClassLevel === 1 ? 0 : (spellsKnownTable[currentIdx] || 0);
       nextSpells = spellsKnownTable[nextIdx] || 0;
       this.spellsToChoose = Math.max(0, nextSpells - currentSpells);
     } else if (style === 'KNOWN' || knowledgeStyle === 'LEARNED') {
       // Fallback logic for Homebrew classes without explicit tables
       if (lowName.includes('wizard') || lowName.includes('mago')) {
-        this.spellsToChoose = 2; // Wizards gain 2
+        this.spellsToChoose = newClassLevel === 1 ? 6 : 2; // Wizards gain 6 at L1, then 2
       } else if (type === 'Full Caster') {
-        this.spellsToChoose = 1;
+        this.spellsToChoose = newClassLevel === 1 ? 2 : 1;
       } else if (type === 'Half Caster') {
-        this.spellsToChoose = (nextLevel % 2 === 0) ? 1 : 0; // Approximate
+        this.spellsToChoose = (newClassLevel % 2 === 0) ? 1 : 0; // Approximate
       } else if (type === 'Pact Magic') {
         this.spellsToChoose = 1;
       } else {
@@ -877,14 +1004,17 @@ export class CharacterSheetPage implements OnInit {
     }
 
     if (this.spellsToChoose > 0 || this.cantripsToChoose > 0) {
-      this.fetchAvailableSpellsForLevelUp();
+      this.fetchAvailableSpellsForLevelUp(newClassLevel);
     } else {
       this.levelUpAvailableSpells = [];
     }
   }
 
-  private fetchAvailableSpellsForLevelUp() {
-    this.apiService.getAvailableSpells(this.pj.id, this.pj.level + 1).subscribe({
+  private fetchAvailableSpellsForLevelUp(targetClassLevel: number) {
+    // We should ideally filter by class name or ID here if the backend supports it
+    // For now, we use the character's total level for slot capacity but we could use the class level
+    // Actually, available spells depend on the level in THAT class (max slot level)
+    this.apiService.getAvailableSpells(this.pj.id, targetClassLevel).subscribe({
       next: (spells: any[]) => {
         this.levelUpAvailableSpells = spells.sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
       },
@@ -919,24 +1049,25 @@ export class CharacterSheetPage implements OnInit {
   }
 
   rollLevelUpHp() {
-    this.levelUpData.hpBonus = Math.floor(Math.random() * this.pj.hitDieType) + 1;
+    this.levelUpData.hpBonus = Math.floor(Math.random() * this.currentLevelUpHitDie) + 1;
   }
 
   takeAverageHp() {
-    this.levelUpData.hpBonus = (this.pj.hitDieType / 2) + 1;
+    // So it's floor(HD/2) + 1. 
+    this.levelUpData.hpBonus = Math.floor(this.currentLevelUpHitDie / 2) + 1;
   }
 
   async manualLevelUpHp() {
     const alert = await this.alertController.create({
       header: 'Introducir Tirada',
-      message: `Introduce el resultado del d${this.pj.hitDieType}:`,
+      message: `Introduce el resultado del d${this.currentLevelUpHitDie}:`,
       inputs: [
         {
           name: 'roll',
           type: 'number',
           placeholder: 'Resultado',
           min: 1,
-          max: this.pj.hitDieType
+          max: this.currentLevelUpHitDie
         }
       ],
       buttons: [
@@ -945,7 +1076,7 @@ export class CharacterSheetPage implements OnInit {
           text: 'Guardar',
           handler: (data) => {
             const val = parseInt(data.roll);
-            if (!isNaN(val) && val > 0 && val <= this.pj.hitDieType) {
+            if (!isNaN(val) && val > 0 && val <= this.currentLevelUpHitDie) {
               this.levelUpData.hpBonus = val;
             }
           }
@@ -1080,43 +1211,95 @@ export class CharacterSheetPage implements OnInit {
     return true;
   }
 
-  async confirmLevelUp() {
-    const alert = await this.alertController.create({
-      header: 'Confirmar Subida de Nivel',
-      message: `¿Estás seguro de subir al nivel ${this.pj.level + 1}?`,
-      buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        {
-          text: '¡Subir!',
-          handler: () => {
-            const finalStats: any = { ...this.pj.stats };
-            Object.keys(this.levelUpData.statChanges).forEach(key => {
-              finalStats[key] += this.levelUpData.statChanges[key];
-            });
+  confirmLevelUp() {
+    if (!this.characterId) return;
 
-            const oldConMod = this.getModifierNumber(this.pj.stats.con);
-            const newConMod = this.getModifierNumber(finalStats.con);
-            const retroactiveHp = (newConMod - oldConMod) * this.pj.level;
-            
-            const payload = {
-              maxHp: this.pj.maxHp + retroactiveHp + this.levelUpData.hpBonus + newConMod,
-              stats: finalStats,
-              choicesJson: this.levelUpData.choicesJson,
-              newSpells: this.levelUpData.selectedSpells
-            };
+    const conMod = getModifier(this.pj.stats.con + this.levelUpData.statChanges.con);
+    const oldConMod = getModifier(this.pj.stats.con);
+    const retroactive = (conMod - oldConMod) * this.pj.level;
+    const finalHpBonus = this.levelUpData.hpBonus + conMod + retroactive;
 
-            this.apiService.levelUp(this.pj.id, payload).subscribe({
-              next: () => {
-                this.isLevelUpModalOpen = false;
-                this.loadCharacter(this.pj.id);
-              },
-              error: (err) => console.error('Error leveling up:', err)
-            });
-          }
-        }
-      ]
+    const request: any = {
+      hpBonus: finalHpBonus,
+      statChanges: this.levelUpData.statChanges,
+      choicesJson: this.levelUpData.choicesJson,
+      newSpells: this.levelUpData.selectedSpells,
+      multiclassId: this.levelUpMode === 'MULTICLASS' ? this.levelUpData.newClassId : null,
+      classToLevelId: this.levelUpMode === 'EXISTING' ? this.levelUpData.classToLevelId : null,
+      subclassId: this.levelUpData.subclassId
+    };
+
+    this.apiService.levelUpCharacter(this.characterId, request).subscribe({
+      next: () => {
+        this.isLevelUpModalOpen = false;
+        this.loadCharacter(this.characterId!);
+      },
+      error: (err) => {
+        console.error('Error leveling up:', err);
+        const msg = err.error?.message || 'Error desconocido al subir de nivel';
+        this.alertController.create({
+          header: 'Error',
+          message: msg,
+          buttons: ['OK']
+        }).then(a => a.present());
+      }
     });
-    await alert.present();
+  }
+
+  isClassAlreadyTaken(classId: number): boolean {
+    if (!this.rawCharacter) return false;
+    if (this.rawCharacter.dndClass?.id === classId) return true;
+    return (this.rawCharacter.classLevels || []).some((cl: any) => cl.dndClass.id === classId);
+  }
+
+  validatePrereq(cls: any): { met: boolean; text: string } {
+    const prereqs = cls.classFeatures?.multiclassingPrerequisites;
+    if (!prereqs || !prereqs.requirements || prereqs.requirements.length === 0) {
+      return { met: true, text: 'Sin requisitos' };
+    }
+
+    const requirements = prereqs.requirements;
+    const logic = prereqs.logic || 'AND';
+    const scores = this.pj.stats; // Use current effective stats
+
+    const results = requirements.map((req: any) => {
+      const ability = (req.ability || '').toUpperCase();
+      const minScore = req.minScore || 13;
+      const key = ability.substring(0, 3).toLowerCase();
+      const score = scores[key] || 0;
+      return { 
+        ability: this.statLabels[key] || ability, 
+        met: score >= minScore, 
+        current: score, 
+        required: minScore 
+      };
+    });
+
+    const metCount = results.filter((r: any) => r.met).length;
+    const isMet = logic === 'OR' ? metCount > 0 : metCount === requirements.length;
+
+    const text = results.map((r: any) => `${r.ability} ${r.required}`).join(', ');
+    return { met: isMet, text };
+  }
+
+  selectMulticlass(cls: any) {
+    this.levelUpData.newClassId = cls.id;
+    this.levelUpData.classToLevelId = null;
+    this.levelUpMode = 'MULTICLASS';
+    this.updateLevelUpFeatures();
+  }
+
+  selectExistingClass(classId: number) {
+    this.levelUpData.classToLevelId = classId;
+    this.levelUpData.newClassId = null;
+    this.levelUpMode = 'EXISTING';
+    this.updateLevelUpFeatures();
+  }
+
+  isClassActive(classId: number): boolean {
+    if (this.levelUpMode === 'EXISTING' && this.levelUpData.classToLevelId === classId) return true;
+    if (this.levelUpMode === 'MULTICLASS' && this.levelUpData.newClassId === classId) return true;
+    return false;
   }
 
   // Performs a long rest

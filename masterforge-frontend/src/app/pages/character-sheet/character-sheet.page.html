@@ -19,7 +19,7 @@
     <ion-row class="ion-margin-bottom ion-align-items-center">
       <ion-col size="8">
         <div class="info-box">
-          <div class="info-line"><strong>Clase:</strong> {{ pj.dndClass }} {{ pj.level }}</div>
+          <div class="info-line"><strong>Clase:</strong> {{ pj.fullClassName }}</div>
           <div class="info-line"><strong>Trasfondo:</strong> {{ pj.background }}</div>
           <div class="info-line"><strong>Alineamiento:</strong> {{ pj.alignment }}</div>
           <div class="info-line"><strong>Experiencia:</strong> {{ pj.xp }} XP</div>
@@ -546,17 +546,75 @@
 
     <ion-content class="char-sheet-content ion-padding">
       <div class="level-up-container">
+        <!-- Class Selection Section -->
+        <div class="level-up-section">
+          <h2 class="section-title">Elegir Clase para Subir</h2>
+          <p class="mode-hint">Selecciona tu clase principal o una nueva para multiclase.</p>
+          
+          <div class="class-selection-list">
+            <!-- Existing Primary Class -->
+            <div class="mc-item" [class.mc-item--primary]="isClassActive(rawCharacter.dndClass?.id)" (click)="selectExistingClass(rawCharacter.dndClass?.id)">
+              <div class="mc-info">
+                <span class="mc-name">{{ rawCharacter.dndClass?.name }}</span>
+                <span class="mc-tag">Clase Actual</span>
+              </div>
+              <div class="mc-controls">
+                <ion-icon [name]="isClassActive(rawCharacter.dndClass?.id) ? 'checkmark-circle' : 'trending-up-outline'" 
+                          [color]="isClassActive(rawCharacter.dndClass?.id) ? 'success' : 'medium'"></ion-icon>
+              </div>
+            </div>
+
+            <!-- Existing Multiclasses (if any) -->
+            @for (cl of rawCharacter.classLevels; track cl.id) {
+              @if (cl.dndClass.id !== rawCharacter.dndClass?.id) {
+                <div class="mc-item" [class.mc-item--primary]="isClassActive(cl.dndClass.id)" (click)="selectExistingClass(cl.dndClass.id)">
+                  <div class="mc-info">
+                    <span class="mc-name">{{ cl.dndClass.name }}</span>
+                    <span class="mc-tag">Nivel {{ cl.level }}</span>
+                  </div>
+                  <div class="mc-controls">
+                    <ion-icon [name]="isClassActive(cl.dndClass.id) ? 'checkmark-circle' : 'trending-up-outline'" 
+                              [color]="isClassActive(cl.dndClass.id) ? 'success' : 'medium'"></ion-icon>
+                  </div>
+                </div>
+              }
+            }
+
+            <div class="divider"></div>
+            <h3 class="subsection-title gold-text" style="font-size: 1rem; margin: 20px 0 10px;">Añadir Nueva Multiclase</h3>
+            
+            <div class="mc-available-grid">
+              @for (cls of allClasses; track cls.id) {
+                @if (!isClassAlreadyTaken(cls.id)) {
+                  @let prereq = validatePrereq(cls);
+                  <div class="mc-add-card" [class.mc-add-card--disabled]="!prereq.met" [class.selected]="isClassActive(cls.id)" (click)="prereq.met && selectMulticlass(cls)">
+                    <div class="mc-add-info">
+                      <span class="mc-add-name">{{ cls.name }}</span>
+                      <span class="mc-add-prereq" [class.mc-add-prereq--met]="prereq.met">
+                        {{ prereq.met ? '✓ ' : '✗ ' }}{{ prereq.text }}
+                      </span>
+                    </div>
+                    @if (prereq.met) {
+                      <ion-icon [name]="isClassActive(cls.id) ? 'checkmark-circle' : 'add-outline'" [color]="isClassActive(cls.id) ? 'success' : 'warning'"></ion-icon>
+                    }
+                  </div>
+                }
+              }
+            </div>
+          </div>
+        </div>
+
         <!-- HP Increase Section -->
         <div class="level-up-section">
           <h2 class="section-title">Incremento de HP</h2>
-          <p>Tu Dado de Golpe es d{{ pj.hitDieType }}. Modificador de CON: {{ getMod(pj.stats.con) }}</p>
+          <p>Tu Dado de Golpe es d{{ currentLevelUpHitDie }}. Modificador de CON: {{ getMod(pj.stats.con) }}</p>
           
           <div class="hp-options">
             <ion-button expand="block" fill="outline" color="warning" (click)="rollLevelUpHp()" [disabled]="levelUpData.hpBonus > 0">
-              Tirar d{{ pj.hitDieType }}
+              Tirar d{{ currentLevelUpHitDie }}
             </ion-button>
             <ion-button expand="block" fill="outline" color="warning" (click)="takeAverageHp()" [disabled]="levelUpData.hpBonus > 0">
-              Tomar Promedio ({{ (pj.hitDieType / 2) + 1 }})
+              Tomar Promedio ({{ currentLevelUpAverageHp }})
             </ion-button>
             <ion-button expand="block" fill="outline" color="warning" (click)="manualLevelUpHp()" [disabled]="levelUpData.hpBonus > 0">
               Manual
@@ -580,6 +638,25 @@
             </div>
           }
         </div>
+
+        @if (showSubclassPicker) {
+          <div class="level-up-section">
+            <h2 class="section-title">Elegir Subclase</h2>
+            <p>Has alcanzado el nivel necesario para elegir una especialización para esta clase.</p>
+            <div class="mc-available-grid">
+              @for (sub of levelUpSubclasses; track sub.id) {
+                <div class="mc-add-card" [class.selected]="levelUpData.subclassId === sub.id" (click)="selectLevelUpSubclass(sub)">
+                  <div class="mc-add-info">
+                    <span class="mc-add-name">{{ sub.name }}</span>
+                  </div>
+                  @if (levelUpData.subclassId === sub.id) {
+                    <ion-icon name="checkmark-circle" color="success"></ion-icon>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
 
         <!-- ASI Section -->
         @if (isASIDue()) {

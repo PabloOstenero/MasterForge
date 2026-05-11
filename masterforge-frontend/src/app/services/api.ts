@@ -121,7 +121,7 @@ performLongRest(characterId: string): Observable<any> {
   return this.http.post(`${this.apiUrl}/characters/${characterId}/long-rest`, {});
 }
 
-levelUp(characterId: string, data: { maxHp: number, stats: any, choicesJson: any, newSpells?: string[] }): Observable<any> {
+levelUpCharacter(characterId: string, data: { hpBonus: number, statChanges: any, choicesJson: any, newSpells: string[], multiclassId: number | null, classToLevelId: number | null }): Observable<any> {
   return this.http.put(`${this.apiUrl}/characters/${characterId}/level-up`, data);
 }
 
@@ -190,8 +190,11 @@ updateSpellSlots(characterId: string, spellSlots: any): Observable<any> {
     return this.http.get<any[]>(`${this.apiUrl}/dnd-classes`);
   }
 
-  // Fetch all available D&D subclasses
-  getSubclasses(): Observable<any[]> {
+  // Fetch all available D&D subclasses, optionally filtered by class ID
+  getSubclasses(classId?: number): Observable<any[]> {
+    if (classId !== undefined) {
+      return this.http.get<any[]>(`${this.apiUrl}/dnd-subclasses/class/${classId}`);
+    }
     return this.http.get<any[]>(`${this.apiUrl}/dnd-subclasses`);
   }
 

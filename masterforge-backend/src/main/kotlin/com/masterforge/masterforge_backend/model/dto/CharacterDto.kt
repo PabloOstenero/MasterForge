@@ -9,9 +9,15 @@ data class RaceRef(val id: Int)
 data class ClassRef(val id: Int)
 data class ItemRef(val id: UUID)
 
+data class ClassLevelDto(
+    val classId: Int,
+    val subclassId: Int? = null,
+    val level: Int
+)
+
 data class CharacterDto(
     val name: String,
-    val level: Int,
+    val level: Int, // Total Level
     val maxHp: Int,
     val currentHp: Int,
     val tempHp: Int,
@@ -38,8 +44,9 @@ data class CharacterDto(
     val user: UserRef,
     val campaign: CampaignRef? = null,
     val dndRace: RaceRef,
-    val dndClass: ClassRef,
+    val dndClass: ClassRef, // Primary class
     val subclassId: Int? = null,
+    val classLevels: List<ClassLevelDto> = emptyList(), // Multiclass breakdown
     val choicesJson: Map<String, Any>,
     val inventory: List<InventorySlotDto> = emptyList()
 )
