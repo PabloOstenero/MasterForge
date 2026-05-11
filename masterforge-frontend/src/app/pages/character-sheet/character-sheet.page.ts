@@ -10,7 +10,7 @@ import {
 } from '@ionic/angular/standalone';
 import { ApiService } from '../../services/api';
 import { addIcons } from 'ionicons';
-import { statsChart, sparkles, shield, briefcase, trash, add, addCircleOutline, checkmarkCircle, trashOutline, syncOutline, book, bookOutline, settingsOutline, trendingUpOutline, removeCircleOutline, refreshOutline, sparklesOutline } from 'ionicons/icons';
+import { statsChart, sparkles, shield, briefcase, trash, add, addCircleOutline, checkmarkCircle, trashOutline, syncOutline, book, bookOutline, settingsOutline, trendingUpOutline, removeCircleOutline, refreshOutline, sparklesOutline, flaskOutline, hammerOutline, flashOutline } from 'ionicons/icons';
 import { getProficiencyBonus, getModifier, calculatePassive } from '../../utils/dnd-utils';
 
 export const DND_SKILLS = [
@@ -120,8 +120,12 @@ export class CharacterSheetPage implements OnInit {
   spellsToChoose: number = 0;
   cantripsToChoose: number = 0;
   levelUpNewFeatures: any[] = [];
-
   private characterId: string | null = null;
+
+  // Detail Modal State
+  isDetailModalOpen = false;
+  selectedDetail: any = null;
+  detailType: 'SPELL' | 'ITEM' | 'FEATURE' = 'ITEM';
 
   // Inyectamos el servicio en el constructor
   constructor(
@@ -148,7 +152,10 @@ export class CharacterSheetPage implements OnInit {
       'remove-circle-outline': removeCircleOutline,
       'refresh-outline': refreshOutline,
       'sparkles-outline': sparklesOutline,
-      'checkmark-circle': checkmarkCircle
+      'checkmark-circle': checkmarkCircle,
+      'flask-outline': flaskOutline,
+      'hammer-outline': hammerOutline,
+      'flash-outline': flashOutline
     });
   }
 
@@ -315,6 +322,8 @@ export class CharacterSheetPage implements OnInit {
             type: slot.item.type,
             quantity: slot.quantity,
             equipped: slot.equipped,
+            weight: slot.item.weight,
+            description: slot.item.properties?.description || slot.item.description || '',
             properties: slot.item.properties || {}
           })) : [],
           spells: data.spells || [],
@@ -568,6 +577,88 @@ export class CharacterSheetPage implements OnInit {
       options: f.options ?? null,
       isSubclassFeature: true   // flag for optional styling in the template
     }));
+  }
+
+  onSpellSelected(spell: any) {
+    if (!this.characterId) return;
+
+    this.apiService.addSpellToCharacter(this.characterId, spell.id).subscribe({
+      next: () => {
+        this.isSpellModalOpen = false;
+        this.loadCharacter(this.characterId!);
+      }
+    });
+  }
+
+  // --- Detail Modal Logic ---
+  openDetail(data: any, type: 'SPELL' | 'ITEM' | 'FEATURE') {
+    this.selectedDetail = data;
+    this.detailType = type;
+    this.isDetailModalOpen = true;
+  }
+
+  closeDetail() {
+    this.isDetailModalOpen = false;
+    this.selectedDetail = null;
+  }
+
+  getDetailSubtitle(): string {
+    if (!this.selectedDetail) return '';
+    if (this.detailType === 'SPELL') {
+      const lvl = this.selectedDetail.spell.level === 0 ? 'Truco' : `Nivel ${this.selectedDetail.spell.level}`;
+      return `${lvl} • ${this.selectedDetail.spell.school}`;
+    }
+    if (this.detailType === 'ITEM') {
+      const rarity = this.selectedDetail.properties?.rarity ? ` • ${this.selectedDetail.properties.rarity}` : '';
+      return (this.selectedDetail.type || 'Objeto') + rarity;
+    }
+    return '';
+  }
+
+  getDetailIcon(): string {
+    if (this.detailType === 'SPELL') return 'sparkles';
+    if (this.detailType === 'ITEM') {
+      const type = (this.selectedDetail?.type || '').toUpperCase();
+      if (type === 'WEAPON') return 'flash-outline';
+      if (type === 'ARMOR' || type === 'SHIELD') return 'shield';
+      if (type === 'POTION') return 'flask-outline';
+      return 'briefcase';
+    }
+    return 'book-outline';
+  }
+
+  hasAbilityBonuses(): boolean {
+    if (!this.selectedDetail || this.detailType !== 'ITEM') return false;
+    const p = this.selectedDetail.properties;
+    if (!p) return false;
+    return !!(
+      p.bonusStr || p.bonusDex || p.bonusCon || p.bonusInt || p.bonusWis || p.bonusCha || p.bonusMaxHp ||
+      p.overrideStr || p.overrideDex || p.overrideCon || p.overrideInt || p.overrideWis || p.overrideCha
+    );
+  }
+
+  getAbilityBonuses(): string[] {
+    if (!this.hasAbilityBonuses()) return [];
+    const p = this.selectedDetail.properties;
+    const list: string[] = [];
+
+    // Overrides (Fixed values)
+    if (p.overrideStr) list.push(`FU fijada en ${p.overrideStr}`);
+    if (p.overrideDex) list.push(`DES fijada en ${p.overrideDex}`);
+    if (p.overrideCon) list.push(`CON fijada en ${p.overrideCon}`);
+    if (p.overrideInt) list.push(`INT fijada en ${p.overrideInt}`);
+    if (p.overrideWis) list.push(`SAB fijada en ${p.overrideWis}`);
+    if (p.overrideCha) list.push(`CAR fijada en ${p.overrideCha}`);
+
+    // Additive bonuses
+    if (p.bonusStr) list.push(`+${p.bonusStr} FU`);
+    if (p.bonusDex) list.push(`+${p.bonusDex} DES`);
+    if (p.bonusCon) list.push(`+${p.bonusCon} CON`);
+    if (p.bonusInt) list.push(`+${p.bonusInt} INT`);
+    if (p.bonusWis) list.push(`+${p.bonusWis} SAB`);
+    if (p.bonusCha) list.push(`+${p.bonusCha} CAR`);
+    if (p.bonusMaxHp) list.push(`+${p.bonusMaxHp} PG Máx`);
+    return list;
   }
 
   removeItem(slotId: number) {

@@ -6,8 +6,13 @@ import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonButtons, IonBackButton,
   IonIcon, IonItem, IonLabel, IonInput, IonSelect, IonSelectOption,
   IonGrid, IonRow, IonCol, IonSpinner, IonBadge, IonList,
-  IonSegment, IonSegmentButton
+  IonSegment, IonSegmentButton, IonModal
 } from '@ionic/angular/standalone';
+import { 
+  informationCircleOutline, sparkles, flashOutline, shield, flaskOutline, briefcase, bookOutline,
+  checkmarkCircle, peopleOutline, ribbonOutline
+} from 'ionicons/icons';
+import { addIcons } from 'ionicons';
 import { ApiService } from '../../services/api';
 import { AuthService } from '../../services/auth.service';
 import { isStructuredEquipment, resolveInventory, StructuredEquipment, ResolvedInventoryLine, ItemSummary, deserializeEquipment } from '../../models/equipment.models';
@@ -166,11 +171,16 @@ export interface CharacterFormData {
     IonButton, IonButtons, IonBackButton,
     IonIcon, IonItem, IonLabel, IonInput, IonSelect, IonSelectOption,
     IonGrid, IonRow, IonCol, IonSpinner, IonBadge, IonList,
-    IonSegment, IonSegmentButton
+    IonSegment, IonSegmentButton, IonModal
   ],
   encapsulation: ViewEncapsulation.None
 })
 export class ForgeCharacterPage implements OnInit {
+
+  // ─── Detail Modal state ───────────────────────────────────────────────────
+  isDetailModalOpen = false;
+  selectedDetail: any = null;
+  detailType: 'SPELL' | 'ITEM' | 'FEATURE' | 'CLASS' | 'SUBCLASS' | 'RACE' = 'SPELL';
 
   // ─── Step state ─────────────────────────────────────────────────────────────
   currentStep: number = 0;
@@ -348,11 +358,119 @@ export class ForgeCharacterPage implements OnInit {
     private authService: AuthService,
     private homebrewService: HomebrewService,
     private router: Router
-  ) {}
+  ) {
+    addIcons({
+      'information-circle-outline': informationCircleOutline,
+      'sparkles': sparkles,
+      'flash-outline': flashOutline,
+      'shield': shield,
+      'flask-outline': flaskOutline,
+      'briefcase': briefcase,
+      'book-outline': bookOutline,
+      'checkmark-circle': checkmarkCircle,
+      'people-outline': peopleOutline,
+      'ribbon-outline': ribbonOutline
+    });
+  }
 
   ngOnInit(): void {
     this.loadSpells();
     this.loadCatalog();
+  }
+
+  // ─── Detail Modal helpers ─────────────────────────────────────────────────
+
+  openDetail(event: Event, data: any, type: 'SPELL' | 'ITEM' | 'FEATURE' | 'CLASS' | 'SUBCLASS' | 'RACE') {
+    event.stopPropagation();
+    
+    this.detailType = type;
+
+    // If it's a minimal item/spell (e.g. from the catalog or selection list), 
+    // we should try to get the full version if properties are missing.
+    if (type === 'ITEM' && !data.properties && data.id) {
+      this.homebrewService.getItem(data.id).subscribe(fullItem => {
+        this.selectedDetail = {
+          ...fullItem,
+          quantity: data.quantity || 1,
+          weight: fullItem.weight
+        };
+        this.isDetailModalOpen = true;
+      });
+    } else if (type === 'SPELL' && !data.description && data.id) {
+       this.homebrewService.getSpell(data.id).subscribe(fullSpell => {
+        this.selectedDetail = { spell: fullSpell };
+        this.isDetailModalOpen = true;
+      });
+    } else {
+      // Already has data (or is a spell object that needs to be wrapped)
+      this.selectedDetail = type === 'SPELL' && !data.spell ? { spell: data } : data;
+      this.isDetailModalOpen = true;
+    }
+  }
+
+  closeDetail() {
+    this.isDetailModalOpen = false;
+    this.selectedDetail = null;
+  }
+
+  getDetailSubtitle(): string {
+    if (!this.selectedDetail) return '';
+    if (this.detailType === 'SPELL') {
+      const level = this.selectedDetail.spell.level === 0 ? 'Truco' : `Nivel ${this.selectedDetail.spell.level}`;
+      return `${level} - ${this.selectedDetail.spell.school}`;
+    }
+    if (this.detailType === 'RACE') return `Raza - ${this.selectedDetail.size || 'Mediano'}`;
+    if (this.detailType === 'CLASS') return `Clase - d${this.selectedDetail.hitDie}`;
+    if (this.detailType === 'SUBCLASS') return `Subclase`;
+
+    const rarity = this.selectedDetail.rarity || this.selectedDetail.properties?.rarity || 'Común';
+    return `${this.selectedDetail.type} - ${rarity}`;
+  }
+
+  getDetailIcon(): string {
+    if (this.detailType === 'SPELL') return 'sparkles';
+    if (this.detailType === 'RACE') return 'people-outline';
+    if (this.detailType === 'CLASS' || this.detailType === 'SUBCLASS') return 'ribbon-outline';
+    if (this.detailType === 'ITEM') {
+      const type = (this.selectedDetail?.type || '').toUpperCase();
+      if (type === 'WEAPON') return 'flash-outline';
+      if (type === 'ARMOR' || type === 'SHIELD') return 'shield';
+      if (type === 'POTION') return 'flask-outline';
+      return 'briefcase';
+    }
+    return 'book-outline';
+  }
+
+  hasAbilityBonuses(): boolean {
+    if (!this.selectedDetail || this.detailType !== 'ITEM') return false;
+    const p = this.selectedDetail.properties;
+    if (!p) return false;
+    return !!(
+      p.bonusStr || p.bonusDex || p.bonusCon || p.bonusInt || p.bonusWis || p.bonusCha || p.bonusMaxHp ||
+      p.overrideStr || p.overrideDex || p.overrideCon || p.overrideInt || p.overrideWis || p.overrideCha
+    );
+  }
+
+  getAbilityBonuses(): string[] {
+    if (!this.hasAbilityBonuses()) return [];
+    const p = this.selectedDetail.properties;
+    const list: string[] = [];
+
+    if (p.overrideStr) list.push(`FU fijada en ${p.overrideStr}`);
+    if (p.overrideDex) list.push(`DES fijada en ${p.overrideDex}`);
+    if (p.overrideCon) list.push(`CON fijada en ${p.overrideCon}`);
+    if (p.overrideInt) list.push(`INT fijada en ${p.overrideInt}`);
+    if (p.overrideWis) list.push(`SAB fijada en ${p.overrideWis}`);
+    if (p.overrideCha) list.push(`CAR fijada en ${p.overrideCha}`);
+
+    if (p.bonusStr) list.push(`+${p.bonusStr} FU`);
+    if (p.bonusDex) list.push(`+${p.bonusDex} DES`);
+    if (p.bonusCon) list.push(`+${p.bonusCon} CON`);
+    if (p.bonusInt) list.push(`+${p.bonusInt} INT`);
+    if (p.bonusWis) list.push(`+${p.bonusWis} SAB`);
+    if (p.bonusCha) list.push(`+${p.bonusCha} CAR`);
+    if (p.bonusMaxHp) list.push(`+${p.bonusMaxHp} PG Máx`);
+    return list;
   }
 
   loadCatalog(): void {

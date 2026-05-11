@@ -137,7 +137,12 @@
                     class="selectable-card"
                     [class.selected]="formData.selectedRace?.id === race.id"
                     (click)="selectRace(race)">
-                    <div class="card-title">{{ race.name }}</div>
+                    <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+                      {{ race.name }}
+                      <ion-icon name="information-circle-outline" 
+                        style="color: #C5A059; cursor: pointer; font-size: 1.2rem;"
+                        (click)="openDetail($event, race, 'RACE')"></ion-icon>
+                    </div>
                     @if (formatRaceBonuses(race)) {
                       <div class="card-bonus">{{ formatRaceBonuses(race) }}</div>
                     }
@@ -216,7 +221,12 @@
                     class="selectable-card"
                     [class.selected]="formData.selectedClass?.id === cls.id"
                     (click)="selectClass(cls)">
-                    <div class="card-title">{{ cls.name }}</div>
+                    <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+                      {{ cls.name }}
+                      <ion-icon name="information-circle-outline" 
+                        style="color: #C5A059; cursor: pointer; font-size: 1.2rem;"
+                        (click)="openDetail($event, cls, 'CLASS')"></ion-icon>
+                    </div>
                     <div class="card-subtitle">d{{ cls.hitDie }}</div>
                     @if (formatSavingThrows(cls)) {
                       <div class="card-bonus">{{ formatSavingThrows(cls) }}</div>
@@ -261,7 +271,12 @@
                       class="selectable-card selectable-card--small"
                       [class.selected]="formData.selectedSubclass?.id === sc.id"
                       (click)="selectSubclass(sc)">
-                      <div class="card-title">{{ sc.name }}</div>
+                      <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+                        {{ sc.name }}
+                        <ion-icon name="information-circle-outline" 
+                          style="color: #C5A059; cursor: pointer; font-size: 1.2rem;"
+                          (click)="openDetail($event, sc, 'SUBCLASS')"></ion-icon>
+                      </div>
                     </div>
                   </ion-col>
                 }
@@ -298,6 +313,9 @@
                     @if (grant.itemType) {
                       <span class="grant-type">{{ grant.itemType }}</span>
                     }
+                    <ion-icon name="information-circle-outline" 
+                      style="color: #C5A059; margin-left: auto; cursor: pointer; font-size: 1.4rem;"
+                      (click)="openDetail($event, grant, 'ITEM')"></ion-icon>
                   </div>
                 }
               </div>
@@ -323,6 +341,9 @@
                           @if (line.itemType) {
                             <span class="option-item-type">{{ line.itemType }}</span>
                           }
+                          <ion-icon name="information-circle-outline" 
+                            style="color: #C5A059; margin-left: auto; cursor: pointer; font-size: 1.4rem;"
+                            (click)="openDetail($event, line, 'ITEM')"></ion-icon>
                         </div>
                       }
                     </div>
@@ -560,6 +581,9 @@
                   [disabled]="isSpellDisabled(spell.id, true)"
                   (click)="toggleSpell(spell.id)">
                   <span class="skill-name">{{ spell.name }}</span>
+                  <ion-icon name="information-circle-outline" 
+                    style="color: #C5A059; margin-left: auto; cursor: pointer; font-size: 1.4rem;"
+                    (click)="openDetail($event, spell, 'SPELL')"></ion-icon>
                 </button>
               }
             </div>
@@ -577,6 +601,9 @@
                   [disabled]="isSpellDisabled(spell.id, false)"
                   (click)="toggleSpell(spell.id)">
                   <span class="skill-name">{{ spell.name }} <span style="opacity:0.6;font-size:0.85em;margin-left:4px;">Nivel {{ spell.level }}</span></span>
+                  <ion-icon name="information-circle-outline" 
+                    style="color: #C5A059; margin-left: auto; cursor: pointer; font-size: 1.4rem;"
+                    (click)="openDetail($event, spell, 'SPELL')"></ion-icon>
                 </button>
               }
             </div>
@@ -819,3 +846,338 @@
     </div>
   </div>
 </ion-content>
+
+<!-- Detail Modal -->
+<ion-modal [isOpen]="isDetailModalOpen" (didDismiss)="closeDetail()" [initialBreakpoint]="0.8" [breakpoints]="[0, 0.8, 1.0]">
+  <ng-template>
+    <ion-content class="detail-modal-content">
+      @if (selectedDetail) {
+        <div class="detail-header">
+          <div class="detail-icon-circle">
+            <ion-icon [name]="getDetailIcon()"></ion-icon>
+          </div>
+          <h1>{{ detailType === 'SPELL' ? selectedDetail.spell.name : selectedDetail.name }}</h1>
+          <div class="detail-subtitle">{{ getDetailSubtitle() }}</div>
+        </div>
+
+        <div class="detail-body">
+          <div class="detail-section-title">Descripción</div>
+          <div class="detail-description">
+            @if (detailType === 'SPELL' && selectedDetail.spell?.savingThrow && selectedDetail.spell.savingThrow !== 'None' && selectedDetail.spell.savingThrow !== 'none') {
+              <div style="margin-bottom: 10px; color: #C5A059; font-weight: bold;">
+                Salvación: {{ selectedDetail.spell.savingThrow }}
+              </div>
+            }
+            {{ detailType === 'SPELL' ? selectedDetail.spell.description : (selectedDetail.description || selectedDetail.properties?.gearDescription || 'Sin descripción disponible.') }}
+            @if (selectedDetail.properties?.effectDescription) {
+              <div style="margin-top: 10px; color: #C5A059; font-style: italic;">
+                {{ selectedDetail.properties.effectDescription }}
+              </div>
+            }
+          </div>
+
+          @if (detailType === 'SPELL') {
+            <div class="detail-section-title">Propiedades Mágicas</div>
+            <div class="detail-properties-grid">
+              <div class="prop-item">
+                <div class="prop-label">Tiempo</div>
+                <div class="prop-value">{{ selectedDetail.spell.castingTime }}</div>
+              </div>
+              <div class="prop-item">
+                <div class="prop-label">Alcance</div>
+                <div class="prop-value">{{ selectedDetail.spell.range }}</div>
+              </div>
+              <div class="prop-item">
+                <div class="prop-label">Duración</div>
+                <div class="prop-value">{{ selectedDetail.spell.duration }}</div>
+              </div>
+              <div class="prop-item">
+                <div class="prop-label">Componentes</div>
+                <div class="prop-value">
+                  {{ selectedDetail.spell.verbal ? 'V' : '' }}
+                  {{ selectedDetail.spell.somatic ? 'S' : '' }}
+                  {{ selectedDetail.spell.material ? 'M' : '' }}
+                </div>
+              </div>
+            </div>
+
+            @if (selectedDetail.spell.higherLevelDescription) {
+              <div class="detail-section-title">A Niveles Superiores</div>
+              <div class="detail-description" style="color: #C5A059; opacity: 0.9;">
+                {{ selectedDetail.spell.higherLevelDescription }}
+              </div>
+            }
+          } @else if (detailType === 'ITEM') {
+            <div class="detail-section-title">Propiedades del Objeto</div>
+            <div class="detail-properties-grid">
+              <div class="prop-item">
+                <div class="prop-label">Cantidad</div>
+                <div class="prop-value">x{{ selectedDetail.quantity || 1 }}</div>
+              </div>
+              <div class="prop-item">
+                <div class="prop-label">Peso</div>
+                <div class="prop-value">{{ selectedDetail.weight || 0 }} lb</div>
+              </div>
+              
+              @if (selectedDetail.properties?.valueGp) {
+                <div class="prop-item">
+                  <div class="prop-label">Valor</div>
+                  <div class="prop-value">{{ selectedDetail.properties.valueGp }} po</div>
+                </div>
+              }
+
+              @if (selectedDetail.properties?.baseAc !== undefined) {
+                <div class="prop-item">
+                  <div class="prop-label">CA Total</div>
+                  <div class="prop-value">{{ (selectedDetail.properties.baseAc || 0)*1 + (selectedDetail.properties.magicalBonus || 0)*1 }}</div>
+                </div>
+              }
+              @if (selectedDetail.properties?.acBonus !== undefined) {
+                <div class="prop-item">
+                  <div class="prop-label">Bono CA</div>
+                  <div class="prop-value">+{{ (selectedDetail.properties.acBonus || 0)*1 + (selectedDetail.properties.magicalBonus || 0)*1 }}</div>
+                </div>
+              }
+
+              @if (selectedDetail.properties?.damageDieType) {
+                <div class="prop-item">
+                  <div class="prop-label">Daño</div>
+                  <div class="prop-value">
+                    {{ selectedDetail.properties.damageDiceCount }}{{ selectedDetail.properties.damageDieType }}
+                    @if (((selectedDetail.properties.damageBonus || 0)*1 + (selectedDetail.properties.magicalBonus || 0)*1) !== 0) {
+                      +{{ (selectedDetail.properties.damageBonus || 0)*1 + (selectedDetail.properties.magicalBonus || 0)*1 }}
+                    }
+                    {{ selectedDetail.properties.damageType?.[0] }}
+                  </div>
+                </div>
+              }
+
+              @if (selectedDetail.properties?.versatileDieType) {
+                <div class="prop-item">
+                  <div class="prop-label">Daño Versátil</div>
+                  <div class="prop-value">
+                    {{ selectedDetail.properties.versatileDiceCount }}{{ selectedDetail.properties.versatileDieType }}
+                    @if (((selectedDetail.properties.damageBonus || 0)*1 + (selectedDetail.properties.magicalBonus || 0)*1) !== 0) {
+                      +{{ (selectedDetail.properties.damageBonus || 0)*1 + (selectedDetail.properties.magicalBonus || 0)*1 }}
+                    }
+                    {{ selectedDetail.properties.damageType?.[0] }}
+                  </div>
+                </div>
+              }
+
+              @if (selectedDetail.properties?.rangeNormal) {
+                <div class="prop-item">
+                  <div class="prop-label">Alcance</div>
+                  <div class="prop-value">{{ selectedDetail.properties.rangeNormal }}/{{ selectedDetail.properties.rangeLong }}</div>
+                </div>
+              }
+
+              @if (selectedDetail.properties?.healingDieType) {
+                <div class="prop-item">
+                  <div class="prop-label">Curación</div>
+                  <div class="prop-value">
+                    {{ selectedDetail.properties.healingDiceCount }}{{ selectedDetail.properties.healingDieType }} 
+                    +{{ selectedDetail.properties.healingAmount || 0 }}
+                  </div>
+                </div>
+              }
+
+              @if (selectedDetail.properties?.charges) {
+                <div class="prop-item">
+                  <div class="prop-label">Cargas</div>
+                  <div class="prop-value">{{ selectedDetail.properties.charges }} (Recupera: {{ selectedDetail.properties.recharge || '—' }})</div>
+                </div>
+              }
+
+              @if (selectedDetail.properties?.stealthDisadvantage) {
+                <div class="prop-item">
+                  <div class="prop-label">Sigilo</div>
+                  <div class="prop-value" style="color: #ff4444;">Desventaja</div>
+                </div>
+              }
+
+              @if (selectedDetail.properties?.strengthRequirement) {
+                <div class="prop-item">
+                  <div class="prop-label">Requisito FU</div>
+                  <div class="prop-value">{{ selectedDetail.properties.strengthRequirement }}</div>
+                </div>
+              }
+
+              @if (selectedDetail.properties?.requiresAttunement) {
+                <div class="prop-item" style="border-color: #C5A059;">
+                  <div class="prop-label" style="color: #C5A059;">Sintonización</div>
+                  <div class="prop-value">Requerida @if(selectedDetail.properties.attunementBy) { ({{selectedDetail.properties.attunementBy}}) }</div>
+                </div>
+              }
+
+              @if (selectedDetail.properties?.armorCategory) {
+                <div class="prop-item">
+                  <div class="prop-label">Categoría</div>
+                  <div class="prop-value">{{ selectedDetail.properties.armorCategory }}</div>
+                </div>
+              }
+
+              @if (selectedDetail.properties?.baseAc !== undefined && selectedDetail.type === 'Armor') {
+                <div class="prop-item">
+                  <div class="prop-label">Bono DES</div>
+                  <div class="prop-value">
+                    {{ selectedDetail.properties.dexBonus ? (selectedDetail.properties.dexLimit ? 'Sí (Máx +' + selectedDetail.properties.dexLimit + ')' : 'Sí') : 'No' }}
+                  </div>
+                </div>
+              }
+
+              @if (selectedDetail.properties?.stat) {
+                <div class="prop-item">
+                  <div class="prop-label">Aptitud</div>
+                  <div class="prop-value">{{ selectedDetail.properties.stat === 'dex' ? 'Destreza' : 'Fuerza' }}</div>
+                </div>
+              }
+
+              @if (selectedDetail.properties?.attackBonus !== undefined) {
+                <div class="prop-item">
+                  <div class="prop-label">Bono Ataque</div>
+                  <div class="prop-value">+{{ (selectedDetail.properties.attackBonus || 0)*1 + (selectedDetail.properties.magicalBonus || 0)*1 }}</div>
+                </div>
+              }
+
+              @if (selectedDetail.properties?.overrideStr) {
+                <div class="prop-item">
+                  <div class="prop-label">Fuerza</div>
+                  <div class="prop-value">{{ selectedDetail.properties.overrideStr }} (Fijada)</div>
+                </div>
+              }
+              @if (selectedDetail.properties?.overrideDex) {
+                <div class="prop-item">
+                  <div class="prop-label">Destreza</div>
+                  <div class="prop-value">{{ selectedDetail.properties.overrideDex }} (Fijada)</div>
+                </div>
+              }
+              @if (selectedDetail.properties?.overrideCon) {
+                <div class="prop-item">
+                  <div class="prop-label">Constitución</div>
+                  <div class="prop-value">{{ selectedDetail.properties.overrideCon }} (Fijada)</div>
+                </div>
+              }
+              @if (selectedDetail.properties?.overrideInt) {
+                <div class="prop-item">
+                  <div class="prop-label">Inteligencia</div>
+                  <div class="prop-value">{{ selectedDetail.properties.overrideInt }} (Fijada)</div>
+                </div>
+              }
+              @if (selectedDetail.properties?.overrideWis) {
+                <div class="prop-item">
+                  <div class="prop-label">Sabiduría</div>
+                  <div class="prop-value">{{ selectedDetail.properties.overrideWis }} (Fijada)</div>
+                </div>
+              }
+              @if (selectedDetail.properties?.overrideCha) {
+                <div class="prop-item">
+                  <div class="prop-label">Carisma</div>
+                  <div class="prop-value">{{ selectedDetail.properties.overrideCha }} (Fijada)</div>
+                </div>
+              }
+
+              @if (selectedDetail.properties?.weaponProperties?.length > 0) {
+                <div class="prop-item" style="grid-column: span 2;">
+                  <div class="prop-label">Propiedades de Arma</div>
+                  <div class="prop-value">{{ selectedDetail.properties.weaponProperties.join(', ') }}</div>
+                </div>
+              }
+            </div>
+
+            @if (hasAbilityBonuses()) {
+              <div class="detail-section-title">Bonificadores de Atributos</div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 25px;">
+                @for (bonus of getAbilityBonuses(); track $index) {
+                  <span class="option-tag-sheet" style="margin: 0; padding: 6px 15px; font-size: 0.9rem;">{{ bonus }}</span>
+                }
+              </div>
+            }
+
+            @if (selectedDetail.properties?.specialAbilities?.length > 0) {
+              <div class="detail-section-title">Habilidades Especiales</div>
+              <ion-list class="transparent-list" style="margin-bottom: 20px;">
+                @for (feat of selectedDetail.properties.specialAbilities; track $index) {
+                  <ion-item lines="none" style="--background: #1E1E1E; border: 1px solid #333; border-radius: 8px; margin-bottom: 8px;">
+                    <ion-label>
+                      <h3 style="color: #C5A059; font-weight: bold; margin-bottom: 5px;">{{ feat.name }}</h3>
+                      <p style="color: #ccc; font-size: 0.9rem; white-space: pre-wrap;">{{ feat.description }}</p>
+                    </ion-label>
+                  </ion-item>
+                }
+              </ion-list>
+            }
+          } @else if (detailType === 'RACE') {
+            <div class="detail-section-title">Atributos Raciales</div>
+            <div class="detail-properties-grid">
+              <div class="prop-item">
+                <div class="prop-label">Tamaño</div>
+                <div class="prop-value">{{ selectedDetail.size || 'Mediano' }}</div>
+              </div>
+              @if (formatRaceBonuses(selectedDetail)) {
+                <div class="prop-item">
+                  <div class="prop-label">Bonificadores</div>
+                  <div class="prop-value" style="color: #C5A059;">{{ formatRaceBonuses(selectedDetail) }}</div>
+                </div>
+              }
+            </div>
+
+            @if (selectedDetail.raceFeatures?.traits?.length > 0) {
+              <div class="detail-section-title">Rasgos Raciales</div>
+              <ion-list class="transparent-list">
+                @for (trait of selectedDetail.raceFeatures.traits; track trait.name) {
+                  <ion-item lines="none" style="--background: #1E1E1E; border: 1px solid #333; border-radius: 8px; margin-bottom: 8px;">
+                    <ion-label>
+                      <h3 style="color: #C5A059; font-weight: bold;">{{ trait.name }}</h3>
+                      <p style="color: #ccc; font-size: 0.9rem; white-space: pre-wrap;">{{ trait.description }}</p>
+                    </ion-label>
+                  </ion-item>
+                }
+              </ion-list>
+            }
+          } @else if (detailType === 'CLASS' || detailType === 'SUBCLASS') {
+            <div class="detail-section-title">Estadísticas de Clase</div>
+            <div class="detail-properties-grid">
+              @if (selectedDetail.hitDie) {
+                <div class="prop-item">
+                  <div class="prop-label">Dado de Golpe</div>
+                  <div class="prop-value">d{{ selectedDetail.hitDie }}</div>
+                </div>
+              }
+              @if (formatSavingThrows(selectedDetail)) {
+                <div class="prop-item">
+                  <div class="prop-label">Salvaciones</div>
+                  <div class="prop-value">{{ formatSavingThrows(selectedDetail) }}</div>
+                </div>
+              }
+            </div>
+
+            @let features = detailType === 'CLASS' ? selectedDetail.features : (selectedDetail.subclassFeatures?.features || selectedDetail.subclassFeatures?.subclassFeatureEntries);
+            @if (features?.length > 0) {
+              <div class="detail-section-title">Rasgos de {{ detailType === 'CLASS' ? 'Clase' : 'Subclase' }}</div>
+              <ion-list class="transparent-list">
+                @for (feat of features; track feat.name) {
+                  <ion-item lines="none" style="--background: #1E1E1E; border: 1px solid #333; border-radius: 8px; margin-bottom: 8px;">
+                    <ion-label>
+                      <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="color: #C5A059; font-weight: bold;">{{ feat.name }}</h3>
+                        <span style="color: #888; font-size: 0.7rem; text-transform: uppercase;">Nivel {{ feat.levelRequired }}</span>
+                      </div>
+                      <p style="color: #ccc; font-size: 0.9rem; white-space: pre-wrap;">{{ feat.description }}</p>
+                    </ion-label>
+                  </ion-item>
+                }
+              </ion-list>
+            }
+          }
+        </div>
+
+        <div class="ion-padding">
+          <ion-button expand="block" fill="outline" color="medium" (click)="closeDetail()" style="--border-radius: 12px;">
+            Cerrar
+          </ion-button>
+        </div>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>

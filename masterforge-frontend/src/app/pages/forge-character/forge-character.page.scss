@@ -857,3 +857,121 @@ ion-segment-button {
   flex-wrap: wrap;
   gap: 10px;
 }
+
+/* --- Detail Modal Styling --- */
+ion-modal {
+  --background: #121212;
+  --color: white;
+  --height: 80%;
+  --border-radius: 20px 20px 0 0;
+  
+  &::part(content) {
+    border-top: 2px solid #C5A059;
+  }
+}
+
+.detail-header {
+  padding: 30px 20px 20px 20px;
+  background: linear-gradient(to bottom, #1E1E1E, #121212);
+  text-align: center;
+  border-bottom: 1px solid #333;
+
+  .detail-icon-circle {
+    width: 60px;
+    height: 60px;
+    background: #121212;
+    border: 2px solid #C5A059;
+    border-radius: 50%;
+    margin: 0 auto 15px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    ion-icon { font-size: 2rem; color: #C5A059; }
+  }
+
+  h1 {
+    color: white;
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin: 0;
+  }
+  
+  .detail-subtitle {
+    color: #C5A059;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-top: 5px;
+    letter-spacing: 0.1em;
+  }
+}
+
+.detail-body {
+  padding: 20px;
+
+  .detail-section-title {
+    color: #888;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    &::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #333;
+    }
+  }
+
+  .detail-description {
+    color: #ccc;
+    line-height: 1.6;
+    font-size: 1rem;
+    margin-bottom: 30px;
+    white-space: pre-wrap;
+  }
+
+  .detail-properties-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+
+  .prop-item {
+    background: #1E1E1E;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #333;
+
+    .prop-label {
+      color: #888;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .prop-value {
+      color: white;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+  }
+}
+
+.option-tag-sheet {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: bold;
+  background: #2a1f0e;
+  color: #C5A059;
+  border: 1px solid #C5A059;
+  border-radius: 6px;
+  padding: 3px 10px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+}
