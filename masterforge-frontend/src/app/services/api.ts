@@ -67,8 +67,10 @@ export class ApiService {
   }
 
   // Fetches spells available for a character (filtered by class, excluding already known)
-  getAvailableSpells(charId: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/characters/${charId}/available-spells`);
+  getAvailableSpells(charId: string, level?: number): Observable<any[]> {
+    let url = `${this.apiUrl}/characters/${charId}/available-spells`;
+    if (level) url += `?level=${level}`;
+    return this.http.get<any[]>(url);
   }
 
   // Adds a spell to the character's spellbook
@@ -105,9 +107,17 @@ performLongRest(characterId: string): Observable<any> {
   return this.http.post(`${this.apiUrl}/characters/${characterId}/long-rest`, {});
 }
 
+levelUp(characterId: string, data: { maxHp: number, stats: any, choicesJson: any, newSpells?: string[] }): Observable<any> {
+  return this.http.put(`${this.apiUrl}/characters/${characterId}/level-up`, data);
+}
+
 updateSpellSlots(characterId: string, spellSlots: any): Observable<any> {
   return this.http.put(`${this.apiUrl}/characters/${characterId}/spell-slots`, { spellSlots });
 }
+
+  getSpells(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/spells`);
+  }
 
   // Fetch all campaigns
   getCampaigns(): Observable<any> {

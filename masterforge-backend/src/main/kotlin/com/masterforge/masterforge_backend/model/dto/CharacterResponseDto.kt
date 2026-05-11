@@ -108,7 +108,6 @@ data class DndClassResponseDto(
                 hitDie = dndClass.hitDie,
                 savingThrows = dndClass.savingThrows,
                 features = dndClass.features
-                    .filter { it.levelRequired <= characterLevel }
                     .map { ClassFeatureDto(it.id, it.name, it.description, it.levelRequired, dndClass.id!!, it.options) },
                 classFeatures = dndClass.classFeatures ?: emptyMap()
             )
@@ -123,19 +122,11 @@ data class SubclassResponseDto(
 ) {
     companion object {
         fun fromEntity(subclass: DndSubclass, characterLevel: Int): SubclassResponseDto {
-            val rawFeatures = subclass.subclassFeatures ?: emptyMap()
-            // subclassFeatures JSON has a "features" array — filter by levelRequired
-            val filteredFeatures = (rawFeatures["features"] as? List<*>)?.filter { entry ->
-                val level = (entry as? Map<*, *>)?.get("levelRequired") as? Int ?: 0
-                level <= characterLevel
-            } ?: emptyList<Any>()
-            val filteredMap = if (rawFeatures.isNotEmpty())
-                rawFeatures.toMutableMap().apply { put("features", filteredFeatures) }
-            else emptyMap()
+            // Return all subclass features without filtering by level
             return SubclassResponseDto(
                 id = subclass.id!!,
                 name = subclass.name,
-                subclassFeatures = filteredMap
+                subclassFeatures = subclass.subclassFeatures ?: emptyMap()
             )
         }
     }

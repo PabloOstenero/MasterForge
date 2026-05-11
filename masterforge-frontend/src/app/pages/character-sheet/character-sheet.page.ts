@@ -6,11 +6,11 @@ import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonSegment, IonSegmentButton, IonLabel,
   IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
   IonItem, IonBadge, IonList, IonIcon, IonButton, IonFooter, IonBackButton, IonButtons,
-  AlertController, ActionSheetController, ModalController, IonSearchbar, IonModal
+  AlertController, ActionSheetController, ModalController, IonSearchbar, IonModal, IonCheckbox
 } from '@ionic/angular/standalone';
 import { ApiService } from '../../services/api';
 import { addIcons } from 'ionicons';
-import { statsChart, sparkles, shield, briefcase, trash, add, addCircleOutline, trashOutline, syncOutline, book, bookOutline, settingsOutline } from 'ionicons/icons';
+import { statsChart, sparkles, shield, briefcase, trash, add, addCircleOutline, checkmarkCircle, trashOutline, syncOutline, book, bookOutline, settingsOutline, trendingUpOutline, removeCircleOutline, refreshOutline, sparklesOutline } from 'ionicons/icons';
 import { getProficiencyBonus, getModifier, calculatePassive } from '../../utils/dnd-utils';
 
 export const DND_SKILLS = [
@@ -43,7 +43,8 @@ export const DND_SKILLS = [
     CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent,
     IonSegment, IonSegmentButton, IonLabel, IonGrid, IonRow, IonCol,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonBadge, IonList,
-    IonIcon, IonButton, IonFooter, IonBackButton, IonButtons, IonSearchbar, IonModal
+    IonIcon, IonButton, IonFooter, IonBackButton, IonButtons, IonSearchbar, IonModal,
+    IonCheckbox
   ],
   encapsulation: ViewEncapsulation.None // Re-enabled to allow styling the Alert pop-ups
 })
@@ -102,6 +103,22 @@ export class CharacterSheetPage implements OnInit {
     preparationStyle: 'KNOWN'
   };
 
+  rawCharacter: any = null; // Store raw data for level-up calculations
+
+  // Level Up State
+  isLevelUpModalOpen = false;
+  levelUpData: any = {
+    hpBonus: 0,
+    statChanges: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
+    choicesJson: {},
+    selectedSpells: []
+  };
+
+  levelUpAvailableSpells: any[] = [];
+  spellsToChoose: number = 0;
+  cantripsToChoose: number = 0;
+  levelUpNewFeatures: any[] = [];
+
   private characterId: string | null = null;
 
   // Inyectamos el servicio en el constructor
@@ -124,7 +141,12 @@ export class CharacterSheetPage implements OnInit {
       'sync-outline': syncOutline,
       'book': book,
       'book-outline': bookOutline,
-      'settings-outline': settingsOutline
+      'settings-outline': settingsOutline,
+      'trending-up-outline': trendingUpOutline,
+      'remove-circle-outline': removeCircleOutline,
+      'refresh-outline': refreshOutline,
+      'sparkles-outline': sparklesOutline,
+      'checkmark-circle': checkmarkCircle
     });
   }
 
@@ -146,6 +168,7 @@ export class CharacterSheetPage implements OnInit {
   loadCharacter(id: string) {
     this.apiService.getCharacter(id).subscribe({
       next: (data) => {
+        this.rawCharacter = data;
         console.log('Raw data from DB:', data);
 
         // Calculate final stats including racial bonuses first
@@ -253,21 +276,23 @@ export class CharacterSheetPage implements OnInit {
           })),
           features: [
             ...(data.dndClass?.features || []),
+            ...(data.dndClass?.classFeatures?.features || []),
             ...this.extractSubclassFeatures(data.subclass?.subclassFeatures)
-          ].map(f => ({
-            ...f,
-            selectedOptions: (data.choicesJson?.featureOptions?.[f.name] || [])
-          })),
-            proficiencies: {
-              armor: this.extractArrayFromClassFeatures(data.dndClass?.classFeatures, 'armorProficiencies'),
-              weapons: this.extractArrayFromClassFeatures(data.dndClass?.classFeatures, 'weaponProficiencies'),
-              tools: this.extractArrayFromClassFeatures(data.dndClass?.classFeatures, 'toolProficiencies'),
-              languages: [
-                ...(data.dndRace?.raceFeatures?.languageProficiencies?.fixed || 
-                   this.extractArrayFromRaceFeatures(data.dndRace?.raceFeatures, 'languages')),
-                ...(data.choicesJson?.languages || [])
-              ]
-            },
+          ].filter(f => parseInt(f.levelRequired, 10) <= data.level)
+            .map(f => ({
+              ...f,
+              selectedOptions: (data.choicesJson?.featureOptions?.[f.name] || [])
+            })),
+          proficiencies: {
+            armor: this.extractArrayFromClassFeatures(data.dndClass?.classFeatures, 'armorProficiencies'),
+            weapons: this.extractArrayFromClassFeatures(data.dndClass?.classFeatures, 'weaponProficiencies'),
+            tools: this.extractArrayFromClassFeatures(data.dndClass?.classFeatures, 'toolProficiencies'),
+            languages: [
+              ...(data.dndRace?.raceFeatures?.languageProficiencies?.fixed ||
+                this.extractArrayFromRaceFeatures(data.dndRace?.raceFeatures, 'languages')),
+              ...(data.choicesJson?.languages || [])
+            ]
+          },
           background: data.background || 'Aventurero',
           alignment: data.alignment || 'Neutral',
           xp: data.xp || 0,
@@ -488,6 +513,7 @@ export class CharacterSheetPage implements OnInit {
       name: f.name ?? '',
       description: f.description ?? '',
       levelRequired: f.levelRequired ?? 0,
+      options: f.options ?? null,
       isSubclassFeature: true   // flag for optional styling in the template
     }));
   }
@@ -532,8 +558,8 @@ export class CharacterSheetPage implements OnInit {
       this.filteredAvailableSpells = [...this.availableSpells];
       return;
     }
-    this.filteredAvailableSpells = this.availableSpells.filter(s => 
-      s.name.toLowerCase().includes(query) || 
+    this.filteredAvailableSpells = this.availableSpells.filter(s =>
+      s.name.toLowerCase().includes(query) ||
       s.school.toLowerCase().includes(query)
     );
   }
@@ -584,6 +610,359 @@ export class CharacterSheetPage implements OnInit {
   // Cambia de pestaña (Atributos, Inventario, Magia)
   segmentChanged(event: any) {
     this.currentTab = event.detail.value;
+  }
+
+  // --- LEVEL UP LOGIC ---
+  openLevelUpModal() {
+    if (!this.rawCharacter) return;
+
+    this.isLevelUpModalOpen = true;
+    const nextLevel = this.pj.level + 1;
+
+    // Reset data
+    this.levelUpData = {
+      hpBonus: 0,
+      statChanges: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
+      choicesJson: JSON.parse(JSON.stringify(this.pj.choicesJson)), // Deep copy
+      selectedSpells: []
+    };
+
+    // Build the list of features that grant choices at this level
+    // (Mimicking availableFeatureChoices from ForgeCharacterPage)
+    const allPossibleFeatures = [
+      ...(this.rawCharacter.dndClass?.features || []),
+      ...(this.rawCharacter.dndClass?.classFeatures?.features || []),
+      ...this.extractSubclassFeatures(this.rawCharacter.subclass?.subclassFeatures)
+    ];
+
+    this.levelUpNewFeatures = [];
+    const seenNames = new Set<string>();
+
+    allPossibleFeatures.forEach(f => {
+      const reqLevel = parseInt(f.levelRequired, 10);
+      if (reqLevel <= nextLevel && !seenNames.has(f.name)) {
+        const isNew = reqLevel === nextLevel;
+
+        // Calculate max choices for current level vs next level
+        const currentMax = this.calculateMaxChoices(f, this.pj.level);
+        const nextMax = this.calculateMaxChoices(f, nextLevel);
+        const gainedNewChoices = nextMax > currentMax;
+
+        if (isNew || gainedNewChoices) {
+          const optsArray = this.getFeatureOptionsArray(f);
+
+          // Filter options by level
+          const filteredOptions = optsArray.filter((opt: any) => {
+            const optReq = opt.levelRequired ?? f.levelRequired;
+            return parseInt(optReq, 10) <= nextLevel;
+          });
+
+          if (isNew || (gainedNewChoices && filteredOptions.length > 0)) {
+            this.levelUpNewFeatures.push({
+              ...f,
+              calculatedMaxChoices: nextMax,
+              filteredOptions: filteredOptions
+            });
+            seenNames.add(f.name);
+          }
+        }
+      }
+    });
+
+    // Calculate Spells/Cantrips to choose
+    this.calculateSpellsToChoose(nextLevel);
+  }
+
+  private calculateSpellsToChoose(nextLevel: number) {
+    const cls = this.rawCharacter.dndClass;
+    const sc = this.rawCharacter.subclass?.subclassFeatures?.spellcasting || cls?.classFeatures?.spellcasting;
+    if (!sc) {
+      this.cantripsToChoose = 0;
+      this.spellsToChoose = 0;
+      this.levelUpAvailableSpells = [];
+      return;
+    }
+
+    const currentIdx = Math.min(Math.max(this.pj.level - 1, 0), 19);
+    const nextIdx = Math.min(Math.max(nextLevel - 1, 0), 19);
+
+    const style = sc.preparationStyle || sc.preparation_style || 'KNOWN';
+    const type = sc.spellcastingType || sc.spellcasting_type || sc.type;
+    const lowName = cls?.name?.toLowerCase() || '';
+
+    const spellsKnownTable = sc.spellsKnown || sc.spells_known;
+    const hasSpellsKnownTable = Array.isArray(spellsKnownTable) && spellsKnownTable.length > 0;
+
+    const cantripsKnownTable = sc.cantripsKnown || sc.cantrips_known;
+    const currentCantrips = cantripsKnownTable?.[currentIdx] || 0;
+    const nextCantrips = cantripsKnownTable?.[nextIdx] || 0;
+    this.cantripsToChoose = Math.max(0, nextCantrips - currentCantrips);
+
+    let currentSpells = 0;
+    let nextSpells = 0;
+
+    if (hasSpellsKnownTable) {
+      currentSpells = spellsKnownTable[currentIdx] || 0;
+      nextSpells = spellsKnownTable[nextIdx] || 0;
+      this.spellsToChoose = Math.max(0, nextSpells - currentSpells);
+    } else if (style === 'KNOWN' || lowName.includes('wizard') || lowName.includes('mago')) {
+      // Fallback logic for Homebrew classes without explicit tables
+      if (lowName.includes('wizard') || lowName.includes('mago')) {
+        this.spellsToChoose = 2; // Wizards gain 2
+      } else if (type === 'Full Caster') {
+        this.spellsToChoose = 1;
+      } else if (type === 'Half Caster') {
+        this.spellsToChoose = (nextLevel % 2 === 0) ? 1 : 0; // Approximate
+      } else if (type === 'Pact Magic') {
+        this.spellsToChoose = 1;
+      } else {
+        this.spellsToChoose = 0;
+      }
+    } else {
+      this.spellsToChoose = 0;
+    }
+
+    if (this.spellsToChoose > 0 || this.cantripsToChoose > 0) {
+      this.fetchAvailableSpellsForLevelUp();
+    } else {
+      this.levelUpAvailableSpells = [];
+    }
+  }
+
+  private fetchAvailableSpellsForLevelUp() {
+    this.apiService.getAvailableSpells(this.pj.id, this.pj.level + 1).subscribe({
+      next: (spells: any[]) => {
+        this.levelUpAvailableSpells = spells.sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
+      },
+      error: (err) => console.error('Error fetching level up spells:', err)
+    });
+  }
+
+
+  toggleLevelUpSpell(spellId: string) {
+    const idx = this.levelUpData.selectedSpells.indexOf(spellId);
+    if (idx > -1) {
+      this.levelUpData.selectedSpells.splice(idx, 1);
+    } else {
+      const spell = this.levelUpAvailableSpells.find(s => s.id === spellId);
+      if (!spell) return;
+
+      const isCantrip = spell.level === 0;
+      const currentCantrips = this.levelUpData.selectedSpells.filter((id: string) =>
+        this.levelUpAvailableSpells.find(s => s.id === id)?.level === 0).length;
+      const currentSpells = this.levelUpData.selectedSpells.length - currentCantrips;
+
+      if (isCantrip && currentCantrips < this.cantripsToChoose) {
+        this.levelUpData.selectedSpells.push(spellId);
+      } else if (!isCantrip && currentSpells < this.spellsToChoose) {
+        this.levelUpData.selectedSpells.push(spellId);
+      }
+    }
+  }
+
+  isLevelUpSpellSelected(spellId: string): boolean {
+    return this.levelUpData.selectedSpells.includes(spellId);
+  }
+
+  rollLevelUpHp() {
+    this.levelUpData.hpBonus = Math.floor(Math.random() * this.pj.hitDieType) + 1;
+  }
+
+  takeAverageHp() {
+    this.levelUpData.hpBonus = (this.pj.hitDieType / 2) + 1;
+  }
+
+  async manualLevelUpHp() {
+    const alert = await this.alertController.create({
+      header: 'Introducir Tirada',
+      message: `Introduce el resultado del d${this.pj.hitDieType}:`,
+      inputs: [
+        {
+          name: 'roll',
+          type: 'number',
+          placeholder: 'Resultado',
+          min: 1,
+          max: this.pj.hitDieType
+        }
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Guardar',
+          handler: (data) => {
+            const val = parseInt(data.roll);
+            if (!isNaN(val) && val > 0 && val <= this.pj.hitDieType) {
+              this.levelUpData.hpBonus = val;
+            }
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  isASIDue(): boolean {
+    const nextLevel = this.pj.level + 1;
+    return [4, 8, 12, 16, 19].includes(nextLevel);
+  }
+
+  getTotalASISpent(): number {
+    return Object.values(this.levelUpData.statChanges).reduce((a: any, b: any) => a + b, 0) as number;
+  }
+
+  incrementStat(key: string) {
+    if (this.getTotalASISpent() < 2 && this.pj.stats[key] + this.levelUpData.statChanges[key] < 20) {
+      this.levelUpData.statChanges[key]++;
+    }
+  }
+
+  decrementStat(key: string) {
+    if (this.levelUpData.statChanges[key] > 0) {
+      this.levelUpData.statChanges[key]--;
+    }
+  }
+
+  // Feature Options Logic (Reusing Forge Character logic)
+  calculateMaxChoices(feature: any, level?: number): number {
+    const lvl = level || this.pj.level;
+    const options = feature.options;
+    if (!options) return 0;
+
+    // Use choiceCount if present, or count the available options if no specific count is set
+    let total = options.choiceCount || 0;
+
+    if (options.progression && Array.isArray(options.progression)) {
+      const applicable = options.progression
+        .filter((p: any) => lvl >= p.level)
+        .reduce((sum: number, p: any) => sum + (p.additionalChoices || 0), 0);
+      total += applicable;
+    }
+
+    // Fallback: if there are options but total is 0, assume at least 1 choice is allowed
+    if (total === 0 && options.options?.length > 0) return 1;
+
+    return total;
+  }
+
+  toggleFeatureOption(feature: any, optionName: string) {
+    if (!this.levelUpData.choicesJson.featureOptions) {
+      this.levelUpData.choicesJson.featureOptions = {};
+    }
+
+    const choices = { ...this.levelUpData.choicesJson.featureOptions };
+    const selected = [...(choices[feature.name] || [])];
+
+    if (selected.includes(optionName)) {
+      choices[feature.name] = selected.filter((o: string) => o !== optionName);
+    } else {
+      const max = this.calculateMaxChoices(feature, this.pj.level + 1);
+      if (selected.length < max) {
+        choices[feature.name] = [...selected, optionName];
+      }
+    }
+
+    // Trigger change detection by re-assigning the nested objects
+    this.levelUpData.choicesJson = {
+      ...this.levelUpData.choicesJson,
+      featureOptions: choices
+    };
+  }
+
+  isFeatureOptionSelected(feature: any, optionName: string): boolean {
+    const choices = this.levelUpData.choicesJson.featureOptions || {};
+    return (choices[feature.name] || []).includes(optionName);
+  }
+
+  isFeatureMaxed(feature: any): boolean {
+    const choices = this.levelUpData.choicesJson.featureOptions || {};
+    const selected = choices[feature.name] || [];
+    return selected.length >= this.calculateMaxChoices(feature, this.pj.level + 1);
+  }
+
+  getFeatureOptionsArray(feature: any): any[] {
+    if (!feature) return [];
+
+    // 1. If the feature itself has a choices array (some legacy structures)
+    if (Array.isArray(feature.choices)) return feature.choices;
+    if (Array.isArray(feature.options)) return feature.options;
+
+    const opt = feature.options;
+    if (!opt || typeof opt !== 'object') return [];
+
+    // 2. Direct key checks (standard structures)
+    if (Array.isArray(opt.options)) return opt.options;
+    if (Array.isArray(opt.choices)) return opt.choices;
+    if (Array.isArray(opt.choicePool)) return opt.choicePool;
+    if (Array.isArray(opt.choice_pool)) return opt.choice_pool;
+    if (Array.isArray(opt.pool)) return opt.pool;
+
+    // 3. Broad search: return the first property that is a non-empty array
+    for (const key of Object.keys(opt)) {
+      if (Array.isArray(opt[key]) && opt[key].length > 0) {
+        return opt[key];
+      }
+    }
+
+    return [];
+  }
+
+  isLevelUpValid(): boolean {
+    if (this.levelUpData.hpBonus <= 0) return false;
+    if (this.isASIDue() && this.getTotalASISpent() < 2) return false;
+
+    // Check spells
+    const selectedCantrips = this.levelUpData.selectedSpells.filter((id: string) =>
+      this.levelUpAvailableSpells.find(s => s.id === id)?.level === 0).length;
+    const selectedSpells = this.levelUpData.selectedSpells.length - selectedCantrips;
+    if (selectedCantrips < this.cantripsToChoose || selectedSpells < this.spellsToChoose) return false;
+
+    // Check if all features with options have choices made
+    for (const f of this.levelUpNewFeatures) {
+      if (f.filteredOptions?.length > 0) {
+        const selected = (this.levelUpData.choicesJson.featureOptions || {})[f.name] || [];
+        if (selected.length < f.calculatedMaxChoices) return false;
+      }
+    }
+    return true;
+  }
+
+  async confirmLevelUp() {
+    const alert = await this.alertController.create({
+      header: 'Confirmar Subida de Nivel',
+      message: `¿Estás seguro de subir al nivel ${this.pj.level + 1}?`,
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: '¡Subir!',
+          handler: () => {
+            const finalStats: any = { ...this.pj.stats };
+            Object.keys(this.levelUpData.statChanges).forEach(key => {
+              finalStats[key] += this.levelUpData.statChanges[key];
+            });
+
+            const oldConMod = this.getModifierNumber(this.pj.stats.con);
+            const newConMod = this.getModifierNumber(finalStats.con);
+            const retroactiveHp = (newConMod - oldConMod) * this.pj.level;
+            
+            const payload = {
+              maxHp: this.pj.maxHp + retroactiveHp + this.levelUpData.hpBonus + newConMod,
+              stats: finalStats,
+              choicesJson: this.levelUpData.choicesJson,
+              newSpells: this.levelUpData.selectedSpells
+            };
+
+            this.apiService.levelUp(this.pj.id, payload).subscribe({
+              next: () => {
+                this.isLevelUpModalOpen = false;
+                this.loadCharacter(this.pj.id);
+              },
+              error: (err) => console.error('Error leveling up:', err)
+            });
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   // Performs a long rest
@@ -736,9 +1115,24 @@ export class CharacterSheetPage implements OnInit {
   }
 
   // Helper to find the highest spell level the character has slots for
-  getMaxSpellLevel(): number {
+  getMaxSpellLevel(characterLevel?: number): number {
+    // If a level is provided, we calculate based on the class progression table (for Level Up)
+    if (characterLevel !== undefined && this.rawCharacter) {
+      const cls = this.rawCharacter.dndClass;
+      const rawFeatures = cls?.classFeatures || {};
+      const autoSlots = this.getAutoSpellSlots(characterLevel, rawFeatures);
+
+      let max = 0;
+      for (let i = 1; i <= 9; i++) {
+        if (autoSlots[`level_${i}`]?.max > 0) {
+          max = i;
+        }
+      }
+      return max;
+    }
+
+    // Default: Calculate based on current character's spell slots
     let max = 0;
-    // Iterate through slots level_1 to level_9
     for (let i = 1; i <= 9; i++) {
       if (this.getSpellSlots(i.toString()).max > 0) {
         max = i;
@@ -751,18 +1145,18 @@ export class CharacterSheetPage implements OnInit {
   get groupedSpells() {
     if (!this.pj.spells) return [];
     const maxLevel = this.getMaxSpellLevel();
-    
+
     // Extract names and descriptions of spells granted by race to exempt them from the filter
     const racialTraitsText = (this.pj.traits || [])
     const groups: any = {};
     this.pj.spells.forEach((cs: any) => {
       if (!cs || !cs.spell) return;
-      
+
       const level = cs.spell.level;
-      
+
       // Filter out spells higher than character's capacity
       if (Number(level) > maxLevel && level !== '0') return;
-      
+
       if (!groups[level]) groups[level] = [];
       groups[level].push(cs);
     });
@@ -832,7 +1226,7 @@ export class CharacterSheetPage implements OnInit {
 
     // 1. Try to use the custom table from the class features
     const table = casting.spellSlots?.slots || casting.spell_slots?.slots;
-    
+
     if (table && table[level - 1]) {
       const row = table[level - 1];
       row.forEach((count: number, idx: number) => {
@@ -919,12 +1313,12 @@ export class CharacterSheetPage implements OnInit {
     const level = this.pj.level || 1;
     const mod = this.getSpellcastingMod();
     const className = (this.pj.dndClass || '').toLowerCase();
-    
+
     // Half-casters (Paladin, Ranger)
     if (['paladín', 'paladin', 'explorador', 'exploradora', 'ranger'].includes(className)) {
       return Math.max(1, Math.floor(level / 2) + mod);
     }
-    
+
     // Full-casters (Cleric, Druid, Wizard)
     return Math.max(1, level + mod);
   }
@@ -1011,10 +1405,10 @@ export class CharacterSheetPage implements OnInit {
 
     const synonyms = longKeys[statKey] || [statKey];
     const isProficient = synonyms.some(key => !!this.pj.savingThrowsProficiencies?.[key] || !!this.pj.savingThrowsProficiencies?.[key.toLowerCase()]);
-    
+
     const profBonus = this.pj.proficiencyBonus || 0;
     const total = isProficient ? baseMod + profBonus : baseMod;
-    
+
     return total >= 0 ? `+${total}` : `${total}`;
   }
 
@@ -1035,10 +1429,13 @@ export class CharacterSheetPage implements OnInit {
 
   // Calcula el modificador de D&D a partir de la puntuación base (Ej: 16 -> +3)
   getMod(score: any): string {
-    // Forzamos a que el valor se convierta en número por seguridad
-    const num = Number(score);
-    const mod = Math.floor((num - 10) / 2);
+    const mod = this.getModifierNumber(score);
     return mod >= 0 ? `+${mod}` : `${mod}`;
+  }
+
+  getModifierNumber(score: any): number {
+    const num = Number(score);
+    return Math.floor((num - 10) / 2);
   }
 
   // Sends HP update to the backend

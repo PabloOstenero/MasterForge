@@ -6,6 +6,7 @@ import com.masterforge.masterforge_backend.model.dto.CharacterSummaryDto
 import com.masterforge.masterforge_backend.model.dto.SpellDto
 import com.masterforge.masterforge_backend.model.entity.Character
 import com.masterforge.masterforge_backend.model.entity.CharacterSpell
+import com.masterforge.masterforge_backend.model.entity.Spell
 import com.masterforge.masterforge_backend.model.entity.InventorySlot
 import com.masterforge.masterforge_backend.repository.*
 import org.springframework.http.HttpStatus
@@ -22,6 +23,12 @@ data class HitDiceUpdateDto(val hitDiceSpent: Int)
 data class MoneyUpdateDto(val cp: Int, val sp: Int, val ep: Int, val gp: Int, val pp: Int)
 data class AddSpellDto(val spellId: java.util.UUID, val isPrepared: Boolean = false)
 data class SpellSlotsUpdateDto(val spellSlots: Map<String, Any>)
+data class LevelUpDto(
+    val maxHp: Int,
+    val stats: Map<String, Int>,
+    val choicesJson: Map<String, Any>,
+    val newSpells: List<UUID> = emptyList()
+)
 
 @RestController
 @RequestMapping("/api/characters")
@@ -150,37 +157,67 @@ class CharacterController(
      *  excluding spells the character already has in their spellbook and spells higher than their current capacity. */
     @GetMapping("/{id}/available-spells")
     @Transactional
-    fun getAvailableSpells(@PathVariable id: UUID): ResponseEntity<List<SpellDto>> {
+    fun getAvailableSpells(
+        @PathVariable id: UUID,
+        @RequestParam(required = false) level: Int?
+    ): ResponseEntity<List<SpellDto>> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
-        val className = character.dndClass.name
-        val knownSpellIds = characterSpellRepository.findByCharacterId(id).map { it.spell.id }.toSet()
-        val maxLevel = getMaxSpellLevel(character)
+        
+        val classFeatures = character.dndClass.classFeatures
+        val subclassFeatures = character.subclass?.subclassFeatures
+        val spellcasting = (subclassFeatures?.get("spellcasting") as? Map<*, *>) 
+                          ?: (classFeatures?.get("spellcasting") as? Map<*, *>)
 
-        val available = spellRepository.findBySpellClassesContainingIgnoreCase(className)
-            .filter { it.id !in knownSpellIds && (it.level == 0 || it.level <= maxLevel) }
-            .map { spell -> SpellDto(
-                id = spell.id,
-                name = spell.name,
-                level = spell.level,
-                school = spell.school,
-                castingTime = spell.castingTime,
-                range = spell.range,
-                duration = spell.duration,
-                verbal = spell.verbal,
-                somatic = spell.somatic,
-                material = spell.material,
-                materialComponent = spell.materialComponent,
-                concentration = spell.concentration,
-                ritual = spell.ritual,
-                damageTypes = spell.damageTypes?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() },
-                savingThrow = spell.savingThrow,
-                spellClasses = spell.spellClasses?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() },
-                higherLevelDescription = spell.higherLevelDescription,
-                description = spell.description,
-                authorId = spell.author?.id
+        val className = character.dndClass.name
+        val additionalClass = spellcasting?.get("additionalSpellClass") as? String
+        val expandedSpellNames = (subclassFeatures?.get("expandedSpellList") as? List<*>)
+                                ?.filterIsInstance<Map<String, Any>>()
+                                ?.mapNotNull { it["name"] as? String } ?: emptyList()
+
+        val knownSpellIds = characterSpellRepository.findByCharacterId(id).map { it.spell.id }.toSet()
+        val maxLevel = getMaxSpellLevel(character, level)
+
+        // Use a set to avoid duplicates from multiple sources
+        val allAvailable = mutableSetOf<Spell>()
+        
+        // 1. Spells from the primary class
+        allAvailable.addAll(spellRepository.findBySpellClassesContainingIgnoreCase(className))
+        
+        // 2. Spells from an additional class (e.g. Divine Soul Sorcerer getting Cleric spells)
+        if (!additionalClass.isNullOrBlank()) {
+            allAvailable.addAll(spellRepository.findBySpellClassesContainingIgnoreCase(additionalClass))
+        }
+        
+        // 3. Spells specifically added to the subclass list
+        expandedSpellNames.forEach { name ->
+            spellRepository.findByNameIgnoreCase(name)?.let { allAvailable.add(it) }
+        }
+
+        val filtered = allAvailable
+            .filter { s -> s.id !in knownSpellIds && (s.level == 0 || s.level <= maxLevel) }
+            .map { s -> SpellDto(
+                id = s.id,
+                name = s.name,
+                level = s.level,
+                school = s.school,
+                castingTime = s.castingTime,
+                range = s.range,
+                duration = s.duration,
+                verbal = s.verbal,
+                somatic = s.somatic,
+                material = s.material,
+                materialComponent = s.materialComponent,
+                concentration = s.concentration,
+                ritual = s.ritual,
+                damageTypes = s.damageTypes?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() },
+                savingThrow = s.savingThrow,
+                spellClasses = s.spellClasses?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() },
+                higherLevelDescription = s.higherLevelDescription,
+                description = s.description,
+                authorId = s.author?.id
             )}
-        return ResponseEntity.ok(available)
+        return ResponseEntity.ok(filtered)
     }
 
     /** Adds a spell to the character's spellbook. */
@@ -254,45 +291,61 @@ class CharacterController(
         return ResponseEntity.ok(CharacterResponseDto.fromEntity(character, spells))
     }
 
-    private fun getMaxSpellLevel(character: Character): Int {
+    private fun getMaxSpellLevel(character: Character, requestedLevel: Int? = null): Int {
+        val effectiveLevel = requestedLevel ?: character.level
         var max = 0
-        for (i in 1..9) {
-            val key = "level_$i"
-            val raw = character.spellSlots?.get(key)
-            if (raw != null) {
-                val maxSlots = when (raw) {
-                    is Map<*, *> -> (raw["max"] as? Number)?.toInt() ?: 0
-                    is Number -> raw.toInt()
-                    else -> 0
-                }
-                if (maxSlots > 0) max = i
-            }
-        }
         
-        // If no slots found in character, fall back to class automated slots
-        if (max == 0) {
-            val classFeatures = character.dndClass.classFeatures ?: return 0
-            val spellcasting = classFeatures["spellcasting"] as? Map<*, *> ?: return 0
-            
-            // Try to get from explicit slot table in classFeatures
-            val spellSlots = spellcasting["spellSlots"] as? Map<*, *> ?: spellcasting["spell_slots"] as? Map<*, *>
-            val table = spellSlots?.get("slots") as? List<List<Int>>
-            if (table != null && table.size >= character.level) {
-                val row = table[character.level - 1]
+        val classFeatures = character.dndClass.classFeatures
+        val subclassFeatures = character.subclass?.subclassFeatures
+        val spellcasting = (subclassFeatures?.get("spellcasting") as? Map<*, *>) 
+                          ?: (classFeatures?.get("spellcasting") as? Map<*, *>)
+
+        // 1. Try to get from character's saved slots (only for current level)
+        if (requestedLevel == null || requestedLevel == character.level) {
+            for (i in 1..9) {
+                val key = "level_$i"
+                val raw = character.spellSlots?.get(key)
+                if (raw != null) {
+                    val maxSlots = when (raw) {
+                        is Map<*, *> -> (raw["max"] as? Number)?.toInt() ?: 0
+                        is Number -> raw.toInt()
+                        else -> 0
+                    }
+                    if (maxSlots > 0) max = i
+                }
+            }
+            if (max > 0) return max
+        }
+
+        // 2. Try to get from explicit slot table in class/subclass features
+        if (spellcasting != null) {
+            val table = (spellcasting["spellSlots"] as? Map<*, *>) ?: (spellcasting["spell_slots"] as? Map<*, *>)
+            val slotsTable = table?.get("slots") as? List<List<Int>>
+            if (slotsTable != null && slotsTable.size >= effectiveLevel) {
+                val row = slotsTable[effectiveLevel - 1]
                 return row.indexOfLast { it > 0 } + 1
             }
+        }
 
-            // Standard progression fallback based on type
-            val type = spellcasting["spellcastingType"] as? String ?: spellcasting["type"] as? String
+        // 3. Fallback based on spellcasting type (standard 5e progression)
+        if (spellcasting != null) {
+            val type = (spellcasting["spellcastingType"] as? String) ?: (spellcasting["type"] as? String)
             return when (type) {
-                "Full Caster" -> if (character.level >= 1) 1 else 0
-                "Half Caster" -> if (character.level >= 2) 1 else 0
-                "Pact Magic" -> 1
+                "Full Caster" -> (effectiveLevel + 1) / 2
+                "Half Caster" -> (effectiveLevel / 2 + 1) / 2
+                "Third Caster" -> (effectiveLevel / 3 + 1) / 2
+                "Pact Magic" -> when {
+                    effectiveLevel >= 9 -> 5
+                    effectiveLevel >= 7 -> 4
+                    effectiveLevel >= 5 -> 3
+                    effectiveLevel >= 3 -> 2
+                    else -> 1
+                }
                 else -> 0
             }
         }
-        
-        return max
+
+        return 0
     }
 
     @PutMapping("/{characterId}/campaign/{campaignId}")
@@ -571,7 +624,7 @@ class CharacterController(
         updatedSlots.keys.forEach { key ->
             val slotData = updatedSlots[key]
             if (slotData is Map<*, *>) {
-                val mutableSlotData = slotData.toMutableMap()
+                val mutableSlotData = (slotData as Map<String, Any>).toMutableMap()
                 mutableSlotData["available"] = mutableSlotData["max"] ?: 0
                 updatedSlots[key] = mutableSlotData
             }
@@ -592,6 +645,79 @@ class CharacterController(
         )
         
         val saved = characterRepository.save(updatedCharacter)
+        val spells = characterSpellRepository.findByCharacterId(id)
+        return ResponseEntity.ok(CharacterResponseDto.fromEntity(saved, spells))
+    }
+
+    @PutMapping("/{id}/level-up")
+    @Transactional
+    fun levelUp(@PathVariable id: UUID, @RequestBody dto: LevelUpDto): ResponseEntity<CharacterResponseDto> {
+        val character = characterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        
+        val newLevel = character.level + 1
+        
+        // Update basic stats
+        var updatedCharacter = character.copy(
+            level = newLevel,
+            maxHp = dto.maxHp,
+            currentHp = dto.maxHp, // Heal to full on level up
+            hitDiceTotal = newLevel,
+            baseStr = dto.stats["str"] ?: character.baseStr,
+            baseDex = dto.stats["dex"] ?: character.baseDex,
+            baseCon = dto.stats["con"] ?: character.baseCon,
+            baseInt = dto.stats["int"] ?: character.baseInt,
+            baseWis = dto.stats["wis"] ?: character.baseWis,
+            baseCha = dto.stats["cha"] ?: character.baseCha,
+            choicesJson = dto.choicesJson
+        )
+
+        // Recalculate Spell Slots based on class/subclass table
+        val classFeatures = character.dndClass.classFeatures
+        val subclassFeatures = character.subclass?.subclassFeatures
+        
+        val spellcasting = subclassFeatures?.get("spellcasting") as? Map<*, *> 
+                          ?: classFeatures?.get("spellcasting") as? Map<*, *>
+        
+        if (spellcasting != null) {
+            val spellSlots = spellcasting["spellSlots"] as? Map<*, *> ?: spellcasting["spell_slots"] as? Map<*, *>
+            val table = spellSlots?.get("slots") as? List<List<Int>>
+            if (table != null && table.size >= newLevel) {
+                val row = table[newLevel - 1]
+                val updatedCharSlots = updatedCharacter.spellSlots?.toMutableMap() ?: mutableMapOf()
+                
+                row.forEachIndexed { i, max ->
+                    val levelKey = "level_${i + 1}"
+                    if (max > 0) {
+                        val currentSlotData = (updatedCharSlots[levelKey] as? Map<String, Any>)?.toMutableMap() 
+                            ?: mutableMapOf<String, Any>("available" to 0, "max" to 0)
+                        
+                        currentSlotData["max"] = max
+                        currentSlotData["available"] = max // Refresh slots on level up
+                        updatedCharSlots[levelKey] = currentSlotData
+                    }
+                }
+                updatedCharacter = updatedCharacter.copy(spellSlots = updatedCharSlots)
+            }
+        }
+        
+        val saved = characterRepository.save(updatedCharacter)
+
+        // Save new spells selected during level up
+        dto.newSpells.forEach { spellId ->
+            val spell = spellRepository.findById(spellId)
+                .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Spell not found: $spellId") }
+            
+            // Check if character already has this spell
+            if (!characterSpellRepository.existsByCharacterIdAndSpellId(id, spellId)) {
+                characterSpellRepository.save(CharacterSpell(
+                    character = saved,
+                    spell = spell,
+                    isPrepared = true // New spells are usually prepared/known
+                ))
+            }
+        }
+
         val spells = characterSpellRepository.findByCharacterId(id)
         return ResponseEntity.ok(CharacterResponseDto.fromEntity(saved, spells))
     }
