@@ -79,7 +79,7 @@
 
     <ion-grid class="ion-no-padding">
       <ion-row>
-        @for (statKey of ['str', 'dex', 'con', 'int', 'wis', 'cha']; track statKey) {
+        @for (statKey of ['str', 'dex', 'con', 'int', 'wis', 'cha']; track $index) {
         <ion-col size="4">
           <div class="stat-card">
             <div class="stat-label">
@@ -133,7 +133,7 @@
     <h2 class="section-title" style="margin-top: 30px;">Tiradas de Salvación</h2>
     <ion-grid class="ion-no-padding ion-margin-bottom">
       <ion-row>
-        @for (statKey of ['str', 'dex', 'con', 'int', 'wis', 'cha']; track statKey) {
+        @for (statKey of ['str', 'dex', 'con', 'int', 'wis', 'cha']; track $index) {
         <ion-col size="4">
           <div class="stat-card-small">
             <div class="prof-dot-small" [class.proficient]="isProficientInSave(statKey)"
@@ -152,7 +152,7 @@
     <!-- New Section: Class Features -->
     <h2 class="section-title" style="margin-top: 30px;">Rasgos de Clase</h2>
     <ion-list class="transparent-list">
-      @for (feature of pj.features; track feature.id) {
+      @for (feature of pj.features; track $index) {
       <ion-item lines="none" class="skill-item">
         <ion-label>
           <h2 style="color: #C5A059;">
@@ -165,7 +165,7 @@
           @if (feature.selectedOptions?.length > 0) {
           <div class="selected-options-sheet">
             <strong>Opciones:</strong>
-            @for (opt of feature.selectedOptions; track opt) {
+            @for (opt of feature.selectedOptions; track $index) {
             <span class="option-tag-sheet">{{ opt }}</span>
             }
           </div>
@@ -180,7 +180,7 @@
     <!-- New Section: Racial Traits -->
     <h2 class="section-title" style="margin-top: 30px;">Rasgos de Raza</h2>
     <ion-list class="transparent-list">
-      @for (trait of pj.traits; track trait.id) {
+      @for (trait of pj.traits; track $index) {
       <ion-item lines="none" class="skill-item">
         <ion-label>
           <h2 style="color: #C5A059;">{{ trait.name }}</h2>
@@ -188,7 +188,7 @@
           @if (trait.selectedOptions?.length > 0) {
           <div class="selected-options-sheet">
             <strong>Opciones:</strong>
-            @for (opt of trait.selectedOptions; track opt) {
+            @for (opt of trait.selectedOptions; track $index) {
             <span class="option-tag-sheet">{{ opt }}</span>
             }
           </div>
@@ -223,7 +223,7 @@
 
     <h2 class="section-title" style="margin-top: 30px;">Habilidades (Skills)</h2>
     <ion-list class="transparent-list">
-      @for (skill of skills; track skill.id) {
+      @for (skill of skills; track $index) {
       <ion-item lines="none" class="skill-item">
         <div slot="start" class="prof-dot" [class.filled]="pj.skillProficiencies?.[skill.id]"
           [class.outline]="!pj.skillProficiencies?.[skill.id]"></div>
@@ -274,14 +274,14 @@
         <div class="combat-square-box death-saves">
           <div class="death-saves-row">
             <span>Éxitos</span>
-            @for (i of [0, 1, 2]; track i) {
+            @for (i of [0, 1, 2]; track $index) {
             <div class="ds-dot" [class.checked]="pj.deathSaves.success > i" (click)="toggleDeathSave('success', i)">
             </div>
             }
           </div>
           <div class="death-saves-row">
             <span>Fallos</span>
-            @for (i of [0, 1, 2]; track i) {
+            @for (i of [0, 1, 2]; track $index) {
             <div class="ds-dot error" [class.checked]="pj.deathSaves.failure > i"
               (click)="toggleDeathSave('failure', i)"></div>
             }
@@ -299,7 +299,7 @@
     </div>
 
     <ion-list class="transparent-list">
-      @for (item of pj.inventory; track item.id) {
+      @for (item of pj.inventory; track $index) {
       @if (itemIs(item, 'WEAPON')) {
       <div class="attack-row" [class.unequipped]="!item.equipped" (click)="toggleEquip(item.id)">
         <div class="atk-name">
@@ -316,7 +316,7 @@
     <!-- Quick Toggle for other combat gear -->
     <p style="color: #666; font-size: 0.8rem; margin-top: 20px;">Armaduras y Escudos (Toca para equipar):</p>
     <div class="gear-chips">
-      @for (item of pj.inventory; track item.id) {
+      @for (item of pj.inventory; track $index) {
       @if (itemIs(item, 'ARMOR', 'SHIELD')) {
       <ion-badge [color]="item.equipped ? 'success' : 'medium'" (click)="toggleEquip(item.id)" class="ion-margin-end">
         {{ item.name }}
@@ -360,7 +360,7 @@
     </div>
 
     <ion-list class="transparent-list">
-      @for (item of pj.inventory; track item.id) {
+      @for (item of pj.inventory; track $index) {
       <ion-item lines="none" class="skill-item">
         <ion-label>
           <h2>{{ item.name }}</h2>
@@ -415,8 +415,12 @@
       </h2>
       <div style="display: flex; gap: 4px;">
         @if (pj.preparationStyle === 'PREPARED') {
-        <ion-button fill="clear" color="medium" size="small" (click)="syncSpells()">
+        <ion-button fill="clear" color="medium" size="small" (click)="syncSpells()" title="Sincronizar">
           <ion-icon name="sync-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+        <ion-button fill="clear" color="danger" size="small" (click)="clearUnpreparedSpells()" title="Borrar No Preparados">
+          <ion-icon name="trash-outline" slot="start"></ion-icon>
+          Limpiar No Prep.
         </ion-button>
         }
         <ion-button fill="clear" color="warning" size="small" (click)="openAddSpellPicker()">
@@ -428,7 +432,7 @@
 
 
     @if (pj.spells && pj.spells.length > 0) {
-    @for (group of groupedSpells; track group.levelNum) {
+    @for (group of groupedSpells; track $index) {
     <div class="spell-level-section">
       <div class="spell-level-header">
         <h3>{{ group.level }}</h3>
@@ -446,7 +450,7 @@
       </div>
 
       <ion-list class="transparent-list">
-        @for (cs of group.spells; track cs.id) {
+        @for (cs of group.spells; track $index) {
         <ion-item lines="none" class="skill-item spell-item">
           <ion-label>
             <h2 [class.spell-prepared]="cs.isPrepared || group.levelNum === '0'"
@@ -512,7 +516,7 @@
         <p style="text-align: center; color: #888; margin-top: 40px;">No se encontraron conjuros.</p>
         }
 
-        @for (spell of filteredAvailableSpells; track spell.id) {
+        @for (spell of filteredAvailableSpells; track $index) {
         <ion-item lines="none" class="skill-item" (click)="selectSpell(spell.id)"
           style="cursor: pointer; margin-bottom: 8px;">
           <ion-label>
@@ -584,7 +588,7 @@
             <p>Puedes aumentar una puntuación en 2, o dos puntuaciones en 1 (Máx 20).</p>
             
             <ion-list class="transparent-list">
-              @for (statKey of ['str', 'dex', 'con', 'int', 'wis', 'cha']; track statKey) {
+              @for (statKey of ['str', 'dex', 'con', 'int', 'wis', 'cha']; track $index) {
                 <ion-item lines="none" class="skill-item">
                   <ion-label>
                     <h2 style="color: #eee;">{{ statLabels[statKey] }} (Actual: {{ pj.stats[statKey] }})</h2>
@@ -609,7 +613,7 @@
         @if (levelUpNewFeatures.length > 0) {
           <div class="level-up-section" style="margin-top: 30px;">
             <h2 class="section-title">Nuevos Rasgos de Clase</h2>
-            @for (feature of levelUpNewFeatures; track feature.id) {
+            @for (feature of levelUpNewFeatures; track $index) {
               <div class="feature-choice-box" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                 <h3 style="color: #C5A059; margin: 0;">{{ feature.name }}</h3>
                 <p style="color: #ccc; margin: 5px 0;">{{ feature.description }}</p>
@@ -617,7 +621,7 @@
                 @if (feature.filteredOptions?.length > 0) {
                   <ion-list class="transparent-list">
                     <p style="color: #888; font-size: 0.9rem;">Elige {{ feature.calculatedMaxChoices }} opciones:</p>
-                    @for (opt of feature.filteredOptions; track opt.name) {
+                    @for (opt of feature.filteredOptions; track $index) {
                       <ion-item lines="none" class="skill-item" (click)="toggleFeatureOption(feature, opt.name)">
                         <ion-checkbox slot="start" color="warning" [checked]="isFeatureOptionSelected(feature, opt.name)" [disabled]="!isFeatureOptionSelected(feature, opt.name) && isFeatureMaxed(feature)"></ion-checkbox>
                         <ion-label>
@@ -656,7 +660,7 @@
               @if (cantripsToChoose > 0) {
                 <h4 style="color: #C5A059; border-bottom: 1px solid #444; padding-bottom: 5px;">Trucos (Nivel 0)</h4>
                 <div class="options-grid">
-                  @for (spell of levelUpAvailableSpells; track spell.id) {
+                  @for (spell of levelUpAvailableSpells; track $index) {
                     @if (spell.level === 0) {
                       <div class="option-card" 
                            [class.option-selected]="isLevelUpSpellSelected(spell.id)"
@@ -675,7 +679,7 @@
               @if (spellsToChoose > 0) {
                 <h4 style="color: #C5A059; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 20px;">Conjuros</h4>
                 <div class="options-grid">
-                  @for (spell of levelUpAvailableSpells; track spell.id) {
+                  @for (spell of levelUpAvailableSpells; track $index) {
                     @if (spell.level > 0) {
                       <div class="option-card" 
                            [class.option-selected]="isLevelUpSpellSelected(spell.id)"

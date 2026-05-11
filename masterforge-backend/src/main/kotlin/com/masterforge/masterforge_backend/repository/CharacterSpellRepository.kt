@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository
 interface CharacterSpellRepository : JpaRepository<CharacterSpell, Int> {
     fun findByCharacterId(characterId: java.util.UUID): List<CharacterSpell>
     fun existsByCharacterIdAndSpellId(characterId: java.util.UUID, spellId: java.util.UUID): Boolean
+    fun deleteByCharacterIdAndIsPreparedFalse(characterId: java.util.UUID)
 }

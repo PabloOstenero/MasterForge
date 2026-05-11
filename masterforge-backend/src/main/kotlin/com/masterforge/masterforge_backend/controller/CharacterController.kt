@@ -240,6 +240,19 @@ class CharacterController(
         if (!alreadyKnown) {
             characterSpellRepository.save(CharacterSpell(character = character, spell = spell, isPrepared = dto.isPrepared))
         }
+
+        // For LEARNED casters, persist the choice in choicesJson so it can be restored via 'Sync'
+        if (getKnowledgeStyle(character) == "LEARNED") {
+            val updatedChoices = character.choicesJson.toMutableMap()
+            val learnedSpells = (updatedChoices["learnedSpells"] as? List<String>)?.toMutableList() ?: mutableListOf()
+            val spellIdStr = dto.spellId.toString()
+            if (spellIdStr !in learnedSpells) {
+                learnedSpells.add(spellIdStr)
+                updatedChoices["learnedSpells"] = learnedSpells
+                characterRepository.save(character.copy(choicesJson = updatedChoices))
+            }
+        }
+
         val spells = characterSpellRepository.findByCharacterId(id)
         return ResponseEntity.ok(CharacterResponseDto.fromEntity(character, spells))
     }
@@ -250,7 +263,34 @@ class CharacterController(
     fun removeSpell(@PathVariable id: UUID, @PathVariable characterSpellId: Int): ResponseEntity<CharacterResponseDto> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        
+        val charSpell = characterSpellRepository.findById(characterSpellId).orElse(null)
+        if (charSpell != null && getKnowledgeStyle(character) == "LEARNED") {
+            val spellIdStr = charSpell.spell.id.toString()
+            val updatedChoices = character.choicesJson.toMutableMap()
+            val learnedSpells = (updatedChoices["learnedSpells"] as? List<String>)?.toMutableList() ?: mutableListOf()
+            val selectedSpells = (updatedChoices["selectedSpells"] as? List<String>)?.toMutableList() ?: mutableListOf()
+            
+            if (learnedSpells.remove(spellIdStr) || selectedSpells.remove(spellIdStr)) {
+                updatedChoices["learnedSpells"] = learnedSpells
+                updatedChoices["selectedSpells"] = selectedSpells
+                characterRepository.save(character.copy(choicesJson = updatedChoices))
+            }
+        }
+
         characterSpellRepository.deleteById(characterSpellId)
+        val spells = characterSpellRepository.findByCharacterId(id)
+        return ResponseEntity.ok(CharacterResponseDto.fromEntity(character, spells))
+    }
+
+    @DeleteMapping("/{id}/spells/unprepared")
+    @Transactional
+    fun removeUnpreparedSpells(@PathVariable id: UUID): ResponseEntity<CharacterResponseDto> {
+        val character = characterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+
+        characterSpellRepository.deleteByCharacterIdAndIsPreparedFalse(id)
+
         val spells = characterSpellRepository.findByCharacterId(id)
         return ResponseEntity.ok(CharacterResponseDto.fromEntity(character, spells))
     }
@@ -279,17 +319,35 @@ class CharacterController(
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
         val className = character.dndClass.name
         val knownSpellIds = characterSpellRepository.findByCharacterId(id).map { it.spell.id }.toSet()
-        val maxLevel = getMaxSpellLevel(character)
         
-        val available = spellRepository.findBySpellClassesContainingIgnoreCase(className)
-            .filter { it.id !in knownSpellIds && it.level > 0 && it.level <= maxLevel }
+        val knowledgeStyle = getKnowledgeStyle(character)
 
-        available.forEach { spell ->
+        val spellsToAdd = if (knowledgeStyle == "LEARNED") {
+            val learnedSpells = character.choicesJson["learnedSpells"] as? List<String> ?: emptyList()
+            val selectedSpells = character.choicesJson["selectedSpells"] as? List<String> ?: emptyList()
+            val knownStrIds = knownSpellIds.map { it.toString() }.toSet()
+            val allIds = (learnedSpells + selectedSpells).distinct().filter { it !in knownStrIds }
+            spellRepository.findAllById(allIds.map { UUID.fromString(it) })
+        } else {
+            val maxLevel = getMaxSpellLevel(character)
+            spellRepository.findBySpellClassesContainingIgnoreCase(className)
+                .filter { it.id !in knownSpellIds && it.level > 0 && it.level <= maxLevel }
+        }
+
+        spellsToAdd.forEach { spell ->
             characterSpellRepository.save(CharacterSpell(character = character, spell = spell, isPrepared = false))
         }
 
         val spells = characterSpellRepository.findByCharacterId(id)
         return ResponseEntity.ok(CharacterResponseDto.fromEntity(character, spells))
+    }
+
+    private fun getKnowledgeStyle(character: Character): String {
+        val classFeatures = character.dndClass.classFeatures
+        val subclassFeatures = character.subclass?.subclassFeatures
+        val spellcasting = (subclassFeatures?.get("spellcasting") as? Map<*, *>) 
+                          ?: (classFeatures?.get("spellcasting") as? Map<*, *>)
+        return spellcasting?.get("knowledgeStyle") as? String ?: "ALL_LIST"
     }
 
     private fun getMaxSpellLevel(character: Character, requestedLevel: Int? = null): Int {

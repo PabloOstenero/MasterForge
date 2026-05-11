@@ -352,7 +352,8 @@ export class CharacterSheetPage implements OnInit {
           spellSlots: mergedSlots,
           _rawClassFeatures: data.dndClass?.classFeatures || {},
           _rawRaceFeatures: data.dndRace?.raceFeatures || {},
-          preparationStyle: data.dndClass?.classFeatures?.['spellcasting']?.['preparationStyle'] || 'KNOWN'
+          preparationStyle: data.dndClass?.classFeatures?.['spellcasting']?.['preparationStyle'] || 'KNOWN',
+          knowledgeStyle: data.dndClass?.classFeatures?.['spellcasting']?.['knowledgeStyle'] || 'ALL_LIST'
         };
       },
       error: (err) => {
@@ -656,6 +657,15 @@ export class CharacterSheetPage implements OnInit {
     });
   }
 
+  clearUnpreparedSpells() {
+    if (!this.characterId) return;
+
+    this.apiService.removeUnpreparedSpells(this.characterId).subscribe({
+      next: () => this.loadCharacter(this.characterId!),
+      error: (err) => console.error('Error clearing unprepared spells:', err)
+    });
+  }
+
   // --- UI LOGIC ---
 
   // Cambia de pestaña (Atributos, Inventario, Magia)
@@ -752,11 +762,13 @@ export class CharacterSheetPage implements OnInit {
     let currentSpells = 0;
     let nextSpells = 0;
 
+    const knowledgeStyle = sc.knowledgeStyle || sc.knowledge_style || (lowName.includes('wizard') || lowName.includes('mago') ? 'LEARNED' : 'ALL_LIST');
+
     if (hasSpellsKnownTable) {
       currentSpells = spellsKnownTable[currentIdx] || 0;
       nextSpells = spellsKnownTable[nextIdx] || 0;
       this.spellsToChoose = Math.max(0, nextSpells - currentSpells);
-    } else if (style === 'KNOWN' || lowName.includes('wizard') || lowName.includes('mago')) {
+    } else if (style === 'KNOWN' || knowledgeStyle === 'LEARNED') {
       // Fallback logic for Homebrew classes without explicit tables
       if (lowName.includes('wizard') || lowName.includes('mago')) {
         this.spellsToChoose = 2; // Wizards gain 2

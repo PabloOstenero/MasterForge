@@ -723,6 +723,17 @@
                   </select>
                 </div>
 
+                @if (form.get('preparationStyle')?.value === 'PREPARED') {
+                <div class="field-group">
+                  <label class="field-label">Tipo de Conocimiento <span class="required">*</span></label>
+                  <select class="forge-select-native" formControlName="knowledgeStyle" 
+                    (change)="onKnowledgeStyleChange()" data-testid="knowledge-style-input">
+                    <option value="ALL_LIST">Todo el Listado (Clérigo/Druida)</option>
+                    <option value="LEARNED">Aprendidos/Libro (Mago/Hechicero)</option>
+                  </select>
+                </div>
+                }
+
                 <div class="field-group spellcasting-ritual-field">
                   <label class="field-label">Rituales</label>
                   <div class="natural-armor-toggle-row">

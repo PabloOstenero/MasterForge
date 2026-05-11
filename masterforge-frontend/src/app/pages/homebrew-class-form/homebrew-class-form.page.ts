@@ -36,6 +36,7 @@ export const ABILITIES = ['Strength', 'Dexterity', 'Constitution', 'Intelligence
 export const SPELLCASTING_ABILITIES = ['Intelligence', 'Wisdom', 'Charisma'] as const;
 export const SPELLCASTING_TYPES = ['Full Caster', 'Half Caster', 'Third Caster', 'Pact Magic'] as const;
 export const PREPARATION_STYLES = ['PREPARED', 'KNOWN'] as const;
+export const KNOWLEDGE_STYLES = ['ALL_LIST', 'LEARNED'] as const;
 
 export const ABILITY_ABBREVIATIONS: Record<string, string> = {
   'Strength': 'FU',
@@ -424,6 +425,7 @@ export class HomebrewClassFormPage implements OnInit {
   readonly spellcastingAbilities = SPELLCASTING_ABILITIES;
   readonly spellcastingTypes = SPELLCASTING_TYPES;
   readonly preparationStyles = PREPARATION_STYLES;
+  readonly knowledgeStyles = KNOWLEDGE_STYLES;
   readonly levelRange = Array.from({ length: 20 }, (_, i) => i + 1);
   readonly spellLevelRange = Array.from({ length: 9 }, (_, i) => i + 1);
 
@@ -494,6 +496,7 @@ export class HomebrewClassFormPage implements OnInit {
       spellcastingType:     [''],
       ritualCasting:        [false],
       preparationStyle:     ['PREPARED'],
+      knowledgeStyle:       ['ALL_LIST'],
       cantripsKnown: this.fb.array(Array(20).fill(null).map(() => new FormControl(null))),
       spellsKnown:   this.fb.array(Array(20).fill(null).map(() => new FormControl(null))),
       spellSlots:    this.fb.array(
@@ -702,8 +705,9 @@ export class HomebrewClassFormPage implements OnInit {
             spellcastingType:    sc.spellcastingType ?? '',
             ritualCasting:       sc.ritualCasting ?? false,
             preparationStyle:    sc.preparationStyle ?? 'PREPARED',
+            knowledgeStyle:      sc.knowledgeStyle ?? 'ALL_LIST',
           });
-          this.showSpellsKnown = sc.preparationStyle === 'KNOWN';
+          this.updateSpellsKnownVisibility();
 
           // Add validators for spellcasting fields
           this.form.get('spellcastingAbility')?.setValidators(Validators.required);
@@ -1021,8 +1025,26 @@ export class HomebrewClassFormPage implements OnInit {
   }
 
   onPreparationStyleChange(): void {
-    const style = this.form.get('preparationStyle')?.value;
-    this.showSpellsKnown = style === 'KNOWN';
+    const prepStyle = this.form.get('preparationStyle')?.value;
+    if (prepStyle === 'KNOWN') {
+      this.form.get('knowledgeStyle')?.setValue('LEARNED');
+    }
+    this.updateSpellsKnownVisibility();
+  }
+
+  onKnowledgeStyleChange(): void {
+    this.updateSpellsKnownVisibility();
+    const knowStyle = this.form.get('knowledgeStyle')?.value;
+    if (knowStyle === 'ALL_LIST') {
+      this.spellsKnown.controls.forEach(c => c.reset(null));
+    }
+  }
+
+  private updateSpellsKnownVisibility(): void {
+    const prepStyle = this.form.get('preparationStyle')?.value;
+    const knowStyle = this.form.get('knowledgeStyle')?.value;
+    // Show the table if it's KNOWN style OR if it's LEARNED (Wizard style)
+    this.showSpellsKnown = (prepStyle === 'KNOWN' || knowStyle === 'LEARNED');
   }
 
   onSpellcastingTypeChange(): void {
@@ -1267,6 +1289,7 @@ export class HomebrewClassFormPage implements OnInit {
         spellcastingType: v.spellcastingType ?? '',
         ritualCasting:    v.ritualCasting ?? false,
         preparationStyle: (v.preparationStyle ?? 'PREPARED') as 'PREPARED' | 'KNOWN',
+        knowledgeStyle:   (v.knowledgeStyle ?? 'ALL_LIST') as 'ALL_LIST' | 'LEARNED',
         cantripsKnown:    cantripsKnownArr,
         spellSlots:       parseSpellSlotTable(spellSlotsArr),
       };

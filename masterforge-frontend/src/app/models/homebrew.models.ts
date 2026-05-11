@@ -107,6 +107,7 @@ export interface Spellcasting {
   spellcastingType: string;
   ritualCasting: boolean;
   preparationStyle: 'PREPARED' | 'KNOWN';
+  knowledgeStyle?: 'ALL_LIST' | 'LEARNED';
   cantripsKnown: number[];
   spellsKnown?: number[];
   spellSlots: SpellSlotTable;

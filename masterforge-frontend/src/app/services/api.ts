@@ -93,6 +93,11 @@ export class ApiService {
     return this.http.post(`${this.apiUrl}/characters/${charId}/spells/sync-class`, {});
   }
 
+  // Deletes all unprepared spells for the character
+  removeUnpreparedSpells(charId: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/characters/${charId}/spells/unprepared`);
+  }
+
   /**
  * Actualiza los puntos de vida temporales del personaje en la base de datos.
  * @param characterId UUID del personaje.

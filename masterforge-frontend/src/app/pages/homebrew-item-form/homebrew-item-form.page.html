@@ -32,7 +32,7 @@
             <select class="forge-select-native" formControlName="type"
               [class.input-error]="form.get('type')?.invalid && form.get('type')?.touched">
               <option value="">-- Selecciona un tipo --</option>
-              @for (t of itemTypes; track t) {
+              @for (t of itemTypes; track $index) {
                 <option [value]="t">{{ t }}</option>
               }
             </select>
@@ -59,7 +59,7 @@
             <label class="field-label">Rareza <span class="optional-tag">opcional</span></label>
             <select class="forge-select-native" formControlName="rarity">
               <option value="">-- Sin rareza --</option>
-              @for (r of itemRarities; track r) {
+              @for (r of itemRarities; track $index) {
                 <option [value]="r">{{ r }}</option>
               }
             </select>
@@ -88,7 +88,7 @@
           <div class="field-group">
             <label class="field-label">Bonos a Atributos (+X)</label>
             <div class="forge-grid-3">
-              @for (s of ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']; track s) {
+              @for (s of ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']; track $index) {
                 <div class="mini-field">
                   <label>{{ s.toUpperCase().substring(0,3) }}</label>
                   <ion-input class="forge-input" type="number" [formControlName]="'bonus' + s" placeholder="0"></ion-input>
@@ -100,7 +100,7 @@
           <div class="field-group">
             <label class="field-label">Sobrescribir Atributo (Fijo)</label>
             <div class="forge-grid-3">
-              @for (s of ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']; track s) {
+              @for (s of ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']; track $index) {
                 <div class="mini-field">
                   <label>{{ s.toUpperCase().substring(0,3) }}</label>
                   <ion-input class="forge-input" type="number" [formControlName]="'override' + s" placeholder="--"></ion-input>
@@ -130,7 +130,7 @@
               <div class="dice-row">
                 <ion-input class="forge-input dice-count" type="number" formControlName="damageDiceCount" placeholder="1" min="1"></ion-input>
                 <select class="forge-select-native die-type" formControlName="damageDieType">
-                  @for (d of dieTypes; track d) { <option [value]="d">{{ d }}</option> }
+                  @for (d of dieTypes; track $index) { <option [value]="d">{{ d }}</option> }
                 </select>
                 <span class="dice-plus">+</span>
                 <ion-input class="forge-input dice-bonus" type="number" formControlName="damageBonus" placeholder="0"></ion-input>
@@ -140,7 +140,7 @@
             <div class="field-group">
               <label class="field-label">Tipo de Daño</label>
               <div class="chip-grid">
-                @for (dt of damageTypes; track dt; let i = $index) {
+                @for (dt of damageTypes; track $index; let i = $index) {
                   <button type="button" class="chip"
                     [class.chip--active]="weaponDamageTypeIndex === i"
                     (click)="selectDamageType(i)">{{ dt }}</button>
@@ -151,7 +151,7 @@
             <div class="field-group">
               <label class="field-label">Propiedades de Arma</label>
               <div class="chip-grid">
-                @for (wp of weaponProperties; track wp; let i = $index) {
+                @for (wp of weaponProperties; track $index; let i = $index) {
                   <button type="button" class="chip"
                     [class.chip--active]="weaponPropertiesArray.at(i).value"
                     (click)="toggleWeaponProperty(i)">{{ wp }}</button>
@@ -175,7 +175,7 @@
               <div class="dice-row">
                 <ion-input class="forge-input dice-count" type="number" formControlName="versatileDiceCount" placeholder="1" min="1"></ion-input>
                 <select class="forge-select-native die-type" formControlName="versatileDieType">
-                  @for (d of dieTypes; track d) { <option [value]="d">{{ d }}</option> }
+                  @for (d of dieTypes; track $index) { <option [value]="d">{{ d }}</option> }
                 </select>
               </div>
             </div>
@@ -183,7 +183,7 @@
             <div class="field-group">
               <label class="field-label">Característica</label>
               <select class="forge-select-native" formControlName="stat">
-                @for (s of abilityStats; track s) {
+                @for (s of abilityStats; track $index) {
                   <option [value]="s">{{ s }}</option>
                 }
               </select>
@@ -192,7 +192,7 @@
             <div class="field-group">
               <label class="field-label">Bonus Mágico</label>
               <select class="forge-select-native" formControlName="magicalBonus">
-                @for (b of magicalBonuses; track b) {
+                @for (b of magicalBonuses; track $index) {
                   <option [value]="b">+{{ b }}</option>
                 }
               </select>
@@ -213,7 +213,7 @@
             <div class="field-group">
               <label class="field-label">Categoría</label>
               <select class="forge-select-native" formControlName="armorCategory">
-                @for (c of armorCategories; track c) {
+                @for (c of armorCategories; track $index) {
                   <option [value]="c">{{ c }}</option>
                 }
               </select>
@@ -252,7 +252,7 @@
             <div class="field-group">
               <label class="field-label">Bonus Mágico CA</label>
               <select class="forge-select-native" formControlName="magicalBonus">
-                @for (b of magicalBonuses; track b) {
+                @for (b of magicalBonuses; track $index) {
                   <option [value]="b">+{{ b }}</option>
                 }
               </select>
@@ -273,7 +273,7 @@
             <div class="field-group">
               <label class="field-label">Bonus Mágico CA</label>
               <select class="forge-select-native" formControlName="magicalBonus">
-                @for (b of magicalBonuses; track b) {
+                @for (b of magicalBonuses; track $index) {
                   <option [value]="b">+{{ b }}</option>
                 }
               </select>
@@ -291,7 +291,7 @@
               <div class="dice-row">
                 <ion-input class="forge-input dice-count" type="number" formControlName="healingDiceCount" placeholder="2" min="1"></ion-input>
                 <select class="forge-select-native die-type" formControlName="healingDieType">
-                  @for (d of dieTypes; track d) { <option [value]="d">{{ d }}</option> }
+                  @for (d of dieTypes; track $index) { <option [value]="d">{{ d }}</option> }
                 </select>
               </div>
             </div>
@@ -343,7 +343,7 @@
             <div class="field-group">
               <label class="field-label">Bonus Mágico</label>
               <select class="forge-select-native" formControlName="magicalBonus">
-                @for (b of magicalBonuses; track b) {
+                @for (b of magicalBonuses; track $index) {
                   <option [value]="b">+{{ b }}</option>
                 }
               </select>
@@ -384,7 +384,7 @@
             }
 
             <div formArrayName="abilities">
-              @for (ctrl of abilities.controls; track ctrl; let i = $index) {
+              @for (ctrl of abilities.controls; track $index; let i = $index) {
                 <div class="entry-card" [formGroupName]="i">
                   <div class="entry-card-fields">
                     <div class="field-group">
