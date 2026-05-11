@@ -20,6 +20,7 @@ import java.util.UUID
 data class HpUpdateDto(val currentHp: Int)
 data class TempHpUpdateDto(val tempHp: Int)
 data class HitDiceUpdateDto(val hitDiceSpent: Int)
+data class BonusMaxHpUpdateDto(val bonusMaxHp: Int)
 data class MoneyUpdateDto(val cp: Int, val sp: Int, val ep: Int, val gp: Int, val pp: Int)
 data class AddSpellDto(val spellId: java.util.UUID, val isPrepared: Boolean = false)
 data class SpellSlotsUpdateDto(val spellSlots: Map<String, Any>)
@@ -471,14 +472,28 @@ class CharacterController(
 
     @PutMapping("/{id}/temp-hp")
     @Transactional
-    fun updateTempHp(@PathVariable id: UUID, @RequestBody dto: TempHpUpdateDto): ResponseEntity<Void> {
+    fun updateTempHp(@PathVariable id: UUID, @RequestBody dto: TempHpUpdateDto): ResponseEntity<CharacterResponseDto> {
         val character = characterRepository.findById(id)
-            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found with id $id") }
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        val updated = character.copy(tempHp = dto.tempHp)
+        return ResponseEntity.ok(CharacterResponseDto.fromEntity(characterRepository.save(updated)))
+    }
 
-        val updatedCharacter = character.copy(tempHp = dto.tempHp)
-        characterRepository.save(updatedCharacter)
+    @PutMapping("/{id}/bonus-max-hp")
+    @Transactional
+    fun updateBonusMaxHp(@PathVariable id: UUID, @RequestBody dto: BonusMaxHpUpdateDto): ResponseEntity<CharacterResponseDto> {
+        val character = characterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
         
-        return ResponseEntity.ok().build()
+        val oldMax = calculateEffectiveMaxHp(character)
+        val updated = character.copy(bonusMaxHp = dto.bonusMaxHp)
+        val newMax = calculateEffectiveMaxHp(updated)
+        
+        val delta = newMax - oldMax
+        val finalHp = Math.max(0, Math.min(newMax, updated.currentHp + delta))
+        
+        val finalCharacter = updated.copy(currentHp = finalHp)
+        return ResponseEntity.ok(CharacterResponseDto.fromEntity(characterRepository.save(finalCharacter)))
     }
 
     @PutMapping("/{id}/spell-slots")
@@ -516,16 +531,26 @@ class CharacterController(
     fun toggleEquip(@PathVariable id: UUID, @PathVariable slotId: Int): ResponseEntity<CharacterResponseDto> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
-        
+
         val index = character.inventory.indexOfFirst { it.id == slotId }
         if (index == -1) {
             throw ResponseStatusException(HttpStatus.NOT_FOUND, "Slot not found")
         }
 
+        val oldMax = calculateEffectiveMaxHp(character)
+        
         val slot = character.inventory[index]
         character.inventory[index] = slot.copy(isEquipped = !slot.isEquipped)
         
-        val saved = characterRepository.save(character)
+        val newMax = calculateEffectiveMaxHp(character)
+        val delta = newMax - oldMax
+        
+        val updatedHp = Math.max(0, Math.min(newMax, character.currentHp + delta))
+        
+        // Use copy to update HP as it's a val
+        val finalCharacter = character.copy(currentHp = updatedHp)
+        
+        val saved = characterRepository.save(finalCharacter)
         return ResponseEntity.ok(CharacterResponseDto.fromEntity(saved))
     }
 
@@ -615,9 +640,12 @@ class CharacterController(
     fun performLongRest(@PathVariable id: UUID): ResponseEntity<CharacterResponseDto> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
-        
-        // 1. Restore HP
-        val restoredHp = character.maxHp
+
+        // Recalcular HP efectiva (Base + Bono + Items + Retroactiva por CON)
+        println("DEBUG: Iniciando Long Rest para ${character.name}")
+        println("DEBUG: Inventario size: ${character.inventory.size}")
+        val restoredHp = calculateEffectiveMaxHp(character)
+        println("DEBUG: HP Restablecida calculada: $restoredHp (Base: ${character.maxHp}, Buff: ${character.bonusMaxHp})")
         
         // 2. Restore Spell Slots
         val updatedSlots = character.spellSlots?.toMutableMap() ?: mutableMapOf()
@@ -730,5 +758,37 @@ class CharacterController(
         }
         characterRepository.deleteById(id)
         return ResponseEntity.noContent().build()
+    }
+
+    private fun calculateEffectiveMaxHp(character: Character): Int {
+        val raceConBonus = character.dndRace?.bonusCon ?: 0
+        var effectiveCon = character.baseCon + raceConBonus
+        var itemFlatBonus = 0
+
+        println("DEBUG: Calculando HP efectiva. Base CON: ${character.baseCon}, Race Bonus: $raceConBonus")
+
+        character.inventory.forEach { slot ->
+            if (slot.isEquipped) {
+                val props = slot.item.properties
+                // Stat Overrides
+                props["overrideCon"]?.let { 
+                    val v = (it as? Number)?.toInt() ?: 0
+                    if (v > 0) effectiveCon = Math.max(effectiveCon, v)
+                }
+                // Stat Bonuses
+                props["bonusCon"]?.let { effectiveCon += (it as? Number)?.toInt() ?: 0 }
+                // Flat HP Bonuses
+                props["bonusMaxHp"]?.let { itemFlatBonus += (it as? Number)?.toInt() ?: 0 }
+            }
+        }
+
+        val conMod = Math.floor((effectiveCon - 10) / 2.0).toInt()
+        val baseConWithRace = character.baseCon + raceConBonus
+        val baseConMod = Math.floor((baseConWithRace - 10) / 2.0).toInt()
+        val retroactiveHp = (conMod - baseConMod) * character.level
+        
+        val total = character.maxHp + character.bonusMaxHp + itemFlatBonus + retroactiveHp
+        println("DEBUG: Total calculado: $total (Retroactiva: $retroactiveHp)")
+        return total
     }
 }

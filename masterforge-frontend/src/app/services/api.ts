@@ -103,6 +103,15 @@ updateTempHp(characterId: string, tempHp: number): Observable<any> {
   return this.http.put(`${this.apiUrl}/characters/${characterId}/temp-hp`, { tempHp: Number(tempHp) });
 }
 
+/**
+ * Actualiza la vida máxima adicional (ej: hechizo 'Aid')
+ * @param characterId UUID del personaje
+ * @param bonusMaxHp Cantidad de vida máxima adicional
+ */
+updateBonusMaxHp(characterId: string, bonusMaxHp: number): Observable<any> {
+  return this.http.put(`${this.apiUrl}/characters/${characterId}/bonus-max-hp`, { bonusMaxHp: Number(bonusMaxHp) });
+}
+
 performLongRest(characterId: string): Observable<any> {
   return this.http.post(`${this.apiUrl}/characters/${characterId}/long-rest`, {});
 }
@@ -369,6 +378,7 @@ export interface CharacterResponseDto {
   maxHp: number;
   currentHp: number;
   tempHp: number;
+  bonusMaxHp: number;
   speed: number;
   hitDiceTotal: number;
   hitDiceSpent: number;

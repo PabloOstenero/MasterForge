@@ -116,6 +116,23 @@ export interface GearFormValues {
   valueGp: number | null;
 }
 
+/** Form values for the buffs (ASI/HP) properties sub-group. */
+export interface BuffFormValues {
+  bonusStr: number | null;
+  bonusDex: number | null;
+  bonusCon: number | null;
+  bonusInt: number | null;
+  bonusWis: number | null;
+  bonusCha: number | null;
+  overrideStr: number | null;
+  overrideDex: number | null;
+  overrideCon: number | null;
+  overrideInt: number | null;
+  overrideWis: number | null;
+  overrideCha: number | null;
+  bonusMaxHp: number | null;
+}
+
 // ---------------------------------------------------------------------------
 // Pure serialization function
 // ---------------------------------------------------------------------------
@@ -143,6 +160,7 @@ export function buildItemProperties(
   magical: MagicalFormValues,
   ammunition: AmmunitionFormValues,
   gear: GearFormValues,
+  buffs: BuffFormValues,
   specialAbilities: FeatureEntry[],
   // Shared fields always stored regardless of type
   rarity?: string,
@@ -224,9 +242,25 @@ export function buildItemProperties(
     props['magicalBonus'] = ammunition.magicalBonus ?? 0;
 
   } else {
-    // Adventuring Gear, Tool, Mount, Vehicle, Treasure
     addOptional('gearDescription', gear.gearDescription);
     addOptional('valueGp', gear.valueGp);
+  }
+
+  // ── Stat & HP Buffs (Applicable to any type, but usually magical) ─────────
+  if (buffs) {
+    addOptional('bonusStr', buffs.bonusStr);
+    addOptional('bonusDex', buffs.bonusDex);
+    addOptional('bonusCon', buffs.bonusCon);
+    addOptional('bonusInt', buffs.bonusInt);
+    addOptional('bonusWis', buffs.bonusWis);
+    addOptional('bonusCha', buffs.bonusCha);
+    addOptional('overrideStr', buffs.overrideStr);
+    addOptional('overrideDex', buffs.overrideDex);
+    addOptional('overrideCon', buffs.overrideCon);
+    addOptional('overrideInt', buffs.overrideInt);
+    addOptional('overrideWis', buffs.overrideWis);
+    addOptional('overrideCha', buffs.overrideCha);
+    addOptional('bonusMaxHp', buffs.bonusMaxHp);
   }
 
   return props;
@@ -464,6 +498,23 @@ export class HomebrewItemFormPage implements OnInit {
         valueGp:         [null, Validators.min(0)],
       }),
 
+      // Buffs (ASI/HP) sub-group
+      buffs: this.fb.group({
+        bonusStr: [null],
+        bonusDex: [null],
+        bonusCon: [null],
+        bonusInt: [null],
+        bonusWis: [null],
+        bonusCha: [null],
+        overrideStr: [null],
+        overrideDex: [null],
+        overrideCon: [null],
+        overrideInt: [null],
+        overrideWis: [null],
+        overrideCha: [null],
+        bonusMaxHp:  [null],
+      }),
+
       // Special abilities FormArray
       abilities: this.fb.array([]),
     });
@@ -568,6 +619,22 @@ export class HomebrewItemFormPage implements OnInit {
           valueGp:         p.valueGp ?? null,
         });
 
+        this.form.get('buffs')?.patchValue({
+          bonusStr: p.bonusStr ?? null,
+          bonusDex: p.bonusDex ?? null,
+          bonusCon: p.bonusCon ?? null,
+          bonusInt: p.bonusInt ?? null,
+          bonusWis: p.bonusWis ?? null,
+          bonusCha: p.bonusCha ?? null,
+          overrideStr: p.overrideStr ?? null,
+          overrideDex: p.overrideDex ?? null,
+          overrideCon: p.overrideCon ?? null,
+          overrideInt: p.overrideInt ?? null,
+          overrideWis: p.overrideWis ?? null,
+          overrideCha: p.overrideCha ?? null,
+          bonusMaxHp:  p.bonusMaxHp ?? null,
+        });
+
         // Restore special abilities
         if (Array.isArray(p.specialAbilities)) {
           p.specialAbilities.forEach((a: any) => {
@@ -609,6 +676,7 @@ export class HomebrewItemFormPage implements OnInit {
       v.magical,
       v.ammunition,
       v.gear,
+      v.buffs,
       v.abilities ?? [],
       v.rarity ?? '',
       v.valueGp ?? null,

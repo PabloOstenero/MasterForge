@@ -37,13 +37,19 @@
     <div class="hp-section ion-margin-bottom">
       <div class="hp-main-side">
         <div class="hp-bar-container">
-          <div class="hp-bar-fill" [style.width.%]="(pj.currentHp / pj.maxHp) * 100"></div>
+          <div class="hp-bar-fill" [style.width.%]="(pj.currentHp / (pj.maxHp + pj.bonusMaxHp)) * 100"></div>
         </div>
-        <div class="hp-text">HP {{ pj.currentHp }} / {{ pj.maxHp }}</div>
+        <div class="hp-text">HP {{ pj.currentHp }} / {{ pj.maxHp + pj.bonusMaxHp }}</div>
       </div>
-      <div class="temp-hp-counter" (click)="updateTempHpAlert()">
-        <div class="temp-val">{{ pj.tempHp }}</div>
-        <div class="temp-label">TEMP</div>
+      <div class="hp-side-counters">
+        <div class="temp-hp-counter" (click)="updateTempHpAlert()">
+          <div class="temp-val">{{ pj.tempHp }}</div>
+          <div class="temp-label">TEMP</div>
+        </div>
+        <div class="bonus-max-hp-counter" (click)="updateBonusMaxHpAlert()">
+          <div class="bonus-val">{{ pj.bonusMaxHp }}</div>
+          <div class="bonus-label">BONO MAX</div>
+        </div>
       </div>
     </div>
 
@@ -80,7 +86,9 @@
               {{ statKey === 'str' ? 'FU' : statKey === 'dex' ? 'DES' : statKey === 'con' ? 'CON' : statKey === 'int' ?
               'INT' : statKey === 'wis' ? 'SAB' : 'CAR' }}
             </div>
-            <div class="stat-value">{{ pj.stats[statKey] }}</div>
+            <div class="stat-value" [class.is-modified]="pj.stats[statKey] !== pj.baseStats[statKey]">
+              {{ pj.stats[statKey] }}
+            </div>
             <div class="stat-mod">{{ getMod(pj.stats[statKey]) }}</div>
           </div>
         </ion-col>
@@ -366,7 +374,8 @@
         <ion-button slot="end" fill="clear" (click)="removeItem(item.id)">
           <ion-icon name="trash" color="danger"></ion-icon>
         </ion-button>
-        <ion-badge [color]="item.equipped ? 'success' : 'medium'" slot="end">
+        <ion-badge [color]="item.equipped ? 'success' : 'medium'" slot="end" (click)="toggleEquip(item.id)"
+          style="cursor: pointer;">
           {{ item.equipped ? 'Equipado' : 'Mochila' }}
         </ion-badge>
       </ion-item>

@@ -29,7 +29,10 @@ data class Character(
     val currentHp: Int,
 
     @Column(name = "temp_hp", nullable = false)
-    val tempHp: Int = 0,  // Temporary hit points
+    val tempHp: Int = 0,  // Temporary hit points (shielding)
+
+    @Column(name = "bonus_max_hp", nullable = false, columnDefinition = "integer default 0")
+    val bonusMaxHp: Int = 0, // Extra Max HP (e.g. from 'Aid' spell)
 
     @Column(nullable = false)
     val speed: Int = 30,  // Speed in feet

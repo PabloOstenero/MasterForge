@@ -73,6 +73,7 @@ export class CharacterSheetPage implements OnInit {
     maxHp: 0,
     currentHp: 0,
     tempHp: 0,
+    bonusMaxHp: 0,
     armorClass: 0,
     speed: 0,
     proficiencyBonus: 0, // Nuevo
@@ -82,6 +83,7 @@ export class CharacterSheetPage implements OnInit {
     hitDiceSpent: 0,
     hitDieType: 8,
     stats: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+    baseStats: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
     money: { cp: 0, sp: 0, ep: 0, gp: 0, pp: 0 },
     inventory: [],
     spells: [],
@@ -164,6 +166,46 @@ export class CharacterSheetPage implements OnInit {
     }
   }
 
+  // Helper: Calculate effective stats and values considering item bonuses/overrides
+  private calculateEffectiveValues(data: any): any {
+    const stats = {
+      str: (data.baseStr || 10) + (data.dndRace?.bonusStr || 0),
+      dex: (data.baseDex || 10) + (data.dndRace?.bonusDex || 0),
+      con: (data.baseCon || 10) + (data.dndRace?.bonusCon || 0),
+      int: (data.baseInt || 10) + (data.dndRace?.bonusInt || 0),
+      wis: (data.baseWis || 10) + (data.dndRace?.bonusWis || 0),
+      cha: (data.baseCha || 10) + (data.dndRace?.bonusCha || 0)
+    };
+    let itemBonusMaxHp = 0;
+    
+    const equipped = (data.inventory || []).filter((s: any) => s.equipped);
+
+    equipped.forEach((slot: any) => {
+      const props = slot.item.properties || {};
+      
+      // 1. Stat Overrides (highest value takes precedence)
+      if (typeof props.overrideStr === 'number') stats.str = Math.max(stats.str, props.overrideStr);
+      if (typeof props.overrideDex === 'number') stats.dex = Math.max(stats.dex, props.overrideDex);
+      if (typeof props.overrideCon === 'number') stats.con = Math.max(stats.con, props.overrideCon);
+      if (typeof props.overrideInt === 'number') stats.int = Math.max(stats.int, props.overrideInt);
+      if (typeof props.overrideWis === 'number') stats.wis = Math.max(stats.wis, props.overrideWis);
+      if (typeof props.overrideCha === 'number') stats.cha = Math.max(stats.cha, props.overrideCha);
+
+      // 2. Stat Bonuses (additive)
+      if (typeof props.bonusStr === 'number') stats.str += props.bonusStr;
+      if (typeof props.bonusDex === 'number') stats.dex += props.bonusDex;
+      if (typeof props.bonusCon === 'number') stats.con += props.bonusCon;
+      if (typeof props.bonusInt === 'number') stats.int += props.bonusInt;
+      if (typeof props.bonusWis === 'number') stats.wis += props.bonusWis;
+      if (typeof props.bonusCha === 'number') stats.cha += props.bonusCha;
+
+      // 3. Max HP Bonuses
+      if (typeof props.bonusMaxHp === 'number') itemBonusMaxHp += props.bonusMaxHp;
+    });
+
+    return { stats, itemBonusMaxHp };
+  }
+
   // --- BACKEND CONNECTION LOGIC ---
   loadCharacter(id: string) {
     this.apiService.getCharacter(id).subscribe({
@@ -171,20 +213,20 @@ export class CharacterSheetPage implements OnInit {
         this.rawCharacter = data;
         console.log('Raw data from DB:', data);
 
-        // Calculate final stats including racial bonuses first
-        // Use base stats directly (Character Forge already adds racial bonuses before saving)
-        const stats: any = {
-          str: data.baseStr || 10,
-          dex: data.baseDex || 10,
-          con: data.baseCon || 10,
-          int: data.baseInt || 10,
-          wis: data.baseWis || 10,
-          cha: data.baseCha || 10
-        };
+        // --- CÁLCULO DINÁMICO DE VALORES (ITEMS + RAZA) ---
+        const effective = this.calculateEffectiveValues(data);
+        const effectiveStats = effective.stats;
+        const itemMaxHp = effective.itemBonusMaxHp;
 
-        // Dex modifier calculation for AC
-        const dexMod = getModifier(stats.dex);
-        const wisMod = getModifier(stats.wis);
+        const dexMod = getModifier(effectiveStats.dex);
+        const wisMod = getModifier(effectiveStats.wis);
+        const conMod = getModifier(effectiveStats.con);
+
+        // Retroactive HP from CON items (D&D 5e Rule: Mod change * level)
+        const baseConWithRace = (data.baseCon || 10) + (data.dndRace?.bonusCon || 0);
+        const baseConMod = getModifier(baseConWithRace);
+        const conDiff = conMod - baseConMod;
+        const retroactiveConHp = conDiff * (data.level || 1);
 
         // Cálculo del Bono de Competencia
         const proficiencyBonus = getProficiencyBonus(data.level);
@@ -241,6 +283,7 @@ export class CharacterSheetPage implements OnInit {
           maxHp: data.maxHp ?? 10,
           currentHp: data.currentHp ?? 10,
           tempHp: data.tempHp || 0,
+          bonusMaxHp: (data.bonusMaxHp || 0) + itemMaxHp + retroactiveConHp,
           speed: data.speed || 30,
           proficiencyBonus: proficiencyBonus,
           passivePerception: passivePerception,
@@ -248,9 +291,17 @@ export class CharacterSheetPage implements OnInit {
           armorClass: finalAc,
           hitDiceTotal: data.hitDiceTotal || 0,
           deathSaves: { success: 0, failure: 0 },
+          stats: effectiveStats,
+          baseStats: {
+            str: (data.baseStr || 10) + (data.dndRace?.bonusStr || 0),
+            dex: (data.baseDex || 10) + (data.dndRace?.bonusDex || 0),
+            con: (data.baseCon || 10) + (data.dndRace?.bonusCon || 0),
+            int: (data.baseInt || 10) + (data.dndRace?.bonusInt || 0),
+            wis: (data.baseWis || 10) + (data.dndRace?.bonusWis || 0),
+            cha: (data.baseCha || 10) + (data.dndRace?.bonusCha || 0)
+          },
           hitDiceSpent: data.hitDiceSpent || 0,
           hitDieType: data.dndClass?.hitDie || 8,
-          stats: stats,
           money: {
             cp: data.cp ?? 0,
             sp: data.sp ?? 0,
@@ -1043,7 +1094,8 @@ export class CharacterSheetPage implements OnInit {
           handler: (data) => {
             const heal = parseInt(data.healAmount, 10);
             if (!isNaN(heal) && heal > 0) {
-              this.pj.currentHp = Math.min(this.pj.maxHp, this.pj.currentHp + heal);
+              const totalMax = this.pj.maxHp + this.pj.bonusMaxHp;
+              this.pj.currentHp = Math.min(totalMax, this.pj.currentHp + heal);
               this.updateCharacterHpOnBackend();
             } else {
             }
@@ -1145,13 +1197,28 @@ export class CharacterSheetPage implements OnInit {
   get groupedSpells() {
     if (!this.pj.spells) return [];
     const maxLevel = this.getMaxSpellLevel();
-
-    // Extract names and descriptions of spells granted by race to exempt them from the filter
-    const racialTraitsText = (this.pj.traits || [])
     const groups: any = {};
+
+    // Pre-initialize groups for all levels that have slots (1 to 9)
+    if (this.pj.spellSlots) {
+      Object.keys(this.pj.spellSlots).forEach(key => {
+        const levelMatch = key.match(/level_(\d+)/);
+        if (levelMatch) {
+          const levelNum = levelMatch[1];
+          const slots = this.getSpellSlots(levelNum);
+          if (slots.max > 0) {
+            groups[levelNum] = [];
+          }
+        }
+      });
+    }
+
+    // Always ensure Level 0 (Cantrips) is shown if the character has any
+    const hasCantrips = this.pj.spells.some((cs: any) => cs.spell?.level === '0');
+    if (hasCantrips) groups['0'] = [];
+
     this.pj.spells.forEach((cs: any) => {
       if (!cs || !cs.spell) return;
-
       const level = cs.spell.level;
 
       // Filter out spells higher than character's capacity
@@ -1160,11 +1227,20 @@ export class CharacterSheetPage implements OnInit {
       if (!groups[level]) groups[level] = [];
       groups[level].push(cs);
     });
-    return Object.keys(groups).sort((a, b) => Number(a) - Number(b)).map(level => ({
-      level: level === '0' ? 'Trucos' : `${level}º Nivel`,
-      levelNum: level,
-      spells: groups[level]
-    }));
+
+    return Object.keys(groups)
+      .sort((a, b) => {
+        const na = Number(a);
+        const nb = Number(b);
+        if (na === 0) return -1; // Cantrips always first
+        if (nb === 0) return 1;
+        return nb - na; // Then highest to lowest
+      })
+      .map(level => ({
+        level: level === '0' ? 'Trucos' : `${level}º Nivel`,
+        levelNum: level,
+        spells: groups[level]
+      }));
   }
 
   // Helper to get spell slot status — handles that JSON deserialization
@@ -1468,5 +1544,34 @@ export class CharacterSheetPage implements OnInit {
         console.error('Error actualizando dados de golpe:', err);
       }
     });
+  }
+
+  async updateBonusMaxHpAlert() {
+    const alert = await this.alertController.create({
+      header: 'Bono Vida Máxima',
+      message: 'Ej: Hechizo "Auxilio" (Aid)',
+      inputs: [
+        {
+          name: 'bonusMaxHp',
+          type: 'number',
+          placeholder: 'Cantidad...',
+          value: this.pj.bonusMaxHp
+        }
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Guardar',
+          handler: (data) => {
+            const val = Number(data.bonusMaxHp);
+            this.apiService.updateBonusMaxHp(this.pj.id, val).subscribe({
+              next: () => this.loadCharacter(this.pj.id),
+              error: (err) => console.error('Error actualizando bono de vida:', err)
+            });
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 }

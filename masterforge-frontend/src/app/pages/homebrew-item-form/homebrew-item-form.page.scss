@@ -381,9 +381,6 @@ $red:         #C62828;
 }
 
 // ─── Submit button row ────────────────────────────────────────────────────────
-.form-actions {
-  // grid gap handles spacing
-}
 
 .btn-submit {
   --background: #{$gold};
@@ -420,4 +417,34 @@ $red:         #C62828;
 .dice-bonus {
   flex: 0 0 60px;
   min-width: 0;
+}
+
+// ─── Stat & HP Buffs Section ──────────────────────────────────────────────────
+.forge-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.mini-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  
+  label {
+    font-size: 0.65rem;
+    color: #888;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-left: 5px;
+  }
+}
+
+.field-hint {
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 5px;
+  font-style: italic;
+  line-height: 1.4;
 }

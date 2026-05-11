@@ -80,6 +80,41 @@
             <input type="checkbox" formControlName="requiresAttunement" />
           </div>
         </div>
+
+        <!-- ── Stat & HP Buffs ── -->
+        <div class="form-section" formGroupName="buffs">
+          <h2 class="section-title">Mejoras de Estadísticas y Vida</h2>
+          
+          <div class="field-group">
+            <label class="field-label">Bonos a Atributos (+X)</label>
+            <div class="forge-grid-3">
+              @for (s of ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']; track s) {
+                <div class="mini-field">
+                  <label>{{ s.toUpperCase().substring(0,3) }}</label>
+                  <ion-input class="forge-input" type="number" [formControlName]="'bonus' + s" placeholder="0"></ion-input>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Sobrescribir Atributo (Fijo)</label>
+            <div class="forge-grid-3">
+              @for (s of ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']; track s) {
+                <div class="mini-field">
+                  <label>{{ s.toUpperCase().substring(0,3) }}</label>
+                  <ion-input class="forge-input" type="number" [formControlName]="'override' + s" placeholder="--"></ion-input>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Bono de Vida Máxima</label>
+            <ion-input class="forge-input" type="number" formControlName="bonusMaxHp" placeholder="0"></ion-input>
+            <p class="field-hint">Aumenta permanentemente los HP máximos mientras el objeto esté equipado.</p>
+          </div>
+        </div>
       </div>
 
       <!-- ── col-right: Type-specific sections ── -->
