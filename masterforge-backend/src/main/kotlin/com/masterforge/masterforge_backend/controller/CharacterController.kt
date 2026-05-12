@@ -30,6 +30,7 @@ data class LevelUpDto(
     val classToLevelId: Int? = null,
     val subclassId: Int? = null
 )
+data class ResourceCountersUpdateDto(val resourceCounters: Map<String, Any>)
 
 @RestController
 @RequestMapping("/api/characters")
@@ -273,7 +274,7 @@ class CharacterController(
 
         // For LEARNED casters, persist the choice in choicesJson so it can be restored via 'Sync'
         if (getKnowledgeStyle(character) == "LEARNED") {
-            val updatedChoices = character.choicesJson.toMutableMap()
+            val updatedChoices = (character.choicesJson ?: emptyMap()).toMutableMap()
             val learnedSpells = (updatedChoices["learnedSpells"] as? List<String>)?.toMutableList() ?: mutableListOf()
             val spellIdStr = dto.spellId.toString()
             if (spellIdStr !in learnedSpells) {
@@ -297,7 +298,7 @@ class CharacterController(
         val charSpell = characterSpellRepository.findById(characterSpellId).orElse(null)
         if (charSpell != null && getKnowledgeStyle(character) == "LEARNED") {
             val spellIdStr = charSpell.spell.id.toString()
-            val updatedChoices = character.choicesJson.toMutableMap()
+            val updatedChoices = (character.choicesJson ?: emptyMap()).toMutableMap()
             val learnedSpells = (updatedChoices["learnedSpells"] as? List<String>)?.toMutableList() ?: mutableListOf()
             val selectedSpells = (updatedChoices["selectedSpells"] as? List<String>)?.toMutableList() ?: mutableListOf()
             
@@ -353,8 +354,8 @@ class CharacterController(
         val knowledgeStyle = getKnowledgeStyle(character)
 
         val spellsToAdd = if (knowledgeStyle == "LEARNED") {
-            val learnedSpells = character.choicesJson["learnedSpells"] as? List<String> ?: emptyList()
-            val selectedSpells = character.choicesJson["selectedSpells"] as? List<String> ?: emptyList()
+            val learnedSpells = character.choicesJson?.get("learnedSpells") as? List<String> ?: emptyList()
+            val selectedSpells = character.choicesJson?.get("selectedSpells") as? List<String> ?: emptyList()
             val knownStrIds = knownSpellIds.map { it.toString() }.toSet()
             val allIds = (learnedSpells + selectedSpells).distinct().filter { it !in knownStrIds }
             spellRepository.findAllById(allIds.map { UUID.fromString(it) })
@@ -730,10 +731,10 @@ class CharacterController(
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
 
         // Recalcular HP efectiva (Base + Bono + Items + Retroactiva por CON)
-        println("DEBUG: Iniciando Long Rest para ${character.name}")
-        println("DEBUG: Inventario size: ${character.inventory.size}")
+        println("DEBUG: Starting Long Rest for ${character.name}")
+        println("DEBUG: Inventory size: ${character.inventory.size}")
         val restoredHp = calculateEffectiveMaxHp(character)
-        println("DEBUG: HP Restablecida calculada: $restoredHp (Base: ${character.maxHp}, Buff: ${character.bonusMaxHp})")
+        println("DEBUG: Calculated restored HP: $restoredHp (Base: ${character.maxHp}, Buff: ${character.bonusMaxHp})")
         
         // 2. Restore Spell Slots
         val updatedSlots = character.spellSlots?.toMutableMap() ?: mutableMapOf()
@@ -880,6 +881,15 @@ class CharacterController(
         }
     }
 
+    @PutMapping("/{id}/resource-counters")
+    @Transactional
+    fun updateResourceCounters(@PathVariable id: UUID, @RequestBody dto: ResourceCountersUpdateDto): ResponseEntity<Void> {
+        val character = characterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found with id $id") }
+        characterRepository.save(character.copy(resourceCounters = dto.resourceCounters))
+        return ResponseEntity.ok().build()
+    }
+
     @DeleteMapping("/{id}")
     @Transactional
     fun deleteCharacter(@PathVariable id: UUID): ResponseEntity<Void> {
@@ -895,20 +905,20 @@ class CharacterController(
         var effectiveCon = character.baseCon + raceConBonus
         var itemFlatBonus = 0
 
-        println("DEBUG: Calculando HP efectiva. Base CON: ${character.baseCon}, Race Bonus: $raceConBonus")
+        println("DEBUG: Calculating effective HP. Base CON: ${character.baseCon}, Race Bonus: $raceConBonus")
 
         character.inventory.forEach { slot ->
             if (slot.isEquipped) {
                 val props = slot.item.properties
                 // Stat Overrides
-                props["overrideCon"]?.let { 
+                props?.get("overrideCon")?.let { 
                     val v = (it as? Number)?.toInt() ?: 0
                     if (v > 0) effectiveCon = Math.max(effectiveCon, v)
                 }
                 // Stat Bonuses
-                props["bonusCon"]?.let { effectiveCon += (it as? Number)?.toInt() ?: 0 }
+                props?.get("bonusCon")?.let { effectiveCon += (it as? Number)?.toInt() ?: 0 }
                 // Flat HP Bonuses
-                props["bonusMaxHp"]?.let { itemFlatBonus += (it as? Number)?.toInt() ?: 0 }
+                props?.get("bonusMaxHp")?.let { itemFlatBonus += (it as? Number)?.toInt() ?: 0 }
             }
         }
 
@@ -918,7 +928,7 @@ class CharacterController(
         val retroactiveHp = (conMod - baseConMod) * character.level
         
         val total = character.maxHp + character.bonusMaxHp + itemFlatBonus + retroactiveHp
-        println("DEBUG: Total calculado: $total (Retroactiva: $retroactiveHp)")
+        println("DEBUG: Total calculated: $total (Retroactive: $retroactiveHp)")
         return total
     }
 }

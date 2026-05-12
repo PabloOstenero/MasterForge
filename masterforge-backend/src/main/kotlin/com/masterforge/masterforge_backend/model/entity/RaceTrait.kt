@@ -25,6 +25,10 @@ data class RaceTrait(
     @Column(name = "options", columnDefinition = "jsonb", nullable = true)
     val options: Map<String, Any>? = null,
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "properties", columnDefinition = "jsonb", nullable = true)
+    val properties: Map<String, Any>? = null,
+
     // It connects to the DndRace entity using a foreign key
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)

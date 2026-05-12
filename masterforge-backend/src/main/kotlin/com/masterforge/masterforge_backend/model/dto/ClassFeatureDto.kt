@@ -6,5 +6,6 @@ data class ClassFeatureDto(
     val description: String,
     val levelRequired: Int,
     val dndClassId: Int,
-    val options: Map<String, Any>? = null
+    val options: Map<String, Any>? = null,
+    val properties: Map<String, Any>? = null
 )

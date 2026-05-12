@@ -7,6 +7,6 @@ data class ItemDto(
     val name: String,
     val type: String,
     val weight: Double,
-    val properties: Map<String, Any>,
+    val properties: Map<String, Any>? = null,
     val authorId: UUID?
 )

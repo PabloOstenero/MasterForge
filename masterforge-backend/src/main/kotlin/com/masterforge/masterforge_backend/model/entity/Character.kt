@@ -80,18 +80,18 @@ data class Character(
     val baseCha: Int,
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "saving_throws_proficiencies", columnDefinition = "jsonb", nullable = false)
-    val savingThrowsProficiencies: Map<String, Any> = emptyMap(),
+    @Column(name = "saving_throws_proficiencies", columnDefinition = "jsonb")
+    val savingThrowsProficiencies: Map<String, Any>? = emptyMap(),
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "skill_proficiencies", columnDefinition = "jsonb", nullable = false)
-    val skillProficiencies: Map<String, Any> = emptyMap(),
+    @Column(name = "skill_proficiencies", columnDefinition = "jsonb")
+    val skillProficiencies: Map<String, Any>? = emptyMap(),
 
     // ---Spell Slots ---
     // It will store something like this: {"level_1": {"max": 4, "available": 2}, "level_2": {"max": 2, "available": 2}}
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "spell_slots", columnDefinition = "jsonb")
-    val spellSlots: Map<String, Any> = emptyMap(),
+    val spellSlots: Map<String, Any>? = emptyMap(),
 
     // --- Relationships ---
     @JsonIgnore
@@ -119,7 +119,7 @@ data class Character(
     // Here we store the player choices when leveling up
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "choices_json", columnDefinition = "jsonb")
-    val choicesJson: Map<String, Any> = emptyMap(),
+    val choicesJson: Map<String, Any>? = emptyMap(),
 
     @JsonIgnore
     @OneToMany(mappedBy = "character", cascade = [CascadeType.ALL], orphanRemoval = true)
@@ -130,5 +130,9 @@ data class Character(
     val spells: MutableList<CharacterSpell> = mutableListOf(),
 
     @OneToMany(mappedBy = "character", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val classLevels: MutableList<CharacterClassLevel> = mutableListOf()
+    val classLevels: MutableList<CharacterClassLevel> = mutableListOf(),
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "resource_counters", columnDefinition = "jsonb")
+    val resourceCounters: Map<String, Any>? = emptyMap()
 )

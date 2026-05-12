@@ -102,6 +102,7 @@ export class CharacterSheetPage implements OnInit {
     skillProficiencies: {}, // Matches the Map structure from the backend
     savingThrowsProficiencies: {},
     spellSlots: {},
+    resourceCounters: {},
     preparationStyle: 'KNOWN'
   };
 
@@ -128,6 +129,7 @@ export class CharacterSheetPage implements OnInit {
   showSubclassPicker = false;
   spellsToChoose: number = 0;
   cantripsToChoose: number = 0;
+  resourcePools: any[] = [];
   private characterId: string | null = null;
 
   // Detail Modal State
@@ -286,22 +288,9 @@ export class CharacterSheetPage implements OnInit {
         const proficiencyBonus = getProficiencyBonus(data.level);
 
         // --- CÁLCULO DINÁMICO DE CA (REGLAS 5E) ---
+        // --- CÁLCULO DINÁMICO DE CA (MOTOR DE REGLAS 5E) ---
+        const finalAc = this.calculateEffectiveAC(data, effectiveStats);
         const inventorySlots = data.inventory || [];
-        const equippedArmor = inventorySlots.find((s: any) => s.equipped && s.item.type === 'ARMOR');
-        const equippedShield = inventorySlots.find((s: any) => s.equipped && s.item.type === 'SHIELD');
-
-        let baseAc = 10;
-        let appliedDexMod = dexMod;
-
-        if (equippedArmor) {
-          const props = equippedArmor.item.properties || {};
-          baseAc = props.baseAc || 10;
-          if (props.dexBonus === false) appliedDexMod = 0;
-          else if (typeof props.dexLimit === 'number' && props.dexLimit !== null) appliedDexMod = Math.min(dexMod, props.dexLimit);
-        }
-
-        const shieldBonus = equippedShield ? (equippedShield.item.properties?.acBonus || 2) : 0;
-        const finalAc = baseAc + appliedDexMod + (data.dndRace?.bonusArmorClass || 0) + shieldBonus;
 
         // Cálculo de Percepción Pasiva
         const isPerceptionProficient = !!data.skillProficiencies?.perception;
@@ -358,6 +347,10 @@ export class CharacterSheetPage implements OnInit {
             cha: (data.baseCha || 10) + (data.dndRace?.bonusCha || 0)
           },
           hitDiceSpent: data.hitDiceSpent || 0,
+          resourceCounters: data.resourceCounters || {},
+
+
+
           hitDieType: data.dndClass?.hitDie || 8,
           money: {
             cp: data.cp ?? 0,
@@ -394,7 +387,11 @@ export class CharacterSheetPage implements OnInit {
                   ...(cl.dndClass?.classFeatures?.features || []),
                   ...this.extractSubclassFeatures(cl.subclass?.subclassFeatures)
                 ];
-                allFeats.push(...classFeats.filter(f => parseInt(f.levelRequired, 10) <= cl.level));
+                // Attach class name to features for context-aware mechanics (like Ki points)
+                const mapped = classFeats
+                  .filter(f => parseInt(f.levelRequired, 10) <= cl.level)
+                  .map(f => ({ ...f, _className: cl.dndClass.name }));
+                allFeats.push(...mapped);
               });
             } else {
               // Fallback for legacy data/safety: use primary class and total level
@@ -403,7 +400,10 @@ export class CharacterSheetPage implements OnInit {
                 ...(data.dndClass?.classFeatures?.features || []),
                 ...this.extractSubclassFeatures(data.subclass?.subclassFeatures)
               ];
-              allFeats.push(...classFeats.filter(f => parseInt(f.levelRequired, 10) <= data.level));
+              const mapped = classFeats
+                .filter(f => parseInt(f.levelRequired, 10) <= data.level)
+                .map(f => ({ ...f, _className: data.dndClass?.name }));
+              allFeats.push(...mapped);
             }
             return allFeats.map(f => ({
               ...f,
@@ -431,6 +431,8 @@ export class CharacterSheetPage implements OnInit {
           preparationStyle: data.dndClass?.classFeatures?.['spellcasting']?.['preparationStyle'] || 'KNOWN',
           knowledgeStyle: data.dndClass?.classFeatures?.['spellcasting']?.['knowledgeStyle'] || 'ALL_LIST'
         };
+
+        this.calculateResourcePools();
       },
       error: (err) => {
         console.error("Critical error loading character:", err);
@@ -576,21 +578,26 @@ export class CharacterSheetPage implements OnInit {
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {
-          text: 'Guardar',
+          text: 'Actualizar',
           handler: (data) => {
-            const val = parseInt(data.amount, 10);
-            if (!isNaN(val) && val >= 0 && this.characterId) {
-              this.pj.tempHp = val;
-              this.apiService.updateTempHp(this.characterId, val).subscribe({
-                next: () => console.log('Temporary HP updated successfully in DB'),
-                error: (err: any) => console.error("Error updating temporary HP:", err)
-              });
+            const amount = parseInt(data.amount, 10);
+            if (!isNaN(amount)) {
+              this.pj.tempHp = amount;
+              this.updateTempHpOnBackend();
             }
           }
         }
       ]
     });
     await alert.present();
+  }
+
+  private updateTempHpOnBackend() {
+    if (!this.characterId) return;
+    this.apiService.updateTempHp(this.characterId, this.pj.tempHp).subscribe({
+      next: () => console.log('Temporary HP updated successfully in DB'),
+      error: (err: any) => console.error("Error updating temporary HP:", err)
+    });
   }
 
   private updateMoneyOnBackend() {
@@ -642,6 +649,7 @@ export class CharacterSheetPage implements OnInit {
       description: f.description ?? '',
       levelRequired: f.levelRequired ?? 0,
       options: f.options ?? null,
+      properties: f.properties ?? null,
       isSubclassFeature: true   // flag for optional styling in the template
     }));
   }
@@ -1302,6 +1310,31 @@ export class CharacterSheetPage implements OnInit {
     return false;
   }
 
+  // Performs a short rest
+  async performShortRest() {
+    const alert = await this.alertController.create({
+      header: 'Descanso Corto',
+      message: '¿Realizar un descanso corto? Se restaurarán recursos como los Puntos de Ki y podrás gastar Dados de Golpe para curarte.',
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Descansar',
+          handler: () => {
+            // Restore resources that reset on Short Rest
+            this.resourcePools.forEach(p => {
+              if (p.reset === 'SHORT_REST') p.current = p.max;
+            });
+            this.syncResourceCounters();
+            
+            // Also suggest spending hit dice
+            this.updateHitDiceAlert();
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
   // Performs a long rest
   async performLongRest() {
     const alert = await this.alertController.create({
@@ -1313,7 +1346,12 @@ export class CharacterSheetPage implements OnInit {
           text: 'Descansar',
           handler: () => {
             this.apiService.performLongRest(this.characterId!).subscribe({
-              next: () => this.loadCharacter(this.characterId!),
+              next: () => {
+                // Reset local resource pools
+                this.resourcePools.forEach(p => p.current = p.max);
+                this.syncResourceCounters();
+                this.loadCharacter(this.characterId!);
+              },
               error: (err) => console.error('Error performing long rest:', err)
             });
           }
@@ -1835,29 +1873,308 @@ export class CharacterSheetPage implements OnInit {
   async updateBonusMaxHpAlert() {
     const alert = await this.alertController.create({
       header: 'Bono Vida Máxima',
-      message: 'Ej: Hechizo "Auxilio" (Aid)',
+      cssClass: 'heal-alert',
       inputs: [
         {
-          name: 'bonusMaxHp',
+          name: 'amount',
           type: 'number',
-          placeholder: 'Cantidad...',
+          placeholder: 'Ej: +10 o -5',
           value: this.pj.bonusMaxHp
         }
       ],
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {
-          text: 'Guardar',
+          text: 'Actualizar',
           handler: (data) => {
-            const val = Number(data.bonusMaxHp);
-            this.apiService.updateBonusMaxHp(this.pj.id, val).subscribe({
-              next: () => this.loadCharacter(this.pj.id),
-              error: (err) => console.error('Error actualizando bono de vida:', err)
-            });
+            const amount = parseInt(data.amount, 10);
+            if (!isNaN(amount)) {
+              this.pj.bonusMaxHp = amount;
+              this.updateBonusMaxHpOnBackend();
+            }
           }
         }
       ]
     });
     await alert.present();
   }
+
+  private updateBonusMaxHpOnBackend() {
+    if (!this.characterId) return;
+    this.apiService.updateBonusMaxHp(this.characterId, this.pj.bonusMaxHp).subscribe({
+      next: () => console.log('Bonus Max HP updated successfully in DB'),
+      error: (err: any) => console.error("Error updating bonus max HP:", err)
+    });
+  }
+
+  // --- Dynamic Resource Pool Logic ---
+  calculateResourcePools() {
+    if (!this.rawCharacter) return;
+    const pools: any[] = [];
+    
+    // 1. Scan Class & Subclass Features
+    this.pj.features.forEach((feat: any) => {
+      const itemsToScan = [feat, ...(feat.selectedOptions || [])];
+      itemsToScan.forEach(obj => {
+        let pool = this.detectResourceInFeature(obj);
+        if (pool) pools.push(pool);
+      });
+    });
+
+    // 2. Scan Racial Traits
+    this.pj.traits.forEach((trait: any) => {
+      let pool = this.detectResourceInFeature(trait);
+      if (pool) pools.push(pool);
+    });
+
+    this.checkAndAddHardcodedPools(pools);
+    this.resourcePools = pools;
+  }
+
+  private detectResourceInFeature(feat: any): any | null {
+    const props = feat.properties || feat.options || {};
+    if (props.resourcePool) {
+      const rp = props.resourcePool;
+      const max = this.calculateResourceMax(rp, feat);
+      const current = this.pj.resourceCounters[rp.name] ?? max;
+      return { ...rp, max, current, featureName: feat.name };
+    }
+    return null;
+  }
+
+  private checkAndAddHardcodedPools(existingPools: any[]) {
+    const classLevels = this.rawCharacter.classLevels || [];
+    const monk = classLevels.find((cl: any) => cl.dndClass.name.toLowerCase().includes('monk') || cl.dndClass.name.toLowerCase().includes('monje'));
+    if (monk && !existingPools.find(p => p.name === 'Puntos de Ki')) {
+      const max = monk.level;
+      const current = this.pj.resourceCounters['Puntos de Ki'] ?? max;
+      existingPools.push({ name: 'Puntos de Ki', max, current, reset: 'SHORT_REST' });
+    }
+    const sorc = classLevels.find((cl: any) => cl.dndClass.name.toLowerCase().includes('sorcerer') || cl.dndClass.name.toLowerCase().includes('hechicero'));
+    if (sorc && sorc.level >= 2 && !existingPools.find(p => p.name === 'Puntos de Hechicería')) {
+      const max = sorc.level;
+      const current = this.pj.resourceCounters['Puntos de Hechicería'] ?? max;
+      existingPools.push({ name: 'Puntos de Hechicería', max, current, reset: 'LONG_REST' });
+    }
+    const barb = classLevels.find((cl: any) => cl.dndClass.name.toLowerCase().includes('barbarian') || cl.dndClass.name.toLowerCase().includes('bárbaro'));
+    if (barb && !existingPools.find(p => p.name === 'Furias')) {
+      const rageTable = [0, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 6, 6, 6, 999];
+      const max = rageTable[barb.level] || 2;
+      const current = this.pj.resourceCounters['Furias'] ?? max;
+      existingPools.push({ name: 'Furias', max, current, reset: 'LONG_REST' });
+    }
+  }
+
+  private calculateResourceMax(rp: any, feat?: any): number {
+    let max = rp.max;
+
+    // Handle "level" keyword (dynamic scaling)
+    if (max === 'level') {
+      // If we have a class context, use class level
+      const className = feat?._className || feat?.dndClass?.name;
+      if (className) {
+        const cl = (this.rawCharacter.classLevels || []).find((l: any) => 
+          l.dndClass.name.toLowerCase() === className.toLowerCase()
+        );
+        return cl?.level || this.pj.level;
+      }
+      // Default to character total level
+      return this.pj.level;
+    }
+
+    // Handle legacy/other resource types
+    if (rp.type === 'CLASS_LEVEL') {
+      const cl = (this.rawCharacter.classLevels || []).find((l: any) => l.dndClass.name === rp.className);
+      return cl?.level || 0;
+    }
+    if (rp.type === 'FIXED_TABLE') {
+      const cl = (this.rawCharacter.classLevels || []).find((l: any) => l.dndClass.name === rp.className);
+      return rp.table[cl?.level || 0] || 0;
+    }
+    
+    return Number(max) || 0;
+  }
+
+  useResource(pool: any) {
+    if (pool.current > 0) {
+      pool.current--;
+      this.syncResourceCounters();
+    }
+  }
+
+  restoreResource(pool: any) {
+    if (pool.current < pool.max) {
+      pool.current++;
+      this.syncResourceCounters();
+    }
+  }
+
+  private syncResourceCounters() {
+    const counters: Record<string, number> = {};
+    this.resourcePools.forEach(p => {
+      counters[p.name] = p.current;
+    });
+    this.pj.resourceCounters = counters;
+    if (this.characterId) {
+      this.apiService.updateResourceCounters(this.characterId, counters).subscribe();
+    }
+  }
+
+  // --- Advanced AC Engine ---
+  private calculateEffectiveAC(data: any, stats: any): number {
+    const dexMod = getModifier(stats.dex);
+    const inventory = data.inventory || [];
+    const armor = inventory.find((s: any) => s.equipped && s.item.type === 'ARMOR');
+    const shield = inventory.find((s: any) => s.equipped && s.item.type === 'SHIELD');
+
+    // Get features that the character actually has at their current level
+    const allFeatures = this.getAllCharacterFeatures(data);
+
+    let calculations: number[] = [];
+
+    // 1. Base / Armor Path
+    if (armor) {
+      const props = armor.item.properties || {};
+      let base = props.baseAc || 10;
+      let appliedDex = dexMod;
+      if (props.dexBonus === false || props.noDex === true) appliedDex = 0;
+      else if (typeof props.dexLimit === 'number') appliedDex = Math.min(dexMod, props.dexLimit);
+      
+      calculations.push(base + appliedDex);
+    } else {
+      // Unarmored Path (Default)
+      calculations.push(10 + dexMod);
+
+      // --- DATA-DRIVEN AC CALCULATIONS (Homebrew Support) ---
+      allFeatures.forEach(f => {
+        const props = f.properties || f.options || {};
+        if (props.acCalculation) {
+          const calc = props.acCalculation;
+          // Most special calculations (Unarmored Defense) don't work with armor
+          // but we check if the feature explicitly allows it
+          if (calc.requiresNoArmor === false || !armor) {
+            let val = calc.base || 10;
+            if (calc.stats) {
+              calc.stats.forEach((s: string) => {
+                const statVal = stats[s.toLowerCase()];
+                if (statVal !== undefined) val += getModifier(statVal);
+              });
+            }
+            calculations.push(val);
+          }
+        }
+      });
+
+      // --- HARDCODED FALLBACKS (Standard 5e) ---
+      const conMod = getModifier(stats.con);
+      const wisMod = getModifier(stats.wis);
+      // Barbarian: 10 + DEX + CON
+      if (this.hasFeature(data, ['Defensa sin armadura', 'Unarmored Defense'], 'Barbarian')) {
+        calculations.push(10 + dexMod + conMod);
+      }
+      // Monk: 10 + DEX + WIS
+      if (this.hasFeature(data, ['Defensa sin armadura', 'Unarmored Defense'], 'Monk')) {
+        calculations.push(10 + dexMod + wisMod);
+      }
+      // Draconic Resilience / Natural Armor (13 + DEX)
+      if (this.hasFeature(data, ['Resiliencia Dracónica', 'Draconic Resilience', 'Armadura Natural', 'Natural Armor'])) {
+        calculations.push(13 + dexMod);
+      }
+    }
+
+    // Pick the best base calculation
+    let finalAc = Math.max(...calculations);
+
+    // 2. Add Flat Bonuses
+    // - Shields
+    if (shield) {
+      finalAc += (shield.item.properties?.acBonus || 2);
+    }
+
+    // - Racial flat bonus (legacy field)
+    finalAc += (data.dndRace?.bonusArmorClass || 0);
+
+    // - Data-driven Flat Bonuses (Homebrew Support)
+    allFeatures.forEach(f => {
+      // Check base feature and all selected options
+      const itemsToScan = [f, ...(f.selectedOptions || [])];
+      
+      itemsToScan.forEach(obj => {
+        const props = obj.properties || obj.options || {};
+        if (props.acBonus !== undefined && props.acBonus !== null) {
+          const bonus = Number(props.acBonus);
+          const armorOnly = !!props.acBonusArmorOnly;
+          // Apply if: (requires armor and we have it) OR (does not require armor)
+          if (!armorOnly || (armorOnly && armor)) {
+            finalAc += bonus;
+          }
+        }
+      });
+    });
+
+    // - Magic Items (additive AC bonuses)
+    inventory.filter((s: any) => s.equipped && s.item.properties?.bonusAc).forEach((s: any) => {
+      finalAc += Number(s.item.properties.bonusAc);
+    });
+
+    return finalAc;
+  }
+
+  private hasFeature(data: any, names: string[], className?: string): boolean {
+    return this.getAllCharacterFeatures(data).some(f => {
+      const matchName = names.some(n => f.name.toLowerCase().includes(n.toLowerCase()));
+      if (!className) return matchName;
+      // Also check subclasses if class name matches
+      const featClassName = (f.dndClass?.name || '').toLowerCase();
+      return matchName && featClassName.includes(className.toLowerCase());
+    });
+  }
+
+  /**
+   * Returns all features and traits that the character currently possesses
+   * based on their levels and race, respecting the new schema.
+   */
+  private getAllCharacterFeatures(data: any): any[] {
+    const allFeats: any[] = [];
+    
+    // 1. Race traits
+    if (data.dndRace?.traits) {
+      allFeats.push(...data.dndRace.traits);
+    }
+
+    // 2. Class and Subclass features (respecting current levels)
+    if (data.classLevels && data.classLevels.length > 0) {
+      data.classLevels.forEach((cl: any) => {
+        const classFeats = [
+          ...(cl.dndClass?.features || []),
+          ...(cl.dndClass?.classFeatures?.features || []),
+          ...this.extractSubclassFeatures(cl.subclass?.subclassFeatures)
+        ];
+        // Attach class name to features for context-aware mechanics
+        const mapped = classFeats
+          .filter(f => parseInt(f.levelRequired, 10) <= cl.level)
+          .map(f => ({ ...f, _className: cl.dndClass.name }));
+        allFeats.push(...mapped);
+      });
+    } else {
+      // Fallback
+      const classFeats = [
+        ...(data.dndClass?.features || []),
+        ...(data.dndClass?.classFeatures?.features || []),
+        ...this.extractSubclassFeatures(data.subclass?.subclassFeatures)
+      ];
+      const mapped = classFeats
+        .filter(f => parseInt(f.levelRequired, 10) <= (data.level || 1))
+        .map(f => ({ ...f, _className: data.dndClass?.name }));
+      allFeats.push(...mapped);
+    }
+
+    // 3. Attach selected options ( Fighting Styles, Eldritch Invocations, etc.)
+    return allFeats.map(f => {
+      const selectedOptions = (data.choicesJson?.featureOptions?.[f.name] || []);
+      return { ...f, selectedOptions };
+    });
+  }
 }
+
+

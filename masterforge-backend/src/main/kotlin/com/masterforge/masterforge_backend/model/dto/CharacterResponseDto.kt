@@ -43,10 +43,11 @@ data class DndRaceSummaryDto(
                         description = it.description,
                         levelRequired = it.levelRequired,
                         raceId = race.id!!,
-                        options = it.options
+                        options = it.options,
+                        properties = it.properties
                     )
                 },
-                raceFeatures = race.raceFeatures
+                raceFeatures = race.raceFeatures ?: emptyMap()
             )
         }
     }
@@ -106,9 +107,9 @@ data class DndClassResponseDto(
                 id = dndClass.id!!,
                 name = dndClass.name,
                 hitDie = dndClass.hitDie,
-                savingThrows = dndClass.savingThrows,
+                savingThrows = dndClass.savingThrows ?: emptyMap(),
                 features = dndClass.features
-                    .map { ClassFeatureDto(it.id, it.name, it.description, it.levelRequired, dndClass.id!!, it.options) },
+                    .map { ClassFeatureDto(it.id, it.name, it.description, it.levelRequired, dndClass.id!!, it.options, it.properties) },
                 classFeatures = dndClass.classFeatures ?: emptyMap()
             )
         }
@@ -148,7 +149,7 @@ data class ItemResponseDto(
                 name = item.name,
                 type = item.type,
                 weight = item.weight,
-                properties = item.properties
+                properties = item.properties ?: emptyMap()
             )
         }
     }
@@ -229,7 +230,8 @@ data class CharacterResponseDto(
     val classLevels: List<CharacterClassLevelResponseDto> = emptyList(),
     val choicesJson: Map<String, Any>,
     val inventory: List<InventorySlotResponseDto>,
-    val spells: List<CharacterSpellResponseDto> = emptyList()
+    val spells: List<CharacterSpellResponseDto> = emptyList(),
+    val resourceCounters: Map<String, Any> = emptyMap()
 ) {
     companion object {
         fun fromEntity(character: Character): CharacterResponseDto {
@@ -264,17 +266,18 @@ data class CharacterResponseDto(
                 baseInt = character.baseInt,
                 baseWis = character.baseWis,
                 baseCha = character.baseCha,
-                savingThrowsProficiencies = character.savingThrowsProficiencies,
-                skillProficiencies = character.skillProficiencies,
-                spellSlots = character.spellSlots,
+                savingThrowsProficiencies = character.savingThrowsProficiencies ?: emptyMap(),
+                skillProficiencies = character.skillProficiencies ?: emptyMap(),
+                spellSlots = character.spellSlots ?: emptyMap(),
                 user = userSimpleDto,
                 dndRace = DndRaceSummaryDto.fromEntity(character.dndRace),
                 dndClass = DndClassResponseDto.fromEntity(character.dndClass, character.level),
                 campaign = character.campaign?.let { CampaignRef(it.id!!) },
                 subclass = character.subclass?.let { SubclassResponseDto.fromEntity(it, character.level) },
                 classLevels = character.classLevels.map { CharacterClassLevelResponseDto.fromEntity(it) },
-                choicesJson = character.choicesJson,
-                inventory = character.inventory.map { InventorySlotResponseDto.fromEntity(it) }
+                choicesJson = character.choicesJson ?: emptyMap(),
+                inventory = character.inventory.map { InventorySlotResponseDto.fromEntity(it) },
+                resourceCounters = character.resourceCounters ?: emptyMap()
             )
         }
 

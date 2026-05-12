@@ -503,6 +503,8 @@
               </div>
             }
 
+            <app-feature-mechanics [parentForm]="$any(feature)"></app-feature-mechanics>
+
             <button type="button" class="btn-remove" (click)="removeFeature($index)"
               [attr.data-testid]="'remove-feature-' + $index">Eliminar Rasgo</button>
           </div>

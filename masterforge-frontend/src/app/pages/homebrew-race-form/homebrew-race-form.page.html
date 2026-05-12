@@ -487,6 +487,8 @@
               </div>
             }
 
+            <app-feature-mechanics [parentForm]="$any(trait)"></app-feature-mechanics>
+
             <button type="button" class="btn-remove" (click)="removeTrait($index)" [attr.data-testid]="'remove-trait-' + $index">
               Eliminar Rasgo
             </button>

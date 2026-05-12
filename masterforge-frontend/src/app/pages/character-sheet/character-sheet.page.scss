@@ -1023,3 +1023,92 @@ ion-segment-button {
 .gold-text {
   color: #C5A059;
 }
+/* --- Resource Pool Styles --- */
+.resource-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.resource-pool-card {
+  background: #1E1E1E;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 12px;
+  position: relative;
+  overflow: hidden;
+
+  .pool-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+
+    .pool-name {
+      color: #C5A059;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
+    .pool-reset {
+      color: #888;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+  }
+
+  .pool-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+
+    .pool-value {
+      flex: 1;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: baseline;
+      gap: 4px;
+
+      .current {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: white;
+      }
+
+      .separator {
+        color: #555;
+        font-size: 1.2rem;
+      }
+
+      .max {
+        color: #888;
+        font-size: 1.1rem;
+      }
+    }
+
+    ion-button {
+      --padding-start: 4px;
+      --padding-end: 4px;
+      margin: 0;
+      height: 40px;
+      font-size: 1.8rem;
+    }
+  }
+
+  .pool-progress-container {
+    height: 4px;
+    background: #121212;
+    border-radius: 2px;
+    margin-top: 10px;
+    overflow: hidden;
+
+    .pool-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #C5A059, #E0C080);
+      transition: width 0.3s ease;
+    }
+  }
+}

@@ -10,6 +10,7 @@ import { forkJoin, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 import { HomebrewService, CreateRaceDto } from '../../services/homebrew.service';
+import { FeatureMechanicsComponent } from '../../components/feature-mechanics/feature-mechanics.component';
 import {
   SkillProficiencies,
   LanguageProficiencies,
@@ -215,6 +216,7 @@ export function buildRaceFeatures(
     FormsModule,
     IonButton, IonSpinner,
     IonItem, IonLabel, IonInput, IonTextarea,
+    FeatureMechanicsComponent,
   ],
 })
 export class HomebrewRaceFormPage implements OnInit {
@@ -232,7 +234,7 @@ export class HomebrewRaceFormPage implements OnInit {
   editId: string | null = null;
 
   /** Original traits loaded in edit mode for reconciliation */
-  originalTraits: { id: number; name: string; description: string; levelRequired: number; options?: any }[] = [];
+  originalTraits: { id: number; name: string; description: string; levelRequired: number; options?: any; properties?: any }[] = [];
 
   // ---------------------------------------------------------------------------
   // Proficiency chip state
@@ -540,8 +542,20 @@ export class HomebrewRaceFormPage implements OnInit {
               hasOptions: [!!(options.options && options.options.length > 0)],
               choiceCount: [options.choiceCount ?? 1],
               options: this.fb.array([]),
-              progression: this.fb.array([])
+              progression: this.fb.array([]),
+              properties: this.fb.group({})
             });
+
+            if (t.properties) {
+              const props = t.properties;
+              const propsGroup = traitGroup.get('properties') as FormGroup;
+              if (props.acCalculation) propsGroup.addControl('acCalculation', this.fb.group(props.acCalculation));
+              if (props.acBonus !== undefined) {
+                propsGroup.addControl('acBonus', this.fb.control(props.acBonus));
+                propsGroup.addControl('acBonusArmorOnly', this.fb.control(props.acBonusArmorOnly ?? false));
+              }
+              if (props.resourcePool) propsGroup.addControl('resourcePool', this.fb.group(props.resourcePool));
+            }
 
             if (options.options) {
               const optsArray = traitGroup.get('options') as FormArray;
@@ -768,16 +782,26 @@ export class HomebrewRaceFormPage implements OnInit {
    */
   async reconcileTraits(raceId: number): Promise<void> {
     const currentTraits = this.traits.controls.map((ctrl) => {
-      const hasOptions = ctrl.get('hasOptions')?.value;
-      const options = ctrl.get('options')?.value;
-      const progression = ctrl.get('progression')?.value;
-      const choiceCount = ctrl.get('choiceCount')?.value;
+      const fg = ctrl as FormGroup;
+      const hasOptions = fg.get('hasOptions')?.value;
+      const options = fg.get('options')?.value;
+      const progression = fg.get('progression')?.value;
+      const choiceCount = fg.get('choiceCount')?.value;
+      const propertiesValue = fg.get('properties')?.value;
+      
+      const cleanProps: any = {};
+      if (propertiesValue.acCalculation) cleanProps.acCalculation = propertiesValue.acCalculation;
+      if (propertiesValue.acBonus !== undefined && propertiesValue.acBonus !== null) {
+        cleanProps.acBonus = propertiesValue.acBonus;
+        cleanProps.acBonusArmorOnly = propertiesValue.acBonusArmorOnly;
+      }
+      if (propertiesValue.resourcePool) cleanProps.resourcePool = propertiesValue.resourcePool;
 
       return {
-        id:          ctrl.get('id')?.value as number | null,
-        name:        ctrl.get('name')?.value as string,
-        description: ctrl.get('description')?.value as string,
-        levelRequired: ctrl.get('levelRequired')?.value as number,
+        id:          fg.get('id')?.value as number | null,
+        name:        fg.get('name')?.value as string,
+        description: fg.get('description')?.value as string,
+        levelRequired: fg.get('levelRequired')?.value as number,
         options: hasOptions ? {
           choiceCount,
           options: options.map((o: any) => ({
@@ -789,7 +813,8 @@ export class HomebrewRaceFormPage implements OnInit {
             level: p.level,
             additionalChoices: p.additionalChoices
           }))
-        } : null
+        } : null,
+        properties: Object.keys(cleanProps).length > 0 ? cleanProps : null
       };
     });
 
@@ -808,13 +833,14 @@ export class HomebrewRaceFormPage implements OnInit {
             description: trait.description,
             levelRequired: trait.levelRequired,
             options:     trait.options,
+            properties:  trait.properties,
             raceId,
           }).toPromise(),
         );
       }
     }
 
-    // PUT changed traits (id non-null, name or description changed)
+    // PUT changed traits
     for (const trait of currentTraits) {
       if (trait.id !== null) {
         const original = this.originalTraits.find(o => o.id === trait.id);
@@ -822,7 +848,8 @@ export class HomebrewRaceFormPage implements OnInit {
           original.name !== trait.name || 
           original.description !== trait.description || 
           original.levelRequired !== trait.levelRequired ||
-          JSON.stringify(original.options) !== JSON.stringify(trait.options)
+          JSON.stringify(original.options) !== JSON.stringify(trait.options) ||
+          JSON.stringify(original.properties) !== JSON.stringify(trait.properties)
         );
 
         if (hasChanged) {
@@ -832,6 +859,7 @@ export class HomebrewRaceFormPage implements OnInit {
               description: trait.description,
               levelRequired: trait.levelRequired,
               options:     trait.options,
+              properties:  trait.properties,
               raceId,
             }).toPromise(),
           );
@@ -895,7 +923,8 @@ export class HomebrewRaceFormPage implements OnInit {
       hasOptions:  [false],
       choiceCount: [1],
       options:     this.fb.array([]),
-      progression: this.fb.array([])
+      progression: this.fb.array([]),
+      properties:  this.fb.group({})
     }));
   }
 

@@ -31,6 +31,7 @@ class RaceTraitController(
             description = dto.description,
             levelRequired = dto.levelRequired,
             options = dto.options,
+            properties = dto.properties,
             race = race
         )
         return raceTraitRepository.save(raceTrait)
@@ -59,6 +60,7 @@ class RaceTraitController(
             description = dto.description,
             levelRequired = dto.levelRequired,
             options = dto.options,
+            properties = dto.properties,
             race = race
         )
         return raceTraitRepository.save(updatedTrait)

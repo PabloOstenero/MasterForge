@@ -125,9 +125,13 @@ levelUpCharacter(characterId: string, data: { hpBonus: number, statChanges: any,
   return this.http.put(`${this.apiUrl}/characters/${characterId}/level-up`, data);
 }
 
-updateSpellSlots(characterId: string, spellSlots: any): Observable<any> {
-  return this.http.put(`${this.apiUrl}/characters/${characterId}/spell-slots`, { spellSlots });
-}
+  updateSpellSlots(characterId: string, spellSlots: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/characters/${characterId}/spell-slots`, { spellSlots });
+  }
+
+  updateResourceCounters(characterId: string, resourceCounters: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/characters/${characterId}/resource-counters`, { resourceCounters });
+  }
 
   getSpells(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/spells`);
@@ -334,6 +338,8 @@ export interface ClassFeatureDto {
   description: string;
   levelRequired: number;
   dndClassId: number;
+  options?: any;
+  properties?: any;
 }
 
 export interface RaceTraitDto {
@@ -341,6 +347,9 @@ export interface RaceTraitDto {
   name: string;
   description: string;
   raceId: number;
+  levelRequired: number;
+  options?: any;
+  properties?: any;
 }
 
 export interface CharacterSpellResponseDto {

@@ -30,8 +30,8 @@ data class DndClass(
     val hitDie: Int,
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "saving_throws", columnDefinition = "jsonb", nullable = false)
-    val savingThrows: Map<String, Any> = emptyMap(),
+    @Column(name = "saving_throws", columnDefinition = "jsonb")
+    val savingThrows: Map<String, Any>? = emptyMap(),
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "class_features", columnDefinition = "jsonb", nullable = true)

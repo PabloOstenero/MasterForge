@@ -65,6 +65,20 @@ export interface FeatureEntry {
   description: string;
   levelRequired: number;
   options?: FeatureOptionPool;
+  properties?: {
+    acCalculation?: {
+      base: number;
+      stats: string[];
+      requiresNoArmor?: boolean;
+    };
+    acBonus?: number;
+    acBonusArmorOnly?: boolean;
+    resourcePool?: {
+      name: string;
+      max: number | string;
+      reset: 'SHORT_REST' | 'LONG_REST';
+    };
+  };
 }
 
 /**

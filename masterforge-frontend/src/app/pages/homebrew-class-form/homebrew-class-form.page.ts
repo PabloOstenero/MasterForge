@@ -20,6 +20,7 @@ import {
 } from '../../models/homebrew.models';
 import { StructuredEquipment, isStructuredEquipment, serializeEquipment } from '../../models/equipment.models';
 import { StartingEquipmentPickerComponent } from '../../components/starting-equipment-picker/starting-equipment-picker.component';
+import { FeatureMechanicsComponent } from '../../components/feature-mechanics/feature-mechanics.component';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -293,6 +294,7 @@ export function serializeSpellSlotTable(table: SpellSlotTable): number[][] {
     IonButton, IonSpinner,
     IonItem, IonLabel, IonInput, IonTextarea, IonIcon,
     StartingEquipmentPickerComponent,
+    FeatureMechanicsComponent,
   ],
 })
 export class HomebrewClassFormPage implements OnInit {
@@ -306,7 +308,7 @@ export class HomebrewClassFormPage implements OnInit {
   error: string | null = null;
   editMode = false;
   editId: string | null = null;
-  originalFeatures: { id: number; name: string; description: string; levelRequired: number; options?: any }[] = [];
+  originalFeatures: { id: number; name: string; description: string; levelRequired: number; options?: any; properties?: any }[] = [];
 
   // ---------------------------------------------------------------------------
   // Starting equipment picker state
@@ -676,22 +678,40 @@ export class HomebrewClassFormPage implements OnInit {
                 additionalChoices: [p.additionalChoices, [Validators.required, Validators.min(1)]]
               })))
             });
+            const featureGroup = this.fb.group({
+              id:            [f.id ?? null],
+              name:          [f.name ?? '',        Validators.required],
+              description:   [f.description ?? '', Validators.required],
+              levelRequired: [f.levelRequired ?? 1, [Validators.required, Validators.min(1), Validators.max(20)]],
+              hasOptions:    [!!f.options],
+              options:       optionsGroup,
+              properties:    this.fb.group({}) // Will be populated by the component or patch
+            });
 
-            this.features.push(this.fb.group({
-              id:           [f.id ?? null],
-              name:         [f.name ?? '', Validators.required],
-              description:  [f.description ?? '', Validators.required],
-              levelRequired:[f.levelRequired ?? null, [Validators.required, Validators.min(1), Validators.max(20)]],
-              hasOptions:   [!!f.options],
-              options:      optionsGroup
-            }));
+            if (f.properties) {
+              const props = f.properties;
+              const propsGroup = featureGroup.get('properties') as FormGroup;
+              if (props.acCalculation) {
+                propsGroup.addControl('acCalculation', this.fb.group(props.acCalculation));
+              }
+              if (props.acBonus !== undefined) {
+                propsGroup.addControl('acBonus', this.fb.control(props.acBonus));
+                propsGroup.addControl('acBonusArmorOnly', this.fb.control(props.acBonusArmorOnly ?? false));
+              }
+              if (props.resourcePool) {
+                propsGroup.addControl('resourcePool', this.fb.group(props.resourcePool));
+              }
+            }
+
+            this.features.push(featureGroup);
           });
           this.originalFeatures = cls.features.map((f: any) => ({
             id:           f.id,
             name:         f.name,
             description:  f.description,
             levelRequired:f.levelRequired,
-            options:      f.options
+            options:      f.options,
+            properties:   f.properties
           }));
         }
 
@@ -863,7 +883,8 @@ export class HomebrewClassFormPage implements OnInit {
         choiceCount: [null],
         options: this.fb.array([]),
         progression: this.fb.array([])
-      })
+      }),
+      properties:   this.fb.group({})
     }));
   }
 
@@ -1142,12 +1163,14 @@ export class HomebrewClassFormPage implements OnInit {
       const ctrl = this.features.at(i);
       const id = ctrl.get('id')?.value;
       if (id === null) {
-        const hasOptions = ctrl.get('hasOptions')?.value;
-        const options = hasOptions ? {
-          choiceCount: ctrl.get('options.choiceCount')?.value,
-          options: ctrl.get('options.options')?.value,
-          progression: ctrl.get('options.progression')?.value
-        } : null;
+        const propertiesValue = ctrl.get('properties')?.value || {};
+        const cleanProps: any = {};
+        if (propertiesValue.acCalculation) cleanProps.acCalculation = propertiesValue.acCalculation;
+        if (propertiesValue.acBonus !== undefined && propertiesValue.acBonus !== null) {
+          cleanProps.acBonus = propertiesValue.acBonus;
+          cleanProps.acBonusArmorOnly = propertiesValue.acBonusArmorOnly;
+        }
+        if (propertiesValue.resourcePool) cleanProps.resourcePool = propertiesValue.resourcePool;
 
         promises.push(
           this.homebrewService.createClassFeature({
@@ -1155,7 +1178,8 @@ export class HomebrewClassFormPage implements OnInit {
             description:  ctrl.get('description')?.value,
             levelRequired:ctrl.get('levelRequired')?.value,
             classId,
-            options: options as any
+            options: ctrl.get('hasOptions')?.value ? ctrl.get('options')?.value : null,
+            properties: Object.keys(cleanProps).length > 0 ? cleanProps : null
           }).toPromise(),
         );
       }
@@ -1165,9 +1189,10 @@ export class HomebrewClassFormPage implements OnInit {
     for (const feature of currentFeatures) {
       if (feature.id !== null) {
         const original = this.originalFeatures.find(o => o.id === feature.id);
-        // Also check if options changed
         const currentFormFeature = this.features.controls.find(c => c.get('id')?.value === feature.id);
-        const options = currentFormFeature?.get('hasOptions')?.value 
+        
+        const hasOptions = currentFormFeature?.get('hasOptions')?.value;
+        const options = hasOptions
           ? { 
               choiceCount: currentFormFeature.get('options.choiceCount')?.value,
               options: currentFormFeature.get('options.options')?.value,
@@ -1175,11 +1200,22 @@ export class HomebrewClassFormPage implements OnInit {
             } 
           : null;
 
+        const propertiesValue = currentFormFeature?.get('properties')?.value || {};
+        const cleanProps: any = {};
+        if (propertiesValue.acCalculation) cleanProps.acCalculation = propertiesValue.acCalculation;
+        if (propertiesValue.acBonus !== undefined && propertiesValue.acBonus !== null) {
+          cleanProps.acBonus = propertiesValue.acBonus;
+          cleanProps.acBonusArmorOnly = propertiesValue.acBonusArmorOnly;
+        }
+        if (propertiesValue.resourcePool) cleanProps.resourcePool = propertiesValue.resourcePool;
+        const properties = Object.keys(cleanProps).length > 0 ? cleanProps : null;
+
         if (original && (
           original.name !== feature.name ||
           original.description !== feature.description ||
           original.levelRequired !== feature.levelRequired ||
-          JSON.stringify(original.options) !== JSON.stringify(options)
+          JSON.stringify(original.options) !== JSON.stringify(options) ||
+          JSON.stringify(original.properties) !== JSON.stringify(properties)
         )) {
           promises.push(
             this.homebrewService.updateClassFeature(feature.id, {
@@ -1187,7 +1223,8 @@ export class HomebrewClassFormPage implements OnInit {
               description:  feature.description,
               levelRequired:feature.levelRequired,
               classId,
-              options: options as any
+              options: options as any,
+              properties: properties
             }).toPromise(),
           );
         }

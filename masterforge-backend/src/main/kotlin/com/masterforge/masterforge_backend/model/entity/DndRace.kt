@@ -51,7 +51,7 @@ data class DndRace(
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "race_features", columnDefinition = "jsonb")
-    val raceFeatures: Map<String, Any> = emptyMap(),
+    val raceFeatures: Map<String, Any>? = emptyMap(),
 
     @JsonIgnore
     @OneToMany(mappedBy = "race", cascade = [CascadeType.ALL])

@@ -77,7 +77,7 @@ class DndRaceController(
                 bonusInt = race.bonusInt,
                 bonusWis = race.bonusWis,
                 bonusCha = race.bonusCha,
-                raceFeatures = race.raceFeatures,
+                raceFeatures = race.raceFeatures ?: emptyMap(),
                 traits = traitSummaries
             )
             ResponseEntity.ok(responseDto)

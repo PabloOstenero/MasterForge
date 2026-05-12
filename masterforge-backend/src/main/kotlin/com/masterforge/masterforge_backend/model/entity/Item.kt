@@ -24,7 +24,7 @@ data class Item(
     // Here we store specific things like the damage (1d8) or properties
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    val properties: Map<String, Any> = emptyMap(),
+    val properties: Map<String, Any>? = emptyMap(),
 
     /**
      * The author of the class. If null, it is considered a system-provided (official) class.

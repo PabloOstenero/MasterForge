@@ -16,6 +16,7 @@ import {
 } from '@ionic/angular/standalone';
 
 import { HomebrewService, CreateSubclassDto } from '../../services/homebrew.service';
+import { FeatureMechanicsComponent } from '../../components/feature-mechanics/feature-mechanics.component';
 import {
   SkillProficiencies,
   Spellcasting,
@@ -227,6 +228,7 @@ export function buildSubclassFeatures(
     FormsModule,
     IonButton, IonSpinner,
     IonItem, IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption,
+    FeatureMechanicsComponent,
   ],
 })
 export class HomebrewSubclassFormPage implements OnInit {
@@ -606,13 +608,32 @@ export class HomebrewSubclassFormPage implements OnInit {
             })))
           });
 
-          this.features.push(this.fb.group({
-            name:          [entry.name,          Validators.required],
-            description:   [entry.description,   Validators.required],
+          const featureGroup = this.fb.group({
+            id:            [entry.id ?? null],
+            name:          [entry.name,           Validators.required],
+            description:   [entry.description,    Validators.required],
             levelRequired: [entry.levelRequired,  [Validators.required, Validators.min(1), Validators.max(20)]],
             hasOptions:    [!!entry.options],
-            options:       optionsGroup
-          }));
+            options:       optionsGroup,
+            properties:    this.fb.group({})
+          });
+
+          if (entry.properties) {
+            const props = entry.properties;
+            const propsGroup = featureGroup.get('properties') as FormGroup;
+            if (props.acCalculation) {
+              propsGroup.addControl('acCalculation', this.fb.group(props.acCalculation));
+            }
+            if (props.acBonus !== undefined) {
+              propsGroup.addControl('acBonus', this.fb.control(props.acBonus));
+              propsGroup.addControl('acBonusArmorOnly', this.fb.control(props.acBonusArmorOnly ?? false));
+            }
+            if (props.resourcePool) {
+              propsGroup.addControl('resourcePool', this.fb.group(props.resourcePool));
+            }
+          }
+
+          this.features.push(featureGroup);
         });
 
         // ---------------------------------------------------------------
@@ -754,7 +775,8 @@ export class HomebrewSubclassFormPage implements OnInit {
         choiceCount: [null],
         options: this.fb.array([]),
         progression: this.fb.array([])
-      })
+      }),
+      properties:    this.fb.group({})
     }));
   }
 
@@ -1015,19 +1037,23 @@ export class HomebrewSubclassFormPage implements OnInit {
 
     // ---- Serialize subclass feature entries ----
     const subclassFeatureEntries: FeatureEntry[] = this.features.controls.map(ctrl => {
-      const g = ctrl as FormGroup;
-      const hasOptions = g.get('hasOptions')?.value;
-      const options = hasOptions ? {
-        choiceCount: g.get('options.choiceCount')?.value,
-        options: g.get('options.options')?.value,
-        progression: g.get('options.progression')?.value
-      } : null;
+      const fg = ctrl as FormGroup;
+      const optionsValue = fg.get('hasOptions')?.value ? fg.get('options')?.value : null;
+      const propertiesValue = fg.get('properties')?.value;
+      const cleanProps: any = {};
+      if (propertiesValue.acCalculation) cleanProps.acCalculation = propertiesValue.acCalculation;
+      if (propertiesValue.acBonus !== undefined && propertiesValue.acBonus !== null) {
+        cleanProps.acBonus = propertiesValue.acBonus;
+        cleanProps.acBonusArmorOnly = propertiesValue.acBonusArmorOnly;
+      }
+      if (propertiesValue.resourcePool) cleanProps.resourcePool = propertiesValue.resourcePool;
 
       return {
-        name: g.get('name')?.value,
-        description: g.get('description')?.value,
-        levelRequired: g.get('levelRequired')?.value,
-        options: options as any
+        name: fg.get('name')?.value,
+        description: fg.get('description')?.value,
+        levelRequired: fg.get('levelRequired')?.value,
+        options: optionsValue,
+        properties: Object.keys(cleanProps).length > 0 ? cleanProps : null
       };
     });
 

@@ -66,15 +66,50 @@
         </ion-button>
       </ion-col>
       <ion-col size="4">
-        <ion-button expand="block" color="success" (click)="performLongRest()">
-          Rest
-        </ion-button>
+        <div style="display: flex; gap: 5px;">
+          <ion-button expand="block" color="medium" (click)="performShortRest()" style="flex: 1; --padding-start: 2px; --padding-end: 2px; font-size: 0.8rem;">
+            S. Rest
+          </ion-button>
+          <ion-button expand="block" color="success" (click)="performLongRest()" style="flex: 1; --padding-start: 2px; --padding-end: 2px; font-size: 0.8rem;">
+            L. Rest
+          </ion-button>
+        </div>
       </ion-col>
     </ion-row>
   </div>
 
   @if (currentTab === 'stats') {
   <div class="ion-padding">
+    @if (resourcePools.length > 0) {
+      <h2 class="section-title">Recursos de Clase</h2>
+      <div class="resource-grid ion-margin-bottom">
+        @for (pool of resourcePools; track pool.name) {
+          <div class="resource-pool-card">
+            <div class="pool-header">
+              <span class="pool-name">{{ pool.name }}</span>
+              <span class="pool-reset">{{ pool.reset === 'SHORT_REST' ? 'Descanso Corto' : 'Descanso Largo' }}</span>
+            </div>
+            <div class="pool-body">
+              <ion-button fill="clear" color="danger" (click)="useResource(pool)" [disabled]="pool.current <= 0">
+                <ion-icon name="remove-circle-outline"></ion-icon>
+              </ion-button>
+              <div class="pool-value">
+                <span class="current">{{ pool.current }}</span>
+                <span class="separator">/</span>
+                <span class="max">{{ pool.max === 999 ? '∞' : pool.max }}</span>
+              </div>
+              <ion-button fill="clear" color="success" (click)="restoreResource(pool)" [disabled]="pool.current >= pool.max">
+                <ion-icon name="add-circle-outline"></ion-icon>
+              </ion-button>
+            </div>
+            <div class="pool-progress-container">
+              <div class="pool-progress-fill" [style.width.%]="pool.max === 999 ? 100 : (pool.current / pool.max) * 100"></div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
     <h2 class="section-title">Atributos Principales</h2>
 
     <ion-grid class="ion-no-padding">
