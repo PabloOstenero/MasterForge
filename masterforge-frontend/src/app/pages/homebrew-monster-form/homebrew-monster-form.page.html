@@ -77,6 +77,24 @@
           </div>
         </div>
 
+        <!-- Alineamiento -->
+        <div class="field-group">
+          <label class="field-label">Alineamiento <span class="required">*</span></label>
+          <select
+            class="forge-select-native"
+            formControlName="alignment"
+            data-testid="alignment-input"
+            [class.input-error]="form.get('alignment')?.invalid && form.get('alignment')?.touched">
+            <option value="" disabled>Selecciona alineamiento</option>
+            @for (align of alignments; track align) {
+              <option [value]="align">{{ align }}</option>
+            }
+          </select>
+          @if (form.get('alignment')?.invalid && form.get('alignment')?.touched) {
+            <p class="error-message" data-testid="alignment-error">El alineamiento es obligatorio.</p>
+          }
+        </div>
+
         <!-- Descripción -->
         <div class="field-group">
           <label class="field-label">Descripción <span class="optional-tag">opcional</span></label>
@@ -288,6 +306,10 @@
           <div class="field-group">
             <label class="field-label">Percepción Pasiva</label>
             <ion-input class="forge-input" type="number" formControlName="passivePerception" placeholder="Ej: 12" data-testid="senses-passive-perception"></ion-input>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Idiomas</label>
+            <ion-input class="forge-input" formControlName="languages" placeholder="Común, Dracónico..." data-testid="languages-input"></ion-input>
           </div>
         </div>
       </div>
@@ -534,6 +556,18 @@
                   [attr.data-testid]="'attack-reach-' + $index">
                 </ion-input>
               </div>
+            </div>
+
+            <!-- Descripción narrativa (opcional) -->
+            <div class="field-group">
+              <label class="field-label">Descripción Narrative <span class="optional-tag">opcional</span></label>
+              <ion-textarea
+                class="forge-input forge-textarea"
+                formControlName="description"
+                placeholder="Detalles adicionales, efectos al impactar, etc."
+                rows="2"
+                [attr.data-testid]="'attack-description-' + $index">
+              </ion-textarea>
             </div>
 
             <button type="button" class="btn-remove" (click)="removeAttack($index)" [attr.data-testid]="'remove-attack-' + $index">

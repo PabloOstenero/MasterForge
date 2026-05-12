@@ -25,6 +25,9 @@ data class Monster(
     @Column(nullable = false)
     val size: String, // Small, Medium, Large, Giant
 
+    @Column(nullable = false, columnDefinition = "varchar(255) default 'Unaligned'")
+    val alignment: String,
+
     // --- STATISTICS ---
     @Column(name = "armor_class", nullable = false) val armorClass: Int,
     @Column(name = "hit_points", nullable = false) val hitPoints: Int,

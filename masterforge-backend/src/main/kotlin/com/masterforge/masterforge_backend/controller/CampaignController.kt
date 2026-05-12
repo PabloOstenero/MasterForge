@@ -134,6 +134,28 @@ class CampaignController(
         return ResponseEntity.noContent().build()
     }
 
+    @PutMapping("/{id}/combat-state")
+    @Transactional
+    fun updateCombatState(
+        @PathVariable id: UUID,
+        @RequestBody combatState: Map<String, Any>
+    ): ResponseEntity<Void> {
+        val campaign = campaignRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign not found") }
+        
+        // Authorization check: Only the owner (DM) can update the combat state
+        val authentication = SecurityContextHolder.getContext().authentication
+            ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated")
+        val currentUserId = UUID.fromString(authentication.name)
+        if (campaign.owner.id != currentUserId) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Only the Game Master can update the combat state")
+        }
+
+        val updatedCampaign = campaign.copy(combatState = combatState)
+        campaignRepository.save(updatedCampaign)
+        return ResponseEntity.noContent().build()
+    }
+
     /**
      * GET /api/campaigns/{id}/sessions
      *

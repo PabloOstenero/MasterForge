@@ -9,5 +9,6 @@ data class CampaignDto(
     val ownerId: UUID,
     val maxPlayers: Int,
     val joinPrice: BigDecimal,
-    val visibility: String
+    val visibility: String,
+    val combatState: Map<String, Any>? = null
 )

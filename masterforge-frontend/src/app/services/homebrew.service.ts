@@ -77,6 +77,7 @@ export interface CreateMonsterDto {
   name: string;
   type: string;
   size: string;
+  alignment: string;
   armorClass: number;
   hitPoints: number;
   speed: string;

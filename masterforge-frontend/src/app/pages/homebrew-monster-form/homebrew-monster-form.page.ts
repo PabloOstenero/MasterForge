@@ -40,6 +40,14 @@ export const MONSTER_TYPES = [
   'Plant',
   'Undead',
 ] as const;
+  
+/** Valid alignments in D&D 5e. */
+export const ALIGNMENTS = [
+  'Lawful Good', 'Neutral Good', 'Chaotic Good',
+  'Lawful Neutral', 'Neutral', 'Chaotic Neutral',
+  'Lawful Evil', 'Neutral Evil', 'Chaotic Evil',
+  'Unaligned', 'Any Alignment'
+] as const;
 
 /** All damage types in D&D 5e. */
 export const DAMAGE_TYPES = [
@@ -117,6 +125,7 @@ export function buildCombatMechanics(
   senses: SenseObject,
   attacks: AttackEntry[],
   abilities: FeatureEntry[],
+  languages?: string | string[],
   speeds?: SpeedObject,
 ): CombatMechanics {
   // Filter savingThrows: keep only keys whose value is a non-null number
@@ -131,13 +140,14 @@ export function buildCombatMechanics(
   // Filter senses: keep only keys whose value is not null and not ""
   const filteredSenses: Partial<Senses> = {};
   (Object.keys(senses) as Array<keyof Senses>).forEach((key) => {
+    if (key === ('languages' as any)) return; // Don't include languages in senses
     const val = (senses as any)[key];
     if (val !== null && val !== '') {
       (filteredSenses as any)[key] = val;
     }
   });
 
-  const toArray = (val: string | string[]): string[] => {
+  const toArray = (val: string | string[] | undefined): string[] => {
     if (Array.isArray(val)) return val;
     return val ? val.split(',').map(s => s.trim()).filter(Boolean) : [];
   };
@@ -150,6 +160,7 @@ export function buildCombatMechanics(
     damageImmunities:      toArray(damageImmunities),
     damageVulnerabilities: toArray(damageVulnerabilities),
     conditionImmunities:   toArray(conditionImmunities),
+    languages:             toArray(languages),
     senses:                filteredSenses,
     attacks,
     abilities,
@@ -211,8 +222,9 @@ export class HomebrewMonsterFormPage implements OnInit {
   }
 
   /** Exposed for template iteration. */
-  readonly monsterSizes = MONSTER_SIZES;
   readonly monsterTypes = MONSTER_TYPES;
+  readonly monsterSizes = MONSTER_SIZES;
+  readonly alignments   = ALIGNMENTS;
   readonly damageTypes  = DAMAGE_TYPES;
   readonly conditions   = CONDITIONS;
   readonly skillNames   = SKILL_NAMES;
@@ -251,6 +263,7 @@ export class HomebrewMonsterFormPage implements OnInit {
       name:            ['', Validators.required],
       type:            ['', Validators.required],
       size:            ['', Validators.required],
+      alignment:       ['', Validators.required],
       armorClass:      [null, [Validators.required, Validators.min(1), Validators.max(30)]],
       hitPoints:       [null, [Validators.required, Validators.min(1)]],
       speed:           ['', Validators.required],
@@ -285,6 +298,7 @@ export class HomebrewMonsterFormPage implements OnInit {
         tremorsense:       [''],
         truesight:         [''],
         passivePerception: [null],
+        languages:         [''],
       }),
       attacks:   this.fb.array([]),
       abilities: this.fb.array([]),
@@ -310,6 +324,7 @@ export class HomebrewMonsterFormPage implements OnInit {
           name: monster.name,
           type: monster.type,
           size: monster.size,
+          alignment: monster.alignment,
           armorClass: monster.armorClass,
           hitPoints: monster.hitPoints,
           speed: monster.speed,
@@ -323,6 +338,15 @@ export class HomebrewMonsterFormPage implements OnInit {
           xp: monster.xp,
           description: cm.description ?? '',
         });
+
+        // Patch senses & languages
+        if (cm.senses || cm.languages) {
+          const sensesPatch = { 
+            ...(cm.senses ?? {}),
+            languages: Array.isArray(cm.languages) ? cm.languages.join(', ') : (cm.languages ?? '')
+          };
+          this.form.get('senses')?.patchValue(sensesPatch);
+        }
 
         // Patch saving throws
         if (cm.savingThrows) {
@@ -364,6 +388,7 @@ export class HomebrewMonsterFormPage implements OnInit {
               damageDice:  [a.damageDice ?? ''],
               damageType:  [a.damageType ?? ''],
               reach:       [a.reach ?? ''],
+              description: [a.description ?? ''],
             }));
           });
         }
@@ -492,6 +517,7 @@ export class HomebrewMonsterFormPage implements OnInit {
         damageDice:  [''],
         damageType:  [''],
         reach:       [''],
+        description: [''],
       }),
     );
   }
@@ -542,9 +568,10 @@ export class HomebrewMonsterFormPage implements OnInit {
       this.selectedLabels(this.damageImmunities,      DAMAGE_TYPES),
       this.selectedLabels(this.damageVulnerabilities, DAMAGE_TYPES),
       this.selectedLabels(this.conditionImmunities,   CONDITIONS),
-      v.senses ?? { darkvision: '', blindsight: '', tremorsense: '', truesight: '', passivePerception: null },
+      v.senses ?? { darkvision: '', blindsight: '', tremorsense: '', truesight: '', passivePerception: null, languages: '' },
       v.attacks ?? [],
       v.abilities ?? [],
+      v.senses?.languages,
       v.speeds,
     );
 
@@ -554,6 +581,7 @@ export class HomebrewMonsterFormPage implements OnInit {
       name: v.name,
       type: v.type,
       size: v.size,
+      alignment: v.alignment,
       armorClass: v.armorClass,
       hitPoints: v.hitPoints,
       speed: v.speed,

@@ -281,6 +281,11 @@ levelUpCharacter(characterId: string, data: { hpBonus: number, statChanges: any,
     return this.http.post(`${this.apiUrl}/character-spells`, dto);
   }
 
+  // Update campaign combat state
+  updateCombatState(campaignId: string, combatState: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/campaigns/${campaignId}/combat-state`, combatState);
+  }
+
 }
 
 // Interfaces for player summary cards
@@ -375,6 +380,12 @@ export interface CampaignDetailDto {
   maxPlayers: number;
   joinPrice: number;
   visibility: string;
+  owner: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  combatState?: any;
 }
 
 // Interface for session summary (used in Campaign Detail Page)

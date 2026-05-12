@@ -2,6 +2,8 @@ package com.masterforge.masterforge_backend.model.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import jakarta.persistence.*
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import java.math.BigDecimal
 import java.util.UUID
 
@@ -36,5 +38,9 @@ data class Campaign(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "visibility", nullable = false)
-    val visibility: CampaignVisibility
+    val visibility: CampaignVisibility,
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "combat_state", columnDefinition = "jsonb")
+    val combatState: Map<String, Any>? = null
 )

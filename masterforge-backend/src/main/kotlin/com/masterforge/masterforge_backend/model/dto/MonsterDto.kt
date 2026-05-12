@@ -6,6 +6,7 @@ data class MonsterDto(
     val name: String,
     val type: String,
     val size: String,
+    val alignment: String,
     val armorClass: Int,
     val hitPoints: Int,
     val speed: String,

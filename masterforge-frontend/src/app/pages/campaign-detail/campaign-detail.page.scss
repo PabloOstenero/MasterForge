@@ -314,6 +314,38 @@
   }
 }
 
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.tracker-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba($accent-crimson, 0.15);
+  border: 1px solid rgba($accent-crimson, 0.4);
+  border-radius: 6px;
+  color: #ff6b6b;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  ion-icon {
+    font-size: 1.1rem;
+  }
+
+  &:hover {
+    background: rgba($accent-crimson, 0.25);
+    border-color: $accent-crimson;
+    box-shadow: 0 0 10px rgba($accent-crimson, 0.2);
+  }
+}
+
 // ── Session creation form ─────────────────────────────────────────────────────
 .session-form {
   background: $bg-surface;

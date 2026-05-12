@@ -198,6 +198,7 @@ export interface AttackEntry {
   damageDice: string;
   damageType: string;
   reach: string;
+  description?: string;
 }
 
 export interface MonsterSkillEntry {
@@ -225,6 +226,7 @@ export interface CombatMechanics {
   senses: SenseObject;
   attacks: AttackEntry[];
   abilities: FeatureEntry[];
+  languages?: string[];
   speeds?: SpeedObject;
 }
 

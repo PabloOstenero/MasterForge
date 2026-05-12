@@ -59,10 +59,16 @@
             Sesiones
           </h2>
           @if (!isPlayer) {
-            <button class="add-btn" (click)="openSessionForm()" data-testid="btn-nueva-sesion" aria-label="Nueva sesión">
-              <ion-icon name="add-outline"></ion-icon>
-              Nueva Sesión
-            </button>
+            <div class="header-actions">
+              <button class="tracker-btn" [routerLink]="['/campaigns', campaign?.id, 'combat-tracker']">
+                <ion-icon name="skull-outline"></ion-icon>
+                Tracker de Combate
+              </button>
+              <button class="add-btn" (click)="openSessionForm()" data-testid="btn-nueva-sesion" aria-label="Nueva sesión">
+                <ion-icon name="add-outline"></ion-icon>
+                Nueva Sesión
+              </button>
+            </div>
           }
         </div>
 
