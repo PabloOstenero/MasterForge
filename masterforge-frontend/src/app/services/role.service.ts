@@ -24,6 +24,7 @@ export class RoleService {
     { title: 'Inicio', icon: 'home-outline', route: '/home' },
     { title: 'Jugadores', icon: 'people-outline', route: '/players' },
     { title: 'Campañas', icon: 'map-outline', route: '/campaigns' },
+    { title: 'Bestiario', icon: 'skull-outline', route: '/bestiary' },
     { title: 'Homebrew', icon: 'color-wand-outline', sublabel: 'Clases, Subclases, Razas', route: '/homebrew' },
     { title: 'Config', icon: 'settings-outline', route: '/config' },
   ];

@@ -19,6 +19,7 @@ export const routes: Routes = [
       { path: 'home', loadComponent: () => import('./home/home.page').then(m => m.HomePage) },
       { path: 'players', loadComponent: () => import('./pages/players/players.page').then(m => m.PlayersPage) },
       { path: 'campaigns', loadComponent: () => import('./pages/campaigns/campaigns.page').then(m => m.CampaignsPage) },
+      { path: 'bestiary', loadComponent: () => import('./pages/bestiary/bestiary.page').then(m => m.BestiaryPage) },
       { path: 'campaigns/:id', loadComponent: () => import('./pages/campaign-detail/campaign-detail.page').then(m => m.CampaignDetailPage) },
       { path: 'campaigns/:id/combat-tracker', loadComponent: () => import('./pages/combat-tracker/combat-tracker.page').then(m => m.CombatTrackerPage) },
       { path: 'config', loadComponent: () => import('./pages/config/config.page').then(m => m.ConfigPage) },

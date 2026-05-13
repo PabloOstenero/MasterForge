@@ -1,6 +1,277 @@
-<ion-content class="ion-padding" style="--background: #121212;">
-  <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #F0E6D3;">
-    <h1 style="color: #C9A84C; font-weight: 700; margin-bottom: 8px;">Bestiario</h1>
-    <p style="color: #8C8C8C;">Próximamente...</p>
+<ion-header class="ion-no-border">
+  <ion-toolbar color="dark">
+    <ion-title>Bestiario</ion-title>
+    <ion-buttons slot="end">
+      <ion-badge color="primary" class="ion-margin-end">
+        {{ filteredMonsters.length }} Monstruos
+      </ion-badge>
+    </ion-buttons>
+  </ion-toolbar>
+  
+  <ion-toolbar color="dark">
+    <div class="search-section">
+      <ion-searchbar 
+        placeholder="Buscar por nombre, tipo o CR..." 
+        (ionInput)="filterMonsters($event)" 
+        debounce="300"
+        class="custom-search">
+      </ion-searchbar>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content color="dark">
+  <div class="bestiary-container ion-padding">
+    
+    <!-- Loading State -->
+    <div *ngIf="loading" class="ion-text-center ion-padding-top">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p>Consultando la biblioteca de criaturas...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && filteredMonsters.length === 0" class="empty-state">
+      <ion-icon name="help-circle"></ion-icon>
+      <h2>No se encontraron criaturas</h2>
+      <p>Intenta con otros términos de búsqueda.</p>
+    </div>
+
+    <!-- Monster Grid -->
+    <div class="monster-grid" *ngIf="!loading && filteredMonsters.length > 0">
+      <div class="monster-card" *ngFor="let m of filteredMonsters">
+        <div class="card-clickable-area" (click)="openDetails(m)">
+          <div class="card-header">
+            <h2>{{ m.name }}</h2>
+            <div class="cr-badge">CR {{ m.challengeRating }}</div>
+          </div>
+
+          <div class="card-meta">
+            <span class="type-label">{{ m.size }} {{ m.type }}</span>
+            
+            <p class="card-description" *ngIf="m.combatMechanics?.description">
+              {{ m.combatMechanics.description }}
+            </p>
+            
+            <div class="quick-stats">
+              <div class="stat-box">
+                <span class="label">Puntos de Vida</span>
+                <span class="value"><ion-icon name="heart" class="hp"></ion-icon> {{ m.hitPoints }}</span>
+              </div>
+              <div class="stat-box">
+                <span class="label">Clase de Armadura</span>
+                <span class="value"><ion-icon name="shield" class="ac"></ion-icon> {{ m.armorClass }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <ion-button fill="outline" color="light" (click)="openDetails(m)">
+            <ion-icon name="eye" slot="start"></ion-icon>
+            Ficha
+          </ion-button>
+          <ion-button fill="solid" color="primary" (click)="openCampaignSelection(m)">
+            <ion-icon name="add-circle" slot="start"></ion-icon>
+            Añadir
+          </ion-button>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <!-- Monster Details Modal -->
+  <ion-modal [isOpen]="isDetailsModalOpen" (didDismiss)="isDetailsModalOpen = false" class="details-modal">
+    <ng-template>
+      <ion-header class="ion-no-border">
+        <ion-toolbar class="detail-header-toolbar">
+          <ion-title>{{ selectedMonster?.name }}</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="isDetailsModalOpen = false">
+              <ion-icon name="close"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      
+      <ion-content class="detail-content ion-padding">
+        <div class="monster-summary">
+          <p class="type-subtitle">{{ selectedMonster?.size }} {{ selectedMonster?.type }}, {{ selectedMonster?.alignment }}</p>
+          
+          <div class="monster-description" *ngIf="selectedMonster?.combatMechanics?.description">
+            {{ selectedMonster.combatMechanics.description }}
+          </div>
+
+          <div class="quick-combat-stats">
+            <div class="combat-stat-box">
+              <span class="label">CA</span>
+              <span class="value">{{ selectedMonster?.armorClass }}</span>
+            </div>
+            <div class="combat-stat-box">
+              <span class="label">PV</span>
+              <span class="value">{{ selectedMonster?.hitPoints }}</span>
+            </div>
+            <div class="combat-stat-box">
+              <span class="label">Vel</span>
+              <span class="value">{{ selectedMonster?.speed }}</span>
+            </div>
+            <div class="combat-stat-box">
+              <span class="label">CR</span>
+              <span class="value">{{ selectedMonster?.challengeRating }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="abilities-grid-premium">
+          <div class="ability-card">
+            <label>FUER</label>
+            <div class="val">{{ selectedMonster?.str }}</div>
+            <div class="mod">({{ getModifier(selectedMonster?.str) }})</div>
+            <div class="save">Sal: {{ getSavingThrow('str', selectedMonster?.str) }}</div>
+          </div>
+          <div class="ability-card">
+            <label>DEST</label>
+            <div class="val">{{ selectedMonster?.dex }}</div>
+            <div class="mod">({{ getModifier(selectedMonster?.dex) }})</div>
+            <div class="save">Sal: {{ getSavingThrow('dex', selectedMonster?.dex) }}</div>
+          </div>
+          <div class="ability-card">
+            <label>CONS</label>
+            <div class="val">{{ selectedMonster?.con }}</div>
+            <div class="mod">({{ getModifier(selectedMonster?.con) }})</div>
+            <div class="save">Sal: {{ getSavingThrow('con', selectedMonster?.con) }}</div>
+          </div>
+          <div class="ability-card">
+            <label>INTE</label>
+            <div class="val">{{ selectedMonster?.intStat }}</div>
+            <div class="mod">({{ getModifier(selectedMonster?.intStat) }})</div>
+            <div class="save">Sal: {{ getSavingThrow('int', selectedMonster?.intStat) }}</div>
+          </div>
+          <div class="ability-card">
+            <label>SABI</label>
+            <div class="val">{{ selectedMonster?.wis }}</div>
+            <div class="mod">({{ getModifier(selectedMonster?.wis) }})</div>
+            <div class="save">Sal: {{ getSavingThrow('wis', selectedMonster?.wis) }}</div>
+          </div>
+          <div class="ability-card">
+            <label>CARA</label>
+            <div class="val">{{ selectedMonster?.cha }}</div>
+            <div class="mod">({{ getModifier(selectedMonster?.cha) }})</div>
+            <div class="save">Sal: {{ getSavingThrow('cha', selectedMonster?.cha) }}</div>
+          </div>
+        </div>
+
+        <div class="traits-summary-box">
+          <p *ngIf="getListMechanic('vulnerabilities') !== '—'">
+            <span class="label">Vulnerabilidades:</span> {{ getListMechanic('vulnerabilities') }}
+          </p>
+          <p *ngIf="getListMechanic('resistances') !== '—'">
+            <span class="label">Resistencias:</span> {{ getListMechanic('resistances') }}
+          </p>
+          <p *ngIf="getListMechanic('immunities') !== '—'">
+            <span class="label">Inmunidades (Daño):</span> {{ getListMechanic('immunities') }}
+          </p>
+          <p *ngIf="getListMechanic('conditionImmunities') !== '—'">
+            <span class="label">Inmunidades (Estado):</span> {{ getListMechanic('conditionImmunities') }}
+          </p>
+          <p><span class="label">Senses:</span> {{ formatSenses() }}</p>
+          <p><span class="label">Habilidades:</span> {{ getSkills() }}</p>
+          <p><span class="label">Idiomas:</span> {{ getListMechanic('languages') }}</p>
+        </div>
+
+        <div class="mechanics-group" *ngIf="getMechanics('traits').length > 0">
+          <h3 class="group-title">Rasgos</h3>
+          <div class="mechanic-block" *ngFor="let t of getMechanics('traits')">
+            <div class="mechanic-header">
+              <span class="mechanic-name">{{ t.name }}</span>
+            </div>
+            <div class="mechanic-desc">{{ t.desc }}</div>
+          </div>
+        </div>
+
+        <div class="mechanics-group" *ngIf="getMechanics('actions').length > 0">
+          <h3 class="group-title">Acciones</h3>
+          <div class="mechanic-block" *ngFor="let a of getMechanics('actions')">
+            <div class="mechanic-header">
+              <span class="mechanic-name">{{ a.name }}</span>
+              <div class="attack-badges" *ngIf="a.attackData">
+                <span class="atk-badge bonus" *ngIf="a.attackData.bonus">{{ a.attackData.bonus }}</span>
+                <span class="atk-badge damage" *ngIf="a.attackData.damage">{{ a.attackData.damage }}</span>
+                <span class="atk-badge type" *ngIf="a.attackData.type">{{ a.attackData.type }}</span>
+                <span class="atk-badge reach" *ngIf="a.attackData.reach">{{ a.attackData.reach }}</span>
+              </div>
+            </div>
+            <div class="mechanic-desc" *ngIf="a.desc">{{ a.desc }}</div>
+          </div>
+        </div>
+
+        <div class="mechanics-group" *ngIf="getMechanics('reactions').length > 0">
+          <h3 class="group-title">Reacciones</h3>
+          <div class="mechanic-block" *ngFor="let r of getMechanics('reactions')">
+            <div class="mechanic-header">
+              <span class="mechanic-name">{{ r.name }}</span>
+            </div>
+            <div class="mechanic-desc">{{ r.desc }}</div>
+          </div>
+        </div>
+
+        <div class="mechanics-group" *ngIf="getMechanics('legendaryActions').length > 0">
+          <h3 class="group-title">Acciones Legendarias</h3>
+          <div class="mechanic-block" *ngFor="let l of getMechanics('legendaryActions')">
+            <div class="mechanic-header">
+              <span class="mechanic-name">{{ l.name }}</span>
+              <div class="attack-badges" *ngIf="l.attackData">
+                <span class="atk-badge bonus" *ngIf="l.attackData.bonus">{{ l.attackData.bonus }}</span>
+                <span class="atk-badge damage" *ngIf="l.attackData.damage">{{ l.attackData.damage }}</span>
+                <span class="atk-badge type" *ngIf="l.attackData.type">{{ l.attackData.type }}</span>
+              </div>
+            </div>
+            <div class="mechanic-desc">{{ l.desc }}</div>
+          </div>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <!-- Campaign Selection Modal -->
+  <ion-modal [isOpen]="isCampaignModalOpen" (didDismiss)="isCampaignModalOpen = false" class="campaign-modal">
+    <ng-template>
+      <div class="modal-header">
+        <h2>Añadir a Campaña</h2>
+        <p>¿A qué campaña quieres enviar a <strong>{{ selectedMonsterToStore?.name }}</strong>?</p>
+      </div>
+
+      <ion-content>
+        <div class="campaign-list">
+          <div *ngIf="loadingCampaigns" class="ion-text-center ion-padding">
+            <ion-spinner name="crescent"></ion-spinner>
+          </div>
+
+          <div *ngIf="!loadingCampaigns && myCampaigns.length === 0" class="ion-text-center ion-padding empty-campaigns">
+            <ion-icon name="map" style="font-size: 48px; opacity: 0.5; margin-bottom: 10px;"></ion-icon>
+            <p>No tienes campañas como Dungeon Master.</p>
+            <ion-button fill="clear" color="primary" routerLink="/campaigns">
+              Crear una campaña
+            </ion-button>
+          </div>
+
+          <div class="campaign-item" *ngFor="let campaign of myCampaigns" (click)="addToCampaign(campaign)">
+            <div class="info">
+              <h3>{{ campaign.name }}</h3>
+              <p>{{ campaign.maxPlayers }} Jugadores máx.</p>
+            </div>
+            <ion-icon name="arrow-forward"></ion-icon>
+          </div>
+        </div>
+      </ion-content>
+      
+      <ion-footer class="ion-no-border">
+        <ion-toolbar color="dark">
+          <ion-button expand="block" fill="clear" (click)="isCampaignModalOpen = false" color="medium">
+            Cancelar
+          </ion-button>
+        </ion-toolbar>
+      </ion-footer>
+    </ng-template>
+  </ion-modal>
+
 </ion-content>
