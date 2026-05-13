@@ -11,6 +11,7 @@ import {
 import { ApiService } from '../../services/api';
 import { addIcons } from 'ionicons';
 import { statsChart, sparkles, shield, briefcase, trash, add, addCircleOutline, checkmarkCircle, trashOutline, syncOutline, book, bookOutline, settingsOutline, trendingUpOutline, removeCircleOutline, refreshOutline, sparklesOutline, flaskOutline, hammerOutline, flashOutline } from 'ionicons/icons';
+import { FeatureChoicePickerComponent } from '../../components/feature-choice-picker/feature-choice-picker.component';
 import { getProficiencyBonus, getModifier, calculatePassive, calculateMulticlassHp } from '../../utils/dnd-utils';
 
 export const DND_SKILLS = [
@@ -44,7 +45,7 @@ export const DND_SKILLS = [
     IonSegment, IonSegmentButton, IonLabel, IonGrid, IonRow, IonCol,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonBadge, IonList,
     IonIcon, IonButton, IonFooter, IonBackButton, IonButtons, IonSearchbar, IonModal,
-    IonCheckbox
+    IonCheckbox, FeatureChoicePickerComponent
   ],
   encapsulation: ViewEncapsulation.None // Re-enabled to allow styling the Alert pop-ups
 })
@@ -130,6 +131,10 @@ export class CharacterSheetPage implements OnInit {
   spellsToChoose: number = 0;
   cantripsToChoose: number = 0;
   resourcePools: any[] = [];
+  damageResistances: string[] = [];
+  damageImmunities: string[] = [];
+  conditionImmunities: string[] = [];
+  senses: string[] = [];
   private characterId: string | null = null;
 
   // Detail Modal State
@@ -433,6 +438,7 @@ export class CharacterSheetPage implements OnInit {
         };
 
         this.calculateResourcePools();
+        this.calculateAutomatedEffects();
       },
       error: (err) => {
         console.error("Critical error loading character:", err);
@@ -1161,6 +1167,11 @@ export class CharacterSheetPage implements OnInit {
     };
   }
 
+  onFeatureChoiceChange(feature: any, selection: any) {
+    const key = feature.id ? feature.id.toString() : feature.name;
+    this.levelUpData.choicesJson[key] = selection;
+  }
+
   isFeatureOptionSelected(feature: any, optionName: string): boolean {
     const choices = this.levelUpData.choicesJson.featureOptions || {};
     return (choices[feature.name] || []).includes(optionName);
@@ -1211,9 +1222,18 @@ export class CharacterSheetPage implements OnInit {
 
     // Check if all features with options have choices made
     for (const f of this.levelUpNewFeatures) {
-      if (f.filteredOptions?.length > 0) {
-        const selected = (this.levelUpData.choicesJson.featureOptions || {})[f.name] || [];
-        if (selected.length < f.calculatedMaxChoices) return false;
+      if (f.options) {
+        const key = f.id ? f.id.toString() : f.name;
+        const selected = this.levelUpData.choicesJson[key];
+        
+        // Basic validation: if there are options, there must be a choice
+        if (!selected) return false;
+        
+        // If it's a list (SELECT_MANY), check the count
+        if (Array.isArray(selected)) {
+          const max = this.calculateMaxChoices(f, this.pj.level + 1);
+          if (selected.length < max) return false;
+        }
       }
     }
     return true;
@@ -1931,6 +1951,39 @@ export class CharacterSheetPage implements OnInit {
     this.resourcePools = pools;
   }
 
+  calculateAutomatedEffects() {
+    const res: Set<string> = new Set();
+    const imm: Set<string> = new Set();
+    const condImm: Set<string> = new Set();
+    const sen: Set<string> = new Set();
+
+    const allFeatures = this.getAllCharacterFeatures(this.rawCharacter);
+
+    allFeatures.forEach(f => {
+      const itemsToScan = [f, ...(f.selectedOptions || [])];
+      itemsToScan.forEach(obj => {
+        const effects = obj.properties?.effects || obj.options?.effects || [];
+        effects.forEach((eff: any) => {
+          const type = eff.type;
+          const target = eff.target;
+
+          if (type === 'DAMAGE_RESISTANCE') res.add(target);
+          if (type === 'DAMAGE_IMMUNITY') imm.add(target);
+          if (type === 'CONDITION_IMMUNITY') condImm.add(target);
+          if (type === 'SENSE') {
+             const value = eff.value ? ` (${eff.value} ft)` : '';
+             sen.add(`${target}${value}`);
+          }
+        });
+      });
+    });
+
+    this.damageResistances = Array.from(res);
+    this.damageImmunities = Array.from(imm);
+    this.conditionImmunities = Array.from(condImm);
+    this.senses = Array.from(sen);
+  }
+
   private detectResourceInFeature(feat: any): any | null {
     const props = feat.properties || feat.options || {};
     if (props.resourcePool) {
@@ -1980,6 +2033,11 @@ export class CharacterSheetPage implements OnInit {
       }
       // Default to character total level
       return this.pj.level;
+    }
+
+    // Handle "PB" keyword (Proficiency Bonus scaling)
+    if (max === 'PB' || max === 'pb') {
+      return this.pj.proficiencyBonus || 2;
     }
 
     // Handle legacy/other resource types
@@ -2174,6 +2232,18 @@ export class CharacterSheetPage implements OnInit {
       const selectedOptions = (data.choicesJson?.featureOptions?.[f.name] || []);
       return { ...f, selectedOptions };
     });
+  }
+
+  getActionTypeLabel(type: string): string {
+    const map: Record<string, string> = {
+      'ACTION': 'Acción',
+      'BONUS_ACTION': 'Acción Adicional',
+      'REACTION': 'Reacción',
+      'NO_ACTION': 'Sin Acción',
+      'SPECIAL': 'Especial',
+      'PASSIVE': 'Pasivo'
+    };
+    return map[type] || '';
   }
 }
 

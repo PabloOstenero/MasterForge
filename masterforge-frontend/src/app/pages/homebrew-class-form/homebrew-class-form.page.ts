@@ -2,9 +2,17 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, FormArray, FormControl, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { IonButton, IonSpinner, IonItem, IonLabel, IonInput, IonTextarea, IonIcon } from '@ionic/angular/standalone';
+import { IonButton, IonSpinner, IonItem, IonLabel, IonInput, IonTextarea, IonIcon, IonCheckbox, IonSelect, IonSelectOption } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { flash, shield, hammer, moon } from 'ionicons/icons';
+import {
+  flash, shield, hammer, moon, add, trash, hammerOutline,
+  sparkles, list, trendingUp, shieldOutline, listOutline,
+  sparklesOutline, trendingUpOutline,
+  addOutline, trashOutline, flashOutline,
+  flashOffOutline
+} from 'ionicons/icons';
+import { trigger, transition, style, animate } from '@angular/animations';
+
 import { HomebrewService, CreateClassDto } from '../../services/homebrew.service';
 import {
   SkillProficiencies,
@@ -13,14 +21,17 @@ import {
   SpellSlotTable,
   ClassFeatures,
   FeatureEntry,
+  FeatureOptionPool,
   MulticlassingPrerequisite,
   MulticlassingPrerequisites,
   MulticlassingProficiencies,
   SKILL_DATA
 } from '../../models/homebrew.models';
-import { StructuredEquipment, isStructuredEquipment, serializeEquipment } from '../../models/equipment.models';
+import { StructuredEquipment, serializeEquipment, isStructuredEquipment } from '../../models/equipment.models';
 import { StartingEquipmentPickerComponent } from '../../components/starting-equipment-picker/starting-equipment-picker.component';
 import { FeatureMechanicsComponent } from '../../components/feature-mechanics/feature-mechanics.component';
+import { FeatureChoiceEditorComponent } from '../../components/feature-choice-editor/feature-choice-editor.component';
+import { FeatureEffectEditorComponent } from '../../components/feature-effect-editor/feature-effect-editor.component';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -55,106 +66,106 @@ export const ABILITY_ABBREVIATIONS: Record<string, string> = {
 
 // prettier-ignore
 const FULL_CASTER_SLOTS: number[][] = [
-  [2,0,0,0,0,0,0,0,0],
-  [3,0,0,0,0,0,0,0,0],
-  [4,2,0,0,0,0,0,0,0],
-  [4,3,0,0,0,0,0,0,0],
-  [4,3,2,0,0,0,0,0,0],
-  [4,3,3,0,0,0,0,0,0],
-  [4,3,3,1,0,0,0,0,0],
-  [4,3,3,2,0,0,0,0,0],
-  [4,3,3,3,1,0,0,0,0],
-  [4,3,3,3,2,0,0,0,0],
-  [4,3,3,3,2,1,0,0,0],
-  [4,3,3,3,2,1,0,0,0],
-  [4,3,3,3,2,1,1,0,0],
-  [4,3,3,3,2,1,1,0,0],
-  [4,3,3,3,2,1,1,1,0],
-  [4,3,3,3,2,1,1,1,0],
-  [4,3,3,3,2,1,1,1,1],
-  [4,3,3,3,3,1,1,1,1],
-  [4,3,3,3,3,2,1,1,1],
-  [4,3,3,3,3,2,2,1,1],
+  [2, 0, 0, 0, 0, 0, 0, 0, 0],
+  [3, 0, 0, 0, 0, 0, 0, 0, 0],
+  [4, 2, 0, 0, 0, 0, 0, 0, 0],
+  [4, 3, 0, 0, 0, 0, 0, 0, 0],
+  [4, 3, 2, 0, 0, 0, 0, 0, 0],
+  [4, 3, 3, 0, 0, 0, 0, 0, 0],
+  [4, 3, 3, 1, 0, 0, 0, 0, 0],
+  [4, 3, 3, 2, 0, 0, 0, 0, 0],
+  [4, 3, 3, 3, 1, 0, 0, 0, 0],
+  [4, 3, 3, 3, 2, 0, 0, 0, 0],
+  [4, 3, 3, 3, 2, 1, 0, 0, 0],
+  [4, 3, 3, 3, 2, 1, 0, 0, 0],
+  [4, 3, 3, 3, 2, 1, 1, 0, 0],
+  [4, 3, 3, 3, 2, 1, 1, 0, 0],
+  [4, 3, 3, 3, 2, 1, 1, 1, 0],
+  [4, 3, 3, 3, 2, 1, 1, 1, 0],
+  [4, 3, 3, 3, 2, 1, 1, 1, 1],
+  [4, 3, 3, 3, 3, 1, 1, 1, 1],
+  [4, 3, 3, 3, 3, 2, 1, 1, 1],
+  [4, 3, 3, 3, 3, 2, 2, 1, 1],
 ];
 
 // prettier-ignore
 const HALF_CASTER_SLOTS: number[][] = [
-  [0,0,0,0,0,0,0,0,0],
-  [2,0,0,0,0,0,0,0,0],
-  [3,0,0,0,0,0,0,0,0],
-  [3,0,0,0,0,0,0,0,0],
-  [4,2,0,0,0,0,0,0,0],
-  [4,2,0,0,0,0,0,0,0],
-  [4,3,0,0,0,0,0,0,0],
-  [4,3,0,0,0,0,0,0,0],
-  [4,3,2,0,0,0,0,0,0],
-  [4,3,2,0,0,0,0,0,0],
-  [4,3,3,0,0,0,0,0,0],
-  [4,3,3,0,0,0,0,0,0],
-  [4,3,3,1,0,0,0,0,0],
-  [4,3,3,1,0,0,0,0,0],
-  [4,3,3,2,0,0,0,0,0],
-  [4,3,3,2,0,0,0,0,0],
-  [4,3,3,3,1,0,0,0,0],
-  [4,3,3,3,1,0,0,0,0],
-  [4,3,3,3,2,0,0,0,0],
-  [4,3,3,3,2,0,0,0,0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [2, 0, 0, 0, 0, 0, 0, 0, 0],
+  [3, 0, 0, 0, 0, 0, 0, 0, 0],
+  [3, 0, 0, 0, 0, 0, 0, 0, 0],
+  [4, 2, 0, 0, 0, 0, 0, 0, 0],
+  [4, 2, 0, 0, 0, 0, 0, 0, 0],
+  [4, 3, 0, 0, 0, 0, 0, 0, 0],
+  [4, 3, 0, 0, 0, 0, 0, 0, 0],
+  [4, 3, 2, 0, 0, 0, 0, 0, 0],
+  [4, 3, 2, 0, 0, 0, 0, 0, 0],
+  [4, 3, 3, 0, 0, 0, 0, 0, 0],
+  [4, 3, 3, 0, 0, 0, 0, 0, 0],
+  [4, 3, 3, 1, 0, 0, 0, 0, 0],
+  [4, 3, 3, 1, 0, 0, 0, 0, 0],
+  [4, 3, 3, 2, 0, 0, 0, 0, 0],
+  [4, 3, 3, 2, 0, 0, 0, 0, 0],
+  [4, 3, 3, 3, 1, 0, 0, 0, 0],
+  [4, 3, 3, 3, 1, 0, 0, 0, 0],
+  [4, 3, 3, 3, 2, 0, 0, 0, 0],
+  [4, 3, 3, 3, 2, 0, 0, 0, 0],
 ];
 
 // prettier-ignore
 const THIRD_CASTER_SLOTS: number[][] = [
-  [0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0],
-  [2,0,0,0,0,0,0,0,0],
-  [3,0,0,0,0,0,0,0,0],
-  [3,0,0,0,0,0,0,0,0],
-  [3,0,0,0,0,0,0,0,0],
-  [4,2,0,0,0,0,0,0,0],
-  [4,2,0,0,0,0,0,0,0],
-  [4,2,0,0,0,0,0,0,0],
-  [4,3,0,0,0,0,0,0,0],
-  [4,3,0,0,0,0,0,0,0],
-  [4,3,0,0,0,0,0,0,0],
-  [4,3,2,0,0,0,0,0,0],
-  [4,3,2,0,0,0,0,0,0],
-  [4,3,2,0,0,0,0,0,0],
-  [4,3,3,0,0,0,0,0,0],
-  [4,3,3,0,0,0,0,0,0],
-  [4,3,3,0,0,0,0,0,0],
-  [4,3,3,1,0,0,0,0,0],
-  [4,3,3,1,0,0,0,0,0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [2, 0, 0, 0, 0, 0, 0, 0, 0],
+  [3, 0, 0, 0, 0, 0, 0, 0, 0],
+  [3, 0, 0, 0, 0, 0, 0, 0, 0],
+  [3, 0, 0, 0, 0, 0, 0, 0, 0],
+  [4, 2, 0, 0, 0, 0, 0, 0, 0],
+  [4, 2, 0, 0, 0, 0, 0, 0, 0],
+  [4, 2, 0, 0, 0, 0, 0, 0, 0],
+  [4, 3, 0, 0, 0, 0, 0, 0, 0],
+  [4, 3, 0, 0, 0, 0, 0, 0, 0],
+  [4, 3, 0, 0, 0, 0, 0, 0, 0],
+  [4, 3, 2, 0, 0, 0, 0, 0, 0],
+  [4, 3, 2, 0, 0, 0, 0, 0, 0],
+  [4, 3, 2, 0, 0, 0, 0, 0, 0],
+  [4, 3, 3, 0, 0, 0, 0, 0, 0],
+  [4, 3, 3, 0, 0, 0, 0, 0, 0],
+  [4, 3, 3, 0, 0, 0, 0, 0, 0],
+  [4, 3, 3, 1, 0, 0, 0, 0, 0],
+  [4, 3, 3, 1, 0, 0, 0, 0, 0],
 ];
 
 // Pact Magic (Warlock): all slots are the same level, count increases
 // prettier-ignore
 const PACT_MAGIC_SLOTS: number[][] = [
-  [1,0,0,0,0,0,0,0,0],
-  [2,0,0,0,0,0,0,0,0],
-  [0,2,0,0,0,0,0,0,0],
-  [0,2,0,0,0,0,0,0,0],
-  [0,0,2,0,0,0,0,0,0],
-  [0,0,2,0,0,0,0,0,0],
-  [0,0,0,2,0,0,0,0,0],
-  [0,0,0,2,0,0,0,0,0],
-  [0,0,0,0,2,0,0,0,0],
-  [0,0,0,0,2,0,0,0,0],
-  [0,0,0,0,3,0,0,0,0],
-  [0,0,0,0,3,0,0,0,0],
-  [0,0,0,0,3,0,0,0,0],
-  [0,0,0,0,3,0,0,0,0],
-  [0,0,0,0,3,0,0,0,0],
-  [0,0,0,0,3,0,0,0,0],
-  [0,0,0,0,4,0,0,0,0],
-  [0,0,0,0,4,0,0,0,0],
-  [0,0,0,0,4,0,0,0,0],
-  [0,0,0,0,4,0,0,0,0],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0],
+  [2, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 2, 0, 0, 0, 0, 0, 0, 0],
+  [0, 2, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 2, 0, 0, 0, 0, 0, 0],
+  [0, 0, 2, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 2, 0, 0, 0, 0, 0],
+  [0, 0, 0, 2, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 2, 0, 0, 0, 0],
+  [0, 0, 0, 0, 2, 0, 0, 0, 0],
+  [0, 0, 0, 0, 3, 0, 0, 0, 0],
+  [0, 0, 0, 0, 3, 0, 0, 0, 0],
+  [0, 0, 0, 0, 3, 0, 0, 0, 0],
+  [0, 0, 0, 0, 3, 0, 0, 0, 0],
+  [0, 0, 0, 0, 3, 0, 0, 0, 0],
+  [0, 0, 0, 0, 3, 0, 0, 0, 0],
+  [0, 0, 0, 0, 4, 0, 0, 0, 0],
+  [0, 0, 0, 0, 4, 0, 0, 0, 0],
+  [0, 0, 0, 0, 4, 0, 0, 0, 0],
+  [0, 0, 0, 0, 4, 0, 0, 0, 0],
 ];
 
 export const SPELL_SLOT_PRESETS: Record<string, number[][]> = {
-  'Full Caster':   FULL_CASTER_SLOTS,
-  'Half Caster':   HALF_CASTER_SLOTS,
-  'Third Caster':  THIRD_CASTER_SLOTS,
-  'Pact Magic':    PACT_MAGIC_SLOTS,
+  'Full Caster': FULL_CASTER_SLOTS,
+  'Half Caster': HALF_CASTER_SLOTS,
+  'Third Caster': THIRD_CASTER_SLOTS,
+  'Pact Magic': PACT_MAGIC_SLOTS,
 };
 
 // prettier-ignore
@@ -190,8 +201,6 @@ export const CANTRIPS_KNOWN_PRESETS: Record<string, number[]> = {
   'Third Caster': THIRD_CASTER_CANTRIPS,
   'Pact Magic': PACT_MAGIC_CANTRIPS,
 };
-
-
 
 // ---------------------------------------------------------------------------
 // Custom validator
@@ -278,10 +287,6 @@ export function serializeSpellSlotTable(table: SpellSlotTable): number[][] {
   return table.slots;
 }
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
-
 @Component({
   selector: 'app-homebrew-class-form',
   templateUrl: './homebrew-class-form.page.html',
@@ -291,11 +296,20 @@ export function serializeSpellSlotTable(table: SpellSlotTable): number[][] {
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
-    IonButton, IonSpinner,
-    IonItem, IonLabel, IonInput, IonTextarea, IonIcon,
+    IonButton, IonSpinner, IonItem, IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption, IonIcon, IonCheckbox,
     StartingEquipmentPickerComponent,
-    FeatureMechanicsComponent,
+    FeatureChoiceEditorComponent,
+    FeatureEffectEditorComponent,
+    FeatureMechanicsComponent
   ],
+  animations: [
+    trigger('slideIn', [
+      transition(':enter', [
+        style({ transform: 'translateY(-10px)', opacity: 0 }),
+        animate('200ms ease-out', style({ transform: 'translateY(0)', opacity: 1 }))
+      ])
+    ])
+  ]
 })
 export class HomebrewClassFormPage implements OnInit {
 
@@ -309,6 +323,7 @@ export class HomebrewClassFormPage implements OnInit {
   editMode = false;
   editId: string | null = null;
   originalFeatures: { id: number; name: string; description: string; levelRequired: number; options?: any; properties?: any }[] = [];
+  featureActiveSection: Record<number, string> = {};
 
   // ---------------------------------------------------------------------------
   // Starting equipment picker state
@@ -431,15 +446,19 @@ export class HomebrewClassFormPage implements OnInit {
   readonly levelRange = Array.from({ length: 20 }, (_, i) => i + 1);
   readonly spellLevelRange = Array.from({ length: 9 }, (_, i) => i + 1);
 
+
   constructor(
     private fb: FormBuilder,
     private homebrewService: HomebrewService,
     private router: Router,
     private route: ActivatedRoute,
   ) {
-    addIcons({ flash, shield, hammer, moon });
+    addIcons({ 
+      flash, shield, hammer, moon, add, trash, hammerOutline, sparkles, list, trendingUp, 
+      shieldOutline, sparklesOutline, trendingUpOutline, addOutline, listOutline, 
+      trashOutline, flashOutline 
+    });
   }
-
   // ---------------------------------------------------------------------------
   // Lifecycle
   // ---------------------------------------------------------------------------
@@ -459,49 +478,49 @@ export class HomebrewClassFormPage implements OnInit {
 
     this.form = this.fb.group({
       // Identity
-      name:        ['', Validators.required],
+      name: ['', Validators.required],
       description: [''],
-      price:       [null, [Validators.required, Validators.min(0)]],
-      hitDie:      ['', Validators.required],
+      price: [null, [Validators.required, Validators.min(0)]],
+      hitDie: ['', Validators.required],
 
       // Saving throws
       savingThrows: savingThrowsGroup,
 
       // Primary ability and subclass level
       primaryAbility: ['', Validators.required],
-      subclassLevel:  [3, [Validators.required, Validators.min(1), Validators.max(20)]],
+      subclassLevel: [3, [Validators.required, Validators.min(1), Validators.max(20)]],
 
       // Skill proficiencies
-      skills:           this.fb.group(skillsGroup),
+      skills: this.fb.group(skillsGroup),
       skillChoiceCount: [null, Validators.min(0)],
 
       // Multiclassing prerequisites
       multiclassingPrerequisites: this.fb.array([]),
-      multiclassingLogic:         ['AND'],
+      multiclassingLogic: ['AND'],
 
       // Multiclassing proficiency grants
-      multiclassingArmorGrants:  this.fb.array(ARMOR_PROFS.map(() => false)),
+      multiclassingArmorGrants: this.fb.array(ARMOR_PROFS.map(() => false)),
       multiclassingWeaponGrants: this.fb.array(WEAPON_PROFS.map(() => false)),
-      multiclassingToolGrants:   this.fb.array([]),
+      multiclassingToolGrants: this.fb.array([]),
 
       // Damage resistances / immunities / condition immunities
-      damageResistances:   this.fb.array(DAMAGE_TYPES.map(() => false)),
-      damageImmunities:    this.fb.array(DAMAGE_TYPES.map(() => false)),
+      damageResistances: this.fb.array(DAMAGE_TYPES.map(() => false)),
+      damageImmunities: this.fb.array(DAMAGE_TYPES.map(() => false)),
       conditionImmunities: this.fb.array(CONDITIONS.map(() => false)),
 
       // Class features
       features: this.fb.array([]),
 
       // Spellcasting
-      spellcastingEnabled:  [false],
-      spellcastingAbility:  [''],
-      spellcastingType:     [''],
-      ritualCasting:        [false],
-      preparationStyle:     ['PREPARED'],
-      knowledgeStyle:       ['ALL_LIST'],
+      spellcastingEnabled: [false],
+      spellcastingAbility: [''],
+      spellcastingType: [''],
+      ritualCasting: [false],
+      preparationStyle: ['PREPARED'],
+      knowledgeStyle: ['ALL_LIST'],
       cantripsKnown: this.fb.array(Array(20).fill(null).map(() => new FormControl(null))),
-      spellsKnown:   this.fb.array(Array(20).fill(null).map(() => new FormControl(null))),
-      spellSlots:    this.fb.array(
+      spellsKnown: this.fb.array(Array(20).fill(null).map(() => new FormControl(null))),
+      spellSlots: this.fb.array(
         Array(20).fill(null).map(() =>
           this.fb.array(Array(9).fill(null).map(() => new FormControl(null)))
         )
@@ -529,10 +548,10 @@ export class HomebrewClassFormPage implements OnInit {
         // Patch basic fields — hitDie comes back as a number (e.g. 8), convert to string ("d8")
         const hitDieStr = cls.hitDie ? `d${cls.hitDie}` : '';
         this.form.patchValue({
-          name:        cls.name ?? '',
+          name: cls.name ?? '',
           description: cls.description ?? '',
-          price:       cls.price ?? null,
-          hitDie:      hitDieStr,
+          price: cls.price ?? null,
+          hitDie: hitDieStr,
         });
 
         // Patch saving throws — also sync the chip state array
@@ -550,28 +569,35 @@ export class HomebrewClassFormPage implements OnInit {
         // Patch primaryAbility and subclassLevel
         this.form.patchValue({
           primaryAbility: cf.primaryAbility ?? '',
-          subclassLevel:  cf.subclassLevel ?? 3,
+          subclassLevel: cf.subclassLevel ?? 3,
         });
 
         // Detect legacy vs structured equipment and pass to picker
-        // startingEquipment may be stored as a JSON string inside classFeatures — parse it first
         const rawEquipment = cf.startingEquipment;
         let parsedEquipment: any = rawEquipment;
-        if (typeof rawEquipment === 'string') {
-          try { parsedEquipment = JSON.parse(rawEquipment); } catch { parsedEquipment = null; }
-        }
-        if (isStructuredEquipment(parsedEquipment)) {
-          this.equipmentInitialValue = parsedEquipment;
-          this.currentEquipment = parsedEquipment; // preserve even if Rasgos tab is never visited
-          this.equipmentLegacyText = null;
-        } else if (typeof rawEquipment === 'string' && rawEquipment.trim() !== '') {
-          this.equipmentLegacyText = rawEquipment;
-          this.equipmentInitialValue = null;
-          this.currentEquipment = null;
-        } else {
-          this.equipmentInitialValue = null;
-          this.equipmentLegacyText = null;
-          this.currentEquipment = null;
+        if (typeof rawEquipment === 'string' && rawEquipment.trim() !== '') {
+          try {
+            parsedEquipment = JSON.parse(rawEquipment);
+            if (isStructuredEquipment(parsedEquipment)) {
+              this.equipmentInitialValue = parsedEquipment;
+              this.currentEquipment = parsedEquipment;
+              this.equipmentLegacyText = null;
+            } else {
+              this.equipmentLegacyText = rawEquipment;
+              this.equipmentInitialValue = null;
+              this.currentEquipment = null;
+            }
+          } catch {
+            this.equipmentLegacyText = rawEquipment;
+            this.equipmentInitialValue = null;
+            this.currentEquipment = null;
+          }
+        } else if (typeof rawEquipment === 'object' && rawEquipment !== null) {
+          if (isStructuredEquipment(rawEquipment)) {
+            this.equipmentInitialValue = rawEquipment;
+            this.currentEquipment = rawEquipment;
+            this.equipmentLegacyText = null;
+          }
         }
 
         // Restore weapon chips and custom weapon profs
@@ -608,9 +634,9 @@ export class HomebrewClassFormPage implements OnInit {
           const arr = this.form.get(controlName) as FormArray;
           labels.forEach((label, i) => arr.at(i).setValue(selected.includes(label)));
         };
-        patchBoolArray('damageResistances',   DAMAGE_TYPES, cf.damageResistances);
-        patchBoolArray('damageImmunities',    DAMAGE_TYPES, cf.damageImmunities);
-        patchBoolArray('conditionImmunities', CONDITIONS,   cf.conditionImmunities);
+        patchBoolArray('damageResistances', DAMAGE_TYPES, cf.damageResistances);
+        patchBoolArray('damageImmunities', DAMAGE_TYPES, cf.damageImmunities);
+        patchBoolArray('conditionImmunities', CONDITIONS, cf.conditionImmunities);
 
         // Restore skill proficiencies
         const sp = cf.skillProficiencies;
@@ -635,7 +661,7 @@ export class HomebrewClassFormPage implements OnInit {
           if (Array.isArray(prereqs.requirements)) {
             prereqs.requirements.forEach((req: any) => {
               this.multiclassingPrerequisites.push(this.fb.group({
-                ability:  [req.ability ?? '', Validators.required],
+                ability: [req.ability ?? '', Validators.required],
                 minScore: [req.minScore ?? null, [Validators.required, Validators.min(1), Validators.max(20)]],
               }));
             });
@@ -666,26 +692,54 @@ export class HomebrewClassFormPage implements OnInit {
         if (Array.isArray(cls.features)) {
           cls.features.forEach((f: any) => {
             const optionsGroup = this.fb.group({
-              choiceCount: [f.options?.choiceCount ?? null],
-              options: this.fb.array((f.options?.options ?? []).map((opt: any) => this.fb.group({
-                id: [opt.id ?? null],
-                name: [opt.name ?? '', Validators.required],
-                description: [opt.description ?? '', Validators.required],
-                levelRequired: [opt.levelRequired ?? f.levelRequired, [Validators.required, Validators.min(1), Validators.max(20)]]
+              type: [f.options?.type ?? 'SELECT_ONE'],
+              count: [f.options?.count ?? 1],
+              choices: this.fb.array((f.options?.choices ?? []).map((c: any) => this.fb.group({
+                id: [c.id],
+                label: [c.label || c.name, Validators.required],
+                description: [c.description, Validators.required],
+                effects: this.fb.array((c.effects ?? []).map((e: any) => this.fb.group(e)))
               }))),
-              progression: this.fb.array((f.options?.progression ?? []).map((p: any) => this.fb.group({
-                level: [p.level, [Validators.required, Validators.min(1), Validators.max(20)]],
-                additionalChoices: [p.additionalChoices, [Validators.required, Validators.min(1)]]
+              progression: this.fb.array(((f.options as any)?.progression ?? []).map((p: any) => this.fb.group({
+                level: [p.level, Validators.required],
+                additionalChoices: [p.additionalChoices, Validators.required]
               })))
             });
             const featureGroup = this.fb.group({
-              id:            [f.id ?? null],
-              name:          [f.name ?? '',        Validators.required],
-              description:   [f.description ?? '', Validators.required],
+              id: [f.id ?? null],
+              name: [f.name ?? '', Validators.required],
+              description: [f.description ?? '', Validators.required],
               levelRequired: [f.levelRequired ?? 1, [Validators.required, Validators.min(1), Validators.max(20)]],
-              hasOptions:    [!!f.options],
-              options:       optionsGroup,
-              properties:    this.fb.group({}) // Will be populated by the component or patch
+              hasOptions: [!!f.options],
+              options: optionsGroup,
+              progression: this.fb.array(((f.progression && f.progression.length > 0) ? f.progression : ((f.options as any)?.progression ?? [])).map((p: any) => this.fb.group({
+                level: [p.level, Validators.required],
+                additionalChoices: [p.additionalChoices ?? 0],
+                description: [p.description || '']
+              }))),
+              properties: this.fb.group({
+                acCalculation: this.fb.group({
+                  base: [10],
+                  stats: [[]],
+                  requiresNoArmor: [false]
+                }),
+                acBonus: [0],
+                acBonusArmorOnly: [false],
+                resourcePool: this.fb.group({
+                  name: [''],
+                  max: [''],
+                  reset: ['LONG_REST']
+                }),
+                innateSpells: this.fb.array([]),
+                effects: this.fb.array((f.properties?.effects ?? []).map((e: any) => this.fb.group({
+                  type: [e.type ?? 'STAT_MODIFIER'],
+                  target: [e.target ?? ''],
+                  customTarget: [e.customTarget ?? ''],
+                  value: [e.value ?? 1],
+                  useProficiencyBonus: [e.useProficiencyBonus ?? false],
+                  condition: [e.condition ?? null]
+                })))
+              })
             });
 
             if (f.properties) {
@@ -706,12 +760,12 @@ export class HomebrewClassFormPage implements OnInit {
             this.features.push(featureGroup);
           });
           this.originalFeatures = cls.features.map((f: any) => ({
-            id:           f.id,
-            name:         f.name,
-            description:  f.description,
-            levelRequired:f.levelRequired,
-            options:      f.options,
-            properties:   f.properties
+            id: f.id,
+            name: f.name,
+            description: f.description,
+            levelRequired: f.levelRequired,
+            options: f.options,
+            properties: f.properties
           }));
         }
 
@@ -722,10 +776,10 @@ export class HomebrewClassFormPage implements OnInit {
           const sc = cf.spellcasting;
           this.form.patchValue({
             spellcastingAbility: sc.ability ?? '',
-            spellcastingType:    sc.spellcastingType ?? '',
-            ritualCasting:       sc.ritualCasting ?? false,
-            preparationStyle:    sc.preparationStyle ?? 'PREPARED',
-            knowledgeStyle:      sc.knowledgeStyle ?? 'ALL_LIST',
+            spellcastingType: sc.spellcastingType ?? '',
+            ritualCasting: sc.ritualCasting ?? false,
+            preparationStyle: sc.preparationStyle ?? 'PREPARED',
+            knowledgeStyle: sc.knowledgeStyle ?? 'ALL_LIST',
           });
           this.updateSpellsKnownVisibility();
 
@@ -874,22 +928,83 @@ export class HomebrewClassFormPage implements OnInit {
 
   addFeature(): void {
     this.features.push(this.fb.group({
-      id:           [null],
-      name:         ['', Validators.required],
-      description:  ['', Validators.required],
-      levelRequired:[null, [Validators.required, Validators.min(1), Validators.max(20)]],
-      hasOptions:   [false],
-      options:      this.fb.group({
-        choiceCount: [null],
-        options: this.fb.array([]),
+      id: [null],
+      name: ['', Validators.required],
+      description: ['', Validators.required],
+      levelRequired: [null, [Validators.required, Validators.min(1), Validators.max(20)]],
+      actionType: ['PASSIVE'],
+      hasOptions: [false],
+      options: this.fb.group({
+        type: ['SELECT_ONE'],
+        count: [1],
+        choices: this.fb.array([]),
         progression: this.fb.array([])
       }),
-      properties:   this.fb.group({})
+      progression: this.fb.array([]),
+      properties: this.fb.group({
+        acCalculation: this.fb.group({
+          base: [10],
+          stats: [[]],
+          requiresNoArmor: [false]
+        }),
+        acBonus: [0],
+        acBonusArmorOnly: [false],
+        resourcePool: this.fb.group({
+          name: [''],
+          max: [''],
+          reset: ['LONG_REST']
+        }),
+        innateSpells: this.fb.array([]),
+        effects: this.fb.array([])
+      })
     }));
   }
 
   removeFeature(index: number): void {
     this.features.removeAt(index);
+    delete this.featureActiveSection[index];
+  }
+
+  toggleFeatureSection(index: number, section: string): void {
+    if (this.featureActiveSection[index] === section) {
+      delete this.featureActiveSection[index];
+    } else {
+      this.featureActiveSection[index] = section;
+    }
+  }
+
+  addFeatureProgressionRow(featureIndex: number): void {
+    const progression = this.features.at(featureIndex).get('progression') as FormArray;
+    progression.push(this.fb.group({
+      level: [null, [Validators.required, Validators.min(1), Validators.max(20)]],
+      additionalChoices: [1],
+      description: ['']
+    }));
+  }
+
+  removeFeatureProgressionRow(featureIndex: number, progIndex: number): void {
+    const progression = this.features.at(featureIndex).get('progression') as FormArray;
+    progression.removeAt(progIndex);
+  }
+
+  getFeatureEffects(featureIndex: number): FormArray {
+    return (this.features.at(featureIndex).get('properties.effects') as FormArray);
+  }
+
+  addFeatureEffect(featureIndex: number, initialData?: any): void {
+    const effectsArray = this.getFeatureEffects(featureIndex);
+    effectsArray.push(this.fb.group({
+      type: [initialData?.type ?? 'STAT_MODIFIER', Validators.required],
+      target: [initialData?.target ?? '', Validators.required],
+      customTarget: [initialData?.customTarget ?? ''],
+      value: [initialData?.value ?? 1],
+      useProficiencyBonus: [initialData?.useProficiencyBonus ?? false],
+      condition: [initialData?.condition ?? null]
+    }));
+  }
+
+  removeFeatureEffect(featureIndex: number, effectIndex: number): void {
+    this.getFeatureEffects(featureIndex).removeAt(effectIndex);
   }
 
   addFeatureOption(featureIndex: number): void {
@@ -922,7 +1037,7 @@ export class HomebrewClassFormPage implements OnInit {
 
   addMulticlassingPrerequisite(): void {
     this.multiclassingPrerequisites.push(this.fb.group({
-      ability:  ['', Validators.required],
+      ability: ['', Validators.required],
       minScore: [null, [Validators.required, Validators.min(1), Validators.max(20)]],
     }));
   }
@@ -1031,7 +1146,7 @@ export class HomebrewClassFormPage implements OnInit {
   toggleSpellcasting(): void {
     this.spellcastingEnabled = !this.spellcastingEnabled;
     const abilityCtrl = this.form.get('spellcastingAbility');
-    const typeCtrl    = this.form.get('spellcastingType');
+    const typeCtrl = this.form.get('spellcastingType');
     if (this.spellcastingEnabled) {
       abilityCtrl?.setValidators(Validators.required);
       typeCtrl?.setValidators(Validators.required);
@@ -1105,7 +1220,7 @@ export class HomebrewClassFormPage implements OnInit {
       });
       this.spellSlotsCustomized = false;
     }
-    
+
     // Auto-select the type in the dropdown for visual consistency
     this.form.patchValue({ spellcastingType: type });
     if (type === 'Full Caster' || type === 'Pact Magic') {
@@ -1146,10 +1261,10 @@ export class HomebrewClassFormPage implements OnInit {
 
   async reconcileClassFeatures(classId: number): Promise<void> {
     const currentFeatures = this.features.controls.map((ctrl) => ({
-      id:           ctrl.get('id')?.value as number | null,
-      name:         ctrl.get('name')?.value as string,
-      description:  ctrl.get('description')?.value as string,
-      levelRequired:ctrl.get('levelRequired')?.value as number,
+      id: ctrl.get('id')?.value as number | null,
+      name: ctrl.get('name')?.value as string,
+      description: ctrl.get('description')?.value as string,
+      levelRequired: ctrl.get('levelRequired')?.value as number,
     }));
 
     const currentIds = new Set(
@@ -1174,12 +1289,17 @@ export class HomebrewClassFormPage implements OnInit {
 
         promises.push(
           this.homebrewService.createClassFeature({
-            name:         ctrl.get('name')?.value,
-            description:  ctrl.get('description')?.value,
-            levelRequired:ctrl.get('levelRequired')?.value,
+            name: ctrl.get('name')?.value,
+            description: ctrl.get('description')?.value,
+            levelRequired: ctrl.get('levelRequired')?.value,
+            actionType: ctrl.get('actionType')?.value,
             classId,
             options: ctrl.get('hasOptions')?.value ? ctrl.get('options')?.value : null,
-            properties: Object.keys(cleanProps).length > 0 ? cleanProps : null
+            progression: ctrl.get('progression')?.value || [],
+            properties: {
+              ...cleanProps,
+              effects: propertiesValue.effects || []
+            }
           }).toPromise(),
         );
       }
@@ -1190,14 +1310,15 @@ export class HomebrewClassFormPage implements OnInit {
       if (feature.id !== null) {
         const original = this.originalFeatures.find(o => o.id === feature.id);
         const currentFormFeature = this.features.controls.find(c => c.get('id')?.value === feature.id);
-        
+
         const hasOptions = currentFormFeature?.get('hasOptions')?.value;
         const options = hasOptions
-          ? { 
-              choiceCount: currentFormFeature.get('options.choiceCount')?.value,
-              options: currentFormFeature.get('options.options')?.value,
-              progression: currentFormFeature.get('options.progression')?.value
-            } 
+          ? {
+            type: currentFormFeature.get('options.type')?.value,
+            count: currentFormFeature.get('options.count')?.value,
+            choices: currentFormFeature.get('options.choices')?.value,
+            progression: currentFormFeature.get('options.progression')?.value
+          }
           : null;
 
         const propertiesValue = currentFormFeature?.get('properties')?.value || {};
@@ -1208,22 +1329,28 @@ export class HomebrewClassFormPage implements OnInit {
           cleanProps.acBonusArmorOnly = propertiesValue.acBonusArmorOnly;
         }
         if (propertiesValue.resourcePool) cleanProps.resourcePool = propertiesValue.resourcePool;
-        const properties = Object.keys(cleanProps).length > 0 ? cleanProps : null;
+        const properties = {
+          ...cleanProps,
+          effects: propertiesValue.effects || []
+        };
 
         if (original && (
           original.name !== feature.name ||
           original.description !== feature.description ||
           original.levelRequired !== feature.levelRequired ||
+          (original as any).actionType !== currentFormFeature?.get('actionType')?.value ||
           JSON.stringify(original.options) !== JSON.stringify(options) ||
           JSON.stringify(original.properties) !== JSON.stringify(properties)
         )) {
           promises.push(
             this.homebrewService.updateClassFeature(feature.id, {
-              name:         feature.name,
-              description:  feature.description,
-              levelRequired:feature.levelRequired,
+              name: feature.name,
+              description: feature.description,
+              levelRequired: feature.levelRequired,
+              actionType: currentFormFeature?.get('actionType')?.value,
               classId,
               options: options as any,
+              progression: currentFormFeature?.get('progression')?.value || [],
               properties: properties
             }).toPromise(),
           );
@@ -1289,13 +1416,13 @@ export class HomebrewClassFormPage implements OnInit {
 
     // Serialize damage resistances / immunities / condition immunities
     const damageResistances: string[] = DAMAGE_TYPES.filter((_, i) => this.damageResistances.at(i).value === true);
-    const damageImmunities: string[]  = DAMAGE_TYPES.filter((_, i) => this.damageImmunities.at(i).value === true);
+    const damageImmunities: string[] = DAMAGE_TYPES.filter((_, i) => this.damageImmunities.at(i).value === true);
     const conditionImmunities: string[] = CONDITIONS.filter((_, i) => this.conditionImmunities.at(i).value === true);
 
     // Serialize multiclassing prerequisites
     const prereqControls = this.multiclassingPrerequisites.controls;
     const prereqRequirements: MulticlassingPrerequisite[] = prereqControls.map((ctrl) => ({
-      ability:  ctrl.get('ability')?.value as string,
+      ability: ctrl.get('ability')?.value as string,
       minScore: ctrl.get('minScore')?.value as number,
     }));
     const multiclassingPrerequisitesObj: MulticlassingPrerequisites | null = prereqRequirements.length > 0
@@ -1322,13 +1449,13 @@ export class HomebrewClassFormPage implements OnInit {
         (rowArr) => (rowArr as FormArray).controls.map(c => c.value ?? 0)
       );
       spellcastingObj = {
-        ability:          v.spellcastingAbility ?? '',
+        ability: v.spellcastingAbility ?? '',
         spellcastingType: v.spellcastingType ?? '',
-        ritualCasting:    v.ritualCasting ?? false,
+        ritualCasting: v.ritualCasting ?? false,
         preparationStyle: (v.preparationStyle ?? 'PREPARED') as 'PREPARED' | 'KNOWN',
-        knowledgeStyle:   (v.knowledgeStyle ?? 'ALL_LIST') as 'ALL_LIST' | 'LEARNED',
-        cantripsKnown:    cantripsKnownArr,
-        spellSlots:       parseSpellSlotTable(spellSlotsArr),
+        knowledgeStyle: (v.knowledgeStyle ?? 'ALL_LIST') as 'ALL_LIST' | 'LEARNED',
+        cantripsKnown: cantripsKnownArr,
+        spellSlots: parseSpellSlotTable(spellSlotsArr),
       };
       if (spellsKnownArr !== undefined) {
         spellcastingObj.spellsKnown = spellsKnownArr;
@@ -1338,7 +1465,7 @@ export class HomebrewClassFormPage implements OnInit {
     // Serialize starting equipment from picker
     const startingEquipmentStr: string = this.currentEquipment
       ? serializeEquipment(this.currentEquipment)
-      : '';
+      : (this.equipmentLegacyText || '');
 
     const classFeatures = buildClassFeatures(
       v.primaryAbility ?? '',
@@ -1360,13 +1487,13 @@ export class HomebrewClassFormPage implements OnInit {
     const hitDieNumber: number = parseInt((v.hitDie ?? '').replace('d', ''), 10);
 
     const dto: CreateClassDto = {
-      name:          v.name,
-      description:   v.description ?? '',
-      price:         v.price,
-      hitDie:        hitDieNumber as any,
-      savingThrows:  savingThrowsRecord,
+      name: v.name,
+      description: v.description ?? '',
+      price: v.price,
+      hitDie: hitDieNumber as any,
+      savingThrows: savingThrowsRecord,
       classFeatures,
-      authorId:      '',
+      authorId: '',
     };
 
     const request$ = this.editMode && this.editId

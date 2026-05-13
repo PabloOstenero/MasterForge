@@ -32,6 +32,12 @@ data class ClassFeature(
     // It connects to the DndClass entity using a foreign key
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "class_id", nullable = false)
-    val dndClass: DndClass
+    @JoinColumn(name = "class_id", nullable = true)
+    val dndClass: DndClass? = null,
+
+    // It connects to the DndSubclass entity using a foreign key
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subclass_id", nullable = true)
+    val dndSubclass: DndSubclass? = null
 )

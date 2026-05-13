@@ -1,0 +1,111 @@
+<div class="forge-choice-engine" [formGroup]="parentForm">
+  <!-- Engine Header -->
+  <header class="engine-header">
+    <div class="engine-info">
+      <h2 class="engine-title">Configuración de Elecciones</h2>
+      <p class="engine-subtitle">Define cómo los jugadores personalizarán este rasgo al subir de nivel.</p>
+    </div>
+    
+    <div class="engine-controls">
+      <div class="control-group">
+        <label>Modo de Selección</label>
+        <select class="forge-select-native" formControlName="type">
+          <option value="SELECT_ONE">Selección Única</option>
+          <option value="SELECT_MANY">Selección Múltiple</option>
+          <option value="BOOLEAN">Interruptor (On/Off)</option>
+        </select>
+      </div>
+      
+      @if (parentForm.get('type')?.value === 'SELECT_MANY') {
+        <div class="control-group narrow">
+          <label>Cantidad</label>
+          <input type="number" class="forge-input-native" formControlName="count" placeholder="2">
+        </div>
+      }
+    </div>
+  </header>
+
+  <!-- Choices Container -->
+  <!-- Choices Container -->
+  <div class="choices-container">
+    <div class="container-toolbar">
+      <span class="count-badge">{{ choices.length }} Opciones definidas</span>
+      <button type="button" class="btn-forge-primary" (click)="addChoice()">
+        <ion-icon name="add"></ion-icon> Añadir Nueva Opción
+      </button>
+    </div>
+
+    <!-- Choice Progression Table (Moved out of choices formArrayName) -->
+    <div class="progression-panel" formArrayName="progression">
+      <div class="panel-header">
+        <h3 class="panel-title"><ion-icon name="trending-up-outline"></ion-icon> Progresión de Elecciones</h3>
+        <p class="panel-hint">Define a qué niveles el jugador obtiene selecciones adicionales.</p>
+      </div>
+      
+      <div class="progression-table-wrapper">
+        <table class="forge-table-mini">
+          <thead>
+            <tr>
+              <th>Nivel</th>
+              <th>Elecciones Adicionales</th>
+              <th width="40"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (prog of progression.controls; track prog; let pi = $index) {
+              <tr [formGroupName]="pi">
+                <td><input type="number" class="forge-input-native-small" formControlName="level" placeholder="Nivel"></td>
+                <td><input type="number" class="forge-input-native-small" formControlName="additionalChoices" placeholder="+1"></td>
+                <td>
+                  <button type="button" class="btn-icon-delete" (click)="removeProgression(pi)">
+                    <ion-icon name="trash-outline"></ion-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <button type="button" class="btn-text-add" (click)="addProgression()">+ Añadir Hito de Progresión</button>
+      </div>
+    </div>
+
+    <div class="choices-stack" formArrayName="choices">
+      @for (choice of choices.controls; track choice; let i = $index) {
+        <div class="choice-entry-card" [formGroupName]="i">
+          <div class="card-side-accent"></div>
+          
+          <div class="card-content">
+            <div class="card-top-row">
+              <div class="field-wrapper flex-grow">
+                <input type="text" class="input-ghost-title" formControlName="label" placeholder="Nombre de la opción (Ej: Estilo de Combate)">
+              </div>
+              <button type="button" class="btn-card-delete" (click)="removeChoice(i)" title="Eliminar opción">
+                <ion-icon name="trash"></ion-icon>
+              </button>
+            </div>
+
+            <div class="field-wrapper">
+              <textarea class="textarea-simple" formControlName="description" rows="2" placeholder="Describe los beneficios de esta opción..."></textarea>
+            </div>
+
+            <!-- Nested Effects Section -->
+            <app-feature-effect-editor
+              [effectsArray]="getEffects(i)"
+              (onAddEffect)="addEffect(i)"
+              (onQuickEffect)="addEffect(i, $event)"
+              (onRemoveEffect)="removeEffect(i, $event)">
+            </app-feature-effect-editor>
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (choices.length === 0) {
+      <div class="empty-state-placeholder" (click)="addChoice()">
+        <ion-icon name="list-outline"></ion-icon>
+        <p>No has definido ninguna opción todavía.</p>
+        <span>Haz clic aquí para añadir la primera opción de este rasgo.</span>
+      </div>
+    }
+  </div>
+</div>

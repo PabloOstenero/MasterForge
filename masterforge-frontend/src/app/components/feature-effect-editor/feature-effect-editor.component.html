@@ -1,0 +1,70 @@
+<div class="effects-manager">
+  <div class="effects-header">
+    <span class="effects-label"><ion-icon name="flash-outline"></ion-icon> {{ label }}</span>
+    <button type="button" class="btn-text-add" (click)="onAddEffect.emit()">+ Vincular Efecto Personalizado</button>
+  </div>
+
+  <div class="effects-grid">
+    @for (effect of effectsArray.controls; track effect; let ei = $index) {
+      <div class="effect-strip" [formGroup]="$any(effect)" [class.no-value]="effect.get('type')?.value === 'PROFICIENCY'">
+        <div class="effect-col type">
+          <label>Tipo</label>
+          <select class="forge-select-native-small" formControlName="type" (change)="onTypeChange(ei)">
+            @for (t of effectTypes; track t.value) {
+              <option [value]="t.value">{{ t.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="effect-col target">
+          <label>Objetivo</label>
+          <select class="forge-select-native-small" formControlName="target">
+            <option value="" disabled>Seleccionar...</option>
+            @for (st of getFilteredTargets(effect.get('type')?.value); track st.value) {
+              <option [value]="st.value">{{ st.label }}</option>
+            }
+          </select>
+          
+          <!-- Custom Resource Name Input -->
+          @if (effect.get('target')?.value === 'res_custom') {
+            <input type="text" 
+                   class="forge-input-native-small custom-resource-input" 
+                   formControlName="customTarget" 
+                   placeholder="Nombre del recurso...">
+          }
+        </div>
+
+        @if (['STAT_MODIFIER', 'RESOURCE_MAX', 'SENSE'].includes(effect.get('type')?.value)) {
+          <div class="effect-col value">
+            <label>Valor</label>
+            <div class="value-input-wrapper">
+              <input type="number" class="forge-input-native-small" formControlName="value" placeholder="1">
+              <label class="pb-checkbox" title="Sumar Bono de Competencia">
+                <input type="checkbox" formControlName="useProficiencyBonus">
+                <span>+PB</span>
+              </label>
+            </div>
+          </div>
+        }
+
+        <div class="effect-col condition">
+          <label>Condición</label>
+          <select class="forge-select-native-small" formControlName="condition">
+            <option [value]="null">Ninguna</option>
+            @for (c of conditions; track c.value) {
+              <option [value]="c.value">{{ c.label }}</option>
+            }
+          </select>
+        </div>
+
+        <button type="button" class="btn-effect-delete" (click)="removeEffect(ei)" title="Eliminar efecto">
+          <ion-icon name="trash"></ion-icon>
+        </button>
+      </div>
+    }
+
+    @if (effectsArray.length === 0) {
+      <div class="empty-effects-hint">No hay efectos automáticos definidos.</div>
+    }
+  </div>
+</div>

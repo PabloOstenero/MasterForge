@@ -131,38 +131,36 @@
       </ion-row>
     </ion-grid>
 
-    <!-- New Section: Derived Combat/Exploration Stats -->
-    <h2 class="section-title" style="margin-top: 30px;">Información de Combate</h2>
-    <ion-grid class="ion-no-padding ion-margin-bottom">
-      <ion-row>
-        <ion-col size="6">
-          <div class="info-box-small">
-            <div class="info-label">Bono de Competencia</div>
-            <div class="info-value-gold">{{ pj.proficiencyBonus >= 0 ? '+' : '' }}{{ pj.proficiencyBonus }}</div>
+    <!-- New Section: Senses and Defenses (Automated) -->
+    @if (senses.length > 0 || damageResistances.length > 0 || damageImmunities.length > 0 || conditionImmunities.length > 0) {
+      <h2 class="section-title" style="margin-top: 30px;">Sentidos y Defensas</h2>
+      <div class="info-box-medium ion-margin-bottom">
+        @if (senses.length > 0) {
+          <div class="prof-group">
+            <div class="prof-label">Sentidos</div>
+            <div class="prof-values">{{ senses.join(', ') }}</div>
           </div>
-        </ion-col>
-        <ion-col size="6">
-          <div class="info-box-small">
-            <div class="info-label">Iniciativa</div>
-            <div class="info-value-gold">{{ pj.initiative >= 0 ? '+' : '' }}{{ pj.initiative }}</div>
+        }
+        @if (damageResistances.length > 0) {
+          <div class="prof-group">
+            <div class="prof-label">Resistencias</div>
+            <div class="prof-values">{{ damageResistances.join(', ') }}</div>
           </div>
-        </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col size="6">
-          <div class="info-box-small">
-            <div class="info-label">Velocidad</div>
-            <div class="info-value-gold">{{ pj.speed }} ft</div>
+        }
+        @if (damageImmunities.length > 0) {
+          <div class="prof-group">
+            <div class="prof-label">Inmunidades (Daño)</div>
+            <div class="prof-values">{{ damageImmunities.join(', ') }}</div>
           </div>
-        </ion-col>
-        <ion-col size="6">
-          <div class="info-box-small">
-            <div class="info-label">Percepción Pasiva</div>
-            <div class="info-value-gold">{{ pj.passivePerception }}</div>
+        }
+        @if (conditionImmunities.length > 0) {
+          <div class="prof-group">
+            <div class="prof-label">Inmunidades (Condición)</div>
+            <div class="prof-values">{{ conditionImmunities.join(', ') }}</div>
           </div>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
+        }
+      </div>
+    }
 
     <!-- New Section: Saving Throws -->
     <h2 class="section-title" style="margin-top: 30px;">Tiradas de Salvación</h2>
@@ -190,10 +188,14 @@
       @for (feature of pj.features; track $index) {
       <ion-item lines="none" class="skill-item">
         <ion-label>
-          <h2 style="color: #C5A059;">
-            {{ feature.name }} <small>(Nivel {{ feature.levelRequired }})</small>
+          <h2 style="color: #C5A059; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            {{ feature.name }}
+            <small style="color: #888;">(Nivel {{ feature.levelRequired }})</small>
+            @if (feature.actionType && feature.actionType !== 'PASSIVE') {
+              <ion-badge color="warning" style="font-size: 0.6rem; padding: 2px 6px;">{{ getActionTypeLabel(feature.actionType) }}</ion-badge>
+            }
             @if (feature.isSubclassFeature) {
-            <span class="subclass-badge">{{ pj.subclass }}</span>
+              <span class="subclass-badge">{{ pj.subclass }}</span>
             }
           </h2>
           <p>{{ feature.description }}</p>
@@ -218,7 +220,12 @@
       @for (trait of pj.traits; track $index) {
       <ion-item lines="none" class="skill-item">
         <ion-label>
-          <h2 style="color: #C5A059;">{{ trait.name }}</h2>
+          <h2 style="color: #C5A059; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            {{ trait.name }}
+            @if (trait.actionType && trait.actionType !== 'PASSIVE') {
+              <ion-badge color="warning" style="font-size: 0.6rem; padding: 2px 6px;">{{ getActionTypeLabel(trait.actionType) }}</ion-badge>
+            }
+          </h2>
           <p>{{ trait.description }}</p>
           @if (trait.selectedOptions?.length > 0) {
           <div class="selected-options-sheet">
@@ -725,26 +732,18 @@
         @if (levelUpNewFeatures.length > 0) {
           <div class="level-up-section" style="margin-top: 30px;">
             <h2 class="section-title">Nuevos Rasgos de Clase</h2>
-            @for (feature of levelUpNewFeatures; track $index) {
-              <div class="feature-choice-box" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                <h3 style="color: #C5A059; margin: 0;">{{ feature.name }}</h3>
-                <p style="color: #ccc; margin: 5px 0;">{{ feature.description }}</p>
-                
-                @if (feature.filteredOptions?.length > 0) {
-                  <ion-list class="transparent-list">
-                    <p style="color: #888; font-size: 0.9rem;">Elige {{ feature.calculatedMaxChoices }} opciones:</p>
-                    @for (opt of feature.filteredOptions; track $index) {
-                      <ion-item lines="none" class="skill-item" (click)="toggleFeatureOption(feature, opt.name)">
-                        <ion-checkbox slot="start" color="warning" [checked]="isFeatureOptionSelected(feature, opt.name)" [disabled]="!isFeatureOptionSelected(feature, opt.name) && isFeatureMaxed(feature)"></ion-checkbox>
-                        <ion-label>
-                          <h2 style="color: #eee;">{{ opt.name }}</h2>
-                          <p>{{ opt.description }}</p>
-                        </ion-label>
-                      </ion-item>
-                    }
-                  </ion-list>
-                }
-              </div>
+            @for (feature of levelUpNewFeatures; track feature.id) {
+              @if (feature.options) {
+                <app-feature-choice-picker 
+                  [feature]="feature" 
+                  (selectionChange)="onFeatureChoiceChange(feature, $event)">
+                </app-feature-choice-picker>
+              } @else {
+                <div class="feature-choice-box" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                  <h3 style="color: #C5A059; margin: 0;">{{ feature.name }}</h3>
+                  <p style="color: #ccc; margin: 5px 0;">{{ feature.description }}</p>
+                </div>
+              }
             }
           </div>
         }

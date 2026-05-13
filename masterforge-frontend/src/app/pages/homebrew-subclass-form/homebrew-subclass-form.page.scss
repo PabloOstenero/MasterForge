@@ -707,20 +707,271 @@ $red:         #C62828;
   vertical-align: middle;
 }
 
-.btn-configure {  background: rgba(197, 160, 89, 0.12);
-  color: $gold;
-  border: 1px solid rgba(197, 160, 89, 0.35);
-  border-radius: 8px;
-  padding: 6px 16px;
-  font-size: 0.85rem;
-  font-weight: bold;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s, border-color 0.15s;
+// ─── Refactored Features UI ───────────────────────────────────────────────────
+
+.tab-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+
+  .section-title {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #c1994c;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .section-subtitle {
+    margin: 0.25rem 0 0;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.4);
+  }
+}
+
+.features-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.feature-master-card {
+  background: rgba(30, 30, 40, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: border-color 0.2s, transform 0.2s;
 
   &:hover {
-    background: rgba(197, 160, 89, 0.22);
-    border-color: $gold;
+    border-color: rgba(193, 153, 76, 0.2);
+  }
+}
+
+.card-header-main {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+
+  .header-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    label {
+      font-size: 0.65rem;
+      color: rgba(193, 153, 76, 0.8);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+  }
+  
+  .level-control {
+    width: 70px;
+  }
+}
+
+.input-feature-title {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  width: 100%;
+  outline: none;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.2);
+  }
+}
+
+.card-body-main {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.field-label-small {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.textarea-premium {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+  border-radius: 6px;
+  padding: 1rem;
+  width: 100%;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  outline: none;
+  resize: vertical;
+
+  &:focus {
+    border-color: rgba(193, 153, 76, 0.4);
+    background: rgba(0, 0, 0, 0.25);
+  }
+}
+
+.feature-config-row {
+  background: rgba(193, 153, 76, 0.03);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(193, 153, 76, 0.08);
+}
+
+/* Premium Toggle Switch */
+.toggle-switch {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  position: relative;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+
+    &:checked + .slider {
+      background: #c1994c;
+      &:before { transform: translateX(20px); }
+    }
+  }
+
+  .slider {
+    width: 44px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    position: relative;
+    transition: 0.3s;
+
+    &:before {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.3s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  .toggle-label {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+}
+
+.empty-state-large {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem;
+  text-align: center;
+  background: rgba(193, 153, 76, 0.02);
+  border: 2px dashed rgba(193, 153, 76, 0.15);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  ion-icon {
+    font-size: 4rem;
+    color: #c1994c;
+    opacity: 0.5;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #fff;
+  }
+
+  p {
+    margin: 0.5rem 0 2rem;
+    color: rgba(255, 255, 255, 0.4);
+    max-width: 400px;
+  }
+
+  &:hover {
+    background: rgba(193, 153, 76, 0.04);
+    border-color: rgba(193, 153, 76, 0.3);
+    transform: translateY(-4px);
+  }
+}
+
+.btn-forge-outline {
+  background: transparent;
+  border: 1px solid #c1994c;
+  color: #c1994c;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #c1994c;
+    color: #000;
+  }
+}
+
+.btn-forge-primary {
+  background: linear-gradient(135deg, #c1994c, #8a6d35);
+  color: #000;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(193, 153, 76, 0.3);
+
+  &:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+  }
+}
+
+.btn-card-delete {
+  background: rgba(255, 80, 80, 0.1);
+  color: #ff5050;
+  border: 1px solid rgba(255, 80, 80, 0.2);
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #ff5050;
+    color: white;
   }
 }
 
@@ -908,96 +1159,196 @@ $red:         #C62828;
   font-size: 1rem;
 }
 
-/* Feature Options Styles */
-.options-pool-section {
-  margin-top: 1rem;
-  padding: 1.25rem;
-  background: rgba(255, 255, 255, 0.02);
+// ─── Mechanics Toolbar ────────────────────────────────────────────────────────
+.mechanics-toolbar-container {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+  padding: 6px;
+  margin-top: 1rem;
 }
 
-.option-entry-card {
-  margin-top: 0.75rem;
-  padding: 1rem;
-  background: rgba(var(--ion-color-secondary-rgb), 0.05);
-  border-radius: 10px;
-  border: 1px solid rgba(var(--ion-color-secondary-rgb), 0.2);
-  border-left: 4px solid var(--ion-color-secondary);
-  transition: all 0.2s ease;
+.mechanics-toolbar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
 
-  &:hover {
-    background: rgba(var(--ion-color-secondary-rgb), 0.08);
-    border-color: rgba(var(--ion-color-secondary-rgb), 0.4);
+  @media (max-width: 600px) {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-.subsection-title {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--ion-color-secondary);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin: 0;
-}
-
-.btn-small {
-  padding: 6px 12px;
-  font-size: 0.75rem;
-  height: auto;
-  min-height: 0;
-}
-
-.checkbox-group {
-  margin: 1rem 0;
-  display: flex;
-  align-items: center;
-}
-
-.progression-list {
-  margin-top: 1rem;
-  padding: 1rem;
-  background: rgba(var(--ion-color-primary-rgb), 0.05);
-  border-radius: 10px;
-  border: 1px solid rgba(var(--ion-color-primary-rgb), 0.1);
-  margin-bottom: 1rem;
-}
-
-.progression-entry-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr 40px;
-  gap: 12px;
-  align-items: flex-end;
-  margin-top: 0.5rem;
-  padding: 0.5rem;
-  background: rgba(0, 0, 0, 0.2);
+.btn-tool {
+  background: transparent;
+  border: 1px solid transparent;
   border-radius: 8px;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: rgba(255, 255, 255, 0.4);
+
+  ion-icon {
+    font-size: 1.4rem;
+    transition: transform 0.2s;
+  }
+
+  span {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.8);
+    ion-icon { transform: translateY(-2px); }
+  }
+
+  &.active {
+    background: rgba(193, 153, 76, 0.08);
+    border-color: rgba(193, 153, 76, 0.2);
+    color: #c1994c;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+    ion-icon { color: #c1994c; }
+  }
 }
 
-.btn-remove-prog {
-  background: rgba(229, 115, 115, 0.1);
-  color: #e57373;
-  border: 1px solid rgba(229, 115, 115, 0.3);
-  border-radius: 6px;
-  width: 32px;
-  height: 32px;
+// ─── Contextual Panels ────────────────────────────────────────────────────────
+.contextual-panels-stack {
+  margin-top: 0.5rem;
+}
+
+.context-panel {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(193, 153, 76, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.panel-header-mini {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+// ─── Progression Editor ───────────────────────────────────────────────────────
+.progression-editor-header {
+  margin-bottom: 1.5rem;
+  h3 { margin: 0; font-size: 1rem; color: #fff; }
+  p { margin: 4px 0 0; font-size: 0.8rem; color: rgba(255, 255, 255, 0.4); }
+}
+
+.progression-table-wrapper {
+  overflow-x: auto;
+}
+
+.forge-table-mini {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+
+  th {
+    text-align: left;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    color: rgba(193, 153, 76, 0.8);
+    padding: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  td {
+    padding: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  }
+}
+
+.forge-input-native-small {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: #fff;
+  padding: 6px 8px;
+  font-size: 0.85rem;
+  width: 100%;
+  outline: none;
+
+  &:focus { border-color: #c1994c; }
+}
+
+.btn-text-add {
+  background: transparent;
+  border: none;
+  color: #c1994c;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0;
+  &:hover { text-decoration: underline; }
+}
+
+.btn-icon-delete {
+  background: rgba(255, 80, 80, 0.1);
+  color: #ff5050;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 1.2rem;
-  margin-bottom: 2px;
   transition: all 0.2s;
-
-  &:hover {
-    background: rgba(229, 115, 115, 0.2);
-    border-color: #e57373;
-  }
+  &:hover { background: #ff5050; color: white; }
 }
 
-.option-entry-grid {
-  display: grid;
-  grid-template-columns: 1fr 100px;
+/* Premium Mini Toggle for Panels */
+.toggle-switch-mini {
+  display: flex;
+  align-items: center;
   gap: 12px;
+  cursor: pointer;
+  
+  input {
+    display: none;
+    &:checked + .slider-mini {
+      background: #c1994c;
+      &:before { transform: translateX(16px); }
+    }
+  }
+
+  .slider-mini {
+    width: 36px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    position: relative;
+    transition: 0.3s;
+
+    &:before {
+      content: "";
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+  }
+
+  .toggle-label-mini {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 500;
+  }
 }

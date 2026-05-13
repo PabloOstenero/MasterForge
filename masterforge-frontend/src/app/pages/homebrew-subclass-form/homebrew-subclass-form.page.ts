@@ -12,11 +12,21 @@ import {
 import { Router, ActivatedRoute } from '@angular/router';
 import {
   IonButton, IonSpinner,
-  IonItem, IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption
+  IonItem, IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption, IonIcon
 } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import {
+  add, trash, sparklesOutline, shieldOutline, listOutline,
+  trendingUpOutline, sparkles, list, trendingUp, shield,
+  trashOutline, addOutline, flashOutline, hammerOutline
+} from 'ionicons/icons';
+import { trigger, transition, style, animate } from '@angular/animations';
 
+import { StartingEquipmentPickerComponent } from '../../components/starting-equipment-picker/starting-equipment-picker.component';
 import { HomebrewService, CreateSubclassDto } from '../../services/homebrew.service';
 import { FeatureMechanicsComponent } from '../../components/feature-mechanics/feature-mechanics.component';
+import { FeatureChoiceEditorComponent } from '../../components/feature-choice-editor/feature-choice-editor.component';
+import { FeatureEffectEditorComponent } from '../../components/feature-effect-editor/feature-effect-editor.component';
 import {
   SkillProficiencies,
   Spellcasting,
@@ -63,106 +73,106 @@ export const ABILITY_ABBREVIATIONS: Record<string, string> = {
 
 // prettier-ignore
 const FULL_CASTER_SLOTS: number[][] = [
-  [2,0,0,0,0,0,0,0,0],
-  [3,0,0,0,0,0,0,0,0],
-  [4,2,0,0,0,0,0,0,0],
-  [4,3,0,0,0,0,0,0,0],
-  [4,3,2,0,0,0,0,0,0],
-  [4,3,3,0,0,0,0,0,0],
-  [4,3,3,1,0,0,0,0,0],
-  [4,3,3,2,0,0,0,0,0],
-  [4,3,3,3,1,0,0,0,0],
-  [4,3,3,3,2,0,0,0,0],
-  [4,3,3,3,2,1,0,0,0],
-  [4,3,3,3,2,1,0,0,0],
-  [4,3,3,3,2,1,1,0,0],
-  [4,3,3,3,2,1,1,0,0],
-  [4,3,3,3,2,1,1,1,0],
-  [4,3,3,3,2,1,1,1,0],
-  [4,3,3,3,2,1,1,1,1],
-  [4,3,3,3,3,1,1,1,1],
-  [4,3,3,3,3,2,1,1,1],
-  [4,3,3,3,3,2,2,1,1],
+  [2, 0, 0, 0, 0, 0, 0, 0, 0],
+  [3, 0, 0, 0, 0, 0, 0, 0, 0],
+  [4, 2, 0, 0, 0, 0, 0, 0, 0],
+  [4, 3, 0, 0, 0, 0, 0, 0, 0],
+  [4, 3, 2, 0, 0, 0, 0, 0, 0],
+  [4, 3, 3, 0, 0, 0, 0, 0, 0],
+  [4, 3, 3, 1, 0, 0, 0, 0, 0],
+  [4, 3, 3, 2, 0, 0, 0, 0, 0],
+  [4, 3, 3, 3, 1, 0, 0, 0, 0],
+  [4, 3, 3, 3, 2, 0, 0, 0, 0],
+  [4, 3, 3, 3, 2, 1, 0, 0, 0],
+  [4, 3, 3, 3, 2, 1, 0, 0, 0],
+  [4, 3, 3, 3, 2, 1, 1, 0, 0],
+  [4, 3, 3, 3, 2, 1, 1, 0, 0],
+  [4, 3, 3, 3, 2, 1, 1, 1, 0],
+  [4, 3, 3, 3, 2, 1, 1, 1, 0],
+  [4, 3, 3, 3, 2, 1, 1, 1, 1],
+  [4, 3, 3, 3, 3, 1, 1, 1, 1],
+  [4, 3, 3, 3, 3, 2, 1, 1, 1],
+  [4, 3, 3, 3, 3, 2, 2, 1, 1],
 ];
 
 // prettier-ignore
 const HALF_CASTER_SLOTS: number[][] = [
-  [0,0,0,0,0,0,0,0,0],
-  [2,0,0,0,0,0,0,0,0],
-  [3,0,0,0,0,0,0,0,0],
-  [3,0,0,0,0,0,0,0,0],
-  [4,2,0,0,0,0,0,0,0],
-  [4,2,0,0,0,0,0,0,0],
-  [4,3,0,0,0,0,0,0,0],
-  [4,3,0,0,0,0,0,0,0],
-  [4,3,2,0,0,0,0,0,0],
-  [4,3,2,0,0,0,0,0,0],
-  [4,3,3,0,0,0,0,0,0],
-  [4,3,3,0,0,0,0,0,0],
-  [4,3,3,1,0,0,0,0,0],
-  [4,3,3,1,0,0,0,0,0],
-  [4,3,3,2,0,0,0,0,0],
-  [4,3,3,2,0,0,0,0,0],
-  [4,3,3,3,1,0,0,0,0],
-  [4,3,3,3,1,0,0,0,0],
-  [4,3,3,3,2,0,0,0,0],
-  [4,3,3,3,2,0,0,0,0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [2, 0, 0, 0, 0, 0, 0, 0, 0],
+  [3, 0, 0, 0, 0, 0, 0, 0, 0],
+  [3, 0, 0, 0, 0, 0, 0, 0, 0],
+  [4, 2, 0, 0, 0, 0, 0, 0, 0],
+  [4, 2, 0, 0, 0, 0, 0, 0, 0],
+  [4, 3, 0, 0, 0, 0, 0, 0, 0],
+  [4, 3, 0, 0, 0, 0, 0, 0, 0],
+  [4, 3, 2, 0, 0, 0, 0, 0, 0],
+  [4, 3, 2, 0, 0, 0, 0, 0, 0],
+  [4, 3, 3, 0, 0, 0, 0, 0, 0],
+  [4, 3, 3, 0, 0, 0, 0, 0, 0],
+  [4, 3, 3, 1, 0, 0, 0, 0, 0],
+  [4, 3, 3, 1, 0, 0, 0, 0, 0],
+  [4, 3, 3, 2, 0, 0, 0, 0, 0],
+  [4, 3, 3, 2, 0, 0, 0, 0, 0],
+  [4, 3, 3, 3, 1, 0, 0, 0, 0],
+  [4, 3, 3, 3, 1, 0, 0, 0, 0],
+  [4, 3, 3, 3, 2, 0, 0, 0, 0],
+  [4, 3, 3, 3, 2, 0, 0, 0, 0],
 ];
 
 // prettier-ignore
 const THIRD_CASTER_SLOTS: number[][] = [
-  [0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0],
-  [2,0,0,0,0,0,0,0,0],
-  [3,0,0,0,0,0,0,0,0],
-  [3,0,0,0,0,0,0,0,0],
-  [3,0,0,0,0,0,0,0,0],
-  [4,2,0,0,0,0,0,0,0],
-  [4,2,0,0,0,0,0,0,0],
-  [4,2,0,0,0,0,0,0,0],
-  [4,3,0,0,0,0,0,0,0],
-  [4,3,0,0,0,0,0,0,0],
-  [4,3,0,0,0,0,0,0,0],
-  [4,3,2,0,0,0,0,0,0],
-  [4,3,2,0,0,0,0,0,0],
-  [4,3,2,0,0,0,0,0,0],
-  [4,3,3,0,0,0,0,0,0],
-  [4,3,3,0,0,0,0,0,0],
-  [4,3,3,0,0,0,0,0,0],
-  [4,3,3,1,0,0,0,0,0],
-  [4,3,3,1,0,0,0,0,0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [2, 0, 0, 0, 0, 0, 0, 0, 0],
+  [3, 0, 0, 0, 0, 0, 0, 0, 0],
+  [3, 0, 0, 0, 0, 0, 0, 0, 0],
+  [3, 0, 0, 0, 0, 0, 0, 0, 0],
+  [4, 2, 0, 0, 0, 0, 0, 0, 0],
+  [4, 2, 0, 0, 0, 0, 0, 0, 0],
+  [4, 2, 0, 0, 0, 0, 0, 0, 0],
+  [4, 3, 0, 0, 0, 0, 0, 0, 0],
+  [4, 3, 0, 0, 0, 0, 0, 0, 0],
+  [4, 3, 0, 0, 0, 0, 0, 0, 0],
+  [4, 3, 2, 0, 0, 0, 0, 0, 0],
+  [4, 3, 2, 0, 0, 0, 0, 0, 0],
+  [4, 3, 2, 0, 0, 0, 0, 0, 0],
+  [4, 3, 3, 0, 0, 0, 0, 0, 0],
+  [4, 3, 3, 0, 0, 0, 0, 0, 0],
+  [4, 3, 3, 0, 0, 0, 0, 0, 0],
+  [4, 3, 3, 1, 0, 0, 0, 0, 0],
+  [4, 3, 3, 1, 0, 0, 0, 0, 0],
 ];
 
 // Pact Magic (Warlock): all slots are the same level, count increases
 // prettier-ignore
 const PACT_MAGIC_SLOTS: number[][] = [
-  [1,0,0,0,0,0,0,0,0],
-  [2,0,0,0,0,0,0,0,0],
-  [0,2,0,0,0,0,0,0,0],
-  [0,2,0,0,0,0,0,0,0],
-  [0,0,2,0,0,0,0,0,0],
-  [0,0,2,0,0,0,0,0,0],
-  [0,0,0,2,0,0,0,0,0],
-  [0,0,0,2,0,0,0,0,0],
-  [0,0,0,0,2,0,0,0,0],
-  [0,0,0,0,2,0,0,0,0],
-  [0,0,0,0,3,0,0,0,0],
-  [0,0,0,0,3,0,0,0,0],
-  [0,0,0,0,3,0,0,0,0],
-  [0,0,0,0,3,0,0,0,0],
-  [0,0,0,0,3,0,0,0,0],
-  [0,0,0,0,3,0,0,0,0],
-  [0,0,0,0,4,0,0,0,0],
-  [0,0,0,0,4,0,0,0,0],
-  [0,0,0,0,4,0,0,0,0],
-  [0,0,0,0,4,0,0,0,0],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0],
+  [2, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 2, 0, 0, 0, 0, 0, 0, 0],
+  [0, 2, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 2, 0, 0, 0, 0, 0, 0],
+  [0, 0, 2, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 2, 0, 0, 0, 0, 0],
+  [0, 0, 0, 2, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 2, 0, 0, 0, 0],
+  [0, 0, 0, 0, 2, 0, 0, 0, 0],
+  [0, 0, 0, 0, 3, 0, 0, 0, 0],
+  [0, 0, 0, 0, 3, 0, 0, 0, 0],
+  [0, 0, 0, 0, 3, 0, 0, 0, 0],
+  [0, 0, 0, 0, 3, 0, 0, 0, 0],
+  [0, 0, 0, 0, 3, 0, 0, 0, 0],
+  [0, 0, 0, 0, 3, 0, 0, 0, 0],
+  [0, 0, 0, 0, 4, 0, 0, 0, 0],
+  [0, 0, 0, 0, 4, 0, 0, 0, 0],
+  [0, 0, 0, 0, 4, 0, 0, 0, 0],
+  [0, 0, 0, 0, 4, 0, 0, 0, 0],
 ];
 
 export const SPELL_SLOT_PRESETS: Record<string, number[][]> = {
-  'Full Caster':   FULL_CASTER_SLOTS,
-  'Half Caster':   HALF_CASTER_SLOTS,
-  'Third Caster':  THIRD_CASTER_SLOTS,
-  'Pact Magic':    PACT_MAGIC_SLOTS,
+  'Full Caster': FULL_CASTER_SLOTS,
+  'Half Caster': HALF_CASTER_SLOTS,
+  'Third Caster': THIRD_CASTER_SLOTS,
+  'Pact Magic': PACT_MAGIC_SLOTS,
 };
 
 
@@ -228,8 +238,20 @@ export function buildSubclassFeatures(
     FormsModule,
     IonButton, IonSpinner,
     IonItem, IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption,
+    StartingEquipmentPickerComponent,
     FeatureMechanicsComponent,
+    FeatureChoiceEditorComponent,
+    FeatureEffectEditorComponent,
+    IonIcon
   ],
+  animations: [
+    trigger('slideIn', [
+      transition(':enter', [
+        style({ transform: 'translateY(-10px)', opacity: 0 }),
+        animate('200ms ease-out', style({ transform: 'translateY(0)', opacity: 1 }))
+      ])
+    ])
+  ]
 })
 export class HomebrewSubclassFormPage implements OnInit {
 
@@ -244,6 +266,7 @@ export class HomebrewSubclassFormPage implements OnInit {
   editId: string | null = null;
   activeTab = 'identidad';
   slotsCustomized = false;
+  featureActiveSection: Record<number, string> = {};
 
   // ---------------------------------------------------------------------------
   // Class list state
@@ -326,12 +349,19 @@ export class HomebrewSubclassFormPage implements OnInit {
   readonly levelRange = Array.from({ length: 20 }, (_, i) => i + 1);
   readonly spellLevelRange = Array.from({ length: 9 }, (_, i) => i + 1);
 
+
   constructor(
     private fb: FormBuilder,
     private homebrewService: HomebrewService,
     private router: Router,
     private route: ActivatedRoute,
-  ) {}
+  ) {
+    addIcons({ 
+      add, trash, sparklesOutline, shieldOutline, listOutline, 
+      trendingUpOutline, sparkles, list, trendingUp, shield,
+      trashOutline, addOutline, flashOutline, hammerOutline
+    });
+  }
 
   // ---------------------------------------------------------------------------
   // Lifecycle
@@ -346,37 +376,37 @@ export class HomebrewSubclassFormPage implements OnInit {
 
     this.form = this.fb.group({
       // Identity
-      name:          ['', Validators.required],
-      description:   [''],
+      name: ['', Validators.required],
+      description: [''],
       parentClassId: [null, Validators.required],
 
 
       // Damage resistances / immunities / condition immunities
-      damageResistances:   this.fb.array(Array(DAMAGE_TYPES.length).fill(null).map(() => new FormControl(false))),
-      damageImmunities:    this.fb.array(Array(DAMAGE_TYPES.length).fill(null).map(() => new FormControl(false))),
+      damageResistances: this.fb.array(Array(DAMAGE_TYPES.length).fill(null).map(() => new FormControl(false))),
+      damageImmunities: this.fb.array(Array(DAMAGE_TYPES.length).fill(null).map(() => new FormControl(false))),
       conditionImmunities: this.fb.array(Array(CONDITIONS.length).fill(null).map(() => new FormControl(false))),
 
-      // Dynamic feature entries
-      features:         this.fb.array([]),
+      // Subclass features
+      features: this.fb.array([]),
       expandedSpellList: this.fb.array([]),
-      resourcePools:    this.fb.array([]),
+      resourcePools: this.fb.array([]),
 
       // Spellcasting
-      spellcastingEnabled:  [false],
-      spellcastingAbility:  [''],   // validators added dynamically when enabled
-      spellcastingType:     [''],   // validators added dynamically when enabled
-      ritualCasting:        [false],
-      preparationStyle:     ['PREPARED'],
+      spellcastingEnabled: [false],
+      spellcastingAbility: [''],   // validators added dynamically when enabled
+      spellcastingType: [''],   // validators added dynamically when enabled
+      ritualCasting: [false],
+      preparationStyle: ['PREPARED'],
       cantripsKnown: this.fb.array(Array(20).fill(null).map(() => new FormControl(0))),
-      spellsKnown:   this.fb.array(Array(20).fill(null).map(() => new FormControl(0))),
-      spellSlots:    this.fb.array(
+      spellsKnown: this.fb.array(Array(20).fill(null).map(() => new FormControl(0))),
+      spellSlots: this.fb.array(
         Array(20).fill(null).map(() =>
           this.fb.array(Array(9).fill(null).map(() => new FormControl(0)))
         )
       ),
 
       // Skill proficiencies
-      skills:           this.fb.group(skillsGroup),
+      skills: this.fb.group(skillsGroup),
       skillChoiceCount: [0, Validators.min(0)],
 
       // Magic Lists
@@ -460,7 +490,7 @@ export class HomebrewSubclassFormPage implements OnInit {
 
   selectSpell(index: number, spell: { id: string; name: string; level: number }) {
     const group = this.expandedSpellList.at(index) as FormGroup;
-    group.patchValue({ 
+    group.patchValue({
       name: spell.name,
       level: spell.level
     });
@@ -520,11 +550,11 @@ export class HomebrewSubclassFormPage implements OnInit {
       next: (subclass: any) => {
         const pId = subclass.parentClassId ?? subclass.parentClass?.id;
         const sf: SubclassFeatures = subclass.subclassFeatures ?? {};
-        
+
         // Patch basic identity fields
         this.form.patchValue({
-          name:          subclass.name          ?? '',
-          description:   subclass.description   ?? '',
+          name: subclass.name ?? '',
+          description: subclass.description ?? '',
           parentClassId: pId ? Number(pId) : null,
           additionalSpellClass: sf.additionalSpellClass ?? '',
         });
@@ -594,44 +624,35 @@ export class HomebrewSubclassFormPage implements OnInit {
         // ---------------------------------------------------------------
         this.features.clear();
         (sf.features ?? sf.subclassFeatureEntries ?? []).forEach((entry: FeatureEntry) => {
-          const optionsGroup = this.fb.group({
-            choiceCount: [entry.options?.choiceCount ?? null],
-            options: this.fb.array((entry.options?.options ?? []).map((opt: any) => this.fb.group({
-              id: [opt.id ?? null],
-              name: [opt.name ?? '', Validators.required],
-              description: [opt.description ?? '', Validators.required],
-              levelRequired: [opt.levelRequired ?? entry.levelRequired, [Validators.required, Validators.min(1), Validators.max(20)]]
-            }))),
-            progression: this.fb.array((entry.options?.progression ?? []).map((p: any) => this.fb.group({
-              level: [p.level, [Validators.required, Validators.min(1), Validators.max(20)]],
-              additionalChoices: [p.additionalChoices, [Validators.required, Validators.min(1)]]
-            })))
-          });
-
           const featureGroup = this.fb.group({
-            id:            [entry.id ?? null],
-            name:          [entry.name,           Validators.required],
-            description:   [entry.description,    Validators.required],
-            levelRequired: [entry.levelRequired,  [Validators.required, Validators.min(1), Validators.max(20)]],
-            hasOptions:    [!!entry.options],
-            options:       optionsGroup,
-            properties:    this.fb.group({})
+            id: [entry.id ?? null],
+            name: [entry.name, Validators.required],
+            description: [entry.description, Validators.required],
+            levelRequired: [entry.levelRequired, [Validators.required, Validators.min(1), Validators.max(20)]],
+            hasOptions: [!!entry.options],
+            options: this.fb.group({
+              type: [entry.options?.type ?? 'SELECT_ONE'],
+              count: [entry.options?.count ?? 1],
+              choices: this.fb.array((entry.options?.choices ?? []).map((c: any) => this.fb.group({
+                id: [c.id],
+                label: [c.label || c.name, Validators.required],
+                description: [c.description, Validators.required],
+                effects: this.fb.array((c.effects ?? []).map((e: any) => this.fb.group(e)))
+              }))),
+              progression: this.fb.array(((entry.options as any)?.progression ?? []).map((p: any) => this.fb.group({
+                level: [p.level, Validators.required],
+                additionalChoices: [p.additionalChoices, Validators.required]
+              })))
+            }),
+            progression: this.fb.array(((entry.progression && entry.progression.length > 0) ? entry.progression : ((entry.options as any)?.progression ?? [])).map((p: any) => this.fb.group({
+              level: [p.level, Validators.required],
+              additionalChoices: [p.additionalChoices ?? 0],
+              description: [p.description || '']
+            }))),
+            properties: this.fb.group({
+              effects: this.fb.array((entry.properties?.effects ?? []).map((e: any) => this.fb.group(e)))
+            })
           });
-
-          if (entry.properties) {
-            const props = entry.properties;
-            const propsGroup = featureGroup.get('properties') as FormGroup;
-            if (props.acCalculation) {
-              propsGroup.addControl('acCalculation', this.fb.group(props.acCalculation));
-            }
-            if (props.acBonus !== undefined) {
-              propsGroup.addControl('acBonus', this.fb.control(props.acBonus));
-              propsGroup.addControl('acBonusArmorOnly', this.fb.control(props.acBonusArmorOnly ?? false));
-            }
-            if (props.resourcePool) {
-              propsGroup.addControl('resourcePool', this.fb.group(props.resourcePool));
-            }
-          }
 
           this.features.push(featureGroup);
         });
@@ -642,8 +663,8 @@ export class HomebrewSubclassFormPage implements OnInit {
         this.expandedSpellList.clear();
         (sf.expandedSpellList ?? []).forEach((entry: ExpandedSpellEntry) => {
           this.expandedSpellList.push(this.fb.group({
-            name:            [entry.name,            Validators.required],
-            level:           [entry.level,           [Validators.required, Validators.min(0), Validators.max(9)]],
+            name: [entry.name, Validators.required],
+            level: [entry.level, [Validators.required, Validators.min(0), Validators.max(9)]],
             preparationType: [entry.preparationType, Validators.required],
           }));
         });
@@ -654,9 +675,9 @@ export class HomebrewSubclassFormPage implements OnInit {
         this.resourcePools.clear();
         (sf.resourcePools ?? []).forEach((pool: ResourcePool) => {
           this.resourcePools.push(this.fb.group({
-            name:       [pool.name,       Validators.required],
-            dieType:    [pool.dieType,    Validators.required],
-            count:      [pool.count,      [Validators.required, Validators.min(1)]],
+            name: [pool.name, Validators.required],
+            dieType: [pool.dieType, Validators.required],
+            count: [pool.count, [Validators.required, Validators.min(1)]],
             rechargeOn: [pool.rechargeOn, Validators.required],
           }));
         });
@@ -673,10 +694,10 @@ export class HomebrewSubclassFormPage implements OnInit {
 
           // Patch scalar spellcasting fields
           this.form.patchValue({
-            spellcastingAbility: sc.ability           ?? '',
-            spellcastingType:    sc.spellcastingType  ?? '',
-            ritualCasting:       sc.ritualCasting     ?? false,
-            preparationStyle:    sc.preparationStyle  ?? 'PREPARED',
+            spellcastingAbility: sc.ability ?? '',
+            spellcastingType: sc.spellcastingType ?? '',
+            ritualCasting: sc.ritualCasting ?? false,
+            preparationStyle: sc.preparationStyle ?? 'PREPARED',
           });
 
           // Restore cantripsKnown (20-element array)
@@ -720,7 +741,7 @@ export class HomebrewSubclassFormPage implements OnInit {
   toggleSpellcasting(): void {
     const enabled = this.form.get('spellcastingEnabled')?.value as boolean;
     const abilityCtrl = this.form.get('spellcastingAbility');
-    const typeCtrl    = this.form.get('spellcastingType');
+    const typeCtrl = this.form.get('spellcastingType');
     if (enabled) {
       abilityCtrl?.setValidators(Validators.required);
       typeCtrl?.setValidators(Validators.required);
@@ -767,21 +788,83 @@ export class HomebrewSubclassFormPage implements OnInit {
 
   addFeature(): void {
     this.features.push(this.fb.group({
-      name:          ['', Validators.required],
-      description:   ['', Validators.required],
+      id: [null],
+      name: ['', Validators.required],
+      description: ['', Validators.required],
       levelRequired: [null, [Validators.required, Validators.min(1), Validators.max(20)]],
-      hasOptions:    [false],
-      options:       this.fb.group({
-        choiceCount: [null],
-        options: this.fb.array([]),
+      actionType: ['PASSIVE'],
+      hasOptions: [false],
+      options: this.fb.group({
+        type: ['SELECT_ONE'],
+        count: [1],
+        choices: this.fb.array([]),
         progression: this.fb.array([])
       }),
-      properties:    this.fb.group({})
+      progression: this.fb.array([]),
+      properties: this.fb.group({
+        acCalculation: this.fb.group({
+          base: [10],
+          stats: [[]],
+          requiresNoArmor: [false]
+        }),
+        acBonus: [0],
+        acBonusArmorOnly: [false],
+        resourcePool: this.fb.group({
+          name: [''],
+          max: [''],
+          reset: ['LONG_REST']
+        }),
+        innateSpells: this.fb.array([]),
+        effects: this.fb.array([])
+      })
     }));
   }
 
   removeFeature(index: number): void {
     this.features.removeAt(index);
+    delete this.featureActiveSection[index];
+  }
+
+  toggleFeatureSection(index: number, section: string): void {
+    if (this.featureActiveSection[index] === section) {
+      delete this.featureActiveSection[index];
+    } else {
+      this.featureActiveSection[index] = section;
+    }
+  }
+
+  addFeatureProgressionRow(featureIndex: number): void {
+    const progression = this.features.at(featureIndex).get('progression') as FormArray;
+    progression.push(this.fb.group({
+      level: [null, [Validators.required, Validators.min(1), Validators.max(20)]],
+      additionalChoices: [1],
+      description: ['']
+    }));
+  }
+
+  removeFeatureProgressionRow(featureIndex: number, progIndex: number): void {
+    const progression = this.features.at(featureIndex).get('progression') as FormArray;
+    progression.removeAt(progIndex);
+  }
+
+  getFeatureEffects(featureIndex: number): FormArray {
+    return (this.features.at(featureIndex).get('properties.effects') as FormArray);
+  }
+
+  addFeatureEffect(featureIndex: number, initialData?: any): void {
+    const effectsArray = this.getFeatureEffects(featureIndex);
+    effectsArray.push(this.fb.group({
+      type: [initialData?.type ?? 'STAT_MODIFIER', Validators.required],
+      target: [initialData?.target ?? '', Validators.required],
+      customTarget: [initialData?.customTarget ?? ''],
+      value: [initialData?.value ?? 1],
+      useProficiencyBonus: [initialData?.useProficiencyBonus ?? false],
+      condition: [initialData?.condition ?? null]
+    }));
+  }
+
+  removeFeatureEffect(featureIndex: number, effectIndex: number): void {
+    this.getFeatureEffects(featureIndex).removeAt(effectIndex);
   }
 
   addFeatureOption(featureIndex: number): void {
@@ -818,8 +901,8 @@ export class HomebrewSubclassFormPage implements OnInit {
 
   addExpandedSpell(): void {
     this.expandedSpellList.push(this.fb.group({
-      name:            ['', Validators.required],
-      level:           [1, [Validators.required, Validators.min(0), Validators.max(9)]],
+      name: ['', Validators.required],
+      level: [1, [Validators.required, Validators.min(0), Validators.max(9)]],
       preparationType: ['ALWAYS_PREPARED', Validators.required],
     }));
   }
@@ -834,9 +917,9 @@ export class HomebrewSubclassFormPage implements OnInit {
 
   addResourcePool(): void {
     this.resourcePools.push(this.fb.group({
-      name:       ['', Validators.required],
-      dieType:    ['d6', Validators.required],
-      count:      [1, [Validators.required, Validators.min(1)]],
+      name: ['', Validators.required],
+      dieType: ['d6', Validators.required],
+      count: [1, [Validators.required, Validators.min(1)]],
       rechargeOn: ['Short Rest', Validators.required],
     }));
   }
@@ -1047,13 +1130,20 @@ export class HomebrewSubclassFormPage implements OnInit {
         cleanProps.acBonusArmorOnly = propertiesValue.acBonusArmorOnly;
       }
       if (propertiesValue.resourcePool) cleanProps.resourcePool = propertiesValue.resourcePool;
+      const properties = {
+        ...cleanProps,
+        effects: propertiesValue.effects || []
+      };
 
       return {
+        id: fg.get('id')?.value,
         name: fg.get('name')?.value,
         description: fg.get('description')?.value,
         levelRequired: fg.get('levelRequired')?.value,
+        actionType: fg.get('actionType')?.value,
         options: optionsValue,
-        properties: Object.keys(cleanProps).length > 0 ? cleanProps : null
+        progression: fg.get('progression')?.value || [],
+        properties: properties
       };
     });
 

@@ -342,155 +342,165 @@
       }
 
       <!-- ================================================================ -->
-      <!-- Tab: Rasgos                                                      -->
+      <!-- Tab: Rasgos (Features)                                           -->
       <!-- ================================================================ -->
       @if (activeTab === 'rasgos') {
         <div class="tab-content" data-testid="tab-content-rasgos">
-          <div class="form-section">
-            <div class="section-header-row">
-              <h2 class="section-title">Rasgos de Subclase <span class="section-badge">opcional</span></h2>
-              <button type="button" class="btn-add" (click)="addFeature()" data-testid="add-feature-button">
-                + Añadir
-              </button>
+          <header class="tab-section-header">
+            <div class="header-info">
+              <h2 class="section-title">Habilidades y Rasgos</h2>
+              <p class="section-subtitle">Define las capacidades únicas que esta subclase otorga a diferentes niveles.</p>
             </div>
+            <button type="button" class="btn-forge-primary" (click)="addFeature()" data-testid="add-feature-button">
+              <ion-icon name="add"></ion-icon> Nuevo Rasgo
+            </button>
+          </header>
 
-            @if (features.length === 0) {
-              <p class="empty-hint" data-testid="features-empty-hint">Sin rasgos de subclase definidos.</p>
+          <div class="features-stack" formArrayName="features">
+            @for (feat of features.controls; track $index; let i = $index) {
+              <div class="feature-master-card" [formGroupName]="i" [attr.data-testid]="'feature-entry-' + i">
+                <div class="card-header-main">
+                  <div class="header-group flex-grow">
+                    <input type="text" class="input-feature-title" formControlName="name" placeholder="Nombre del rasgo (Ej: Golpe Divino)">
+                  </div>
+                  
+                  <div class="header-group level-control">
+                    <label>Tipo</label>
+                    <select class="forge-select-native-small" formControlName="actionType">
+                      <option value="PASSIVE">Pasivo</option>
+                      <option value="ACTION">Acción</option>
+                      <option value="BONUS_ACTION">B.Acción</option>
+                      <option value="REACTION">Reacción</option>
+                      <option value="SPECIAL">Especial</option>
+                      <option value="NO_ACTION">No Acción</option>
+                    </select>
+                  </div>
+
+                  <div class="header-group level-control">
+                    <label>Nivel</label>
+                    <input type="number" class="forge-input-native-small" formControlName="levelRequired" placeholder="1">
+                  </div>
+
+                  <button type="button" class="btn-card-delete" (click)="removeFeature(i)" title="Eliminar rasgo completo">
+                    <ion-icon name="trash"></ion-icon>
+                  </button>
+                </div>
+
+                <div class="card-body-main">
+                  <div class="field-wrapper">
+                    <label class="field-label-small">Descripción del Rasgo</label>
+                    <textarea class="textarea-premium" formControlName="description" rows="2" placeholder="Explica qué hace este rasgo..."></textarea>
+                  </div>
+
+                  <!-- Mechanics Toolbar -->
+                  <div class="mechanics-toolbar-container">
+                    <div class="mechanics-toolbar">
+                      <button type="button" class="btn-tool" (click)="toggleFeatureSection(i, 'mechanics')" [class.active]="featureActiveSection[i] === 'mechanics'" title="Mecánicas (CA, Recursos)">
+                        <ion-icon name="shield-outline"></ion-icon>
+                        <span>Mecánicas</span>
+                      </button>
+                      <button type="button" class="btn-tool" (click)="toggleFeatureSection(i, 'options')" [class.active]="featureActiveSection[i] === 'options'" title="Opciones y Elecciones">
+                        <ion-icon name="list-outline"></ion-icon>
+                        <span>Opciones</span>
+                      </button>
+                      <button type="button" class="btn-tool" (click)="toggleFeatureSection(i, 'effects')" [class.active]="featureActiveSection[i] === 'effects'" title="Automatización (Proficiencias, Sentidos)">
+                        <ion-icon name="sparkles-outline"></ion-icon>
+                        <span>Efectos</span>
+                      </button>
+                      <button type="button" class="btn-tool" (click)="toggleFeatureSection(i, 'progression')" [class.active]="featureActiveSection[i] === 'progression'" title="Progresión por Nivel">
+                        <ion-icon name="trending-up-outline"></ion-icon>
+                        <span>Progresión</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="contextual-panels-stack">
+                    <!-- Mechanics Panel (AC & Resources) -->
+                    @if (featureActiveSection[i] === 'mechanics') {
+                      <div class="context-panel mechanics-panel" [@slideIn]>
+                        <app-feature-mechanics [parentForm]="$any(feat)"></app-feature-mechanics>
+                      </div>
+                    }
+
+                    <!-- Choice Engine Panel -->
+                    @if (featureActiveSection[i] === 'options') {
+                      <div class="context-panel options-panel" [@slideIn]>
+                        <div class="panel-header-mini">
+                          <label class="toggle-switch-mini">
+                            <input type="checkbox" formControlName="hasOptions">
+                            <span class="slider-mini"></span>
+                            <span class="toggle-label-mini">Habilitar opciones seleccionables</span>
+                          </label>
+                        </div>
+                        @if (feat.get('hasOptions')?.value) {
+                          <app-feature-choice-editor [parentForm]="$any(feat).get('options')"></app-feature-choice-editor>
+                        }
+                      </div>
+                    }
+
+                    <!-- Effects Panel -->
+                    @if (featureActiveSection[i] === 'effects') {
+                      <div class="context-panel effects-panel" [@slideIn]>
+                        <app-feature-effect-editor
+                          [effectsArray]="getFeatureEffects(i)"
+                          [label]="'Automatización de Atributos y Sentidos'"
+                          (onAddEffect)="addFeatureEffect(i)"
+                          (onRemoveEffect)="removeFeatureEffect(i, $event)">
+                        </app-feature-effect-editor>
+                      </div>
+                    }
+
+                    <!-- Progression Panel -->
+                    @if (featureActiveSection[i] === 'progression') {
+                      <div class="context-panel progression-panel" [@slideIn]>
+                        <div class="progression-editor-header">
+                          <h3>Progresión del Rasgo</h3>
+                          <p>Define cómo escala este rasgo en niveles superiores.</p>
+                        </div>
+                        <div class="progression-table-wrapper">
+                          <table class="forge-table-mini">
+                            <thead>
+                              <tr>
+                                <th>Nivel</th>
+                                <th>Nº Elecciones</th>
+                                <th>Valor/Bono</th>
+                                <th></th>
+                              </tr>
+                            </thead>
+                            <tbody [formArrayName]="'progression'">
+                              @for (p of $any(feat).get('progression').controls; track $index; let pi = $index) {
+                                <tr [formGroupName]="pi">
+                                  <td><input type="number" class="forge-input-native-small" formControlName="level" placeholder="Nivel"></td>
+                                  <td><input type="number" class="forge-input-native-small" formControlName="additionalChoices" placeholder="+1"></td>
+                                  <td><input type="text" class="forge-input-native-small" formControlName="description" placeholder="Ej: +1 CA"></td>
+                                  <td>
+                                    <button type="button" class="btn-icon-delete" (click)="removeFeatureProgressionRow(i, pi)">
+                                      <ion-icon name="trash"></ion-icon>
+                                    </button>
+                                  </td>
+                                </tr>
+                              }
+                            </tbody>
+                          </table>
+                          <button type="button" class="btn-text-add" (click)="addFeatureProgressionRow(i)">
+                            + Añadir Milestone de Progresión
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
             }
 
-            <div formArrayName="features">
-              @for (feat of features.controls; track $index; let i = $index) {
-                <div class="entry-card" [formGroupName]="i" [attr.data-testid]="'feature-entry-' + i">
-
-                  <div class="field-group">
-                    <label class="field-label">Nombre <span class="required">*</span></label>
-                    <ion-input
-                      class="forge-input"
-                      formControlName="name"
-                      placeholder="Ej: Magia de Subclase, Golpe Arcano…"
-                      [attr.data-testid]="'feature-name-' + i"
-                      [class.input-error]="$any(feat).get('name')?.invalid && $any(feat).get('name')?.touched">
-                    </ion-input>
-                    @if ($any(feat).get('name')?.invalid && $any(feat).get('name')?.touched) {
-                      <p class="error-message" [attr.data-testid]="'feature-name-error-' + i">El nombre del rasgo es obligatorio.</p>
-                    }
-                  </div>
-
-                  <div class="field-group">
-                    <label class="field-label">Descripción <span class="required">*</span></label>
-                    <ion-textarea
-                      class="forge-input forge-textarea"
-                      formControlName="description"
-                      placeholder="Describe el efecto del rasgo…"
-                      rows="3"
-                      [attr.data-testid]="'feature-description-' + i"
-                      [class.input-error]="$any(feat).get('description')?.invalid && $any(feat).get('description')?.touched">
-                    </ion-textarea>
-                    @if ($any(feat).get('description')?.invalid && $any(feat).get('description')?.touched) {
-                      <p class="error-message" [attr.data-testid]="'feature-description-error-' + i">La descripción es obligatoria.</p>
-                    }
-                  </div>
-
-                  <div class="field-group">
-                    <label class="field-label">Nivel Requerido <span class="required">*</span></label>
-                    <ion-input
-                      class="forge-input"
-                      type="number"
-                      formControlName="levelRequired"
-                      placeholder="1"
-                      [attr.data-testid]="'feature-level-' + i"
-                      [class.input-error]="$any(feat).get('levelRequired')?.invalid && $any(feat).get('levelRequired')?.touched">
-                    </ion-input>
-                    @if ($any(feat).get('levelRequired')?.invalid && $any(feat).get('levelRequired')?.touched) {
-                      <p class="error-message" [attr.data-testid]="'feature-level-error-' + i">El nivel debe estar entre 1 y 20.</p>
-                    }
-                  </div>
-
-                  <div class="field-group checkbox-group">
-                    <label class="spellcasting-toggle-label">
-                      <input type="checkbox" formControlName="hasOptions" [attr.data-testid]="'feature-has-options-' + i">
-                      <span>¿Tiene opciones seleccionables? (ej: Invocaciones)</span>
-                    </label>
-                  </div>
-
-                  @if ($any(feat).get('hasOptions')?.value) {
-                    <div class="options-pool-section" [formGroup]="$any(feat).get('options')">
-                      <div class="field-group">
-                        <label class="field-label">Cantidad de opciones inicial <span class="required">*</span></label>
-                        <ion-input class="forge-input" type="number" formControlName="choiceCount"
-                          placeholder="2" [attr.data-testid]="'feature-choice-count-' + i">
-                        </ion-input>
-                      </div>
-
-                      <!-- Progression section -->
-                      <div class="progression-list">
-                        <div class="section-header-row">
-                          <h3 class="subsection-title">Progresión de elecciones</h3>
-                          <button type="button" class="btn-add btn-small" (click)="addFeatureProgression(i)"
-                            [attr.data-testid]="'add-progression-' + i">
-                            + Añadir Nivel
-                          </button>
-                        </div>
-
-                        <div formArrayName="progression">
-                          @for (p of $any(feat).get('options.progression').controls; track $pIndex; let $pIndex = $index) {
-                            <div class="progression-entry-row" [formGroup]="$any(p)">
-                              <div class="field-group">
-                                <label class="field-label">A Nivel</label>
-                                <ion-input class="forge-input" type="number" formControlName="level" placeholder="5"></ion-input>
-                              </div>
-                              <div class="field-group">
-                                <label class="field-label">+ Elecciones</label>
-                                <ion-input class="forge-input" type="number" formControlName="additionalChoices" placeholder="1"></ion-input>
-                              </div>
-                              <button type="button" class="btn-remove-prog" (click)="removeFeatureProgression(i, $pIndex)">×</button>
-                            </div>
-                          }
-                        </div>
-                      </div>
-
-                      <div class="options-list">
-                        <div class="section-header-row">
-                          <h3 class="subsection-title">Opciones disponibles</h3>
-                          <button type="button" class="btn-add btn-small" (click)="addFeatureOption(i)"
-                            [attr.data-testid]="'add-option-' + i">
-                            + Añadir Opción
-                          </button>
-                        </div>
-
-                        <div formArrayName="options">
-                          @for (opt of $any(feat).get('options.options').controls; track $optIndex; let $optIndex = $index) {
-                            <div class="option-entry-card" [formGroup]="$any(opt)">
-                              <div class="option-entry-grid">
-                                <div class="field-group">
-                                  <label class="field-label">Nombre de la opción <span class="required">*</span></label>
-                                  <ion-input class="forge-input" formControlName="name" placeholder="Ej: Agonizing Blast"></ion-input>
-                                </div>
-                                <div class="field-group">
-                                  <label class="field-label">Nivel Req. <span class="required">*</span></label>
-                                  <ion-input class="forge-input" type="number" formControlName="levelRequired" placeholder="1"></ion-input>
-                                </div>
-                              </div>
-                              <div class="field-group">
-                                <label class="field-label">Descripción de la opción <span class="required">*</span></label>
-                                <ion-textarea class="forge-input forge-textarea" formControlName="description" rows="2"></ion-textarea>
-                              </div>
-                              <button type="button" class="btn-remove btn-small" (click)="removeFeatureOption(i, $optIndex)">Eliminar Opción</button>
-                            </div>
-                          }
-                        </div>
-                      </div>
-                    </div>
-                  }
-
-                  <app-feature-mechanics [parentForm]="$any(feat)"></app-feature-mechanics>
-
-                  <button type="button" class="btn-remove" (click)="removeFeature(i)"
-                    [attr.data-testid]="'remove-feature-' + i">Eliminar Rasgo</button>
-
-                </div>
-              }
-            </div>
+            @if (features.length === 0) {
+              <div class="empty-state-large" (click)="addFeature()">
+                <ion-icon name="sparkles-outline"></ion-icon>
+                <h3>Tu subclase está vacía</h3>
+                <p>Comienza a añadir rasgos para darle personalidad y poder a tu creación.</p>
+                <button type="button" class="btn-forge-outline">Añadir Primer Rasgo</button>
+              </div>
+            }
           </div>
         </div>
       }

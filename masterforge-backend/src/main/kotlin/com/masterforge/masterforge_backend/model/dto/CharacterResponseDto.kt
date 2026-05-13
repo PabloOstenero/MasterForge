@@ -2,6 +2,7 @@ package com.masterforge.masterforge_backend.model.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.masterforge.masterforge_backend.model.entity.*
+import com.masterforge.masterforge_backend.util.*
 import java.util.UUID
 
 // Simplified DTO for User in Character response to avoid recursion
@@ -102,14 +103,14 @@ data class DndClassResponseDto(
     val classFeatures: Map<String, Any> = emptyMap()
 ) {
     companion object {
-        fun fromEntity(dndClass: DndClass, characterLevel: Int): DndClassResponseDto {
+        fun fromEntity(dndClass: DndClass, characterLevel: Int = 0): DndClassResponseDto {
             return DndClassResponseDto(
                 id = dndClass.id!!,
                 name = dndClass.name,
                 hitDie = dndClass.hitDie,
                 savingThrows = dndClass.savingThrows ?: emptyMap(),
                 features = dndClass.features
-                    .map { ClassFeatureDto(it.id, it.name, it.description, it.levelRequired, dndClass.id!!, it.options, it.properties) },
+                    .map { ClassFeatureDto(it.id, it.name, it.description, it.levelRequired, dndClass.id!!, null, it.options, it.properties) },
                 classFeatures = dndClass.classFeatures ?: emptyMap()
             )
         }
@@ -119,14 +120,16 @@ data class DndClassResponseDto(
 data class SubclassResponseDto(
     val id: Int,
     val name: String,
+    val features: List<ClassFeatureDto> = emptyList(),
     val subclassFeatures: Map<String, Any> = emptyMap()
 ) {
     companion object {
         fun fromEntity(subclass: DndSubclass, characterLevel: Int): SubclassResponseDto {
-            // Return all subclass features without filtering by level
             return SubclassResponseDto(
                 id = subclass.id!!,
                 name = subclass.name,
+                features = subclass.features
+                    .map { ClassFeatureDto(it.id, it.name, it.description, it.levelRequired, null, subclass.id!!, it.options, it.properties) },
                 subclassFeatures = subclass.subclassFeatures ?: emptyMap()
             )
         }
@@ -235,6 +238,31 @@ data class CharacterResponseDto(
 ) {
     companion object {
         fun fromEntity(character: Character): CharacterResponseDto {
+            val effects = FeatureChoiceEngine.getActiveEffects(character)
+            
+            var speed = character.speed
+            var bonusMaxHp = character.bonusMaxHp
+            var str = character.baseStr
+            var dex = character.baseDex
+            var con = character.baseCon
+            var int = character.baseInt
+            var wis = character.baseWis
+            var cha = character.baseCha
+
+            effects.forEach { effect ->
+                val value = (effect.value as? Number)?.toInt() ?: 0
+                when (effect.target) {
+                    "speed" -> speed += value
+                    "bonusMaxHp" -> bonusMaxHp += value
+                    "baseStr" -> str += value
+                    "baseDex" -> dex += value
+                    "baseCon" -> con += value
+                    "baseInt" -> int += value
+                    "baseWis" -> wis += value
+                    "baseCha" -> cha += value
+                }
+            }
+
             val userSimpleDto = UserSimpleDto(
                 id = character.user.id!!,
                 name = character.user.name,
@@ -248,8 +276,8 @@ data class CharacterResponseDto(
                 maxHp = character.maxHp,
                 currentHp = character.currentHp,
                 tempHp = character.tempHp,
-                bonusMaxHp = character.bonusMaxHp,
-                speed = character.speed,
+                bonusMaxHp = bonusMaxHp,
+                speed = speed,
                 hitDiceTotal = character.hitDiceTotal,
                 hitDiceSpent = character.hitDiceSpent,
                 background = character.background,
@@ -260,12 +288,12 @@ data class CharacterResponseDto(
                 ep = character.ep,
                 gp = character.gp,
                 pp = character.pp,
-                baseStr = character.baseStr,
-                baseDex = character.baseDex,
-                baseCon = character.baseCon,
-                baseInt = character.baseInt,
-                baseWis = character.baseWis,
-                baseCha = character.baseCha,
+                baseStr = str,
+                baseDex = dex,
+                baseCon = con,
+                baseInt = int,
+                baseWis = wis,
+                baseCha = cha,
                 savingThrowsProficiencies = character.savingThrowsProficiencies ?: emptyMap(),
                 skillProficiencies = character.skillProficiencies ?: emptyMap(),
                 spellSlots = character.spellSlots ?: emptyMap(),

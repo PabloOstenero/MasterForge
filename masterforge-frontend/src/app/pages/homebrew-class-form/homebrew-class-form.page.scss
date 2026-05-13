@@ -739,20 +739,430 @@ $red:         #C62828;
   vertical-align: middle;
 }
 
-.btn-configure {  background: rgba(197, 160, 89, 0.12);
-  color: $gold;
-  border: 1px solid rgba(197, 160, 89, 0.35);
-  border-radius: 8px;
-  padding: 6px 16px;
-  font-size: 0.85rem;
-  font-weight: bold;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s, border-color 0.15s;
+// ─── Refactored Features UI ───────────────────────────────────────────────────
+
+.tab-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+
+  .section-title {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #c1994c;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .section-subtitle {
+    margin: 0.25rem 0 0;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.4);
+  }
+}
+
+.features-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.feature-master-card {
+  background: rgba(30, 30, 40, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: border-color 0.2s, transform 0.2s;
 
   &:hover {
-    background: rgba(197, 160, 89, 0.22);
-    border-color: $gold;
+    border-color: rgba(193, 153, 76, 0.2);
+  }
+}
+
+.card-header-main {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+
+  .header-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    label {
+      font-size: 0.65rem;
+      color: rgba(193, 153, 76, 0.8);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+  }
+  
+  .level-control {
+    width: 70px;
+  }
+}
+
+.input-feature-title {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  width: 100%;
+  outline: none;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.2);
+  }
+}
+
+// ─── Mechanics Toolbar & Contextual Panels ────────────────────────────────────
+.mechanics-toolbar-container {
+  margin: 1.5rem 0 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mechanics-toolbar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px;
+  
+  &::-webkit-scrollbar { display: none; }
+}
+
+.btn-tool {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+
+  ion-icon {
+    font-size: 1.1rem;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.8);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+
+  &.active {
+    background: rgba(193, 153, 76, 0.12);
+    color: #c1994c;
+    border-color: rgba(193, 153, 76, 0.4);
+    box-shadow: 0 0 15px rgba(193, 153, 76, 0.1);
+  }
+}
+
+.contextual-panels-stack {
+  position: relative;
+  min-height: 50px;
+}
+
+.context-panel {
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  margin-bottom: 1rem;
+}
+
+.panel-header-mini {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.toggle-switch-mini {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+
+  input { display: none; }
+
+  .slider-mini {
+    width: 32px;
+    height: 18px;
+    background: #333;
+    border-radius: 20px;
+    position: relative;
+    transition: 0.3s;
+
+    &::after {
+      content: '';
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: #888;
+      border-radius: 50%;
+      top: 3px;
+      left: 3px;
+      transition: 0.3s;
+    }
+  }
+
+  input:checked + .slider-mini {
+    background: rgba(193, 153, 76, 0.4);
+    &::after {
+      left: 17px;
+      background: #c1994c;
+    }
+  }
+
+  .toggle-label-mini {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+.progression-editor-header {
+  margin-bottom: 1rem;
+  h3 {
+    font-size: 0.9rem;
+    color: #c1994c;
+    margin: 0;
+  }
+  p {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+    margin: 4px 0 0;
+  }
+}
+
+.progression-table-wrapper {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 0.5rem;
+}
+
+.forge-table-mini {
+  width: 100%;
+  border-collapse: collapse;
+  
+  th {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.3);
+    padding: 8px;
+    text-align: left;
+  }
+  
+  td {
+    padding: 6px;
+  }
+}
+
+.btn-icon-delete {
+  background: none;
+  border: none;
+  color: rgba(255, 0, 0, 0.3);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: color 0.2s;
+  
+  &:hover { color: #ff4444; }
+}
+
+.card-body-main {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.field-label-small {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.textarea-premium {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+  border-radius: 6px;
+  padding: 1rem;
+  width: 100%;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  outline: none;
+  resize: vertical;
+
+  &:focus {
+    border-color: rgba(193, 153, 76, 0.4);
+    background: rgba(0, 0, 0, 0.25);
+  }
+}
+
+.feature-config-row {
+  background: rgba(193, 153, 76, 0.03);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(193, 153, 76, 0.08);
+}
+
+/* Premium Toggle Switch */
+.toggle-switch {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  position: relative;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+
+    &:checked + .slider {
+      background: #c1994c;
+      &:before { transform: translateX(20px); }
+    }
+  }
+
+  .slider {
+    width: 44px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    position: relative;
+    transition: 0.3s;
+
+    &:before {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.3s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  .toggle-label {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+}
+
+.empty-state-large {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem;
+  text-align: center;
+  background: rgba(193, 153, 76, 0.02);
+  border: 2px dashed rgba(193, 153, 76, 0.15);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  ion-icon {
+    font-size: 4rem;
+    color: #c1994c;
+    opacity: 0.5;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #fff;
+  }
+
+  p {
+    margin: 0.5rem 0 2rem;
+    color: rgba(255, 255, 255, 0.4);
+    max-width: 400px;
+  }
+
+  &:hover {
+    background: rgba(193, 153, 76, 0.04);
+    border-color: rgba(193, 153, 76, 0.3);
+    transform: translateY(-4px);
+  }
+}
+
+.btn-forge-outline {
+  background: transparent;
+  border: 1px solid #c1994c;
+  color: #c1994c;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #c1994c;
+    color: #000;
+  }
+}
+
+.btn-forge-primary {
+  background: linear-gradient(135deg, #c1994c, #8a6d35);
+  color: #000;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(193, 153, 76, 0.3);
+
+  &:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+  }
+}
+
+.btn-card-delete {
+  background: rgba(255, 80, 80, 0.1);
+  color: #ff5050;
+  border: 1px solid rgba(255, 80, 80, 0.2);
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #ff5050;
+    color: white;
   }
 }
 

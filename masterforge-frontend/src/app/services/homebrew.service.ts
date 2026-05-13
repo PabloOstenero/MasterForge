@@ -153,12 +153,12 @@ export class HomebrewService {
     return this.http.put<any>(`/api/dnd-classes/${id}`, { ...dto, authorId });
   }
 
-  createClassFeature(dto: { name: string; description: string; levelRequired: number; classId: number; options?: any; properties?: any }): Observable<any> {
+  createClassFeature(dto: { name: string; description: string; levelRequired: number; actionType?: string; classId: number; options?: any; progression?: any; properties?: any }): Observable<any> {
     const { classId, ...rest } = dto;
     return this.http.post<any>('/api/class-features', { ...rest, dndClassId: classId });
   }
 
-  updateClassFeature(id: number, dto: { name: string; description: string; levelRequired: number; classId: number; options?: any; properties?: any }): Observable<any> {
+  updateClassFeature(id: number, dto: { name: string; description: string; levelRequired: number; actionType?: string; classId: number; options?: any; progression?: any; properties?: any }): Observable<any> {
     const { classId, ...rest } = dto;
     return this.http.put<any>(`/api/class-features/${id}`, { ...rest, dndClassId: classId });
   }
@@ -195,11 +195,11 @@ export class HomebrewService {
     return this.http.put<any>(`/api/dnd-races/${id}`, { ...dto, authorId });
   }
 
-  createRaceTrait(dto: { name: string; description: string; levelRequired: number; raceId: number; options?: any; properties?: any }): Observable<any> {
+  createRaceTrait(dto: { name: string; description: string; levelRequired: number; actionType?: string; raceId: number; options?: any; progression?: any; properties?: any }): Observable<any> {
     return this.http.post<any>('/api/race-traits', dto);
   }
 
-  updateRaceTrait(id: number, dto: { name: string; description: string; levelRequired: number; raceId: number; options?: any; properties?: any }): Observable<any> {
+  updateRaceTrait(id: number, dto: { name: string; description: string; levelRequired: number; actionType?: string; raceId: number; options?: any; progression?: any; properties?: any }): Observable<any> {
     return this.http.put<any>(`/api/race-traits/${id}`, dto);
   }
 

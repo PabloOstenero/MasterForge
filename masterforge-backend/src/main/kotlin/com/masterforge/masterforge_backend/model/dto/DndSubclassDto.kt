@@ -8,5 +8,6 @@ data class DndSubclassDto(
     val description: String,
     val parentClassId: Int,
     val authorId: UUID?,
-    val subclassFeatures: Map<String, Any>? = null
+    val subclassFeatures: Map<String, Any>? = null, // Deprecated
+    val features: List<ClassFeatureDto>? = null
 )

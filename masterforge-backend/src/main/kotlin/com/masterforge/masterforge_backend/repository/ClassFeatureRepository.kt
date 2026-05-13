@@ -5,4 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface ClassFeatureRepository : JpaRepository<ClassFeature, Long>
+interface ClassFeatureRepository : JpaRepository<ClassFeature, Int> {
+    fun findByDndClassId(classId: Int): List<ClassFeature>
+    fun findByDndSubclassId(subclassId: Int): List<ClassFeature>
+}

@@ -27,6 +27,9 @@ data class DndSubclass(
     @JoinColumn(name = "author_id", nullable = true)
     val author: User? = null,
 
+    @OneToMany(mappedBy = "dndSubclass", cascade = [CascadeType.ALL])
+    val features: MutableList<ClassFeature> = mutableListOf(),
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "subclass_features", columnDefinition = "jsonb", nullable = true)
     val subclassFeatures: Map<String, Any>? = null

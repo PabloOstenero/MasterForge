@@ -48,15 +48,18 @@ export interface SenseObject {
   passivePerception?: number;
 }
 
-export interface FeatureOptionProgression {
+export interface FeatureProgression {
   level: number;
-  additionalChoices: number;
+  additionalChoices?: number;
+  resourceMax?: number | string;
+  bonus?: number;
+  description?: string;
 }
 
 export interface FeatureOptionPool {
-  choiceCount: number;
-  options: FeatureEntry[];
-  progression?: FeatureOptionProgression[];
+  type?: 'SELECT_ONE' | 'SELECT_MANY' | 'BOOLEAN';
+  count?: number;
+  choices?: { id?: string; label: string; description: string; effects?: any[] }[];
 }
 
 export interface FeatureEntry {
@@ -64,7 +67,9 @@ export interface FeatureEntry {
   name: string;
   description: string;
   levelRequired: number;
+  actionType?: 'PASSIVE' | 'ACTION' | 'BONUS_ACTION' | 'REACTION' | 'SPECIAL' | 'NO_ACTION';
   options?: FeatureOptionPool;
+  progression?: FeatureProgression[];
   properties?: {
     acCalculation?: {
       base: number;
@@ -76,8 +81,10 @@ export interface FeatureEntry {
     resourcePool?: {
       name: string;
       max: number | string;
-      reset: 'SHORT_REST' | 'LONG_REST';
+      reset: 'SHORT_REST' | 'LONG_REST' | 'DAWN' | 'NONE';
     };
+    innateSpells?: any[]; // Array of InnateSpell objects
+    effects?: any[];
   };
 }
 

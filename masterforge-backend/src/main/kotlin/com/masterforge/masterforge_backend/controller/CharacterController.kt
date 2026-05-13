@@ -6,6 +6,7 @@ import com.masterforge.masterforge_backend.model.dto.CharacterSummaryDto
 import com.masterforge.masterforge_backend.model.dto.SpellDto
 import com.masterforge.masterforge_backend.model.entity.*
 import com.masterforge.masterforge_backend.repository.*
+import com.masterforge.masterforge_backend.util.FeatureChoiceEngine
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
@@ -772,7 +773,41 @@ class CharacterController(
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
 
-        // Update basic stats
+        // 1. Identify which class/subclass is being leveled and validate feature choices
+        val targetClass = if (dto.multiclassId != null) {
+            dndClassRepository.findById(dto.multiclassId).orElse(null)
+        } else if (dto.classToLevelId != null) {
+            dndClassRepository.findById(dto.classToLevelId).orElse(null)
+        } else {
+            character.dndClass
+        }
+
+        val targetSubclass = if (dto.subclassId != null) {
+            dndSubclassRepository.findById(dto.subclassId).orElse(null)
+        } else {
+            // Check if existing class level already has a subclass
+            character.classLevels.find { it.dndClass.id == targetClass?.id }?.subclass
+        }
+
+        val currentClassLevel = character.classLevels.find { it.dndClass.id == targetClass?.id }?.level ?: 0
+        val newClassLevel = if (dto.multiclassId != null) 1 else currentClassLevel + 1
+
+        val newFeatures = mutableListOf<ClassFeature>()
+        targetClass?.features?.filter { it.levelRequired == newClassLevel }?.let { newFeatures.addAll(it) }
+        targetSubclass?.features?.filter { it.levelRequired == newClassLevel }?.let { newFeatures.addAll(it) }
+
+        // Validate each feature choice
+        newFeatures.forEach { feature ->
+            if (feature.options != null) {
+                val featureKey = feature.id?.toString() ?: feature.name
+                val userChoice = dto.choicesJson[featureKey]
+                if (!FeatureChoiceEngine.validateChoices(feature, userChoice)) {
+                    throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid choice for feature: ${feature.name}")
+                }
+            }
+        }
+
+        // 2. Update basic stats
         val updatedCharacter = character.copy(
             level = character.level + 1,
             maxHp = character.maxHp + dto.hpBonus,

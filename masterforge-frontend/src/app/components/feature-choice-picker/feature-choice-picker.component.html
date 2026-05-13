@@ -1,0 +1,59 @@
+<div class="picker-container">
+  <div class="feature-info">
+    <h3 class="feature-name">{{ feature.name }}</h3>
+    <p class="feature-description">{{ feature.description }}</p>
+  </div>
+
+  @if (type === 'BOOLEAN') {
+    <div class="boolean-toggle-row">
+      <ion-toggle [(ngModel)]="booleanVal" (ionChange)="onBooleanChange()">
+        Activar este rasgo
+      </ion-toggle>
+    </div>
+  }
+
+  @if (type === 'SELECT_ONE' || type === 'SELECT_MANY') {
+    <div class="choice-instructions">
+      @if (type === 'SELECT_ONE') {
+        Selecciona una opción:
+      } @else {
+        Selecciona {{ count }} opciones ({{ selectedIds.length }}/{{ count }}):
+      }
+    </div>
+
+    <div class="choices-grid">
+      @for (choice of choices; track choice.id) {
+        <div class="choice-item-card" 
+          [class.choice-item-card--selected]="isSelected(choice.id)"
+          (click)="toggleChoice(choice.id)">
+          
+          <div class="choice-item-header">
+            <div class="choice-item-title">{{ choice.label }}</div>
+            <div class="choice-check">
+              @if (type === 'SELECT_ONE') {
+                <ion-icon [name]="isSelected(choice.id) ? 'radio-button-on' : 'radio-button-off'"></ion-icon>
+              } @else {
+                <ion-icon [name]="isSelected(choice.id) ? 'checkmark-circle' : 'square-outline'"></ion-icon>
+              }
+            </div>
+          </div>
+
+          <div class="choice-item-description">
+            {{ choice.description }}
+          </div>
+
+          @if (choice.effects?.length > 0) {
+            <div class="choice-item-effects">
+              @for (effect of choice.effects; track effect) {
+                <div class="effect-badge">
+                  <ion-icon name="flash-outline"></ion-icon>
+                  <span>{{ effect.target }}: {{ effect.value > 0 ? '+' : '' }}{{ effect.value }}</span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
