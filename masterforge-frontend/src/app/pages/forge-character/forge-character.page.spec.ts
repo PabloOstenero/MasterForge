@@ -1132,7 +1132,8 @@ describe('Property 12: HP calculation correctness', () => {
             finalScores: { str: 10, dex: 10, con: finalCon, int: 10, wis: 10, cha: 10 },
             calculatedHp: hp,
             equipmentSelections: {},
-            selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: []
+            selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [],
+            multiclasses: [], featureSelections: {},
           };
           const finalScores = { str: 10, dex: 10, con: finalCon, int: 10, wis: 10, cha: 10 };
           const dto = buildCharacterDto(formData, finalScores, hp, 'user-1');
@@ -1194,7 +1195,8 @@ describe('Property 13: CharacterDto defaults are always fixed', () => {
             finalScores: { str: 10, dex: 10, con: finalCon, int: 10, wis: 10, cha: 10 },
             calculatedHp: hp,
             equipmentSelections: {},
-            selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: []
+            selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [],
+            multiclasses: [], featureSelections: {},
           };
           const finalScores = { str: 10, dex: 10, con: finalCon, int: 10, wis: 10, cha: 10 };
           const dto = buildCharacterDto(formData, finalScores, hp, 'user-1');
@@ -1236,6 +1238,7 @@ describe('Property 13: CharacterDto defaults are always fixed', () => {
             manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+      multiclasses: [], featureSelections: {},
             equipmentSelections: {}
           };
           const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
@@ -1272,6 +1275,7 @@ describe('Property 14: DTO user ID matches JWT token', () => {
             manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+      multiclasses: [], featureSelections: {},
             equipmentSelections: {}
           };
           const dto = buildCharacterDto(formData, formData.finalScores, 8, userId);
@@ -1301,6 +1305,7 @@ describe('Property 14: DTO user ID matches JWT token', () => {
             manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+      multiclasses: [], featureSelections: {},
             equipmentSelections: {}
           };
           const dto = buildCharacterDto(formData, formData.finalScores, 8, extractedId);
@@ -1320,6 +1325,7 @@ describe('Property 14: DTO user ID matches JWT token', () => {
       manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+      multiclasses: [], featureSelections: {},
       equipmentSelections: {}
     };
     const dto = buildCharacterDto(formData, formData.finalScores, 8, null);
@@ -1349,6 +1355,7 @@ describe('Property 15: DTO saving throws match selected class', () => {
             manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+      multiclasses: [], featureSelections: {},
             equipmentSelections: {}
           };
           const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
@@ -1368,6 +1375,7 @@ describe('Property 15: DTO saving throws match selected class', () => {
       manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+      multiclasses: [], featureSelections: {},
       equipmentSelections: {}
     };
     const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
@@ -1395,6 +1403,7 @@ describe('Property 16: DTO skill proficiencies match selected skills', () => {
             manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedSkills, finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
             selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+      multiclasses: [], featureSelections: {},
             equipmentSelections: {}
           };
           const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
@@ -1426,6 +1435,7 @@ describe('Property 16: DTO skill proficiencies match selected skills', () => {
       manualScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedSkills: [], finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+      multiclasses: [], featureSelections: {},
       equipmentSelections: {}
     };
     const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
@@ -1457,6 +1467,7 @@ describe('ForgeCharacterPage: submit flow', () => {
       selectedSkills: ['athletics', 'perception'],
       finalScores: { str: 16, dex: 12, con: 14, int: 10, wis: 10, cha: 8 },
       selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 12,
+      multiclasses: [], featureSelections: {},
       equipmentSelections: {}
     };
     component.currentStep = 5;
@@ -1594,6 +1605,7 @@ function makeFormDataWithClass(cls: any): CharacterFormData {
     selectedSkills: [],
     finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
     selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+    multiclasses: [], featureSelections: {},
   };
 }
 
@@ -1866,6 +1878,7 @@ describe('buildCharacterDto: resolveInventory integration', () => {
     selectedSkills: [],
     finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
     selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+    multiclasses: [], featureSelections: {},
   };
 
   it('should include correct inventory lines for structured equipment with fixed grants only', () => {
@@ -1992,6 +2005,7 @@ describe('ForgeCharacterPage: submitCharacter with structured equipment', () => 
       selectedSkills: [],
       finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+      multiclasses: [], featureSelections: {},
     };
 
     component.submitCharacter();
@@ -2019,6 +2033,7 @@ describe('ForgeCharacterPage: submitCharacter with structured equipment', () => 
       selectedSkills: [],
       finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+      multiclasses: [], featureSelections: {},
     };
 
     component.submitCharacter();
@@ -2043,6 +2058,7 @@ describe('ForgeCharacterPage: submitCharacter with structured equipment', () => 
       selectedSkills: [],
       finalScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       selectedLanguages: [], level: 1, hpGenerationMode: 'average', hpRolledValue: 0, selectedSpells: [], calculatedHp: 8,
+      multiclasses: [], featureSelections: {},
     };
 
     component.submitCharacter();

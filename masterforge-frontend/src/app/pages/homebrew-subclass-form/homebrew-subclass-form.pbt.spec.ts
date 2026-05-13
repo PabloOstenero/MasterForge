@@ -58,6 +58,7 @@ describe('HomebrewSubclassFormPage - Property Based Tests', () => {
     rechargeOn: fc.constantFrom(...RECHARGE_OPTIONS)
   });
   const resourcePoolsGen = fc.array(resourcePoolGen);
+  const additionalSpellClassGen = fc.option(fc.string({ minLength: 1 }), { nil: null });
 
   const spellcastingGen = fc.option(fc.record({
     ability: fc.constantFrom(...SPELLCASTING_ABILITIES),
@@ -111,9 +112,11 @@ describe('HomebrewSubclassFormPage - Property Based Tests', () => {
         expandedSpellListGen,
         resourcePoolsGen,
         spellcastingGen,
+        additionalSpellClassGen,
         (
           weaponChips, customWeapon, armorChips, customArmor, customTool,
-          skills, dmgRes, dmgImm, condImm, features, spells, pools, spellcasting
+          skills, dmgRes, dmgImm, condImm, features, spells, pools, spellcasting,
+          additionalSpellClass
         ) => {
           const result = buildSubclassFeatures(
             [...weaponChips, ...customWeapon],
@@ -126,7 +129,8 @@ describe('HomebrewSubclassFormPage - Property Based Tests', () => {
             features,
             spells,
             pools,
-            spellcasting
+            spellcasting,
+            additionalSpellClass
           );
 
           expect(result.weaponProficiencies).toEqual([...weaponChips, ...customWeapon]);
@@ -139,6 +143,7 @@ describe('HomebrewSubclassFormPage - Property Based Tests', () => {
           expect(result.features).toEqual(features);
           expect(result.expandedSpellList).toEqual(spells);
           expect(result.resourcePools).toEqual(pools);
+          expect(result.additionalSpellClass).toEqual(additionalSpellClass ?? undefined);
 
           if (spellcasting) {
             expect(result.spellcasting).toEqual(spellcasting);
@@ -209,7 +214,8 @@ describe('HomebrewSubclassFormPage - Property Based Tests', () => {
       name: fc.string(),
       description: fc.string(),
       parentClassId: fc.integer(),
-      subclassFeatures: subclassFeaturesGen
+      subclassFeatures: subclassFeaturesGen,
+      additionalSpellClass: additionalSpellClassGen
     });
 
     fc.assert(
@@ -277,6 +283,8 @@ describe('HomebrewSubclassFormPage - Property Based Tests', () => {
           };
         }
 
+        const additionalSpellClass = component.form.get('additionalSpellClass')?.value || null;
+
         const rebuilt = buildSubclassFeatures(
           weaponProficiencies,
           armorProficiencies,
@@ -288,7 +296,8 @@ describe('HomebrewSubclassFormPage - Property Based Tests', () => {
           features,
           expandedSpells,
           resourcePools,
-          spellcasting
+          spellcasting,
+          additionalSpellClass
         );
 
         if (response.subclassFeatures.skillProficiencies?.choicePool?.length && rebuilt.skillProficiencies.choicePool.length === 0) {

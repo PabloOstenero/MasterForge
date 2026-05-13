@@ -107,6 +107,7 @@ function makeCreateMonsterDto() {
   return {
     name: 'Goblin',
     type: 'Humanoid',
+    alignment: 'Neutral',
     size: 'Small',
     armorClass: 15,
     hitPoints: 7,
@@ -722,6 +723,7 @@ const raceFormArb = fc.record({
 const monsterFormArb = fc.record({
   name: nonEmptyString,
   type: nonEmptyString,
+  alignment: nonEmptyString,
   size: fc.constantFrom('Small', 'Medium', 'Large', 'Huge', 'Gargantuan'),
   armorClass: fc.integer({ min: 1, max: 30 }),
   hitPoints: fc.integer({ min: 1, max: 1000 }),
@@ -1001,6 +1003,7 @@ const attackEntryArb9: fc.Arbitrary<AttackEntry> = fc.record({
 const abilityEntryArb9: fc.Arbitrary<FeatureEntry> = fc.record({
   name: fc.string({ minLength: 1, maxLength: 60 }),
   description: fc.string({ minLength: 1, maxLength: 200 }),
+  levelRequired: fc.integer({ min: 1, max: 20 }),
 });
 
 /** Arbitrary for SkillEntry */
@@ -1065,6 +1068,7 @@ const combatMechanicsArb: fc.Arbitrary<CombatMechanics> = fc.record({
 const baseMonsterStatsArb = fc.record({
   name: fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
   type: fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
+  alignment: fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
   size: fc.constantFrom('Small', 'Medium', 'Large', 'Huge', 'Gargantuan'),
   armorClass: fc.integer({ min: 1, max: 30 }),
   hitPoints: fc.integer({ min: 1, max: 1000 }),

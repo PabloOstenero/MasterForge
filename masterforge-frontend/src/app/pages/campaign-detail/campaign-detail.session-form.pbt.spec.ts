@@ -51,6 +51,7 @@ function buildMockApiService(): jasmine.SpyObj<ApiService> {
     maxPlayers: 4,
     joinPrice: 0,
     visibility: 'PUBLIC',
+    owner: { id: 'test-user-id', name: 'Test User', email: 'test@example.com' }
   }));
   spy.getCampaignSessions.and.returnValue(of([]));
   spy.getCampaignPlayers.and.returnValue(of([]));

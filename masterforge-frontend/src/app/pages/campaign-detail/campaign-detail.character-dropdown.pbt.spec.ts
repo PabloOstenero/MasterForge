@@ -63,6 +63,7 @@ async function createFixtureForDropdownTest(
     maxPlayers: 6,
     joinPrice: 0,
     visibility: 'PUBLIC',
+    owner: { id: 'u1', name: 'User', email: 'u@e.com' }
   };
 
   const mockApi = jasmine.createSpyObj<ApiService>('ApiService', [

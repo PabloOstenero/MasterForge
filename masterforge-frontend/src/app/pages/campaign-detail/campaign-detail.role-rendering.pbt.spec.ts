@@ -39,6 +39,11 @@ const campaignDetailArb = (): fc.Arbitrary<CampaignDetailDto> =>
     maxPlayers: fc.integer({ min: 1, max: 20 }),
     joinPrice: fc.integer({ min: 0, max: 100 }),
     visibility: fc.constantFrom('PUBLIC', 'PRIVATE'),
+    owner: fc.record({
+      id: fc.uuid(),
+      name: safeString(),
+      email: fc.emailAddress()
+    })
   });
 
 // ---------------------------------------------------------------------------

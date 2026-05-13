@@ -469,7 +469,7 @@ describe('buildSubclassFeatures() pure function', () => {
 
   it('should produce empty arrays and no spellcasting key for empty inputs', () => {
     const result = buildSubclassFeatures(
-      [], [], [], emptySkillProfs, [], [], [], [], [], [], null
+      [], [], [], emptySkillProfs, [], [], [], [], [], [], null, null
     );
     expect(result.weaponProficiencies).toEqual([]);
     expect(result.armorProficiencies).toEqual([]);
@@ -486,28 +486,28 @@ describe('buildSubclassFeatures() pure function', () => {
   it('should correctly union weapon chips and custom profs', () => {
     const result = buildSubclassFeatures(
       ['Simple Weapons', 'Martial Weapons', 'Firearms'],
-      [], [], emptySkillProfs, [], [], [], [], [], [], null
+      [], [], emptySkillProfs, [], [], [], [], [], [], null, null
     );
     expect(result.weaponProficiencies).toEqual(['Simple Weapons', 'Martial Weapons', 'Firearms']);
   });
 
   it('should correctly union armor chips and custom profs', () => {
     const result = buildSubclassFeatures(
-      [], ['Light Armor', 'Custom Armor'], [], emptySkillProfs, [], [], [], [], [], [], null
+      [], ['Light Armor', 'Custom Armor'], [], emptySkillProfs, [], [], [], [], [], [], null, null
     );
     expect(result.armorProficiencies).toEqual(['Light Armor', 'Custom Armor']);
   });
 
   it('should produce the correct string array for active damage resistance chips', () => {
     const result = buildSubclassFeatures(
-      [], [], [], emptySkillProfs, ['Fire', 'Cold'], [], [], [], [], [], null
+      [], [], [], emptySkillProfs, ['Fire', 'Cold'], [], [], [], [], [], null, null
     );
     expect(result.damageResistances).toEqual(['Fire', 'Cold']);
   });
 
   it('should produce the correct string array for active condition immunity chips', () => {
     const result = buildSubclassFeatures(
-      [], [], [], emptySkillProfs, [], [], ['Charmed', 'Prone'], [], [], [], null
+      [], [], [], emptySkillProfs, [], [], ['Charmed', 'Prone'], [], [], [], null, null
     );
     expect(result.conditionImmunities).toEqual(['Charmed', 'Prone']);
   });
@@ -515,7 +515,7 @@ describe('buildSubclassFeatures() pure function', () => {
   it('should serialize feature entries correctly', () => {
     const features: SubclassFeatureEntry[] = [{ name: 'Action Surge', description: 'Take one additional action', levelRequired: 2 }];
     const result = buildSubclassFeatures(
-      [], [], [], emptySkillProfs, [], [], [], features, [], [], null
+      [], [], [], emptySkillProfs, [], [], [], features, [], [], null, null
     );
     expect(result.subclassFeatureEntries).toEqual(features);
   });
@@ -526,7 +526,7 @@ describe('buildSubclassFeatures() pure function', () => {
       { name: 'Fireball', level: 3, preparationType: 'ALWAYS_PREPARED' }
     ];
     const result = buildSubclassFeatures(
-      [], [], [], emptySkillProfs, [], [], [], [], spells, [], null
+      [], [], [], emptySkillProfs, [], [], [], [], spells, [], null, null
     );
     expect(result.expandedSpellList).toEqual(spells);
   });
@@ -536,7 +536,7 @@ describe('buildSubclassFeatures() pure function', () => {
       { name: 'Ki Points', dieType: 'd4', count: 2, rechargeOn: 'Short Rest' }
     ];
     const result = buildSubclassFeatures(
-      [], [], [], emptySkillProfs, [], [], [], [], [], pools, null
+      [], [], [], emptySkillProfs, [], [], [], [], [], pools, null, null
     );
     expect(result.resourcePools).toEqual(pools);
   });
@@ -552,7 +552,7 @@ describe('buildSubclassFeatures() pure function', () => {
       spellSlots: { slots: [] }
     };
     const result = buildSubclassFeatures(
-      [], [], [], emptySkillProfs, [], [], [], [], [], [], spellcasting
+      [], [], [], emptySkillProfs, [], [], [], [], [], [], spellcasting, null
     );
     expect(result.spellcasting).toBeDefined();
     expect(result.spellcasting?.ability).toBe('Intelligence');
@@ -569,10 +569,17 @@ describe('buildSubclassFeatures() pure function', () => {
       spellSlots: { slots: [] }
     };
     const result = buildSubclassFeatures(
-      [], [], [], emptySkillProfs, [], [], [], [], [], [], spellcasting
+      [], [], [], emptySkillProfs, [], [], [], [], [], [], spellcasting, null
     );
     expect(result.spellcasting).toBeDefined();
     expect(result.spellcasting?.spellsKnown).toBeUndefined();
+  });
+
+  it('should include additionalSpellClass when provided', () => {
+    const result = buildSubclassFeatures(
+      [], [], [], emptySkillProfs, [], [], [], [], [], [], null, 'Wizard'
+    );
+    expect(result.additionalSpellClass).toBe('Wizard');
   });
 });
 

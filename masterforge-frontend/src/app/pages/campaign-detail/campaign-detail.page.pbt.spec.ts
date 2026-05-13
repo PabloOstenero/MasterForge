@@ -98,6 +98,11 @@ const campaignDetailArb = (): fc.Arbitrary<CampaignDetailDto> =>
     maxPlayers: fc.integer({ min: 1, max: 20 }),
     joinPrice: fc.integer({ min: 0, max: 100 }),
     visibility: fc.constantFrom('PUBLIC', 'PRIVATE'),
+    owner: fc.record({
+      id: fc.uuid(),
+      name: fc.string(),
+      email: fc.emailAddress()
+    })
   });
 
 const characterArb = (): fc.Arbitrary<CharacterSimpleDto> =>
@@ -349,6 +354,7 @@ describe('CampaignDetailPage PBT — 13.4 Property 9: Independent error state ha
           maxPlayers: 4,
           joinPrice: 0,
           visibility: 'PUBLIC',
+          owner: { id: 'u1', name: 'User', email: 'u@e.com' }
         };
         fixture.detectChanges();
 
@@ -392,6 +398,7 @@ describe('CampaignDetailPage PBT — 13.4 Property 9: Independent error state ha
           maxPlayers: 4,
           joinPrice: 0,
           visibility: 'PUBLIC',
+          owner: { id: 'u1', name: 'User', email: 'u@e.com' }
         };
         component.sessions = [];
         component.activeSegment = 'jugadores';

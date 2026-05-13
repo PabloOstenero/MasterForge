@@ -48,6 +48,7 @@ const attackEntryArb: fc.Arbitrary<AttackEntry> = fc.record({
 const abilityEntryArb: fc.Arbitrary<AbilityEntry> = fc.record({
   name: fc.string({ minLength: 1, maxLength: 60 }),
   description: fc.string({ minLength: 1, maxLength: 200 }),
+  levelRequired: fc.integer({ min: 1, max: 20 }),
 });
 
 /** Arbitrary for SkillEntry */

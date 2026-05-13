@@ -24,7 +24,7 @@ export class RoleService {
     { title: 'Inicio', icon: 'home-outline', route: '/home' },
     { title: 'Jugadores', icon: 'people-outline', route: '/players' },
     { title: 'Campañas', icon: 'map-outline', route: '/campaigns' },
-    { title: 'Bestiario IA', icon: 'skull-outline', route: '/bestiary' },
+    { title: 'Homebrew', icon: 'color-wand-outline', sublabel: 'Clases, Subclases, Razas', route: '/homebrew' },
     { title: 'Config', icon: 'settings-outline', route: '/config' },
   ];
 
@@ -33,7 +33,7 @@ export class RoleService {
     { title: 'Forjar Personaje', icon: 'person-add-outline', route: '/forge-character' },
     { title: 'Mis Personajes', icon: 'book-outline', route: '/my-characters' },
     { title: 'Mis Campañas', icon: 'list-outline', route: '/my-campaigns' },
-    { title: 'Homebrew (IA)', icon: 'color-wand-outline', sublabel: 'Clases, Subclases, Razas', route: '/homebrew' },
+    { title: 'Homebrew', icon: 'color-wand-outline', sublabel: 'Clases, Subclases, Razas', route: '/homebrew' },
     { title: 'Gremio de Campañas', icon: 'search-outline', route: '/search-campaigns' },
     { title: 'Config', icon: 'settings-outline', route: '/config' },
   ];

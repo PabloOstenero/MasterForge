@@ -26,6 +26,7 @@ const mockCampaign: CampaignDetailDto = {
   maxPlayers: 6,
   joinPrice: 10,
   visibility: 'PUBLIC',
+  owner: { id: 'u1', name: 'User', email: 'u@e.com' }
 };
 
 const mockSessions: SessionSummaryDto[] = [

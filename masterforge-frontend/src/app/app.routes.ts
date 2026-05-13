@@ -21,7 +21,6 @@ export const routes: Routes = [
       { path: 'campaigns', loadComponent: () => import('./pages/campaigns/campaigns.page').then(m => m.CampaignsPage) },
       { path: 'campaigns/:id', loadComponent: () => import('./pages/campaign-detail/campaign-detail.page').then(m => m.CampaignDetailPage) },
       { path: 'campaigns/:id/combat-tracker', loadComponent: () => import('./pages/combat-tracker/combat-tracker.page').then(m => m.CombatTrackerPage) },
-      { path: 'bestiary', loadComponent: () => import('./pages/bestiary/bestiary.page').then(m => m.BestiaryPage) },
       { path: 'config', loadComponent: () => import('./pages/config/config.page').then(m => m.ConfigPage) },
       // New routes for Player features (Assuming components will be generated)
       { path: 'forge-character', loadComponent: () => import('./pages/forge-character/forge-character.page').then(m => m.ForgeCharacterPage) },

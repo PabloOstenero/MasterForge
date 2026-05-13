@@ -117,6 +117,7 @@ const gearFormArb: fc.Arbitrary<GearFormValues> = fc.record({
 const specialAbilityArb: fc.Arbitrary<SpecialAbilityEntry> = fc.record({
   name:        fc.string({ minLength: 1, maxLength: 60 }),
   description: fc.string({ minLength: 1, maxLength: 200 }),
+  levelRequired: fc.integer({ min: 1, max: 20 }),
 });
 
 /** Default/empty form values used when a section is not under test */
@@ -143,6 +144,12 @@ const defaultMagical: MagicalFormValues = { charges: null, recharge: '', attunem
 const defaultAmmunition: AmmunitionFormValues = { damageBonus: null, magicalBonus: 0 };
 
 const defaultGear: GearFormValues = { gearDescription: '', valueGp: null };
+
+const defaultBuffs: any = {
+  bonusStr: null, bonusDex: null, bonusCon: null, bonusInt: null, bonusWis: null, bonusCha: null,
+  overrideStr: null, overrideDex: null, overrideCon: null, overrideInt: null, overrideWis: null, overrideCha: null,
+  bonusMaxHp: null
+};
 
 // ---------------------------------------------------------------------------
 // Property-Based Test Suite — buildItemProperties()
@@ -188,6 +195,7 @@ describe('buildItemProperties() — Property-Based Tests', () => {
             defaultMagical,
             defaultAmmunition,
             defaultGear,
+            defaultBuffs,
             abilities,
           );
 
@@ -241,6 +249,7 @@ describe('buildItemProperties() — Property-Based Tests', () => {
             defaultMagical,
             defaultAmmunition,
             defaultGear,
+            defaultBuffs,
             abilities,
           );
 
@@ -348,6 +357,7 @@ describe('buildItemProperties() — Property-Based Tests', () => {
             emptyMagical,
             emptyAmmunition,
             emptyGear,
+            defaultBuffs,
             [],
           );
 
@@ -412,6 +422,7 @@ describe('buildItemProperties() — Property-Based Tests', () => {
             defaultMagical,
             defaultAmmunition,
             defaultGear,
+            defaultBuffs,
             [],
           );
 
@@ -447,6 +458,7 @@ describe('buildItemProperties() — Property-Based Tests', () => {
             defaultMagical,
             defaultAmmunition,
             defaultGear,
+            defaultBuffs,
             [],
           );
 
@@ -624,6 +636,7 @@ describe('homebrew-item-special-abilities — Property-Based Tests', () => {
     const specialAbilityArb: fc.Arbitrary<SpecialAbilityEntry> = fc.record({
       name:        fc.string({ minLength: 1, maxLength: 60 }),
       description: fc.string({ minLength: 1, maxLength: 200 }),
+      levelRequired: fc.integer({ min: 1, max: 20 }),
     });
 
     fc.assert(
@@ -640,6 +653,7 @@ describe('homebrew-item-special-abilities — Property-Based Tests', () => {
             defaultMagical,
             defaultAmmunition,
             defaultGear,
+            defaultBuffs,
             abilities,
           );
 
@@ -664,6 +678,7 @@ describe('homebrew-item-special-abilities — Property-Based Tests', () => {
     const specialAbilityArb: fc.Arbitrary<SpecialAbilityEntry> = fc.record({
       name:        fc.string({ minLength: 1, maxLength: 60 }),
       description: fc.string({ minLength: 1, maxLength: 200 }),
+      levelRequired: fc.integer({ min: 1, max: 20 }),
     });
 
     fc.assert(
@@ -680,6 +695,7 @@ describe('homebrew-item-special-abilities — Property-Based Tests', () => {
             defaultMagical,
             defaultAmmunition,
             defaultGear,
+            defaultBuffs,
             abilities,
           );
 
@@ -704,6 +720,7 @@ describe('homebrew-item-special-abilities — Property-Based Tests', () => {
     const specialAbilityArb: fc.Arbitrary<SpecialAbilityEntry> = fc.record({
       name:        fc.string({ minLength: 1, maxLength: 60 }),
       description: fc.string({ minLength: 1, maxLength: 200 }),
+      levelRequired: fc.integer({ min: 1, max: 20 }),
     });
 
     fc.assert(
@@ -720,6 +737,7 @@ describe('homebrew-item-special-abilities — Property-Based Tests', () => {
             defaultMagical,
             defaultAmmunition,
             defaultGear,
+            defaultBuffs,
             abilities,
           );
 
@@ -757,6 +775,7 @@ describe('homebrew-item-special-abilities — Property-Based Tests', () => {
             defaultMagical,
             defaultAmmunition,
             defaultGear,
+            defaultBuffs,
             [], // empty specialAbilities
           );
 

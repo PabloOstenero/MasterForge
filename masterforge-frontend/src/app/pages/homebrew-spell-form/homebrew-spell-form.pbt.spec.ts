@@ -65,6 +65,7 @@ function createComponent(options: {
   routeId?: string | null;
   homebrewServiceStub?: any;
   routerStub?: any;
+  apiServiceStub?: any;
   authServiceStub?: any;
 } = {}): HomebrewSpellFormPage {
   const fb = new FormBuilder();
@@ -84,9 +85,14 @@ function createComponent(options: {
     getUserIdFromToken: jasmine.createSpy('getUserIdFromToken').and.returnValue(null),
   };
 
+  const apiServiceStub = options.apiServiceStub ?? {
+    getClasses: jasmine.createSpy('getClasses').and.returnValue(of([])),
+  };
+
   const component = new HomebrewSpellFormPage(
     fb,
     homebrewServiceStub,
+    apiServiceStub,
     routerStub,
     routeStub as any,
     authServiceStub,

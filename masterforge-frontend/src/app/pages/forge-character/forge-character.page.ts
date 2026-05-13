@@ -170,6 +170,15 @@ export interface CharacterFormData {
   calculatedHp: number;
 }
 
+/**
+ * Basic HP calculation for Level 1 characters.
+ * @param hitDie The hit die of the class (e.g. 8, 10, 12).
+ * @param con The Constitution score (e.g. 14, 16).
+ */
+export function calculateHp(hitDie: number, con: number): number {
+  return hitDie + getModifier(con);
+}
+
 @Component({
   selector: 'app-forge-character',
   templateUrl: './forge-character.page.html',

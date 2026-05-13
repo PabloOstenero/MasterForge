@@ -22,7 +22,7 @@ describe('AuthLayoutComponent — Property-Based Tests', () => {
   let authSpy: jasmine.SpyObj<AuthService>;
   let router: Router;
 
-  const NAV_ROUTES = ['/home', '/players', '/campaigns', '/bestiary', '/config'];
+  const NAV_ROUTES = ['/home', '/players', '/campaigns', '/homebrew', '/config'];
 
   beforeEach(async () => {
     authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
@@ -36,7 +36,7 @@ describe('AuthLayoutComponent — Property-Based Tests', () => {
           { path: 'home', component: StubPageComponent },
           { path: 'players', component: StubPageComponent },
           { path: 'campaigns', component: StubPageComponent },
-          { path: 'bestiary', component: StubPageComponent },
+          { path: 'homebrew', component: StubPageComponent },
           { path: 'config', component: StubPageComponent },
           { path: 'login', component: StubPageComponent },
         ]),
@@ -172,8 +172,8 @@ describe('AuthLayoutComponent — Property 2: Preservation (Non-Toggle Interacti
   let router: Router;
 
   // The 5 DM items as rendered by the hardcoded template (unfixed code)
-  const DM_ITEM_TITLES = ['Inicio', 'Jugadores', 'Campañas', 'Bestiario', 'Config'];
-  const DM_ROUTES = ['/home', '/players', '/campaigns', '/bestiary', '/config'];
+  const DM_ITEM_TITLES = ['Inicio', 'Jugadores', 'Campañas', 'Homebrew', 'Config'];
+  const DM_ROUTES = ['/home', '/players', '/campaigns', '/homebrew', '/config'];
 
   beforeEach(async () => {
     authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
@@ -187,7 +187,7 @@ describe('AuthLayoutComponent — Property 2: Preservation (Non-Toggle Interacti
           { path: 'home', component: StubPageComponent },
           { path: 'players', component: StubPageComponent },
           { path: 'campaigns', component: StubPageComponent },
-          { path: 'bestiary', component: StubPageComponent },
+          { path: 'homebrew', component: StubPageComponent },
           { path: 'config', component: StubPageComponent },
           { path: 'login', component: StubPageComponent },
         ]),
@@ -373,7 +373,7 @@ const DM_MENU: MenuItem[] = [
   { title: 'Inicio', icon: 'home-outline', route: '/home' },
   { title: 'Jugadores', icon: 'people-outline', route: '/players' },
   { title: 'Campañas', icon: 'map-outline', route: '/campaigns' },
-  { title: 'Bestiario IA', icon: 'skull-outline', route: '/bestiary' },
+  { title: 'Homebrew', icon: 'color-wand-outline', sublabel: 'Clases, Subclases, Razas', route: '/homebrew' },
   { title: 'Config', icon: 'settings-outline', route: '/config' },
 ];
 
@@ -381,7 +381,7 @@ const PLAYER_MENU: MenuItem[] = [
   { title: 'Inicio', icon: 'home-outline', route: '/home' },
   { title: 'Forjar Personaje', icon: 'person-add-outline', route: '/forge-character' },
   { title: 'Mis Personajes', icon: 'book-outline', route: '/my-characters' },
-  { title: 'Homebrew (IA)', icon: 'color-wand-outline', sublabel: 'Clases, Subclases, Razas', route: '/homebrew' },
+  { title: 'Homebrew', icon: 'color-wand-outline', sublabel: 'Clases, Subclases, Razas', route: '/homebrew' },
   { title: 'Gremio de Campañas', icon: 'search-outline', route: '/search-campaigns' },
   { title: 'Config', icon: 'settings-outline', route: '/config' },
 ];
@@ -430,7 +430,7 @@ describe('AuthLayoutComponent — Property 1: Bug Condition - Topbar Absent in A
           { path: 'home', component: StubPageComponent },
           { path: 'players', component: StubPageComponent },
           { path: 'campaigns', component: StubPageComponent },
-          { path: 'bestiary', component: StubPageComponent },
+          { path: 'homebrew', component: StubPageComponent },
           { path: 'config', component: StubPageComponent },
           { path: 'login', component: StubPageComponent },
         ]),
@@ -551,7 +551,7 @@ describe('AuthLayoutComponent — Property 1: Bug Condition (Sidebar Ignores Rol
           { path: 'home', component: StubPageComponent },
           { path: 'players', component: StubPageComponent },
           { path: 'campaigns', component: StubPageComponent },
-          { path: 'bestiary', component: StubPageComponent },
+          { path: 'homebrew', component: StubPageComponent },
           { path: 'config', component: StubPageComponent },
           { path: 'login', component: StubPageComponent },
           { path: 'forge-character', component: StubPageComponent },
