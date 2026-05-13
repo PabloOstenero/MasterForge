@@ -3,6 +3,7 @@ package com.masterforge.masterforge_backend.model.entity
 import jakarta.persistence.*
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
+import java.math.BigDecimal
 import java.util.UUID
 
 @Entity
@@ -14,6 +15,9 @@ data class Item(
 
     @Column(nullable = false)
     val name: String,
+
+    @Column(nullable = true)
+    val price: BigDecimal = BigDecimal.ZERO,
 
     @Column(nullable = false)
     val type: String, // Ex: "Weapon", "Armor", "Potion"

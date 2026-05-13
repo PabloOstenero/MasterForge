@@ -62,6 +62,116 @@
   --padding-end: 16px;
   --padding-top: 12px;
   --padding-bottom: 12px;
-  margin-bottom: 2px;
   border: 1px solid rgba($text-muted, 0.1);
+}
+
+.custom-segment {
+  margin-bottom: 24px;
+  background: #1e1e1e;
+  border-radius: 8px;
+  
+  ion-segment-button {
+    --color: #ffffff;
+    --color-checked: #ffc409; /* warning/gold color */
+    --indicator-color: #ffc409;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+}
+
+.price-label {
+  color: #2dd36f; /* success/green color */
+  font-size: 0.8rem;
+  margin: 0;
+  margin-top: 4px;
+}
+
+.owned-badge {
+  color: #ffc409;
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Preview Modal Styles */
+.preview-modal-content {
+  --background: #1e1e1e;
+  --color: #ffffff;
+}
+
+.stat-block-preview {
+  background: #fdf1dc; /* Parchment color */
+  color: #291209; /* Dark brown text */
+  padding: 16px;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  font-family: 'Bookman Old Style', 'Georgia', serif;
+  border-top: 4px solid #7a200d;
+  border-bottom: 4px solid #7a200d;
+  
+  h2 {
+    color: #7a200d;
+    font-size: 1.6rem;
+    margin: 0;
+    font-variant: small-caps;
+  }
+  
+  p {
+    margin: 4px 0;
+  }
+}
+
+.stat-divider {
+  height: 2px;
+  background: #7a200d;
+  margin: 8px 0;
+}
+
+.ability-grid {
+  ion-col {
+    text-align: center;
+    color: #7a200d;
+    font-size: 0.8rem;
+    
+    strong {
+      display: block;
+      margin-bottom: 2px;
+    }
+  }
+}
+
+.section-divider-title {
+  color: #7a200d;
+  font-size: 1.2rem;
+  margin-top: 16px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #7a200d;
+  font-variant: small-caps;
+}
+
+.feature-text {
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+  
+  strong {
+    font-style: italic;
+  }
+}
+
+.description-text {
+  white-space: pre-wrap;
+  line-height: 1.4;
+  font-style: italic;
+  color: #444;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #ffffff;
 }

@@ -3,16 +3,11 @@ package com.masterforge.masterforge_backend.controller
 import com.masterforge.masterforge_backend.config.SecurityUtils
 import com.masterforge.masterforge_backend.model.dto.HomebrewItemDto
 import com.masterforge.masterforge_backend.model.dto.HomebrewSummaryDto
-import com.masterforge.masterforge_backend.repository.DndClassRepository
-import com.masterforge.masterforge_backend.repository.DndSubclassRepository
-import com.masterforge.masterforge_backend.repository.DndRaceRepository
-import com.masterforge.masterforge_backend.repository.MonsterRepository
-import com.masterforge.masterforge_backend.repository.SpellRepository
-import com.masterforge.masterforge_backend.repository.ItemRepository
+import com.masterforge.masterforge_backend.model.entity.HomebrewCollection
+import com.masterforge.masterforge_backend.repository.*
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+import java.util.UUID
 
 @RestController
 @RequestMapping("/api/homebrew")
@@ -22,7 +17,8 @@ class HomebrewController(
     private val dndRaceRepository: DndRaceRepository,
     private val monsterRepository: MonsterRepository,
     private val spellRepository: SpellRepository,
-    private val itemRepository: ItemRepository
+    private val itemRepository: ItemRepository,
+    private val homebrewCollectionRepository: HomebrewCollectionRepository
 ) {
 
     @GetMapping("/my")
@@ -30,61 +26,84 @@ class HomebrewController(
     fun getMyHomebrew(): HomebrewSummaryDto {
         val userId = SecurityUtils.getCurrentUserId()
 
-        val classes = dndClassRepository.findByAuthorId(userId).map { entity ->
-            HomebrewItemDto(
-                id = entity.id.toString(),
-                name = entity.name,
-                contentType = "CLASS"
-            )
-        }
+        return HomebrewSummaryDto(
+            classes = dndClassRepository.findByAuthorId(userId).map {
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Mío", "CLASS", it.price, true)
+            },
+            subclasses = dndSubclassRepository.findByAuthorId(userId).map {
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Mío", "SUBCLASS", it.price, true)
+            },
+            races = dndRaceRepository.findByAuthorId(userId).map {
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Mío", "RACE", it.price, true)
+            },
+            monsters = monsterRepository.findByAuthorId(userId).map {
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Mío", "MONSTER", it.price, true)
+            },
+            spells = spellRepository.findByAuthorId(userId).map {
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Mío", "SPELL", it.price, true)
+            },
+            items = itemRepository.findByAuthorId(userId).map {
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Mío", "ITEM", it.price, true)
+            }
+        )
+    }
 
-        val subclasses = dndSubclassRepository.findByAuthorId(userId).map { entity ->
-            HomebrewItemDto(
-                id = entity.id.toString(),
-                name = entity.name,
-                contentType = "SUBCLASS"
-            )
-        }
+    @GetMapping("/community")
+    @Transactional(readOnly = true)
+    fun getCommunityHomebrew(): HomebrewSummaryDto {
+        val userId = SecurityUtils.getCurrentUserId()
+        val collections = homebrewCollectionRepository.findByUserId(userId)
+        val ownedItems = collections
+            .groupBy { it.contentType }
+            .mapValues { entry -> entry.value.map { it.contentId }.toSet() }
 
-        val races = dndRaceRepository.findByAuthorId(userId).map { entity ->
-            HomebrewItemDto(
-                id = entity.id.toString(),
-                name = entity.name,
-                contentType = "RACE"
-            )
-        }
-
-        val monsters = monsterRepository.findByAuthorId(userId).map { entity ->
-            HomebrewItemDto(
-                id = entity.id.toString(),
-                name = entity.name,
-                contentType = "MONSTER"
-            )
-        }
-
-        val spells = spellRepository.findByAuthorId(userId).map { entity ->
-            HomebrewItemDto(
-                id = entity.id.toString(),
-                name = entity.name,
-                contentType = "SPELL"
-            )
-        }
-
-        val items = itemRepository.findByAuthorId(userId).map { entity ->
-            HomebrewItemDto(
-                id = entity.id.toString(),
-                name = entity.name,
-                contentType = "ITEM"
-            )
+        fun isOwned(type: String, id: String): Boolean {
+            return ownedItems[type]?.contains(id) == true
         }
 
         return HomebrewSummaryDto(
-            classes = classes,
-            subclasses = subclasses,
-            races = races,
-            monsters = monsters,
-            spells = spells,
-            items = items
+            classes = dndClassRepository.findByAuthorIdNotAndAuthorIdIsNotNull(userId).map {
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Desconocido", "CLASS", it.price, isOwned("CLASS", it.id.toString()))
+            },
+            subclasses = dndSubclassRepository.findByAuthorIdNotAndAuthorIdIsNotNull(userId).map {
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Desconocido", "SUBCLASS", it.price, isOwned("SUBCLASS", it.id.toString()))
+            },
+            races = dndRaceRepository.findByAuthorIdNotAndAuthorIdIsNotNull(userId).map {
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Desconocido", "RACE", it.price, isOwned("RACE", it.id.toString()))
+            },
+            monsters = monsterRepository.findByAuthorIdNotAndAuthorIdIsNotNull(userId).map {
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Desconocido", "MONSTER", it.price, isOwned("MONSTER", it.id.toString()))
+            },
+            spells = spellRepository.findByAuthorIdNotAndAuthorIdIsNotNull(userId).map {
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Desconocido", "SPELL", it.price, isOwned("SPELL", it.id.toString()))
+            },
+            items = itemRepository.findByAuthorIdNotAndAuthorIdIsNotNull(userId).map {
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Desconocido", "ITEM", it.price, isOwned("ITEM", it.id.toString()))
+            }
         )
     }
+
+    @PostMapping("/purchase")
+    @Transactional
+    fun purchaseItem(@RequestBody request: PurchaseRequest) {
+        val userId = SecurityUtils.getCurrentUserId()
+        
+        val alreadyOwned = homebrewCollectionRepository.existsByUserIdAndContentTypeAndContentId(
+            userId, request.contentType, request.contentId
+        )
+        
+        if (!alreadyOwned) {
+            val collection = HomebrewCollection(
+                userId = userId,
+                contentType = request.contentType,
+                contentId = request.contentId
+            )
+            homebrewCollectionRepository.save(collection)
+        }
+    }
 }
+
+data class PurchaseRequest(
+    val contentType: String,
+    val contentId: String
+)

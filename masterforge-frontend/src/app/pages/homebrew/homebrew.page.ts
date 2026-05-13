@@ -3,41 +3,79 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
-  IonSpinner, IonList, IonItem, IonLabel, IonButton
+  IonSpinner, IonList, IonItem, IonLabel, IonButton,
+  IonSegment, IonSegmentButton, IonModal, IonHeader,
+  IonToolbar, IonTitle, IonContent, IonButtons, IonIcon,
+  IonBadge, IonNote, IonGrid, IonRow, IonCol, IonFooter
 } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { eye, close, skull, heart, shield, flash, star, informationCircle } from 'ionicons/icons';
 
 import { HomebrewService, HomebrewSummary, HomebrewItem, ContentType } from '../../services/homebrew.service';
 import { AuthService } from '../../services/auth.service';
+import { getModifier } from '../../utils/dnd-utils';
 
 @Component({
   selector: 'app-homebrew',
   templateUrl: './homebrew.page.html',
   styleUrls: ['./homebrew.page.scss'],
   standalone: true,
-  imports: [IonSpinner, IonList, IonItem, IonLabel, IonButton, CommonModule, FormsModule]
+  imports: [
+    IonSpinner, IonList, IonItem, IonLabel, IonButton,
+    IonSegment, IonSegmentButton, IonModal, IonHeader,
+    IonToolbar, IonTitle, IonContent, IonButtons, IonIcon,
+    IonBadge, IonNote, IonGrid, IonRow, IonCol, IonFooter,
+    CommonModule, FormsModule
+  ]
 })
 export class HomebrewPage implements OnInit {
 
+  selectedTab: 'mine' | 'community' = 'mine';
   homebrewItems: HomebrewSummary = {
-    classes: [],
-    subclasses: [],
-    races: [],
-    monsters: [],
-    spells: [],
-    items: []
+    classes: [], subclasses: [], races: [], monsters: [], spells: [], items: []
   };
+  communityItems: HomebrewSummary = {
+    classes: [], subclasses: [], races: [], monsters: [], spells: [], items: []
+  };
+
   loading = false;
   error: string | null = null;
   deletingId: string | null = null;
+  purchasingId: string | null = null;
+
+  sectionNames: Record<string, string> = {
+    classes: 'Clases',
+    subclasses: 'Subclases',
+    races: 'Razas',
+    monsters: 'Monstruos',
+    spells: 'Hechizos',
+    items: 'Objetos'
+  };
+
+  // Preview Modal
+  isPreviewModalOpen = false;
+  selectedPreviewItem: HomebrewItem | null = null;
+  previewDetails: any = null;
+  loadingPreview = false;
 
   constructor(
     private homebrewService: HomebrewService,
     private router: Router,
     private authService: AuthService
-  ) {}
+  ) {
+    addIcons({ eye, close, skull, heart, shield, flash, star, 'information-circle': informationCircle });
+  }
 
   ngOnInit() {
-    this.loadMyHomebrew();
+    this.loadContent();
+  }
+
+  loadContent(): void {
+    if (this.selectedTab === 'mine') {
+      this.loadMyHomebrew();
+    } else {
+      this.loadCommunityHomebrew();
+    }
   }
 
   loadMyHomebrew(): void {
@@ -49,9 +87,45 @@ export class HomebrewPage implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        console.error('Error al cargar homebrew', err);
+        console.error('Error al cargar homebrew propio', err);
         this.error = err?.message ?? 'Error al cargar el contenido homebrew';
         this.loading = false;
+      }
+    });
+  }
+
+  loadCommunityHomebrew(): void {
+    this.loading = true;
+    this.error = null;
+    this.homebrewService.getCommunityHomebrew().subscribe({
+      next: (data) => {
+        this.communityItems = data;
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar homebrew de la comunidad', err);
+        this.error = err?.message ?? 'Error al cargar el contenido de la comunidad';
+        this.loading = false;
+      }
+    });
+  }
+
+  onTabChange(event: any): void {
+    this.selectedTab = event.detail.value;
+    this.loadContent();
+  }
+
+  purchaseItem(item: HomebrewItem): void {
+    this.purchasingId = item.id;
+    this.homebrewService.purchaseItem(item.contentType, item.id).subscribe({
+      next: () => {
+        item.isOwned = true;
+        this.purchasingId = null;
+      },
+      error: (err) => {
+        console.error('Error al adquirir item', err);
+        this.error = 'Error al adquirir el item';
+        this.purchasingId = null;
       }
     });
   }
@@ -69,19 +143,15 @@ export class HomebrewPage implements OnInit {
   }
 
   navigateToEdit(type: ContentType, id: string): void {
-    if (type === 'CLASS') {
-      this.router.navigate([`/homebrew/class/${id}/edit`]);
-    } else if (type === 'RACE') {
-      this.router.navigate([`/homebrew/race/${id}/edit`]);
-    } else if (type === 'MONSTER') {
-      this.router.navigate([`/homebrew/monster/${id}/edit`]);
-    } else if (type === 'SPELL') {
-      this.router.navigate([`/homebrew/spell/${id}/edit`]);
-    } else if (type === 'ITEM') {
-      this.router.navigate([`/homebrew/item/${id}/edit`]);
-    } else if (type === 'SUBCLASS') {
-      this.router.navigate([`/homebrew/subclass/${id}/edit`]);
-    }
+    const editMap: Record<ContentType, string> = {
+      CLASS:    `/homebrew/class/${id}/edit`,
+      SUBCLASS: `/homebrew/subclass/${id}/edit`,
+      RACE:     `/homebrew/race/${id}/edit`,
+      MONSTER:  `/homebrew/monster/${id}/edit`,
+      SPELL:    `/homebrew/spell/${id}/edit`,
+      ITEM:     `/homebrew/item/${id}/edit`,
+    };
+    this.router.navigate([editMap[type]]);
   }
 
   confirmDelete(item: HomebrewItem): void {
@@ -97,7 +167,6 @@ export class HomebrewPage implements OnInit {
 
     this.homebrewService.deleteItem(item.contentType, item.id).subscribe({
       next: () => {
-        // Map each ContentType to the corresponding list key in homebrewItems
         const listKeyMap: Record<ContentType, keyof HomebrewSummary> = {
           CLASS:    'classes',
           SUBCLASS: 'subclasses',
@@ -121,4 +190,109 @@ export class HomebrewPage implements OnInit {
     });
   }
 
+  previewItem(item: HomebrewItem): void {
+    this.selectedPreviewItem = item;
+    this.loadingPreview = true;
+    this.isPreviewModalOpen = true;
+    this.previewDetails = null;
+
+    const detailObs = this.getDetailObservable(item.contentType, item.id);
+    if (!detailObs) {
+      this.loadingPreview = false;
+      return;
+    }
+
+    detailObs.subscribe({
+      next: (details) => {
+        this.previewDetails = details;
+        this.loadingPreview = false;
+      },
+      error: (err) => {
+        console.error('Error loading preview details', err);
+        this.error = 'No se pudieron cargar los detalles del item';
+        this.loadingPreview = false;
+      }
+    });
+  }
+
+  private getDetailObservable(type: ContentType, id: string) {
+    switch (type) {
+      case 'CLASS':    return this.homebrewService.getClass(id);
+      case 'SUBCLASS': return this.homebrewService.getSubclass(id);
+      case 'RACE':     return this.homebrewService.getRace(id);
+      case 'MONSTER':  return this.homebrewService.getMonster(id);
+      case 'SPELL':    return this.homebrewService.getSpell(id);
+      case 'ITEM':     return this.homebrewService.getItem(id);
+      default:         return null;
+    }
+  }
+
+  closePreview(): void {
+    this.isPreviewModalOpen = false;
+    this.selectedPreviewItem = null;
+    this.previewDetails = null;
+  }
+
+  // --- Stat Block Helpers (Mostly for Monsters) ---
+  getModifier(val: number): string {
+    const mod = getModifier(val);
+    return (mod >= 0 ? '+' : '') + mod;
+  }
+
+  getSavingThrow(attr: string, val: number): string {
+    const mechanics = this.previewDetails?.combatMechanics;
+    if (!mechanics) return this.getModifier(val);
+    const saves = mechanics.savingThrows || mechanics.saves || {};
+    const key = attr.toLowerCase();
+    const s = saves[key] ?? saves[`${key}_save`];
+    return s !== undefined ? (s >= 0 ? '+' : '') + s : this.getModifier(val);
+  }
+
+  getListMechanic(type: string): string {
+    const m = this.previewDetails?.combatMechanics;
+    if (!m) return '—';
+    const val = m[type];
+    if (Array.isArray(val)) return val.length === 0 ? '—' : val.join(', ');
+    return val || '—';
+  }
+
+  getMechanics(type: string): any[] {
+    if (!this.previewDetails || !this.previewDetails.combatMechanics) return [];
+    const mechanics = this.previewDetails.combatMechanics;
+    let list: any[] = [];
+    if (type === 'traits') list = mechanics.traits || mechanics.abilities || [];
+    if (type === 'actions') list = mechanics.actions || [];
+    if (type === 'reactions') list = mechanics.reactions || [];
+    if (type === 'legendaryActions') list = mechanics.legendaryActions || [];
+    return list;
+  }
+
+  getClassFeatures(): any[] {
+    if (!this.previewDetails) return [];
+    
+    // 1. Try to get from the 'features' list directly (Hibernate relationship)
+    if (Array.isArray(this.previewDetails.features) && this.previewDetails.features.length > 0) {
+      return this.previewDetails.features;
+    }
+    
+    // 2. If empty, check the JSON-serialized properties
+    if (this.selectedPreviewItem?.contentType === 'CLASS') {
+      return this.previewDetails.classFeatures?.features || [];
+    }
+    
+    if (this.selectedPreviewItem?.contentType === 'SUBCLASS') {
+      const sf = this.previewDetails.subclassFeatures;
+      return sf?.features || sf?.subclassFeatureEntries || [];
+    }
+    
+    return [];
+  }
+
+  getSavingThrowsList(): string {
+    if (!this.previewDetails || !this.previewDetails.savingThrows) return '—';
+    return Object.entries(this.previewDetails.savingThrows)
+      .filter(([_, value]) => value === true)
+      .map(([key]) => key)
+      .join(', ');
+  }
 }

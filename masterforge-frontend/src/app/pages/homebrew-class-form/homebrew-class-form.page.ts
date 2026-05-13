@@ -710,6 +710,7 @@ export class HomebrewClassFormPage implements OnInit {
               name: [f.name ?? '', Validators.required],
               description: [f.description ?? '', Validators.required],
               levelRequired: [f.levelRequired ?? 1, [Validators.required, Validators.min(1), Validators.max(20)]],
+              actionType: [f.actionType || 'PASSIVE'],
               hasOptions: [!!f.options],
               options: optionsGroup,
               progression: this.fb.array(((f.progression && f.progression.length > 0) ? f.progression : ((f.options as any)?.progression ?? [])).map((p: any) => this.fb.group({
@@ -719,16 +720,16 @@ export class HomebrewClassFormPage implements OnInit {
               }))),
               properties: this.fb.group({
                 acCalculation: this.fb.group({
-                  base: [10],
-                  stats: [[]],
-                  requiresNoArmor: [false]
+                  base: [f.properties?.acCalculation?.base ?? 10],
+                  stats: [f.properties?.acCalculation?.stats ?? []],
+                  requiresNoArmor: [f.properties?.acCalculation?.requiresNoArmor ?? false]
                 }),
-                acBonus: [0],
-                acBonusArmorOnly: [false],
+                acBonus: [f.properties?.acBonus ?? 0],
+                acBonusArmorOnly: [f.properties?.acBonusArmorOnly ?? false],
                 resourcePool: this.fb.group({
-                  name: [''],
-                  max: [''],
-                  reset: ['LONG_REST']
+                  name: [f.properties?.resourcePool?.name ?? ''],
+                  max: [f.properties?.resourcePool?.max ?? ''],
+                  reset: [f.properties?.resourcePool?.reset ?? 'LONG_REST']
                 }),
                 innateSpells: this.fb.array([]),
                 effects: this.fb.array((f.properties?.effects ?? []).map((e: any) => this.fb.group({
@@ -742,20 +743,6 @@ export class HomebrewClassFormPage implements OnInit {
               })
             });
 
-            if (f.properties) {
-              const props = f.properties;
-              const propsGroup = featureGroup.get('properties') as FormGroup;
-              if (props.acCalculation) {
-                propsGroup.addControl('acCalculation', this.fb.group(props.acCalculation));
-              }
-              if (props.acBonus !== undefined) {
-                propsGroup.addControl('acBonus', this.fb.control(props.acBonus));
-                propsGroup.addControl('acBonusArmorOnly', this.fb.control(props.acBonusArmorOnly ?? false));
-              }
-              if (props.resourcePool) {
-                propsGroup.addControl('resourcePool', this.fb.group(props.resourcePool));
-              }
-            }
 
             this.features.push(featureGroup);
           });

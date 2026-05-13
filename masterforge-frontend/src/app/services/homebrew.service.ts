@@ -22,7 +22,10 @@ export type ContentType = 'CLASS' | 'SUBCLASS' | 'RACE' | 'MONSTER' | 'SPELL' | 
 export interface HomebrewItem {
   id: string;
   name: string;
+  authorName: string;
   contentType: ContentType;
+  price: number;
+  isOwned: boolean;
 }
 
 export interface HomebrewSummary {
@@ -32,6 +35,7 @@ export interface HomebrewSummary {
   monsters: HomebrewItem[];
   spells: HomebrewItem[];
   items: HomebrewItem[];
+  [key: string]: HomebrewItem[];
 }
 
 
@@ -133,6 +137,14 @@ export class HomebrewService {
 
   getMyHomebrew(): Observable<HomebrewSummary> {
     return this.http.get<HomebrewSummary>('/api/homebrew/my');
+  }
+
+  getCommunityHomebrew(): Observable<HomebrewSummary> {
+    return this.http.get<HomebrewSummary>('/api/homebrew/community');
+  }
+
+  purchaseItem(contentType: ContentType, contentId: string): Observable<void> {
+    return this.http.post<void>('/api/homebrew/purchase', { contentType, contentId });
   }
 
   getClasses(): Observable<{ id: number; name: string }[]> {

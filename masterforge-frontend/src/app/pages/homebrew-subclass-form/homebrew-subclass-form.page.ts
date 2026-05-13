@@ -629,6 +629,7 @@ export class HomebrewSubclassFormPage implements OnInit {
             name: [entry.name, Validators.required],
             description: [entry.description, Validators.required],
             levelRequired: [entry.levelRequired, [Validators.required, Validators.min(1), Validators.max(20)]],
+            actionType: [entry.actionType || 'PASSIVE'],
             hasOptions: [!!entry.options],
             options: this.fb.group({
               type: [entry.options?.type ?? 'SELECT_ONE'],
@@ -650,7 +651,26 @@ export class HomebrewSubclassFormPage implements OnInit {
               description: [p.description || '']
             }))),
             properties: this.fb.group({
-              effects: this.fb.array((entry.properties?.effects ?? []).map((e: any) => this.fb.group(e)))
+              acCalculation: this.fb.group({
+                base: [entry.properties?.acCalculation?.base ?? 10],
+                stats: [entry.properties?.acCalculation?.stats ?? []],
+                requiresNoArmor: [entry.properties?.acCalculation?.requiresNoArmor ?? false]
+              }),
+              acBonus: [entry.properties?.acBonus ?? 0],
+              acBonusArmorOnly: [entry.properties?.acBonusArmorOnly ?? false],
+              resourcePool: this.fb.group({
+                name: [entry.properties?.resourcePool?.name ?? ''],
+                max: [entry.properties?.resourcePool?.max ?? ''],
+                reset: [entry.properties?.resourcePool?.reset ?? 'LONG_REST']
+              }),
+              effects: this.fb.array((entry.properties?.effects ?? []).map((e: any) => this.fb.group({
+                type: [e.type ?? 'STAT_MODIFIER'],
+                target: [e.target ?? ''],
+                customTarget: [e.customTarget ?? ''],
+                value: [e.value ?? 1],
+                useProficiencyBonus: [e.useProficiencyBonus ?? false],
+                condition: [e.condition ?? null]
+              })))
             })
           });
 

@@ -8,4 +8,5 @@ import java.util.UUID
 @Repository
 interface DndClassRepository : JpaRepository<DndClass, Int> {
     fun findByAuthorId(authorId: UUID): List<DndClass>
+    fun findByAuthorIdNotAndAuthorIdIsNotNull(authorId: UUID): List<DndClass>
 }

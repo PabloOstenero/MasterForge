@@ -23,8 +23,8 @@ data class DndClass(
     @Column(nullable = true, columnDefinition = "TEXT")
     val description: String? = null,
 
-    @Column(nullable = false)
-    val price: BigDecimal,
+    @Column(nullable = true)
+    val price: BigDecimal = BigDecimal.ZERO,
 
     @Column(name = "hit_die", nullable = false)
     val hitDie: Int,

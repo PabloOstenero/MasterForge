@@ -1,6 +1,16 @@
 <div class="char-sheet-content">
   <div class="dashboard-container ion-padding">
 
+    <!-- Tab Selector -->
+    <ion-segment [value]="selectedTab" (ionChange)="onTabChange($event)" class="custom-segment">
+      <ion-segment-button value="mine">
+        <ion-label>Mis Creaciones</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="community">
+        <ion-label>Explorar Comunidad</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
     <!-- Loading state -->
     @if (loading) {
       <div class="loading-container">
@@ -16,295 +26,219 @@
     <!-- Content (only shown when not loading) -->
     @if (!loading) {
 
-      <!-- Classes -->
-      <div class="section-block" data-testid="section-CLASS">
-        <div class="section-header">
-          <h2 class="section-title">Clases</h2>
-          <ion-button fill="outline" size="small" (click)="navigateToCreate('CLASS')" data-testid="create-CLASS">
-            + Crear Clase
-          </ion-button>
-        </div>
+      @let currentItems = selectedTab === 'mine' ? homebrewItems : communityItems;
 
-        @if (homebrewItems.classes.length === 0) {
-          <p class="text-muted" data-testid="empty-CLASS">No has creado ninguna clase homebrew aún.</p>
-        } @else {
-          <ion-list class="transparent-list">
-            @for (item of homebrewItems.classes; track item.id) {
-              <ion-item lines="full" class="skill-item list-item-interactive" data-testid="item-row" [attr.data-item-id]="item.id" [attr.data-item-type]="item.contentType">
-                <ion-label>
-                  <h3 class="gold-title">{{ item.name }}</h3>
-                </ion-label>
-                <ion-button
-                  slot="end"
-                  fill="clear"
-                  size="small"
-                  (click)="navigateToEdit('CLASS', item.id)"
-                  data-testid="edit-action"
-                >
-                  Editar
-                </ion-button>
-                <ion-button
-                  slot="end"
-                  fill="clear"
-                  color="danger"
-                  size="small"
-                  [disabled]="deletingId === item.id"
-                  (click)="confirmDelete(item)"
-                  data-testid="delete-action"
-                >
-                  @if (deletingId === item.id) {
-                    <ion-spinner name="crescent" slot="icon-only"></ion-spinner>
-                  } @else {
-                    Eliminar
-                  }
-                </ion-button>
-              </ion-item>
+      @for (key of ['classes', 'subclasses', 'races', 'monsters', 'spells', 'items']; track key) {
+        @let items = currentItems[key];
+        @let type = key === 'classes' ? 'CLASS' : (key === 'subclasses' ? 'SUBCLASS' : (key === 'races' ? 'RACE' : (key === 'monsters' ? 'MONSTER' : (key === 'spells' ? 'SPELL' : 'ITEM'))));
+
+        <div class="section-block" [attr.data-testid]="'section-' + type">
+          <div class="section-header">
+            <h2 class="section-title">{{ sectionNames[key] }}</h2>
+            @if (selectedTab === 'mine') {
+              <ion-button fill="outline" size="small" (click)="navigateToCreate(type)" [attr.data-testid]="'create-' + type">
+                + Crear {{ sectionNames[key].slice(0, -1) }}
+              </ion-button>
             }
-          </ion-list>
-        }
-      </div>
+          </div>
 
-      <!-- Subclasses -->
-      <div class="section-block" data-testid="section-SUBCLASS">
-        <div class="section-header">
-          <h2 class="section-title">Subclases</h2>
-          <ion-button fill="outline" size="small" (click)="navigateToCreate('SUBCLASS')" data-testid="create-SUBCLASS">
-            + Crear Subclase
-          </ion-button>
-        </div>
+          @if (items.length === 0) {
+            <p class="text-muted" [attr.data-testid]="'empty-' + type">
+              {{ selectedTab === 'mine' ? 'No has creado ninguna homebrew de este tipo aún.' : 'No hay contenido de la comunidad disponible.' }}
+            </p>
+          } @else {
+            <ion-list class="transparent-list">
+              @for (item of items; track item.id) {
+                <ion-item lines="full" class="skill-item list-item-interactive" data-testid="item-row" [attr.data-item-id]="item.id" [attr.data-item-type]="item.contentType">
+                  <ion-label>
+                    <h3 class="gold-title">{{ item.name }}</h3>
+                    @if (selectedTab === 'community' && !item.isOwned) {
+                      <p class="price-label">{{ item.price === 0 ? 'GRATIS' : (item.price | currency:'USD':'symbol':'1.2-2') }}</p>
+                    }
+                  </ion-label>
 
-        @if (homebrewItems.subclasses.length === 0) {
-          <p class="text-muted" data-testid="empty-SUBCLASS">No has creado ninguna subclase homebrew aún.</p>
-        } @else {
-          <ion-list class="transparent-list">
-            @for (item of homebrewItems.subclasses; track item.id) {
-              <ion-item lines="full" class="skill-item list-item-interactive" data-testid="item-row" [attr.data-item-id]="item.id" [attr.data-item-type]="item.contentType">
-                <ion-label>
-                  <h3 class="gold-title">{{ item.name }}</h3>
-                </ion-label>
-                <ion-button
-                  slot="end"
-                  fill="clear"
-                  size="small"
-                  (click)="navigateToEdit('SUBCLASS', item.id)"
-                  data-testid="edit-action"
-                >
-                  Editar
-                </ion-button>
-                <ion-button
-                  slot="end"
-                  fill="clear"
-                  color="danger"
-                  size="small"
-                  [disabled]="deletingId === item.id"
-                  (click)="confirmDelete(item)"
-                  data-testid="delete-action"
-                >
-                  @if (deletingId === item.id) {
-                    <ion-spinner name="crescent" slot="icon-only"></ion-spinner>
-                  } @else {
-                    Eliminar
-                  }
-                </ion-button>
-              </ion-item>
+                    @if (selectedTab === 'mine') {
+                      <ion-button slot="end" fill="clear" size="small" (click)="previewItem(item)">
+                        <ion-icon name="eye" slot="icon-only"></ion-icon>
+                      </ion-button>
+                      <ion-button slot="end" fill="clear" size="small" (click)="navigateToEdit(type, item.id)" data-testid="edit-action">
+                        Editar
+                      </ion-button>
+                      <ion-button slot="end" fill="clear" color="danger" size="small" [disabled]="deletingId === item.id" (click)="confirmDelete(item)" data-testid="delete-action">
+                        @if (deletingId === item.id) {
+                          <ion-spinner name="crescent" slot="icon-only"></ion-spinner>
+                        } @else {
+                          Eliminar
+                        }
+                      </ion-button>
+                    } @else {
+                      <ion-button slot="end" fill="clear" size="small" (click)="previewItem(item)">
+                        <ion-icon name="eye" slot="icon-only"></ion-icon>
+                      </ion-button>
+                      @if (item.isOwned) {
+                        <ion-label slot="end" class="owned-badge">Adquirido</ion-label>
+                      } @else {
+                        <ion-button slot="end" fill="solid" color="warning" size="small" [disabled]="purchasingId === item.id" (click)="purchaseItem(item)" data-testid="purchase-action">
+                          @if (purchasingId === item.id) {
+                            <ion-spinner name="crescent" slot="icon-only"></ion-spinner>
+                          } @else {
+                            Adquirir
+                          }
+                        </ion-button>
+                      }
+                    }
+                  </ion-item>
+                }
+              </ion-list>
             }
-          </ion-list>
+          </div>
         }
-      </div>
-
-      <!-- Races -->
-      <div class="section-block" data-testid="section-RACE">
-        <div class="section-header">
-          <h2 class="section-title">Razas</h2>
-          <ion-button fill="outline" size="small" (click)="navigateToCreate('RACE')" data-testid="create-RACE">
-            + Crear Raza
-          </ion-button>
-        </div>
-
-        @if (homebrewItems.races.length === 0) {
-          <p class="text-muted" data-testid="empty-RACE">No has creado ninguna raza homebrew aún.</p>
-        } @else {
-          <ion-list class="transparent-list">
-            @for (item of homebrewItems.races; track item.id) {
-              <ion-item lines="full" class="skill-item list-item-interactive" data-testid="item-row" [attr.data-item-id]="item.id" [attr.data-item-type]="item.contentType">
-                <ion-label>
-                  <h3 class="gold-title">{{ item.name }}</h3>
-                </ion-label>
-                <ion-button
-                  slot="end"
-                  fill="clear"
-                  size="small"
-                  (click)="navigateToEdit('RACE', item.id)"
-                  data-testid="edit-action"
-                >
-                  Editar
-                </ion-button>
-                <ion-button
-                  slot="end"
-                  fill="clear"
-                  color="danger"
-                  size="small"
-                  [disabled]="deletingId === item.id"
-                  (click)="confirmDelete(item)"
-                  data-testid="delete-action"
-                >
-                  @if (deletingId === item.id) {
-                    <ion-spinner name="crescent" slot="icon-only"></ion-spinner>
-                  } @else {
-                    Eliminar
-                  }
-                </ion-button>
-              </ion-item>
-            }
-          </ion-list>
-        }
-      </div>
-
-      <!-- Monsters -->
-      <div class="section-block" data-testid="section-MONSTER">
-        <div class="section-header">
-          <h2 class="section-title">Monstruos</h2>
-          <ion-button fill="outline" size="small" (click)="navigateToCreate('MONSTER')" data-testid="create-MONSTER">
-            + Crear Monstruo
-          </ion-button>
-        </div>
-
-        @if (homebrewItems.monsters.length === 0) {
-          <p class="text-muted" data-testid="empty-MONSTER">No has creado ningún monstruo homebrew aún.</p>
-        } @else {
-          <ion-list class="transparent-list">
-            @for (item of homebrewItems.monsters; track item.id) {
-              <ion-item lines="full" class="skill-item list-item-interactive" data-testid="item-row" [attr.data-item-id]="item.id" [attr.data-item-type]="item.contentType">
-                <ion-label>
-                  <h3 class="gold-title">{{ item.name }}</h3>
-                </ion-label>
-                <ion-button
-                  slot="end"
-                  fill="clear"
-                  size="small"
-                  (click)="navigateToEdit('MONSTER', item.id)"
-                  data-testid="edit-action"
-                >
-                  Editar
-                </ion-button>
-                <ion-button
-                  slot="end"
-                  fill="clear"
-                  color="danger"
-                  size="small"
-                  [disabled]="deletingId === item.id"
-                  (click)="confirmDelete(item)"
-                  data-testid="delete-action"
-                >
-                  @if (deletingId === item.id) {
-                    <ion-spinner name="crescent" slot="icon-only"></ion-spinner>
-                  } @else {
-                    Eliminar
-                  }
-                </ion-button>
-              </ion-item>
-            }
-          </ion-list>
-        }
-      </div>
-
-      <!-- Spells -->
-      <div class="section-block" data-testid="section-SPELL">
-        <div class="section-header">
-          <h2 class="section-title">Hechizos</h2>
-          <ion-button fill="outline" size="small" (click)="navigateToCreate('SPELL')" data-testid="create-SPELL">
-            + Crear Hechizo
-          </ion-button>
-        </div>
-
-        @if (homebrewItems.spells.length === 0) {
-          <p class="text-muted" data-testid="empty-SPELL">No has creado ningún hechizo homebrew aún.</p>
-        } @else {
-          <ion-list class="transparent-list">
-            @for (item of homebrewItems.spells; track item.id) {
-              <ion-item lines="full" class="skill-item list-item-interactive" data-testid="item-row" [attr.data-item-id]="item.id" [attr.data-item-type]="item.contentType">
-                <ion-label>
-                  <h3 class="gold-title">{{ item.name }}</h3>
-                </ion-label>
-                <ion-button
-                  slot="end"
-                  fill="clear"
-                  size="small"
-                  (click)="navigateToEdit('SPELL', item.id)"
-                  data-testid="edit-action"
-                >
-                  Editar
-                </ion-button>
-                <ion-button
-                  slot="end"
-                  fill="clear"
-                  color="danger"
-                  size="small"
-                  [disabled]="deletingId === item.id"
-                  (click)="confirmDelete(item)"
-                  data-testid="delete-action"
-                >
-                  @if (deletingId === item.id) {
-                    <ion-spinner name="crescent" slot="icon-only"></ion-spinner>
-                  } @else {
-                    Eliminar
-                  }
-                </ion-button>
-              </ion-item>
-            }
-          </ion-list>
-        }
-      </div>
-
-      <!-- Items -->
-      <div class="section-block" data-testid="section-ITEM">
-        <div class="section-header">
-          <h2 class="section-title">Objetos</h2>
-          <ion-button fill="outline" size="small" (click)="navigateToCreate('ITEM')" data-testid="create-ITEM">
-            + Crear Objeto
-          </ion-button>
-        </div>
-
-        @if (homebrewItems.items.length === 0) {
-          <p class="text-muted" data-testid="empty-ITEM">No has creado ningún objeto homebrew aún.</p>
-        } @else {
-          <ion-list class="transparent-list">
-            @for (item of homebrewItems.items; track item.id) {
-              <ion-item lines="full" class="skill-item list-item-interactive" data-testid="item-row" [attr.data-item-id]="item.id" [attr.data-item-type]="item.contentType">
-                <ion-label>
-                  <h3 class="gold-title">{{ item.name }}</h3>
-                </ion-label>
-                <ion-button
-                  slot="end"
-                  fill="clear"
-                  size="small"
-                  (click)="navigateToEdit('ITEM', item.id)"
-                  data-testid="edit-action"
-                >
-                  Editar
-                </ion-button>
-                <ion-button
-                  slot="end"
-                  fill="clear"
-                  color="danger"
-                  size="small"
-                  [disabled]="deletingId === item.id"
-                  (click)="confirmDelete(item)"
-                  data-testid="delete-action"
-                >
-                  @if (deletingId === item.id) {
-                    <ion-spinner name="crescent" slot="icon-only"></ion-spinner>
-                  } @else {
-                    Eliminar
-                  }
-                </ion-button>
-              </ion-item>
-            }
-          </ion-list>
-        }
-      </div>
-
-    }
-
+      }
+    </div>
   </div>
-</div>
+
+  <!-- Preview Modal -->
+  <ion-modal [isOpen]="isPreviewModalOpen" (didDismiss)="closePreview()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="dark">
+          <ion-title>{{ selectedPreviewItem?.name }}</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closePreview()">
+              <ion-icon name="close" slot="icon-only"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding preview-modal-content">
+        @if (loadingPreview) {
+          <div class="loading-container">
+            <ion-spinner name="crescent"></ion-spinner>
+            <p>Cargando detalles...</p>
+          </div>
+        } @else if (previewDetails) {
+          <!-- Monster Stat Block -->
+          @if (selectedPreviewItem?.contentType === 'MONSTER') {
+            <div class="stat-block-preview">
+              <div class="stat-header">
+                <h2>{{ previewDetails.name }}</h2>
+                <p><i>{{ previewDetails.size }} {{ previewDetails.type }}, {{ previewDetails.alignment }}</i></p>
+              </div>
+
+              <div class="stat-divider"></div>
+
+              <div class="primary-stats">
+                <p><strong>Clase de Armadura:</strong> {{ previewDetails.armorClass }}</p>
+                <p><strong>Puntos de Golpe:</strong> {{ previewDetails.hitPoints }}</p>
+                <p><strong>Velocidad:</strong> {{ previewDetails.speed }}</p>
+              </div>
+
+              <div class="stat-divider"></div>
+
+              <ion-grid class="ability-grid">
+                <ion-row>
+                  <ion-col><strong>FUE</strong><br>{{ previewDetails.str }} ({{ getModifier(previewDetails.str) }})</ion-col>
+                  <ion-col><strong>DES</strong><br>{{ previewDetails.dex }} ({{ getModifier(previewDetails.dex) }})</ion-col>
+                  <ion-col><strong>CON</strong><br>{{ previewDetails.con }} ({{ getModifier(previewDetails.con) }})</ion-col>
+                  <ion-col><strong>INT</strong><br>{{ previewDetails.intStat }} ({{ getModifier(previewDetails.intStat) }})</ion-col>
+                  <ion-col><strong>SAB</strong><br>{{ previewDetails.wis }} ({{ getModifier(previewDetails.wis) }})</ion-col>
+                  <ion-col><strong>CAR</strong><br>{{ previewDetails.cha }} ({{ getModifier(previewDetails.cha) }})</ion-col>
+                </ion-row>
+              </ion-grid>
+
+              <div class="stat-divider"></div>
+
+              <div class="secondary-stats">
+                <p><strong>Desafío:</strong> {{ previewDetails.challengeRating }} ({{ previewDetails.xp }} XP)</p>
+              </div>
+
+              @if (getMechanics('traits').length > 0) {
+                <div class="stat-divider"></div>
+                @for (trait of getMechanics('traits'); track trait.name) {
+                  <p class="feature-text"><strong>{{ trait.name }}.</strong> {{ trait.description || trait.desc }}</p>
+                }
+              }
+
+              @if (getMechanics('actions').length > 0) {
+                <h3 class="section-divider-title">Acciones</h3>
+                <div class="stat-divider"></div>
+                @for (action of getMechanics('actions'); track action.name) {
+                  <p class="feature-text"><strong>{{ action.name }}.</strong> {{ action.description || action.desc }}</p>
+                }
+              }
+            </div>
+          }
+
+          <!-- Spell Preview -->
+          @if (selectedPreviewItem?.contentType === 'SPELL') {
+            <div class="stat-block-preview">
+              <div class="stat-header">
+                <h2>{{ previewDetails.name }}</h2>
+                <p><i>Nivel {{ previewDetails.level }}, {{ previewDetails.school }}</i></p>
+              </div>
+              <div class="stat-divider"></div>
+              <p><strong>Tiempo de lanzamiento:</strong> {{ previewDetails.castingTime }}</p>
+              <p><strong>Alcance:</strong> {{ previewDetails.range }}</p>
+              <p><strong>Componentes:</strong> 
+                {{ previewDetails.verbal ? 'V' : '' }}{{ previewDetails.somatic ? 'S' : '' }}{{ previewDetails.material ? 'M' : '' }}
+                @if (previewDetails.materialComponent) { ({{ previewDetails.materialComponent }}) }
+              </p>
+              <p><strong>Duración:</strong> {{ previewDetails.duration }}</p>
+              <div class="stat-divider"></div>
+              <div class="description-text">{{ previewDetails.description }}</div>
+            </div>
+          }
+
+          <!-- General Description for Class/Race/Item -->
+          @if (['CLASS', 'SUBCLASS', 'RACE', 'ITEM'].includes(selectedPreviewItem?.contentType || '')) {
+            <div class="stat-block-preview">
+              <div class="stat-header">
+                <h2>{{ previewDetails.name }}</h2>
+                @if (selectedPreviewItem?.contentType === 'CLASS') {
+                  <p>Dado de Golpe: d{{ previewDetails.hitDie }}</p>
+                }
+                @if (selectedPreviewItem?.contentType === 'SUBCLASS') {
+                  <p>Subclase de {{ previewDetails.parentClass?.name }}</p>
+                  <p><strong>Atributo Principal:</strong> {{ previewDetails.parentClass?.classFeatures?.primaryAbility || '—' }}</p>
+                }
+              </div>
+              <div class="stat-divider"></div>
+              
+              @if (selectedPreviewItem?.contentType === 'CLASS') {
+                <p><strong>Atributo Principal:</strong> {{ previewDetails.classFeatures?.primaryAbility || '—' }}</p>
+                <p><strong>Salvaciones:</strong> {{ getSavingThrowsList() }}</p>
+                <div class="stat-divider"></div>
+              }
+
+              <div class="description-text">{{ previewDetails.description }}</div>
+              
+              @if (selectedPreviewItem?.contentType === 'ITEM') {
+                <p><strong>Tipo:</strong> {{ previewDetails.type }}</p>
+                <p><strong>Peso:</strong> {{ previewDetails.weight }} lb.</p>
+              }
+
+              @if (getClassFeatures().length > 0) {
+                <h3 class="section-divider-title">Rasgos</h3>
+                <div class="stat-divider"></div>
+                @for (feature of getClassFeatures(); track feature.name) {
+                  <p class="feature-text">
+                    <strong>{{ feature.name }} (Nvl {{ feature.levelRequired }}).</strong> 
+                    {{ feature.description }}
+                  </p>
+                }
+              }
+            </div>
+          }
+        }
+      </ion-content>
+
+      @if (selectedPreviewItem && !selectedPreviewItem.isOwned && selectedTab === 'community') {
+        <ion-footer class="ion-no-border">
+          <ion-toolbar color="warning" class="ion-text-center" (click)="purchaseItem(selectedPreviewItem); closePreview()">
+            <ion-title size="small">ADQUIRIR POR {{ selectedPreviewItem.price === 0 ? 'GRATIS' : (selectedPreviewItem.price | currency:'EUR') }}</ion-title>
+          </ion-toolbar>
+        </ion-footer>
+      }
+    </ng-template>
+  </ion-modal>

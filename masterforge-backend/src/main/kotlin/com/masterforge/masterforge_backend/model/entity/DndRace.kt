@@ -21,8 +21,8 @@ data class DndRace(
     @Column(nullable = false)
     val name: String,
 
-    @Column(nullable = false)
-    val price: BigDecimal,
+    @Column(nullable = true)
+    val price: BigDecimal = BigDecimal.ZERO,
 
     // --- Ability Score Bonuses ---
     @Column(name = "bonus_str", nullable = false)

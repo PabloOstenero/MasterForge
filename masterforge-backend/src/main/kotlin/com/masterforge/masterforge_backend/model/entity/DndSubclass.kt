@@ -1,9 +1,10 @@
 package com.masterforge.masterforge_backend.model.entity
 
-
 import jakarta.persistence.*
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
+import java.math.BigDecimal
+import java.util.UUID
 
 @Entity
 @Table(name = "dnd_subclasses")
@@ -17,6 +18,9 @@ data class DndSubclass(
 
     @Column(nullable = false, columnDefinition = "TEXT")
     val description: String,
+
+    @Column(nullable = true)
+    val price: BigDecimal = BigDecimal.ZERO,
 
     // Every subclass MUST come from a class
     @ManyToOne(fetch = FetchType.LAZY)
