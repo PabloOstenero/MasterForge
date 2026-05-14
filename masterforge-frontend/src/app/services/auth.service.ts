@@ -71,6 +71,24 @@ export class AuthService {
     );
   }
 
+  getMe(): Observable<any> {
+    return this.http.get(`${API_URL}/users/me`).pipe(
+      tap((user: any) => this.storeUser(user))
+    );
+  }
+
+  updateMe(user: any): Observable<any> {
+    return this.http.put(`${API_URL}/users/me`, user).pipe(
+      tap((updatedUser: any) => this.storeUser(updatedUser))
+    );
+  }
+
+  deleteMe(): Observable<any> {
+    return this.http.delete(`${API_URL}/users/me`).pipe(
+      tap(() => this.logout())
+    );
+  }
+
   isAuthenticated(): boolean {
     return !!this.getToken() && !this.isTokenExpired();
   }

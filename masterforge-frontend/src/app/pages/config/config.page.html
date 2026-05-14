@@ -1,6 +1,487 @@
 <ion-content class="ion-padding" style="--background: #121212;">
-  <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #F0E6D3;">
-    <h1 style="color: #C9A84C; font-weight: 700; margin-bottom: 8px;">Configuración</h1>
-    <p style="color: #8C8C8C;">Próximamente...</p>
+  <div class="config-container">
+    <h1 class="main-title">Configuración del Maestro</h1>
+    
+    <div *ngIf="isLoading" class="loader-container">
+      <ion-spinner name="crescent" color="warning"></ion-spinner>
+      <p>Cargando pergaminos...</p>
+    </div>
+
+    <div *ngIf="!isLoading" class="config-sections animate__animated animate__fadeIn">
+      
+      <!-- Personal Information -->
+      <section class="parchment-card">
+        <div class="card-header">
+          <ion-icon name="person-outline" color="warning"></ion-icon>
+          <h2>Información Personal</h2>
+        </div>
+        <form [formGroup]="userForm" (ngSubmit)="updatePersonalData()">
+          <div class="form-group">
+            <label>Nombre de Usuario</label>
+            <input type="text" formControlName="name" class="dnd-input">
+          </div>
+          <div class="form-group">
+            <label>Correo Electrónico</label>
+            <input type="email" formControlName="email" class="dnd-input">
+          </div>
+          <button type="submit" class="dnd-button primary" [disabled]="userForm.invalid">
+            Guardar Cambios
+          </button>
+        </form>
+      </section>
+
+      <!-- Security -->
+      <section class="parchment-card">
+        <div class="card-header">
+          <ion-icon name="lock-closed-outline" color="warning"></ion-icon>
+          <h2>Seguridad</h2>
+        </div>
+        
+        <form [formGroup]="passwordForm" (ngSubmit)="updatePassword()">
+          <div class="form-group">
+            <label>Contraseña Actual</label>
+            <div class="password-wrapper">
+              <input [type]="showPassword ? 'text' : 'password'" formControlName="currentPassword" class="dnd-input">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Nueva Contraseña</label>
+            <div class="password-wrapper">
+              <input [type]="showPassword ? 'text' : 'password'" formControlName="newPassword" class="dnd-input">
+              <ion-icon 
+                [name]="showPassword ? 'eye-off-outline' : 'eye-outline'" 
+                (click)="togglePasswordVisibility()"
+                class="password-toggle">
+              </ion-icon>
+            </div>
+            <p *ngIf="passwordForm.get('newPassword')?.errors?.['minlength'] && passwordForm.get('newPassword')?.touched" class="error-hint">
+              Mínimo 6 caracteres.
+            </p>
+          </div>
+          <div class="form-group">
+            <label>Confirmar Contraseña</label>
+            <div class="password-wrapper">
+              <input [type]="showPassword ? 'text' : 'password'" formControlName="confirmPassword" class="dnd-input">
+            </div>
+            <p *ngIf="passwordForm.errors?.['mismatch'] && passwordForm.get('confirmPassword')?.touched" class="error-hint">
+              Las contraseñas no coinciden.
+            </p>
+          </div>
+          <button type="submit" class="dnd-button gold" [disabled]="passwordForm.invalid">
+            Actualizar Contraseña
+          </button>
+        </form>
+
+        <div class="placeholder-section mt-4">
+          <h3>Autenticación en Dos Pasos (2FA)</h3>
+          <p class="status-badge disabled">Próximamente</p>
+          <p class="hint-text">Añade una capa extra de protección a tu cuenta.</p>
+        </div>
+      </section>
+
+      <!-- App Preferences -->
+      <section class="parchment-card">
+        <div class="card-header">
+          <ion-icon name="settings-outline" color="warning"></ion-icon>
+          <h2>Preferencias de la App</h2>
+        </div>
+        <div class="placeholder-section">
+          <h3>Escalado de Fuente</h3>
+          <div class="font-scale-mock">
+            <span>A</span>
+            <div class="slider-mock"></div>
+            <span>A++</span>
+          </div>
+          <p class="hint-text">Ajusta el tamaño del texto para leer mejor los bloques de estadísticas.</p>
+        </div>
+      </section>
+
+      <!-- Notifications -->
+      <section class="parchment-card">
+        <div class="card-header">
+          <ion-icon name="notifications-outline" color="warning"></ion-icon>
+          <h2>Notificaciones</h2>
+        </div>
+        <div class="placeholder-section">
+          <div class="toggle-row">
+            <span>Alertas de Sesión</span>
+            <div class="toggle-mock disabled"></div>
+          </div>
+          <div class="toggle-row">
+            <span>Menciones en Combate</span>
+            <div class="toggle-mock disabled"></div>
+          </div>
+          <p class="hint-text">Gestiona cómo quieres que te avisemos de las novedades.</p>
+        </div>
+      </section>
+
+      <!-- Billing -->
+      <section class="parchment-card">
+        <div class="card-header">
+          <ion-icon name="wallet-outline" color="warning"></ion-icon>
+          <h2>Suscripción y Tesorería</h2>
+        </div>
+        <div class="billing-info">
+          <div class="info-row">
+            <span>Nivel de Suscripción:</span>
+            <span class="badge gold">{{ currentUser?.subscriptionTier }}</span>
+          </div>
+          <div class="info-row">
+            <span>Tesorería (Balance):</span>
+            <span class="balance-text">{{ currentUser?.balance | currency:'GP ' }}</span>
+          </div>
+        </div>
+        <div class="placeholder-section mt-4">
+          <p class="hint-text">Próximamente podrás gestionar tus pagos y nivel de suscripción aquí.</p>
+        </div>
+      </section>
+
+      <!-- Social -->
+      <section class="parchment-card">
+        <div class="card-header">
+          <ion-icon name="people-outline" color="warning"></ion-icon>
+          <h2>Conexiones Sociales</h2>
+        </div>
+        <div class="social-connections">
+          <div class="social-item discord">
+            <ion-icon name="logo-discord"></ion-icon>
+            <span>Conectar con Discord</span>
+            <p class="status-badge disabled">Próximamente</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Danger Zone -->
+      <section class="parchment-card danger-zone">
+        <div class="card-header">
+          <ion-icon name="skull-outline" color="danger"></ion-icon>
+          <h2>Zona de Peligro</h2>
+        </div>
+        <p>Una vez eliminada la cuenta, no hay vuelta atrás. Todos tus datos se perderán en el abismo.</p>
+        <button class="dnd-button danger" (click)="confirmDeleteAccount()">
+          Eliminar Cuenta Permanentemente
+        </button>
+      </section>
+
+    </div>
   </div>
 </ion-content>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@500;700&display=swap');
+
+  .config-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px 0;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .main-title {
+    font-family: 'Outfit', sans-serif;
+    color: #C9A84C;
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 40px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  }
+
+  .loader-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    color: #C9A84C;
+  }
+
+  .config-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .parchment-card {
+    background: linear-gradient(135deg, #1e1e1e 0%, #121212 100%);
+    border: 1px solid #333;
+    border-left: 4px solid #C9A84C;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transition: transform 0.2s ease;
+  }
+
+  .parchment-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 12px;
+  }
+
+  .card-header h2 {
+    margin: 0;
+    font-family: 'Outfit', sans-serif;
+    color: #F0E6D3;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  .card-header ion-icon {
+    font-size: 1.8rem;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    display: block;
+    color: #8C8C8C;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .dnd-input {
+    width: 100%;
+    background: #252525;
+    border: 1px solid #444;
+    color: #F0E6D3;
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+
+  .dnd-input:focus {
+    border-color: #C9A84C;
+    background: #2a2a2a;
+  }
+
+  .password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .password-toggle {
+    position: absolute;
+    right: 12px;
+    font-size: 1.4rem;
+    color: #8C8C8C;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+
+  .password-toggle:hover {
+    color: #C9A84C;
+  }
+
+  .dnd-button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 10px;
+  }
+
+  .dnd-button.primary {
+    background: #C9A84C;
+    color: #121212;
+  }
+
+  .dnd-button.gold {
+    background: transparent;
+    border: 1px solid #C9A84C;
+    color: #C9A84C;
+  }
+
+  .dnd-button.gold:hover {
+    background: rgba(201, 168, 76, 0.1);
+  }
+
+  .dnd-button.danger {
+    background: #7a1f1f;
+    color: white;
+  }
+
+  .dnd-button.danger:hover {
+    background: #a32929;
+  }
+
+  .dnd-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .placeholder-section {
+    padding: 16px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 6px;
+    border: 1px dashed #444;
+  }
+
+  .placeholder-section h3 {
+    margin: 0 0 12px 0;
+    color: #F0E6D3;
+    font-size: 1.1rem;
+  }
+
+  .hint-text {
+    color: #666;
+    font-size: 0.85rem;
+    margin-top: 8px;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .status-badge.disabled {
+    background: #333;
+    color: #888;
+  }
+
+  .mt-4 { margin-top: 24px; }
+
+  .font-scale-mock {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: #888;
+  }
+
+  .slider-mock {
+    flex: 1;
+    height: 4px;
+    background: #333;
+    border-radius: 2px;
+    position: relative;
+  }
+
+  .slider-mock::after {
+    content: '';
+    position: absolute;
+    left: 40%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 16px;
+    background: #C9A84C;
+    border-radius: 50%;
+  }
+
+  .toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    color: #F0E6D3;
+  }
+
+  .toggle-mock {
+    width: 40px;
+    height: 20px;
+    background: #333;
+    border-radius: 10px;
+    position: relative;
+  }
+
+  .toggle-mock::after {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    width: 16px;
+    height: 16px;
+    background: #666;
+    border-radius: 50%;
+  }
+
+  .billing-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    color: #F0E6D3;
+  }
+
+  .badge.gold {
+    color: #C9A84C;
+    font-weight: 700;
+  }
+
+  .balance-text {
+    font-family: 'Outfit', sans-serif;
+    color: #F0E6D3;
+    font-weight: 600;
+  }
+
+  .social-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px;
+    background: #252525;
+    border-radius: 6px;
+    color: #F0E6D3;
+  }
+
+  .social-item.discord ion-icon {
+    font-size: 1.5rem;
+    color: #5865F2;
+  }
+
+  .danger-zone {
+    border-left-color: #7a1f1f;
+    margin-top: 20px;
+    background: rgba(122, 31, 31, 0.05);
+  }
+
+  .danger-zone p {
+    color: #8C8C8C;
+    margin-bottom: 20px;
+  }
+
+  /* Animations */
+  .animate__fadeIn {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .error-hint {
+    color: #ff4961;
+    font-size: 0.75rem;
+    margin-top: 4px;
+    margin-bottom: 0;
+  }
+</style>

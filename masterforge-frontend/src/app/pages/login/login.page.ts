@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import {
   IonContent,
   IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-  IonInput, IonButton, IonLabel, IonIcon
+  IonInput, IonButton, IonLabel, IonIcon, ToastController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { eyeOutline, eyeOffOutline } from 'ionicons/icons';
@@ -33,7 +33,11 @@ export class LoginPage {
 
   @ViewChild('emailInput', { static: false }) emailInput?: IonInput;
 
-  constructor(private authService: AuthService, public router: Router) {
+  constructor(
+    private authService: AuthService, 
+    public router: Router,
+    private toastCtrl: ToastController
+  ) {
     addIcons({ eyeOutline, eyeOffOutline });
   }
 
@@ -71,9 +75,22 @@ export class LoginPage {
           this.router.navigate(['/home']);
         }
       },
-      error: (err) => {
-        this.errorMessage = err?.error?.message ?? 'Credenciales incorrectas. Inténtalo de nuevo.';
+      error: async (err) => {
         this.isLoading = false;
+        if (err.status === 401) {
+          this.errorMessage = 'El correo o la contraseña son incorrectos.';
+        } else {
+          this.errorMessage = err?.error?.message ?? 'Ha ocurrido un error en el servidor.';
+        }
+        
+        const toast = await this.toastCtrl.create({
+          message: this.errorMessage || 'Error',
+          duration: 3000,
+          color: 'danger',
+          position: 'bottom',
+          buttons: [{ text: 'OK', role: 'cancel' }]
+        });
+        await toast.present();
       }
     });
   }

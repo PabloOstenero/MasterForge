@@ -24,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.data.domain.PageRequest
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
 import java.util.UUID
 
 @RestController
@@ -152,15 +153,93 @@ class UserController(
     @PostMapping
     @Transactional
     fun createUser(@RequestBody userDto: UserDto): UserResponseDto {
+        val password = userDto.passwordHash 
+            ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is required for creation")
+        
+        if (password.length < 6) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Password must be at least 6 characters long")
+        }
+        val name = userDto.name
+            ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Name is required for creation")
+        val email = userDto.email
+            ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is required for creation")
+        
+        if (userRepository.findByEmail(email).isPresent) {
+            throw ResponseStatusException(HttpStatus.CONFLICT, "Email is already in use")
+        }
+
         val user = User(
-            name = userDto.name,
-            email = userDto.email,
-            passwordHash = passwordEncoder.encode(userDto.passwordHash)!!,
-            subscriptionTier = userDto.subscriptionTier,
-            balance = userDto.balance,
-            isActive = userDto.isActive
+            name = name,
+            email = email,
+            passwordHash = passwordEncoder.encode(password)!!,
+            subscriptionTier = userDto.subscriptionTier ?: "FREE",
+            balance = userDto.balance ?: BigDecimal.ZERO,
+            isActive = userDto.isActive ?: true
         )
         return UserResponseDto.fromEntity(userRepository.save(user))
+    }
+
+    @GetMapping("/me")
+    @Transactional(readOnly = true)
+    fun getCurrentUser(): ResponseEntity<UserResponseDto> {
+        val userId = SecurityContextHolder.getContext().authentication?.name
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        val user = userRepository.findById(UUID.fromString(userId))
+        return if (user.isPresent) {
+            ResponseEntity.ok(UserResponseDto.fromEntity(user.get()))
+        } else {
+            ResponseEntity.notFound().build()
+        }
+    }
+
+    @PutMapping("/me")
+    @Transactional
+    fun updateCurrentUser(@RequestBody userDto: UserDto): ResponseEntity<UserResponseDto> {
+        val userIdStr = SecurityContextHolder.getContext().authentication?.name
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        val userId = UUID.fromString(userIdStr)
+        val existingUser = userRepository.findById(userId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "User not found") }
+
+        userDto.email?.let { newEmail ->
+            if (newEmail != existingUser.email && userRepository.findByEmail(newEmail).isPresent) {
+                throw ResponseStatusException(HttpStatus.CONFLICT, "Email is already in use")
+            }
+        }
+
+        userDto.passwordHash?.let { newPassword ->
+            if (newPassword.length < 6) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "New password must be at least 6 characters long")
+            }
+            val currentPassword = userDto.currentPassword
+                ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Current password is required to change password")
+            if (!passwordEncoder.matches(currentPassword, existingUser.passwordHash)) {
+                throw ResponseStatusException(HttpStatus.FORBIDDEN, "Current password does not match")
+            }
+        }
+
+        val updatedUser = existingUser.copy(
+            name = userDto.name ?: existingUser.name,
+            email = userDto.email ?: existingUser.email,
+            passwordHash = userDto.passwordHash?.let { passwordEncoder.encode(it) } ?: existingUser.passwordHash,
+            subscriptionTier = userDto.subscriptionTier ?: existingUser.subscriptionTier,
+            balance = userDto.balance ?: existingUser.balance,
+            isActive = userDto.isActive ?: existingUser.isActive
+        )
+        return ResponseEntity.ok(UserResponseDto.fromEntity(userRepository.save(updatedUser)))
+    }
+
+    @DeleteMapping("/me")
+    @Transactional
+    fun deleteCurrentUser(): ResponseEntity<Void> {
+        val userIdStr = SecurityContextHolder.getContext().authentication?.name
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        val userId = UUID.fromString(userIdStr)
+        if (!userRepository.existsById(userId)) {
+            return ResponseEntity.notFound().build()
+        }
+        userRepository.deleteById(userId)
+        return ResponseEntity.noContent().build()
     }
 
     @GetMapping("/{id}")
@@ -180,13 +259,19 @@ class UserController(
         val existingUser = userRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with id $id") }
 
+        userDto.email?.let { newEmail ->
+            if (newEmail != existingUser.email && userRepository.findByEmail(newEmail).isPresent) {
+                throw ResponseStatusException(HttpStatus.CONFLICT, "Email is already in use")
+            }
+        }
+
         val updatedUser = existingUser.copy(
-            name = userDto.name,
-            email = userDto.email,
-            passwordHash = passwordEncoder.encode(userDto.passwordHash)!!,
-            subscriptionTier = userDto.subscriptionTier,
-            balance = userDto.balance,
-            isActive = userDto.isActive
+            name = userDto.name ?: existingUser.name,
+            email = userDto.email ?: existingUser.email,
+            passwordHash = userDto.passwordHash?.let { passwordEncoder.encode(it) } ?: existingUser.passwordHash,
+            subscriptionTier = userDto.subscriptionTier ?: existingUser.subscriptionTier,
+            balance = userDto.balance ?: existingUser.balance,
+            isActive = userDto.isActive ?: existingUser.isActive
         )
         return UserResponseDto.fromEntity(userRepository.save(updatedUser))
     }

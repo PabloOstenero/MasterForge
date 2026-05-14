@@ -56,6 +56,11 @@ export class RegisterPage {
       return;
     }
 
+    if (this.password.length < 6) {
+      this.errorMessage = 'La contraseña debe tener al menos 6 caracteres.';
+      return;
+    }
+
     this.isLoading = true;
     this.authService.register(this.name, this.email, this.password).subscribe({
       next: () => {
