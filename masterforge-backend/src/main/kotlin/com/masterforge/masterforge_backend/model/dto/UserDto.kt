@@ -12,6 +12,7 @@ data class UserDto(
     val subscriptionTier: String? = null,
     val balance: BigDecimal? = null,
     val isActive: Boolean? = null,
+    val sessionNotifications: Boolean? = null,
     @JsonSetter(nulls = Nulls.AS_EMPTY)
     val characters: List<CharacterDto>? = emptyList()
 )

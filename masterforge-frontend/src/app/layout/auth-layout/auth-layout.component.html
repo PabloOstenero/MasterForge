@@ -26,6 +26,12 @@
           <ion-icon slot="start" name="swap-horizontal-outline"></ion-icon>
           <span class="ion-hide-sm-down">{{ (activeRole$ | async) === 'dm' ? 'Modo Jugador' : 'Modo Director' }}</span>
         </ion-button>
+        <button class="notification-btn" (click)="toggleNotifications($event)" aria-label="Notificaciones" type="button">
+          <ion-icon name="notifications-outline" class="action-icon"></ion-icon>
+          @if ((unreadCount$ | async) || 0 > 0) {
+            <span class="notification-badge">{{ unreadCount$ | async }}</span>
+          }
+        </button>
         <button class="avatar-btn" (click)="openDropdown()" aria-label="Menú de usuario" type="button">
           <ion-icon name="person-circle-outline" class="avatar-icon"></ion-icon>
         </button>

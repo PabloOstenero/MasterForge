@@ -133,17 +133,14 @@
           <ion-icon name="notifications-outline" color="warning"></ion-icon>
           <h2>Notificaciones</h2>
         </div>
-        <div class="placeholder-section">
-          <div class="toggle-row">
-            <span>Alertas de Sesión</span>
-            <div class="toggle-mock disabled"></div>
-          </div>
-          <div class="toggle-row">
-            <span>Menciones en Combate</span>
-            <div class="toggle-mock disabled"></div>
-          </div>
-          <p class="hint-text">Gestiona cómo quieres que te avisemos de las novedades.</p>
+        <div class="toggle-row">
+          <span>Alertas de Sesión</span>
+          <ion-toggle color="warning" 
+                      [(ngModel)]="sessionNotifications"
+                      (ionChange)="updateNotifications()">
+          </ion-toggle>
         </div>
+        <p class="hint-text">Gestiona cómo quieres que te avisemos de las novedades.</p>
       </section>
 
       <!-- Billing -->

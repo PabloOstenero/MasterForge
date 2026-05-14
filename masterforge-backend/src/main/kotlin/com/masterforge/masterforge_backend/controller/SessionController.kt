@@ -2,8 +2,11 @@ package com.masterforge.masterforge_backend.controller
 
 import com.masterforge.masterforge_backend.model.dto.SessionDto
 import com.masterforge.masterforge_backend.model.entity.Session
+import com.masterforge.masterforge_backend.repository.CampaignEnrollmentRepository
 import com.masterforge.masterforge_backend.repository.CampaignRepository
 import com.masterforge.masterforge_backend.repository.SessionRepository
+import com.masterforge.masterforge_backend.service.NotificationService
+import com.masterforge.masterforge_backend.service.PushNotificationService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -14,7 +17,10 @@ import java.util.UUID
 @RequestMapping("/api/sessions")
 class SessionController(
     private val sessionRepository: SessionRepository,
-    private val campaignRepository: CampaignRepository
+    private val campaignRepository: CampaignRepository,
+    private val enrollmentRepository: CampaignEnrollmentRepository,
+    private val notificationService: NotificationService,
+    private val pushNotificationService: PushNotificationService
 ) {
 
     @GetMapping
@@ -34,7 +40,31 @@ class SessionController(
             price = sessionDto.price,
             campaign = campaign
         )
-        return sessionRepository.save(session)
+        val savedSession = sessionRepository.save(session)
+
+        // Notify enrolled players
+        val enrollments = enrollmentRepository.findByCampaignId(campaign.id!!)
+        enrollments.forEach { enrollment ->
+            val player = enrollment.user
+            val title = "Nueva Sesión: ${campaign.name}"
+            val message = "Se ha programado una nueva sesión: ${session.name}"
+            val link = "/campaigns/${campaign.id}"
+
+            // 1. Create In-App Notification
+            notificationService.createNotification(player, title, message, link)
+
+            // 2. Send Push Notification
+            if (player.sessionNotifications && player.fcmTokens.isNotEmpty()) {
+                pushNotificationService.sendPushNotification(
+                    tokens = player.fcmTokens,
+                    title = title,
+                    body = message,
+                    data = mapOf("campaignId" to campaign.id.toString(), "type" to "SESSION_ALERT")
+                )
+            }
+        }
+
+        return savedSession
     }
 
     @GetMapping("/{id}")

@@ -224,7 +224,8 @@ class UserController(
             passwordHash = userDto.passwordHash?.let { passwordEncoder.encode(it) } ?: existingUser.passwordHash,
             subscriptionTier = userDto.subscriptionTier ?: existingUser.subscriptionTier,
             balance = userDto.balance ?: existingUser.balance,
-            isActive = userDto.isActive ?: existingUser.isActive
+            isActive = userDto.isActive ?: existingUser.isActive,
+            sessionNotifications = userDto.sessionNotifications ?: existingUser.sessionNotifications
         )
         return ResponseEntity.ok(UserResponseDto.fromEntity(userRepository.save(updatedUser)))
     }
@@ -271,7 +272,8 @@ class UserController(
             passwordHash = userDto.passwordHash?.let { passwordEncoder.encode(it) } ?: existingUser.passwordHash,
             subscriptionTier = userDto.subscriptionTier ?: existingUser.subscriptionTier,
             balance = userDto.balance ?: existingUser.balance,
-            isActive = userDto.isActive ?: existingUser.isActive
+            isActive = userDto.isActive ?: existingUser.isActive,
+            sessionNotifications = userDto.sessionNotifications ?: existingUser.sessionNotifications
         )
         return UserResponseDto.fromEntity(userRepository.save(updatedUser))
     }
@@ -285,12 +287,29 @@ class UserController(
         return ResponseEntity.noContent().build()
     }
 
+    @PostMapping("/me/fcm-token")
+    @Transactional
+    fun registerFcmToken(@RequestBody body: Map<String, String>): ResponseEntity<Void> {
+        val userIdStr = SecurityContextHolder.getContext().authentication?.name
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        val userId = UUID.fromString(userIdStr)
+        val token = body["token"] ?: return ResponseEntity.badRequest().build()
+
+        val user = userRepository.findById(userId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "User not found") }
+        
+        user.fcmTokens.add(token)
+        userRepository.save(user)
+        return ResponseEntity.ok().build()
+    }
+
     private fun User.toDto(): UserDto = UserDto(
         name = this.name,
         email = this.email,
         passwordHash = this.passwordHash,
         subscriptionTier = this.subscriptionTier,
         balance = this.balance,
-        isActive = this.isActive
+        isActive = this.isActive,
+        sessionNotifications = this.sessionNotifications
     )
 }

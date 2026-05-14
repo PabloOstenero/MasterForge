@@ -16,6 +16,7 @@ import {
   IonMenuButton,
   IonAvatar,
   IonSpinner,
+  IonToggle,
   AlertController, 
   ToastController 
 } from '@ionic/angular/standalone';
@@ -61,7 +62,8 @@ import * as QRCode from 'qrcode';
     IonButtons, 
     IonMenuButton,
     IonAvatar,
-    IonSpinner
+    IonSpinner,
+    IonToggle
   ],
   styles: [`
     :host {
@@ -84,6 +86,7 @@ export class ConfigPage implements OnInit {
   currentUser: any;
   isLoading = true;
   showPassword = false;
+  sessionNotifications = true;
   
   // 2FA variables
   is2faSetup = false;
@@ -154,6 +157,19 @@ export class ConfigPage implements OnInit {
     this.applyFontScale();
   }
 
+  updateNotifications() {
+    this.authService.updateMe({
+      sessionNotifications: this.sessionNotifications
+    }).subscribe({
+      next: (user) => {
+        console.log('Notificaciones actualizadas', user);
+      },
+      error: (err) => {
+        console.error('Error al actualizar notificaciones', err);
+      }
+    });
+  }
+
   private applyFontScale() {
     document.documentElement.style.setProperty('--app-font-scale', this.fontScale.toString());
   }
@@ -161,11 +177,15 @@ export class ConfigPage implements OnInit {
   async loadUserData() {
     this.isLoading = true;
     try {
-      this.currentUser = await this.authService.getMe().toPromise();
-      this.userForm.patchValue({
-        name: this.currentUser.name,
-        email: this.currentUser.email
-      });
+      const user = await this.authService.getMe().toPromise();
+      this.currentUser = user;
+      if (user) {
+        this.userForm.patchValue({
+          name: user.name,
+          email: user.email
+        });
+        this.sessionNotifications = user.sessionNotifications ?? true;
+      }
     } catch (error) {
       this.showToast('Error al cargar datos de usuario', 'danger');
     } finally {

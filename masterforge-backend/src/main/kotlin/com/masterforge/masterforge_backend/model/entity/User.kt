@@ -44,8 +44,16 @@ data class User(
     @Column(name = "is_2fa_enabled", nullable = false, columnDefinition = "boolean default false")
     var is2faEnabled: Boolean = false,
 
+    @Column(name = "session_notifications", nullable = false, columnDefinition = "boolean default true")
+    var sessionNotifications: Boolean = true,
+
     @ElementCollection
     @CollectionTable(name = "user_recovery_codes", joinColumns = [JoinColumn(name = "user_id")])
     @Column(name = "recovery_code")
-    val recoveryCodes: MutableList<String> = mutableListOf()
+    val recoveryCodes: MutableList<String> = mutableListOf(),
+
+    @ElementCollection
+    @CollectionTable(name = "user_fcm_tokens", joinColumns = [JoinColumn(name = "user_id")])
+    @Column(name = "fcm_token")
+    val fcmTokens: MutableSet<String> = mutableSetOf()
 )

@@ -23,6 +23,8 @@ data class UserResponseDto(
     val isActive: Boolean,
     @get:JsonProperty("is2faEnabled")
     val is2faEnabled: Boolean,
+    @get:JsonProperty("sessionNotifications")
+    val sessionNotifications: Boolean,
     val recoveryCodes: List<String> = emptyList(),
     val characters: List<CharacterSimpleDto>
 ) {
@@ -36,6 +38,7 @@ data class UserResponseDto(
                 balance = user.balance,
                 isActive = user.isActive,
                 is2faEnabled = user.is2faEnabled,
+                sessionNotifications = user.sessionNotifications,
                 recoveryCodes = user.recoveryCodes,
                 characters = user.characters.map {
                     CharacterSimpleDto(
