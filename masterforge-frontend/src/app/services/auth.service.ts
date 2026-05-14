@@ -20,8 +20,28 @@ export class AuthService {
     if (savedUser) this._currentUser = JSON.parse(savedUser);
   }
 
-  login(email: string, password: string): Observable<{ token: string }> {
-    return this.http.post<{ token: string }>(`${API_URL}/auth/login`, { email, password });
+  login(email: string, password: string): Observable<any> {
+    return this.http.post<any>(`${API_URL}/auth/login`, { email, password });
+  }
+
+  setup2fa(): Observable<any> {
+    return this.http.get(`${API_URL}/2fa/setup`);
+  }
+
+  enable2fa(secret: string, code: string): Observable<any> {
+    return this.http.post(`${API_URL}/2fa/enable`, { secret, code }).pipe(
+      tap((updatedUser: any) => this.storeUser(updatedUser))
+    );
+  }
+
+  disable2fa(): Observable<any> {
+    return this.http.post(`${API_URL}/2fa/disable`, {}).pipe(
+      tap((updatedUser: any) => this.storeUser(updatedUser))
+    );
+  }
+
+  verify2fa(mfaToken: string, code: string): Observable<any> {
+    return this.http.post(`${API_URL}/auth/verify-2fa`, { mfaToken, code });
   }
 
   register(name: string, email: string, passwordHash: string): Observable<any> {

@@ -5,8 +5,9 @@ import { Router } from '@angular/router';
 import {
   IonContent,
   IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-  IonInput, IonButton, IonLabel, IonIcon, ToastController
+  IonInput, IonButton, IonLabel, IonIcon, ToastController, ModalController
 } from '@ionic/angular/standalone';
+import { MfaModalComponent } from '../../components/mfa-modal/mfa-modal.component';
 import { addIcons } from 'ionicons';
 import { eyeOutline, eyeOffOutline } from 'ionicons/icons';
 import { AuthService } from '../../services/auth.service';
@@ -36,7 +37,8 @@ export class LoginPage {
   constructor(
     private authService: AuthService, 
     public router: Router,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private modalCtrl: ModalController
   ) {
     addIcons({ eyeOutline, eyeOffOutline });
   }
@@ -63,17 +65,14 @@ export class LoginPage {
 
     this.isLoading = true;
     this.authService.login(this.email.trim(), this.password.trim()).subscribe({
-      next: (res) => {
-        this.authService.storeToken(res.token);
-        const userId = this.authService.getUserIdFromToken();
-        if (userId) {
-          this.authService.fetchAndStoreUser(userId).subscribe({
-            next: () => this.router.navigate(['/home']),
-            error: () => this.router.navigate(['/home'])
-          });
-        } else {
-          this.router.navigate(['/home']);
+      next: async (res) => {
+        if (res.requiresMfa) {
+          this.isLoading = false;
+          await this.handleMfa(res.mfaToken);
+          return;
         }
+
+        this.completeLogin(res.token);
       },
       error: async (err) => {
         this.isLoading = false;
@@ -93,5 +92,31 @@ export class LoginPage {
         await toast.present();
       }
     });
+  }
+
+  private async handleMfa(mfaToken: string) {
+    const modal = await this.modalCtrl.create({
+      component: MfaModalComponent,
+      componentProps: { mfaToken }
+    });
+    await modal.present();
+
+    const { data } = await modal.onWillDismiss();
+    if (data?.token) {
+      this.completeLogin(data.token);
+    }
+  }
+
+  private completeLogin(token: string) {
+    this.authService.storeToken(token);
+    const userId = this.authService.getUserIdFromToken();
+    if (userId) {
+      this.authService.fetchAndStoreUser(userId).subscribe({
+        next: () => this.router.navigate(['/home']),
+        error: () => this.router.navigate(['/home'])
+      });
+    } else {
+      this.router.navigate(['/home']);
+    }
   }
 }

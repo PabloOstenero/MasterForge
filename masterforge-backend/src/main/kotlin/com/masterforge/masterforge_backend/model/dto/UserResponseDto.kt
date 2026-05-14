@@ -1,5 +1,6 @@
 package com.masterforge.masterforge_backend.model.dto
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.masterforge.masterforge_backend.model.entity.User
 import java.math.BigDecimal
 import java.util.UUID
@@ -18,7 +19,11 @@ data class UserResponseDto(
     val email: String,
     val subscriptionTier: String,
     val balance: BigDecimal,
+    @get:JsonProperty("isActive")
     val isActive: Boolean,
+    @get:JsonProperty("is2faEnabled")
+    val is2faEnabled: Boolean,
+    val recoveryCodes: List<String> = emptyList(),
     val characters: List<CharacterSimpleDto>
 ) {
     companion object {
@@ -30,6 +35,8 @@ data class UserResponseDto(
                 subscriptionTier = user.subscriptionTier.toString(),
                 balance = user.balance,
                 isActive = user.isActive,
+                is2faEnabled = user.is2faEnabled,
+                recoveryCodes = user.recoveryCodes,
                 characters = user.characters.map {
                     CharacterSimpleDto(
                         id = it.id!!,

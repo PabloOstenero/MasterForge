@@ -74,8 +74,35 @@
 
         <div class="placeholder-section mt-4">
           <h3>Autenticación en Dos Pasos (2FA)</h3>
-          <p class="status-badge disabled">Próximamente</p>
-          <p class="hint-text">Añade una capa extra de protección a tu cuenta.</p>
+          
+          @if (!currentUser?.is2faEnabled && !is2faSetup) {
+            <p class="status-badge disabled">Desactivado</p>
+            <p class="hint-text">Añade una capa extra de protección a tu cuenta.</p>
+            <button class="dnd-button gold" (click)='start2faSetup()'>Configurar 2FA</button>
+          }
+
+          @if (is2faSetup) {
+            <div class="mfa-setup-container animate__animated animate__fadeIn">
+              <p class="hint-text">Escanea este código con Google Authenticator o Authy:</p>
+              <div class="qr-container">
+                <img [src]="qrCodeDataUrl" alt="QR 2FA" *ngIf="qrCodeDataUrl">
+              </div>
+              <div class="form-group">
+                <label>Código de Verificación</label>
+                <input type="text" [(ngModel)]="twoFactorCode" placeholder="000000" class="dnd-input text-center">
+              </div>
+              <div class="setup-actions">
+                <button class="dnd-button primary" (click)="verifyAndEnable2fa()">Verificar y Activar</button>
+                <button class="dnd-button ghost" (click)="cancel2faSetup()">Cancelar</button>
+              </div>
+            </div>
+          }
+
+          @if (currentUser?.is2faEnabled) {
+            <p class="status-badge success">Activado</p>
+            <p class="hint-text">Tu cuenta está protegida por un segundo factor.</p>
+            <button class="dnd-button danger-outline" (click)="disable2fa()">Desactivar 2FA</button>
+          }
         </div>
       </section>
 
@@ -164,6 +191,35 @@
       </section>
 
     </div>
+
+    <!-- Recovery Codes Modal/Overlay -->
+    @if (showRecoveryCodes) {
+      <div class="recovery-codes-overlay animate__animated animate__fadeIn">
+        <div class="recovery-card parchment-card">
+          <div class="card-header">
+            <ion-icon name="shield-checkmark-outline" color="warning"></ion-icon>
+            <h3>Códigos de Recuperación</h3>
+          </div>
+          <p class="warning-text">¡IMPORTANTE! Guarda estos códigos en un lugar seguro. Son la única forma de acceder a tu cuenta si pierdes tu dispositivo 2FA.</p>
+          <div class="codes-grid">
+            @for (code of recoveryCodes; track code) {
+              <div class="recovery-code">{{ code }}</div>
+            }
+          </div>
+          
+          <div class="recovery-actions">
+            <button class="dnd-button outline" (click)="copyRecoveryCodes()">
+              <ion-icon name="copy-outline"></ion-icon> Copiar
+            </button>
+            <button class="dnd-button outline" (click)="downloadRecoveryCodes()">
+              <ion-icon name="download-outline"></ion-icon> Exportar (.txt)
+            </button>
+          </div>
+
+          <button class="dnd-button primary full-width" (click)="closeRecoveryCodes()">He Guardado los Códigos</button>
+        </div>
+      </div>
+    }
   </div>
 </ion-content>
 
@@ -483,5 +539,126 @@
     font-size: 0.75rem;
     margin-top: 4px;
     margin-bottom: 0;
+  }
+
+  .status-badge.success {
+    background: rgba(45, 211, 111, 0.15);
+    color: #2dd36f;
+  }
+
+  .mfa-setup-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+  }
+
+  .qr-container {
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .qr-container img {
+    width: 200px;
+    height: 200px;
+  }
+
+  .setup-actions {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .text-center { text-align: center; }
+
+  .dnd-button.ghost {
+    background: transparent;
+    color: #8C8C8C;
+    border: 1px solid #444;
+  }
+
+  .dnd-button.danger-outline {
+    background: transparent;
+    color: #ff4961;
+    border: 1px solid #ff4961;
+  }
+
+  .dnd-button.danger-outline:hover {
+    background: rgba(255, 73, 97, 0.1);
+  }
+
+  .recovery-codes-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+    backdrop-filter: blur(5px);
+  }
+
+  .recovery-card {
+    max-width: 450px;
+    width: 100%;
+    background: #1e1e1e;
+    border: 2px solid #C9A84C;
+    box-shadow: 0 0 50px rgba(0,0,0,0.8);
+    transform: none !important; /* Prevent parent transforms from affecting it */
+  }
+
+  .warning-text {
+    color: #ffc409;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+
+  .codes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .recovery-code {
+    background: #252525;
+    padding: 10px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 1.1rem;
+    text-align: center;
+    border: 1px solid #444;
+    color: #C9A84C;
+    border: 1px solid #444;
+  }
+
+  .recovery-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .recovery-actions button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .full-width {
+    width: 100%;
   }
 </style>

@@ -28,6 +28,19 @@ class JwtService(
             .compact()
     }
 
+    fun generateMfaToken(userId: UUID): String {
+        val now = Date()
+        val expiry = Date(now.time + 5 * 60 * 1000L) // 5 minutes
+
+        return Jwts.builder()
+            .subject(userId.toString())
+            .claim("mfa", true)
+            .issuedAt(now)
+            .expiration(expiry)
+            .signWith(signingKey, Jwts.SIG.HS256)
+            .compact()
+    }
+
     fun validateToken(token: String): Boolean {
         return try {
             Jwts.parser()

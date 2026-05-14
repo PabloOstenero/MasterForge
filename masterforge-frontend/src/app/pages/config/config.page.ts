@@ -15,8 +15,12 @@ import {
   skullOutline, 
   logoDiscord,
   eyeOutline,
-  eyeOffOutline
+  eyeOffOutline,
+  shieldCheckmarkOutline,
+  copyOutline,
+  downloadOutline
 } from 'ionicons/icons';
+import * as QRCode from 'qrcode';
 
 @Component({
   selector: 'app-config',
@@ -36,6 +40,14 @@ export class ConfigPage implements OnInit {
   currentUser: any;
   isLoading = true;
   showPassword = false;
+  
+  // 2FA variables
+  is2faSetup = false;
+  qrCodeDataUrl = '';
+  twoFactorSecret = '';
+  twoFactorCode = '';
+  recoveryCodes: string[] = [];
+  showRecoveryCodes = false;
 
   constructor() {
     addIcons({ 
@@ -48,7 +60,10 @@ export class ConfigPage implements OnInit {
       skullOutline, 
       logoDiscord,
       eyeOutline,
-      eyeOffOutline
+      eyeOffOutline,
+      shieldCheckmarkOutline,
+      copyOutline,
+      downloadOutline
     });
 
     this.userForm = this.fb.group({
@@ -153,6 +168,72 @@ export class ConfigPage implements OnInit {
     } catch (error) {
       this.showToast('Error al eliminar la cuenta', 'danger');
     }
+  }
+
+  // 2FA methods
+  async start2faSetup() {
+    try {
+      const setup = await this.authService.setup2fa().toPromise();
+      this.twoFactorSecret = setup.secret;
+      this.qrCodeDataUrl = await QRCode.toDataURL(setup.qrUri);
+      this.is2faSetup = true;
+    } catch (error) {
+      this.showToast('Error al iniciar configuración 2FA', 'danger');
+    }
+  }
+
+  async verifyAndEnable2fa() {
+    if (!this.twoFactorCode) return;
+    try {
+      const res = await this.authService.enable2fa(this.twoFactorSecret, this.twoFactorCode).toPromise();
+      this.recoveryCodes = res.recoveryCodes;
+      this.showRecoveryCodes = true;
+      this.showToast('2FA activado correctamente', 'success');
+      this.cancel2faSetup();
+      await this.loadUserData();
+    } catch (error) {
+      this.showToast('Código inválido', 'danger');
+    }
+  }
+
+  closeRecoveryCodes() {
+    this.showRecoveryCodes = false;
+    this.recoveryCodes = [];
+  }
+
+  copyRecoveryCodes() {
+    const text = this.recoveryCodes.join('\n');
+    navigator.clipboard.writeText(text).then(() => {
+      this.showToast('Códigos copiados al portapapeles', 'success');
+    });
+  }
+
+  downloadRecoveryCodes() {
+    const text = `MASTERFORGE RECOVERY CODES\nGenerated: ${new Date().toLocaleString()}\n\n${this.recoveryCodes.join('\n')}\n\nKeep these codes safe!`;
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `masterforge-recovery-codes-${this.currentUser?.name}.txt`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  async disable2fa() {
+    try {
+      await this.authService.disable2fa().toPromise();
+      this.showToast('2FA desactivado', 'warning');
+      await this.loadUserData();
+    } catch (error) {
+      this.showToast('Error al desactivar 2FA', 'danger');
+    }
+  }
+
+  cancel2faSetup() {
+    this.is2faSetup = false;
+    this.qrCodeDataUrl = '';
+    this.twoFactorSecret = '';
+    this.twoFactorCode = '';
   }
 
   togglePasswordVisibility() {

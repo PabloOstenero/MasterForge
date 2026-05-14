@@ -36,5 +36,16 @@ data class User(
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-    val characters: MutableList<Character> = mutableListOf()
+    val characters: MutableList<Character> = mutableListOf(),
+
+    @Column(name = "two_factor_secret")
+    var twoFactorSecret: String? = null,
+
+    @Column(name = "is_2fa_enabled", nullable = false, columnDefinition = "boolean default false")
+    var is2faEnabled: Boolean = false,
+
+    @ElementCollection
+    @CollectionTable(name = "user_recovery_codes", joinColumns = [JoinColumn(name = "user_id")])
+    @Column(name = "recovery_code")
+    val recoveryCodes: MutableList<String> = mutableListOf()
 )
