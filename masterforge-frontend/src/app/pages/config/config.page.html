@@ -1,14 +1,14 @@
-<ion-content class="ion-padding" style="--background: #121212;">
+<div class="config-page-wrapper ion-padding">
   <div class="config-container">
     <h1 class="main-title">Configuración del Maestro</h1>
-    
+
     <div *ngIf="isLoading" class="loader-container">
       <ion-spinner name="crescent" color="warning"></ion-spinner>
       <p>Cargando pergaminos...</p>
     </div>
 
     <div *ngIf="!isLoading" class="config-sections animate__animated animate__fadeIn">
-      
+
       <!-- Personal Information -->
       <section class="parchment-card">
         <div class="card-header">
@@ -36,7 +36,7 @@
           <ion-icon name="lock-closed-outline" color="warning"></ion-icon>
           <h2>Seguridad</h2>
         </div>
-        
+
         <form [formGroup]="passwordForm" (ngSubmit)="updatePassword()">
           <div class="form-group">
             <label>Contraseña Actual</label>
@@ -48,13 +48,12 @@
             <label>Nueva Contraseña</label>
             <div class="password-wrapper">
               <input [type]="showPassword ? 'text' : 'password'" formControlName="newPassword" class="dnd-input">
-              <ion-icon 
-                [name]="showPassword ? 'eye-off-outline' : 'eye-outline'" 
-                (click)="togglePasswordVisibility()"
+              <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'" (click)="togglePasswordVisibility()"
                 class="password-toggle">
               </ion-icon>
             </div>
-            <p *ngIf="passwordForm.get('newPassword')?.errors?.['minlength'] && passwordForm.get('newPassword')?.touched" class="error-hint">
+            <p *ngIf="passwordForm.get('newPassword')?.errors?.['minlength'] && passwordForm.get('newPassword')?.touched"
+              class="error-hint">
               Mínimo 6 caracteres.
             </p>
           </div>
@@ -63,7 +62,8 @@
             <div class="password-wrapper">
               <input [type]="showPassword ? 'text' : 'password'" formControlName="confirmPassword" class="dnd-input">
             </div>
-            <p *ngIf="passwordForm.errors?.['mismatch'] && passwordForm.get('confirmPassword')?.touched" class="error-hint">
+            <p *ngIf="passwordForm.errors?.['mismatch'] && passwordForm.get('confirmPassword')?.touched"
+              class="error-hint">
               Las contraseñas no coinciden.
             </p>
           </div>
@@ -74,34 +74,34 @@
 
         <div class="placeholder-section mt-4">
           <h3>Autenticación en Dos Pasos (2FA)</h3>
-          
+
           @if (!currentUser?.is2faEnabled && !is2faSetup) {
-            <p class="status-badge disabled">Desactivado</p>
-            <p class="hint-text">Añade una capa extra de protección a tu cuenta.</p>
-            <button class="dnd-button gold" (click)='start2faSetup()'>Configurar 2FA</button>
+          <p class="status-badge disabled">Desactivado</p>
+          <p class="hint-text">Añade una capa extra de protección a tu cuenta.</p>
+          <button class="dnd-button gold" (click)='start2faSetup()'>Configurar 2FA</button>
           }
 
           @if (is2faSetup) {
-            <div class="mfa-setup-container animate__animated animate__fadeIn">
-              <p class="hint-text">Escanea este código con Google Authenticator o Authy:</p>
-              <div class="qr-container">
-                <img [src]="qrCodeDataUrl" alt="QR 2FA" *ngIf="qrCodeDataUrl">
-              </div>
-              <div class="form-group">
-                <label>Código de Verificación</label>
-                <input type="text" [(ngModel)]="twoFactorCode" placeholder="000000" class="dnd-input text-center">
-              </div>
-              <div class="setup-actions">
-                <button class="dnd-button primary" (click)="verifyAndEnable2fa()">Verificar y Activar</button>
-                <button class="dnd-button ghost" (click)="cancel2faSetup()">Cancelar</button>
-              </div>
+          <div class="mfa-setup-container animate__animated animate__fadeIn">
+            <p class="hint-text">Escanea este código con Google Authenticator o Authy:</p>
+            <div class="qr-container">
+              <img [src]="qrCodeDataUrl" alt="QR 2FA" *ngIf="qrCodeDataUrl">
             </div>
+            <div class="form-group">
+              <label>Código de Verificación</label>
+              <input type="text" [(ngModel)]="twoFactorCode" placeholder="000000" class="dnd-input text-center">
+            </div>
+            <div class="setup-actions">
+              <button class="dnd-button primary" (click)="verifyAndEnable2fa()">Verificar y Activar</button>
+              <button class="dnd-button ghost" (click)="cancel2faSetup()">Cancelar</button>
+            </div>
+          </div>
           }
 
           @if (currentUser?.is2faEnabled) {
-            <p class="status-badge success">Activado</p>
-            <p class="hint-text">Tu cuenta está protegida por un segundo factor.</p>
-            <button class="dnd-button danger-outline" (click)="disable2fa()">Desactivar 2FA</button>
+          <p class="status-badge success">Activado</p>
+          <p class="hint-text">Tu cuenta está protegida por un segundo factor.</p>
+          <button class="dnd-button danger-outline" (click)="disable2fa()">Desactivar 2FA</button>
           }
         </div>
       </section>
@@ -115,14 +115,8 @@
         <div class="setting-item">
           <div class="font-slider-container">
             <ion-icon name="text-outline" style="font-size: 14px;"></ion-icon>
-            <ion-range 
-              min="0.8" 
-              max="1.5" 
-              step="0.05" 
-              [(ngModel)]="fontScale"
-              (ionInput)="setFontScale(fontScale)"
-              color="warning"
-              style="pointer-events: auto; position: relative; z-index: 10;">
+            <ion-range min="0.8" max="1.5" step="0.05" [value]="fontScale" (ionInput)="onScaleInput($event)"
+              color="warning" style="pointer-events: auto; position: relative; z-index: 10;">
             </ion-range>
             <ion-icon name="text-outline" style="font-size: 24px;"></ion-icon>
           </div>
@@ -173,7 +167,6 @@
         </div>
       </section>
 
-
       <!-- Social -->
       <section class="parchment-card">
         <div class="card-header">
@@ -205,34 +198,35 @@
 
     <!-- Recovery Codes Modal/Overlay -->
     @if (showRecoveryCodes) {
-      <div class="recovery-codes-overlay animate__animated animate__fadeIn">
-        <div class="recovery-card parchment-card">
-          <div class="card-header">
-            <ion-icon name="shield-checkmark-outline" color="warning"></ion-icon>
-            <h3>Códigos de Recuperación</h3>
-          </div>
-          <p class="warning-text">¡IMPORTANTE! Guarda estos códigos en un lugar seguro. Son la única forma de acceder a tu cuenta si pierdes tu dispositivo 2FA.</p>
-          <div class="codes-grid">
-            @for (code of recoveryCodes; track code) {
-              <div class="recovery-code">{{ code }}</div>
-            }
-          </div>
-          
-          <div class="recovery-actions">
-            <button class="dnd-button outline" (click)="copyRecoveryCodes()">
-              <ion-icon name="copy-outline"></ion-icon> Copiar
-            </button>
-            <button class="dnd-button outline" (click)="downloadRecoveryCodes()">
-              <ion-icon name="download-outline"></ion-icon> Exportar (.txt)
-            </button>
-          </div>
-
-          <button class="dnd-button primary full-width" (click)="closeRecoveryCodes()">He Guardado los Códigos</button>
+    <div class="recovery-codes-overlay animate__animated animate__fadeIn">
+      <div class="recovery-card parchment-card">
+        <div class="card-header">
+          <ion-icon name="shield-checkmark-outline" color="warning"></ion-icon>
+          <h3>Códigos de Recuperación</h3>
         </div>
+        <p class="warning-text">¡IMPORTANTE! Guarda estos códigos en un lugar seguro. Son la única forma de acceder a tu
+          cuenta si pierdes tu dispositivo 2FA.</p>
+        <div class="codes-grid">
+          @for (code of recoveryCodes; track code) {
+          <div class="recovery-code">{{ code }}</div>
+          }
+        </div>
+
+        <div class="recovery-actions">
+          <button class="dnd-button outline" (click)="copyRecoveryCodes()">
+            <ion-icon name="copy-outline"></ion-icon> Copiar
+          </button>
+          <button class="dnd-button outline" (click)="downloadRecoveryCodes()">
+            <ion-icon name="download-outline"></ion-icon> Exportar (.txt)
+          </button>
+        </div>
+
+        <button class="dnd-button primary full-width" (click)="closeRecoveryCodes()">He Guardado los Códigos</button>
       </div>
+    </div>
     }
   </div>
-</ion-content>
+</div>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@500;700&display=swap');
@@ -253,7 +247,7 @@
     margin-bottom: 40px;
     text-transform: uppercase;
     letter-spacing: 2px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   }
 
   .loader-container {
@@ -277,7 +271,7 @@
     border-left: 4px solid #C9A84C;
     padding: 24px;
     border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     transition: transform 0.2s ease;
   }
 
@@ -399,7 +393,7 @@
 
   .placeholder-section {
     padding: 16px;
-    background: rgba(255,255,255,0.03);
+    background: rgba(255, 255, 255, 0.03);
     border-radius: 6px;
     border: 1px dashed #444;
   }
@@ -430,7 +424,9 @@
     color: #888;
   }
 
-  .mt-4 { margin-top: 24px; }
+  .mt-4 {
+    margin-top: 24px;
+  }
 
   .font-scale-mock {
     display: flex;
@@ -541,8 +537,15 @@
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .error-hint {
@@ -586,7 +589,9 @@
     gap: 10px;
   }
 
-  .text-center { text-align: center; }
+  .text-center {
+    text-align: center;
+  }
 
   .dnd-button.ghost {
     background: transparent;
@@ -610,7 +615,7 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0,0,0,0.9);
+    background: rgba(0, 0, 0, 0.9);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -624,8 +629,9 @@
     width: 100%;
     background: #1e1e1e;
     border: 2px solid #C9A84C;
-    box-shadow: 0 0 50px rgba(0,0,0,0.8);
-    transform: none !important; /* Prevent parent transforms from affecting it */
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+    transform: none !important;
+    /* Prevent parent transforms from affecting it */
   }
 
   .warning-text {
@@ -678,7 +684,7 @@
     align-items: center;
     gap: 15px;
     margin: 15px 0;
-    
+
     ion-range {
       flex: 1;
       --bar-background: #333;

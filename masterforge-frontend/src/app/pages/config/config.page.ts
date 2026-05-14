@@ -63,6 +63,14 @@ import * as QRCode from 'qrcode';
     IonAvatar,
     IonSpinner
   ],
+  styles: [`
+    :host {
+      display: block;
+    }
+    .config-page-wrapper {
+      background: #121212;
+    }
+  `]
 })
 export class ConfigPage implements OnInit {
   private fb = inject(FormBuilder);
@@ -84,7 +92,7 @@ export class ConfigPage implements OnInit {
   twoFactorCode = '';
   recoveryCodes: string[] = [];
   showRecoveryCodes = false;
-  fontScale = 1;
+  fontScale = parseFloat(localStorage.getItem('app-font-scale') || '1.0');
 
   constructor() {
     addIcons({ 
@@ -121,19 +129,28 @@ export class ConfigPage implements OnInit {
     this.loadFontScale();
   }
 
-  loadFontScale() {
+  ionViewDidEnter() {
+    // Force the slider to snap to the correct value after the view is ready
     const savedScale = localStorage.getItem('app-font-scale');
     if (savedScale) {
       this.fontScale = parseFloat(savedScale);
-    } else {
-      this.fontScale = 1.0;
+      this.applyFontScale();
     }
+  }
+
+  loadFontScale() {
     this.applyFontScale();
   }
 
-  setFontScale(scale: number) {
-    this.fontScale = scale;
-    localStorage.setItem('app-font-scale', scale.toString());
+  onScaleInput(ev: any) {
+    const scale = ev.detail.value;
+    this.setFontScale(scale);
+  }
+
+  setFontScale(scale: any) {
+    const numScale = typeof scale === 'number' ? scale : parseFloat(scale);
+    this.fontScale = numScale;
+    localStorage.setItem('app-font-scale', numScale.toString());
     this.applyFontScale();
   }
 

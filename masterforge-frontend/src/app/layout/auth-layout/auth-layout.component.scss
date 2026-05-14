@@ -1,6 +1,7 @@
 .layout-wrapper {
   display: flex;
-  height: 100vh;
+  height: 100%;
+  width: 100%;
   background-color: var(--mf-bg-primary, #121212);
 }
 
@@ -14,7 +15,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  height: 100vh;
+  height: 100%;
   z-index: 100;
 }
 
@@ -67,19 +68,46 @@
 .main-content {
   margin-left: 170px;
   flex: 1;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
   background-color: var(--mf-bg-primary, #121212);
-  height: 100vh;
-  box-sizing: border-box;
+  position: relative;
 }
 
 .topbar {
-  position: relative;
+  flex-shrink: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 8px 16px;
   border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+  background-color: var(--mf-bg-primary, #121212);
+  position: relative;
+  z-index: 1000; /* King of the layout */
+}
+
+.page-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1; /* Explicitly below topbar */
+}
+
+/* Ensure child components take full width */
+.page-body > * {
+  display: block;
+  width: 100%;
+}
+
+/* Ensure the page content has space and flows naturally */
+.main-content > *:last-child {
+  display: block;
+  width: 100%;
 }
 
 .topbar-title {
@@ -138,14 +166,14 @@
 .dropdown-overlay {
   position: fixed;
   inset: 0;
-  z-index: 199;
+  z-index: 240;
 }
 
 .dropdown-menu {
   position: absolute;
   top: calc(100% + 4px);
   right: 16px;
-  z-index: 200;
+  z-index: 250;
   background-color: var(--mf-bg-surface, #1e1e1e);
   border: 1px solid rgba(201, 168, 76, 0.15);
   border-radius: 8px;
