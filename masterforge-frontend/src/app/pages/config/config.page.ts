@@ -1,7 +1,24 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IonicModule, AlertController, ToastController } from '@ionic/angular';
+import { 
+  IonContent, 
+  IonHeader, 
+  IonTitle, 
+  IonToolbar, 
+  IonIcon, 
+  IonRange, 
+  IonLabel, 
+  IonItem, 
+  IonInput, 
+  IonButton, 
+  IonButtons, 
+  IonMenuButton,
+  IonAvatar,
+  IonSpinner,
+  AlertController, 
+  ToastController 
+} from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
@@ -18,7 +35,8 @@ import {
   eyeOffOutline,
   shieldCheckmarkOutline,
   copyOutline,
-  downloadOutline
+  downloadOutline,
+  textOutline
 } from 'ionicons/icons';
 import * as QRCode from 'qrcode';
 
@@ -26,7 +44,25 @@ import * as QRCode from 'qrcode';
   selector: 'app-config',
   templateUrl: './config.page.html',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    ReactiveFormsModule,
+    IonContent, 
+    IonHeader, 
+    IonTitle, 
+    IonToolbar, 
+    IonIcon, 
+    IonRange, 
+    IonLabel, 
+    IonItem, 
+    IonInput, 
+    IonButton, 
+    IonButtons, 
+    IonMenuButton,
+    IonAvatar,
+    IonSpinner
+  ],
 })
 export class ConfigPage implements OnInit {
   private fb = inject(FormBuilder);
@@ -48,6 +84,7 @@ export class ConfigPage implements OnInit {
   twoFactorCode = '';
   recoveryCodes: string[] = [];
   showRecoveryCodes = false;
+  fontScale = 1;
 
   constructor() {
     addIcons({ 
@@ -63,7 +100,8 @@ export class ConfigPage implements OnInit {
       eyeOffOutline,
       shieldCheckmarkOutline,
       copyOutline,
-      downloadOutline
+      downloadOutline,
+      textOutline
     });
 
     this.userForm = this.fb.group({
@@ -80,6 +118,27 @@ export class ConfigPage implements OnInit {
 
   ngOnInit() {
     this.loadUserData();
+    this.loadFontScale();
+  }
+
+  loadFontScale() {
+    const savedScale = localStorage.getItem('app-font-scale');
+    if (savedScale) {
+      this.fontScale = parseFloat(savedScale);
+    } else {
+      this.fontScale = 1.0;
+    }
+    this.applyFontScale();
+  }
+
+  setFontScale(scale: number) {
+    this.fontScale = scale;
+    localStorage.setItem('app-font-scale', scale.toString());
+    this.applyFontScale();
+  }
+
+  private applyFontScale() {
+    document.documentElement.style.setProperty('--app-font-scale', this.fontScale.toString());
   }
 
   async loadUserData() {

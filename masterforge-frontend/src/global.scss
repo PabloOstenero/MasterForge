@@ -34,3 +34,11 @@
 
 @import "@ionic/angular/css/palettes/dark.always.css";
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
+
+:root {
+  --app-font-scale: 1;
+}
+
+html {
+  font-size: calc(16px * var(--app-font-scale));
+}

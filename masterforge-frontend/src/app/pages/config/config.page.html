@@ -112,12 +112,22 @@
           <ion-icon name="settings-outline" color="warning"></ion-icon>
           <h2>Preferencias de la App</h2>
         </div>
-        <div class="placeholder-section">
-          <h3>Escalado de Fuente</h3>
-          <div class="font-scale-mock">
-            <span>A</span>
-            <div class="slider-mock"></div>
-            <span>A++</span>
+        <div class="setting-item">
+          <div class="font-slider-container">
+            <ion-icon name="text-outline" style="font-size: 14px;"></ion-icon>
+            <ion-range 
+              min="0.8" 
+              max="1.5" 
+              step="0.05" 
+              [(ngModel)]="fontScale"
+              (ionInput)="setFontScale(fontScale)"
+              color="warning"
+              style="pointer-events: auto; position: relative; z-index: 10;">
+            </ion-range>
+            <ion-icon name="text-outline" style="font-size: 24px;"></ion-icon>
+          </div>
+          <div class="font-preview">
+            Escala actual: {{ (fontScale * 100).toFixed(0) }}%
           </div>
           <p class="hint-text">Ajusta el tamaño del texto para leer mejor los bloques de estadísticas.</p>
         </div>
@@ -162,6 +172,7 @@
           <p class="hint-text">Próximamente podrás gestionar tus pagos y nivel de suscripción aquí.</p>
         </div>
       </section>
+
 
       <!-- Social -->
       <section class="parchment-card">
@@ -660,5 +671,32 @@
 
   .full-width {
     width: 100%;
+  }
+
+  .font-slider-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 15px 0;
+    
+    ion-range {
+      flex: 1;
+      --bar-background: #333;
+      --bar-background-active: #C9A84C;
+      --knob-background: #C9A84C;
+      --pin-background: #C9A84C;
+    }
+
+    ion-icon {
+      color: #C9A84C;
+      opacity: 0.7;
+    }
+  }
+
+  .font-preview {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #888;
+    font-style: italic;
   }
 </style>
