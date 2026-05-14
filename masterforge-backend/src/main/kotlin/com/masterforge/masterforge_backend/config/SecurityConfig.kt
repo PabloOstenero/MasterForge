@@ -49,6 +49,11 @@ class JwtAuthFilter(private val jwtService: JwtService) : OncePerRequestFilter()
 class SecurityConfig(private val jwtAuthFilter: JwtAuthFilter) {
 
     @Bean
+    fun passwordEncoder(): org.springframework.security.crypto.password.PasswordEncoder {
+        return org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder()
+    }
+
+    @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .csrf { it.disable() }

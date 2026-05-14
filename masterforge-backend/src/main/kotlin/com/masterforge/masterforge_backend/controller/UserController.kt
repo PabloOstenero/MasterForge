@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.data.domain.PageRequest
 import org.springframework.transaction.annotation.Transactional
@@ -33,7 +34,8 @@ class UserController(
     private val sessionAttendeeRepository: SessionAttendeeRepository,
     private val campaignRepository: CampaignRepository,
     private val campaignEnrollmentRepository: CampaignEnrollmentRepository,
-    private val sessionRepository: SessionRepository
+    private val sessionRepository: SessionRepository,
+    private val passwordEncoder: PasswordEncoder
 ) {
 
     @GetMapping
@@ -153,7 +155,7 @@ class UserController(
         val user = User(
             name = userDto.name,
             email = userDto.email,
-            passwordHash = userDto.passwordHash,
+            passwordHash = passwordEncoder.encode(userDto.passwordHash)!!,
             subscriptionTier = userDto.subscriptionTier,
             balance = userDto.balance,
             isActive = userDto.isActive
@@ -181,7 +183,7 @@ class UserController(
         val updatedUser = existingUser.copy(
             name = userDto.name,
             email = userDto.email,
-            passwordHash = userDto.passwordHash,
+            passwordHash = passwordEncoder.encode(userDto.passwordHash)!!,
             subscriptionTier = userDto.subscriptionTier,
             balance = userDto.balance,
             isActive = userDto.isActive

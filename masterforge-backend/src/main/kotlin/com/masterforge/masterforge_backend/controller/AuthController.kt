@@ -4,6 +4,7 @@ import com.masterforge.masterforge_backend.repository.UserRepository
 import com.masterforge.masterforge_backend.service.JwtService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.*
 
 data class LoginRequest(val email: String, val password: String)
@@ -14,7 +15,8 @@ data class ErrorResponse(val error: String)
 @RequestMapping("/api/auth")
 class AuthController(
     private val userRepository: UserRepository,
-    private val jwtService: JwtService
+    private val jwtService: JwtService,
+    private val passwordEncoder: PasswordEncoder
 ) {
 
     @PostMapping("/login")
@@ -24,7 +26,7 @@ class AuthController(
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(ErrorResponse("Invalid email or password"))
 
-        if (user.passwordHash != request.password) {
+        if (!passwordEncoder.matches(request.password, user.passwordHash)) {
             return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(ErrorResponse("Invalid email or password"))
