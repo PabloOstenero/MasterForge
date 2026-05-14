@@ -69,6 +69,9 @@ export class AuthLayoutComponent {
   }
 
   navigateToSettings(): void {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
     this.closeDropdown();
     this.router.navigate(['/config']);
   }
@@ -79,6 +82,9 @@ export class AuthLayoutComponent {
   }
 
   logout(): void {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
     this.closeDropdown();
     this.authService.logout();
     this.router.navigate(['/login']);

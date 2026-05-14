@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -31,8 +31,22 @@ export class LoginPage {
   isLoading = false;
   showPassword = false;
 
+  @ViewChild('emailInput', { static: false }) emailInput?: IonInput;
+
   constructor(private authService: AuthService, public router: Router) {
     addIcons({ eyeOutline, eyeOffOutline });
+  }
+
+  ionViewWillEnter() {
+    this.isLoading = false;
+    this.errorMessage = null;
+    this.password = '';
+  }
+
+  ionViewDidEnter() {
+    setTimeout(() => {
+      this.emailInput?.setFocus();
+    }, 100);
   }
 
   onSubmit() {
