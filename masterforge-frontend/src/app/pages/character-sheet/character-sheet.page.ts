@@ -1785,9 +1785,58 @@ export class CharacterSheetPage implements OnInit {
     return this.pj.spells.filter((s: any) => s.spell && s.spell.level > 0 && s.isPrepared).length;
   }
 
+  // ── Weapon Properties Engine ──────────────────────────────────────────────
+
+  /**
+   * Resolves which stat (STR or DEX) to use for a weapon's attack/damage rolls.
+   * Finesse weapons automatically pick whichever modifier is higher.
+   */
+  private getWeaponStat(item: any): string {
+    const weaponProps: string[] = item.properties?.weaponProperties ?? [];
+    const baseStat: string = item.properties?.stat ?? 'str';
+
+    if (weaponProps.includes('Finesse')) {
+      const strMod = Math.floor(((this.pj.stats?.str ?? 10) - 10) / 2);
+      const dexMod = Math.floor(((this.pj.stats?.dex ?? 10) - 10) / 2);
+      return strMod >= dexMod ? 'str' : 'dex';
+    }
+
+    return baseStat;
+  }
+
+  /** Returns short badge labels for weapon property tags, e.g. ['FIN', 'VER']. */
+  getWeaponBadges(item: any): string[] {
+    const props: string[] = item.properties?.weaponProperties ?? [];
+    const labelMap: Record<string, string> = {
+      'Finesse':    'FIN',
+      'Versatile':  'VER',
+      'Two-Handed': '2H',
+      'Reach':      'RCH',
+      'Heavy':      'HVY',
+      'Light':      'LGT',
+      'Thrown':     'THR',
+      'Range':      'RNG',
+      'Loading':    'LOAD',
+      'Special':    'ESP',
+      'Ammunition': 'AMM',
+    };
+    return props.map(p => labelMap[p]).filter(Boolean);
+  }
+
+  /**
+   * Returns true if the weapon has the Heavy property AND the character's
+   * race is Small — indicating disadvantage on attack rolls per 5e rules.
+   */
+  hasDisadvantageWithWeapon(item: any): boolean {
+    const props: string[] = item.properties?.weaponProperties ?? [];
+    if (!props.includes('Heavy')) return false;
+    const size = (this.rawCharacter?.dndRace?.size || 'Medium').toLowerCase();
+    return size === 'small';
+  }
+
   // Helper to get weapon attack bonus (Stat + Proficiency + magical bonus)
   getAttackBonus(item: any): string {
-    const stat = item.properties?.stat || 'str';
+    const stat = this.getWeaponStat(item);
     const score = this.pj.stats[stat] || 10;
     const mod = Math.floor((score - 10) / 2);
     const magical = Number(item.properties?.magicalBonus) || 0;
@@ -1795,11 +1844,10 @@ export class CharacterSheetPage implements OnInit {
     return total >= 0 ? `+${total}` : `${total}`;
   }
 
-  // Builds the full damage string from the homebrew item's separate fields.
-  // e.g. "2d6+3 Slashing" from { damageDiceCount:2, damageDieType:'d6', damageBonus:3, damageType:['Slashing'], ... }
+  // Builds the full damage string, e.g. "1d8+4 (2H: 1d10+4) Piercing"
   getWeaponDamage(item: any): string {
     const p = item.properties || {};
-    const stat = p.stat || 'str';
+    const stat = this.getWeaponStat(item);
     const score = this.pj.stats[stat] || 10;
     const statMod = Math.floor((score - 10) / 2);
     const magical = Number(p.magicalBonus) || 0;
@@ -1807,7 +1855,7 @@ export class CharacterSheetPage implements OnInit {
     const totalBonus = statMod + magical + damageBonus;
     const bonusPart = totalBonus > 0 ? `+${totalBonus}` : totalBonus < 0 ? `${totalBonus}` : '';
 
-    // Compose normal dice portion
+    // Normal dice
     const count = p.damageDiceCount ?? null;
     const die = p.damageDieType ?? null;
     let dicePart = '';
@@ -1817,12 +1865,15 @@ export class CharacterSheetPage implements OnInit {
       dicePart = p.damageDice; // legacy free-text fallback
     }
 
-    // Compose versatile dice portion (two-handed damage)
+    // Versatile two-handed dice (shown as secondary info)
+    const weaponProps: string[] = p.weaponProperties ?? [];
     const vCount = p.versatileDiceCount ?? null;
     const vDie = p.versatileDieType ?? null;
-    const versatilePart = (vCount && vDie) ? `(${vCount}${vDie}) ` : '';
+    const versatilePart = (weaponProps.includes('Versatile') && vCount && vDie)
+      ? ` (2H: ${vCount}${vDie}${bonusPart})`
+      : '';
 
-    // Damage type: stored as array by the homebrew form
+    // Damage type
     let dmgType = '';
     if (Array.isArray(p.damageType) && p.damageType.length > 0) {
       dmgType = p.damageType[0];
@@ -1830,7 +1881,7 @@ export class CharacterSheetPage implements OnInit {
       dmgType = p.damageType;
     }
 
-    const fullDice = dicePart + versatilePart + bonusPart;
+    const fullDice = dicePart + bonusPart + versatilePart;
     return [fullDice, dmgType].filter(Boolean).join(' ') || '—';
   }
 

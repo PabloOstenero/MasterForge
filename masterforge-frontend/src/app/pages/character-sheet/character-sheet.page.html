@@ -352,10 +352,23 @@
               {{ item.name }}
               @if (!item.equipped) { <small style="color: #666; font-size: 0.6rem;">(OFF)</small> }
             </div>
-            <div class="atk-bonus" (click)="toggleEquip(item.id)">{{ getAttackBonus(item) }}</div>
-            <div class="atk-damage" (click)="toggleEquip(item.id)">{{ getWeaponDamage(item) }}</div>
+            <div class="atk-bonus" (click)="toggleEquip(item.id)">
+              {{ getAttackBonus(item) }}
+              @if (hasDisadvantageWithWeapon(item)) {
+                <span title="Desventaja: arma pesada con raza Pequeña" style="color: #e57373; font-size: 0.75rem; margin-left: 3px;">⚠</span>
+              }
+            </div>
+            <div class="atk-damage" (click)="toggleEquip(item.id)">
+              <span>{{ getWeaponDamage(item) }}</span>
+              <div style="display: flex; gap: 3px; flex-wrap: wrap; margin-top: 2px;">
+                @for (badge of getWeaponBadges(item); track badge) {
+                  <span style="font-size: 0.55rem; background: rgba(197,160,89,0.2); color: #C5A059; border: 1px solid rgba(197,160,89,0.4); border-radius: 3px; padding: 1px 4px; font-weight: 600;">{{ badge }}</span>
+                }
+              </div>
+            </div>
           </div>
         }
+
       }
 
       @for (nw of pj.naturalWeapons; track $index) {
