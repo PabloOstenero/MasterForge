@@ -368,6 +368,7 @@ export interface CampaignPlayerDto {
   name: string;
   email: string;
   subscriptionTier: string;
+  discordUsername?: string;
   characters: CharacterSimpleDto[];
 }
 
@@ -384,6 +385,7 @@ export interface CampaignDetailDto {
     id: string;
     name: string;
     email: string;
+    discordUsername?: string;
   };
   combatState?: any;
 }

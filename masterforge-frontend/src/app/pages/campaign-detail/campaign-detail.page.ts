@@ -15,7 +15,7 @@ import {
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
-import { arrowBackOutline, calendarOutline, cashOutline, peopleOutline, personOutline, addOutline, listOutline, checkmarkCircleOutline, skullOutline } from 'ionicons/icons';
+import { arrowBackOutline, calendarOutline, cashOutline, peopleOutline, personOutline, addOutline, listOutline, checkmarkCircleOutline, skullOutline, logoDiscord } from 'ionicons/icons';
 import { catchError, of } from 'rxjs';
 import {
   ApiService,
@@ -90,7 +90,7 @@ export class CampaignDetailPage implements OnInit {
     private authService: AuthService,
     private router: Router,
   ) {
-    addIcons({ arrowBackOutline, calendarOutline, cashOutline, peopleOutline, personOutline, addOutline, listOutline, checkmarkCircleOutline, skullOutline });
+    addIcons({ arrowBackOutline, calendarOutline, cashOutline, peopleOutline, personOutline, addOutline, listOutline, checkmarkCircleOutline, skullOutline, logoDiscord });
   }
 
   ngOnInit(): void {

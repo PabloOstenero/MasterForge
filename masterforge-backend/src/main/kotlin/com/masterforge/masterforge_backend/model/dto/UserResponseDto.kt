@@ -26,7 +26,9 @@ data class UserResponseDto(
     @get:JsonProperty("sessionNotifications")
     val sessionNotifications: Boolean,
     val recoveryCodes: List<String> = emptyList(),
-    val characters: List<CharacterSimpleDto>
+    val characters: List<CharacterSimpleDto>,
+    val discordId: String? = null,
+    val discordUsername: String? = null
 ) {
     companion object {
         fun fromEntity(user: User): UserResponseDto {
@@ -48,7 +50,9 @@ data class UserResponseDto(
                         dndClass = it.dndClass.name,
                         dndRace = it.dndRace.name
                     )
-                }
+                },
+                discordId = user.discordId,
+                discordUsername = user.discordUsername
             )
         }
     }

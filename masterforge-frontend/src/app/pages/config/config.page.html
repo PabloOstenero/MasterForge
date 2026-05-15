@@ -172,9 +172,24 @@
         </div>
         <div class="social-connections">
           <div class="social-item discord">
-            <ion-icon name="logo-discord"></ion-icon>
-            <span>Conectar con Discord</span>
-            <p class="status-badge disabled">Próximamente</p>
+            <div class="social-info">
+              <ion-icon name="logo-discord"></ion-icon>
+              <div class="text-group">
+                <span class="label">Discord</span>
+                <span class="value" *ngIf="currentUser?.discordUsername">
+                  Conectado como: <strong>{{ currentUser.discordUsername }}</strong>
+                </span>
+                <span class="value" *ngIf="!currentUser?.discordUsername">
+                  Sin vincular
+                </span>
+              </div>
+            </div>
+            <button class="dnd-button ghost small" *ngIf="currentUser?.discordUsername" (click)="unlinkDiscord()">
+              Desvincular
+            </button>
+            <button class="dnd-button gold small" *ngIf="!currentUser?.discordUsername" (click)="linkDiscord()">
+              Vincular
+            </button>
           </div>
         </div>
       </section>
@@ -502,19 +517,58 @@
     font-weight: 600;
   }
 
+  .social-connections {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
   .social-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: #1a1a1a;
+    border-radius: 8px;
+    border: 1px solid #333;
+  }
+
+  .social-info {
     display: flex;
     align-items: center;
     gap: 15px;
-    padding: 12px;
-    background: #252525;
-    border-radius: 6px;
+  }
+
+  .social-info ion-icon {
+    font-size: 2rem;
+    color: #5865F2;
+  }
+
+  .text-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .text-group .label {
+    font-weight: 700;
+    font-size: 1rem;
     color: #F0E6D3;
   }
 
-  .social-item.discord ion-icon {
-    font-size: 1.5rem;
-    color: #5865F2;
+  .text-group .value {
+    font-size: 0.85rem;
+    color: #8C8C8C;
+  }
+
+  .text-group .value strong {
+    color: #C9A84C;
+  }
+
+  .dnd-button.small {
+    width: auto;
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    margin-top: 0;
   }
 
   .danger-zone {

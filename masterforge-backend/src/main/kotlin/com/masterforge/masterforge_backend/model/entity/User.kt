@@ -22,6 +22,7 @@ data class User(
     @Column(nullable = false, unique = true)
     val email: String,
 
+    @JsonIgnore
     @Column(name = "password_hash", nullable = false)
     val passwordHash: String,
 
@@ -38,6 +39,7 @@ data class User(
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     val characters: MutableList<Character> = mutableListOf(),
 
+    @JsonIgnore
     @Column(name = "two_factor_secret")
     var twoFactorSecret: String? = null,
 
@@ -47,13 +49,22 @@ data class User(
     @Column(name = "session_notifications", nullable = false, columnDefinition = "boolean default true")
     var sessionNotifications: Boolean = true,
 
+    @JsonIgnore
     @ElementCollection
     @CollectionTable(name = "user_recovery_codes", joinColumns = [JoinColumn(name = "user_id")])
     @Column(name = "recovery_code")
     val recoveryCodes: MutableList<String> = mutableListOf(),
 
+    @JsonIgnore
     @ElementCollection
     @CollectionTable(name = "user_fcm_tokens", joinColumns = [JoinColumn(name = "user_id")])
     @Column(name = "fcm_token")
-    val fcmTokens: MutableSet<String> = mutableSetOf()
+    val fcmTokens: MutableSet<String> = mutableSetOf(),
+
+    @JsonIgnore
+    @Column(name = "discord_id", unique = true)
+    var discordId: String? = null,
+
+    @Column(name = "discord_username")
+    var discordUsername: String? = null
 )

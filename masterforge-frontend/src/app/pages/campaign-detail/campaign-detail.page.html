@@ -32,6 +32,14 @@
         }
         <div class="campaign-meta">
           <span class="meta-item">
+            <ion-icon name="person-outline"></ion-icon>
+            DM: {{ campaign.owner.name }}
+            <span class="discord-tag" *ngIf="campaign.owner.discordUsername">
+              <ion-icon name="logo-discord"></ion-icon>
+              {{ campaign.owner.discordUsername }}
+            </span>
+          </span>
+          <span class="meta-item">
             <ion-icon name="people-outline"></ion-icon>
             {{ campaign.maxPlayers }} jugadores máx.
           </span>
@@ -205,7 +213,13 @@
                   <ion-item class="player-item" data-testid="player-item">
                     <ion-icon name="person-outline" slot="start" class="player-icon"></ion-icon>
                     <ion-label>
-                      <h3 class="player-name" data-testid="player-name">{{ player.name }}</h3>
+                      <div class="player-header">
+                        <h3 class="player-name" data-testid="player-name">{{ player.name }}</h3>
+                        <span class="discord-tag" *ngIf="player.discordUsername">
+                          <ion-icon name="logo-discord"></ion-icon>
+                          {{ player.discordUsername }}
+                        </span>
+                      </div>
                       <p class="player-email" data-testid="player-email">{{ player.email }}</p>
                     </ion-label>
                   </ion-item>

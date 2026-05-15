@@ -21,6 +21,7 @@ import {
   ToastController 
 } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
+import { DiscordService } from '../../services/discord.service';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { 
@@ -77,6 +78,7 @@ import * as QRCode from 'qrcode';
 export class ConfigPage implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private discordService = inject(DiscordService);
   private alertCtrl = inject(AlertController);
   private toastCtrl = inject(ToastController);
   private router = inject(Router);
@@ -330,6 +332,49 @@ export class ConfigPage implements OnInit {
     this.qrCodeDataUrl = '';
     this.twoFactorSecret = '';
     this.twoFactorCode = '';
+  }
+
+  async linkDiscord() {
+    this.discordService.getAuthUrl().subscribe({
+      next: (res) => {
+        window.location.href = res.url;
+      },
+      error: (err) => {
+        console.error('Failed to get Discord URL', err);
+        this.showToast('Error al conectar con Discord', 'danger');
+      }
+    });
+  }
+
+  async unlinkDiscord() {
+    const alert = await this.alertCtrl.create({
+      header: '¿Desvincular Discord?',
+      message: 'Tu nombre de usuario de Discord ya no será visible para otros jugadores.',
+      cssClass: 'custom-alert',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Desvincular',
+          role: 'destructive',
+          handler: () => {
+            this.discordService.unlink().subscribe({
+              next: () => {
+                this.showToast('Cuenta de Discord desvinculada', 'success');
+                this.loadUserData();
+              },
+              error: () => {
+                this.showToast('Error al desvincular Discord', 'danger');
+              }
+            });
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 
   togglePasswordVisibility() {

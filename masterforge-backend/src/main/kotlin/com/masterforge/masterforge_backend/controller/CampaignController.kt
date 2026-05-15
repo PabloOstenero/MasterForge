@@ -218,6 +218,7 @@ class CampaignController(
                 name = user.name,
                 email = user.email,
                 subscriptionTier = user.subscriptionTier.toString(),
+                discordUsername = user.discordUsername,
                 characters = characters
             )
         }

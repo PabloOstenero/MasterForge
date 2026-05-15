@@ -41,6 +41,7 @@ export const routes: Routes = [
       { path: 'search-campaigns', loadComponent: () => import('./pages/search-campaigns/search-campaigns.page').then(m => m.SearchCampaignsPage) },
       { path: 'my-characters', loadComponent: () => import('./pages/my-characters/my-characters.page').then(m => m.MyCharactersPage) },
       { path: 'my-campaigns', loadComponent: () => import('./pages/my-campaigns/my-campaigns.page').then(m => m.MyCampaignsPage) },
+      { path: 'discord-callback', loadComponent: () => import('./pages/discord-callback/discord-callback.page').then(m => m.DiscordCallbackPage) },
       { path: '', redirectTo: 'home', pathMatch: 'full' },
     ]
   },
