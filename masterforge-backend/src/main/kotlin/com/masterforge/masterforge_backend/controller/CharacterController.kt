@@ -966,9 +966,13 @@ class CharacterController(
         }
 
         character.dndRace?.traits?.forEach { processFeature(it.id, it.name, it.options, it.properties) }
-        character.dndClass.features.forEach { processFeature(it.id, it.name, it.options, it.properties) }
+        character.dndClass.features
+            .filter { it.levelRequired <= character.level }
+            .forEach { processFeature(it.id, it.name, it.options, it.properties) }
         character.classLevels.forEach { cl ->
-            cl.subclass?.features?.forEach { processFeature(it.id, it.name, it.options, it.properties) }
+            cl.subclass?.features
+                ?.filter { it.levelRequired <= cl.level }
+                ?.forEach { processFeature(it.id, it.name, it.options, it.properties) }
         }
 
         return conBonus
