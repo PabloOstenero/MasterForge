@@ -9,7 +9,8 @@
       <div class="effect-strip" [formGroup]="$any(effect)" [class.no-value]="effect.get('type')?.value === 'PROFICIENCY'">
         <div class="effect-col type">
           <label>Tipo</label>
-          <select class="forge-select-native-small" formControlName="type" (change)="onTypeChange(ei)">
+          <select class="forge-select-native-small" formControlName="type" (change)="onTypeChange(ei)"
+                  [class.input-error]="effect.get('type')?.invalid && effect.get('type')?.touched">
             @for (t of effectTypes; track t.value) {
               <option [value]="t.value">{{ t.label }}</option>
             }
@@ -18,7 +19,8 @@
 
         <div class="effect-col target">
           <label>Objetivo</label>
-          <select class="forge-select-native-small" formControlName="target">
+          <select class="forge-select-native-small" formControlName="target"
+                  [class.input-error]="effect.get('target')?.invalid && effect.get('target')?.touched">
             <option value="" disabled>Seleccionar...</option>
             @for (st of getFilteredTargets(effect.get('type')?.value); track st.value) {
               <option [value]="st.value">{{ st.label }}</option>
@@ -38,7 +40,8 @@
           <div class="effect-col value">
             <label>Valor</label>
             <div class="value-input-wrapper">
-              <input type="number" class="forge-input-native-small" formControlName="value" placeholder="1">
+              <input type="number" class="forge-input-native-small" formControlName="value" placeholder="1"
+                     [class.input-error]="effect.get('value')?.invalid && effect.get('value')?.touched">
               <label class="pb-checkbox" title="Sumar Bono de Competencia">
                 <input type="checkbox" formControlName="useProficiencyBonus">
                 <span>+PB</span>

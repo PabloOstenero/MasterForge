@@ -362,12 +362,16 @@
       <div class="form-section">
         <h2 class="section-title">Equipo Inicial <span class="section-badge">opcional</span></h2>
         <app-starting-equipment-picker
+          #equipmentPicker
           [initialValue]="equipmentInitialValue"
           [legacyText]="equipmentLegacyText"
           (equipmentChange)="onEquipmentChange($event)"
           (validityChange)="onPickerValidityChange($event)"
           data-testid="starting-equipment-picker">
         </app-starting-equipment-picker>
+        @if (!isPickerValid && form.touched) {
+          <p class="error-message">El equipo inicial tiene selecciones incompletas.</p>
+        }
       </div>
 
             </div><!-- .col-left -->
@@ -386,10 +390,15 @@
 
       <div class="features-stack" formArrayName="features">
         @for (feat of features.controls; track $index; let i = $index) {
-          <div class="feature-master-card" [formGroupName]="i" [attr.data-testid]="'feature-entry-' + i">
+          <div class="feature-master-card" [formGroupName]="i" [attr.data-testid]="'feature-entry-' + i"
+               [class.card--error]="feat.invalid && form.touched">
             <div class="card-header-main">
               <div class="header-group flex-grow">
-                <input type="text" class="input-feature-title" formControlName="name" placeholder="Nombre del rasgo de clase">
+                <input type="text" class="input-feature-title" formControlName="name" placeholder="Nombre del rasgo de clase"
+                       [class.input-error]="feat.get('name')?.invalid && form.touched">
+                @if (feat.get('name')?.invalid && form.touched) {
+                  <span class="error-text-mini">Nombre obligatorio</span>
+                }
               </div>
               
               <div class="header-group level-control">
@@ -417,27 +426,47 @@
             <div class="card-body-main">
               <div class="field-wrapper">
                 <label class="field-label-small">Descripción del Rasgo</label>
-                <textarea class="textarea-premium" formControlName="description" rows="2" placeholder="Describe el rasgo..."></textarea>
+                <textarea class="textarea-premium" formControlName="description" rows="2" placeholder="Describe el rasgo..."
+                          [class.input-error]="feat.get('description')?.invalid && form.touched"></textarea>
+                @if (feat.get('description')?.invalid && form.touched) {
+                  <p class="error-message">La descripción es obligatoria.</p>
+                }
               </div>
 
               <!-- Mechanics Toolbar -->
               <div class="mechanics-toolbar-container">
                 <div class="mechanics-toolbar">
-                  <button type="button" class="btn-tool" (click)="toggleFeatureSection(i, 'mechanics')" [class.active]="featureActiveSection[i] === 'mechanics'" title="Mecánicas (CA, Recursos)">
+                  <button type="button" class="btn-tool" (click)="toggleFeatureSection(i, 'mechanics')" 
+                    [class.active]="featureActiveSection[i] === 'mechanics'" 
+                    [class.tool--error]="feat.get('properties')?.invalid && form.touched"
+                    title="Mecánicas (CA, Recursos)">
                     <ion-icon name="shield-outline"></ion-icon>
                     <span>Mecánicas</span>
+                    @if (feat.get('properties')?.invalid && form.touched) { <span class="tool-error-dot"></span> }
                   </button>
-                  <button type="button" class="btn-tool" (click)="toggleFeatureSection(i, 'options')" [class.active]="featureActiveSection[i] === 'options'" title="Opciones y Elecciones">
+                  <button type="button" class="btn-tool" (click)="toggleFeatureSection(i, 'options')" 
+                    [class.active]="featureActiveSection[i] === 'options'" 
+                    [class.tool--error]="feat.get('options')?.invalid && form.touched"
+                    title="Opciones y Elecciones">
                     <ion-icon name="list-outline"></ion-icon>
                     <span>Opciones</span>
+                    @if (feat.get('options')?.invalid && form.touched) { <span class="tool-error-dot"></span> }
                   </button>
-                  <button type="button" class="btn-tool" (click)="toggleFeatureSection(i, 'effects')" [class.active]="featureActiveSection[i] === 'effects'" title="Automatización (Proficiencias, Sentidos)">
+                  <button type="button" class="btn-tool" (click)="toggleFeatureSection(i, 'effects')" 
+                    [class.active]="featureActiveSection[i] === 'effects'" 
+                    [class.tool--error]="feat.get('properties.effects')?.invalid && form.touched"
+                    title="Automatización (Proficiencias, Sentidos)">
                     <ion-icon name="sparkles-outline"></ion-icon>
                     <span>Efectos</span>
+                    @if (feat.get('properties.effects')?.invalid && form.touched) { <span class="tool-error-dot"></span> }
                   </button>
-                  <button type="button" class="btn-tool" (click)="toggleFeatureSection(i, 'progression')" [class.active]="featureActiveSection[i] === 'progression'" title="Progresión por Nivel">
+                  <button type="button" class="btn-tool" (click)="toggleFeatureSection(i, 'progression')" 
+                    [class.active]="featureActiveSection[i] === 'progression'" 
+                    [class.tool--error]="feat.get('progression')?.invalid && form.touched"
+                    title="Progresión por Nivel">
                     <ion-icon name="trending-up-outline"></ion-icon>
                     <span>Progresión</span>
+                    @if (feat.get('progression')?.invalid && form.touched) { <span class="tool-error-dot"></span> }
                   </button>
                 </div>
               </div>

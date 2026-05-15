@@ -1628,7 +1628,7 @@ export function buildCharacterDto(
     maxHp: hp,
     currentHp: hp,
     tempHp: 0,
-    speed: 30,
+    speed: formData.selectedRace?.raceFeatures?.speeds?.walk || 30,
     hitDiceTotal: formData.level,
     hitDiceSpent: 0,
     baseStr: finalScores.str,

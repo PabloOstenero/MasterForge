@@ -91,7 +91,7 @@ export class FeatureChoiceEditorComponent {
     const choice = this.fb.group({
       id: [this.generateId(), Validators.required],
       label: ['', Validators.required],
-      description: [''],
+      description: ['', Validators.required],
       effects: this.fb.array([])
     });
     this.choices.push(choice);

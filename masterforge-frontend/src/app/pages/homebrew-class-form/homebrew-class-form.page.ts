@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, FormArray, FormControl, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -325,9 +325,7 @@ export class HomebrewClassFormPage implements OnInit {
   originalFeatures: { id: number; name: string; description: string; levelRequired: number; options?: any; properties?: any }[] = [];
   featureActiveSection: Record<number, string> = {};
 
-  // ---------------------------------------------------------------------------
-  // Starting equipment picker state
-  // ---------------------------------------------------------------------------
+  @ViewChild('equipmentPicker') equipmentPicker?: StartingEquipmentPickerComponent;
 
   currentEquipment: StructuredEquipment | null = null;
   isPickerValid = true;
@@ -693,7 +691,7 @@ export class HomebrewClassFormPage implements OnInit {
           cls.features.forEach((f: any) => {
             const optionsGroup = this.fb.group({
               type: [f.options?.type ?? 'SELECT_ONE'],
-              count: [f.options?.count ?? 1],
+              count: [f.options?.count ?? 1, [Validators.required, Validators.min(1)]],
               choices: this.fb.array((f.options?.choices ?? []).map((c: any) => this.fb.group({
                 id: [c.id],
                 label: [c.label || c.name, Validators.required],
@@ -923,7 +921,7 @@ export class HomebrewClassFormPage implements OnInit {
       hasOptions: [false],
       options: this.fb.group({
         type: ['SELECT_ONE'],
-        count: [1],
+        count: [1, [Validators.required, Validators.min(1)]],
         choices: this.fb.array([]),
         progression: this.fb.array([])
       }),
@@ -1363,6 +1361,7 @@ export class HomebrewClassFormPage implements OnInit {
 
   submit(): void {
     this.form.markAllAsTouched();
+    this.equipmentPicker?.markAllTouched();
 
     if (this.form.invalid || !this.isPickerValid) {
       return;

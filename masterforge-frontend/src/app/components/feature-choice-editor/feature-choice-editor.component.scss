@@ -20,6 +20,11 @@
   padding-bottom: 1.5rem;
   border-bottom: 1px solid rgba(193, 153, 76, 0.1);
 
+  &.header--error {
+    border-bottom-color: rgba(#C62828, 0.4);
+    .engine-title { color: #e57373; }
+  }
+
   .engine-title {
     margin: 0;
     font-size: 1.25rem;
@@ -383,6 +388,23 @@
     border-color: rgba(193, 153, 76, 0.4);
     color: rgba(255, 255, 255, 0.5);
   }
+}
+
+.input-error {
+  border-color: #e57373 !important;
+  background: rgba(229, 115, 115, 0.05) !important;
+}
+
+.input-ghost-title.input-error {
+  border-bottom-color: #e57373 !important;
+}
+
+.error-text-mini {
+  color: #e57373;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-top: 2px;
+  display: block;
 }
 
 .empty-effects-hint {

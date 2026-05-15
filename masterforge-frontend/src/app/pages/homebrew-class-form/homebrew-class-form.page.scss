@@ -228,7 +228,8 @@ $red:         #C62828;
   }
 
   &.input-error {
-    border-color: $red;
+    border-color: $red !important;
+    background: rgba($red, 0.05);
   }
 }
 
@@ -258,10 +259,18 @@ $red:         #C62828;
 
 // ─── Error message ────────────────────────────────────────────────────────────
 .error-message {
-  color: $red;
+  color: #e57373;
   font-size: 0.8rem;
   margin-top: 4px;
   padding-left: 2px;
+  font-weight: 500;
+}
+
+.error-text-mini {
+  color: #e57373;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-top: 2px;
 }
 
 // ─── Entry cards (class features / multiclassing prerequisites) ───────────────
@@ -780,6 +789,12 @@ $red:         #C62828;
   &:hover {
     border-color: rgba(193, 153, 76, 0.2);
   }
+
+  &.card--error {
+    border-color: rgba($red, 0.5);
+    background: rgba($red, 0.03);
+    box-shadow: 0 4px 20px rgba($red, 0.1);
+  }
 }
 
 .card-header-main {
@@ -869,6 +884,24 @@ $red:         #C62828;
     border-color: rgba(193, 153, 76, 0.4);
     box-shadow: 0 0 15px rgba(193, 153, 76, 0.1);
   }
+
+  &.tool--error {
+    border-color: rgba($red, 0.4) !important;
+    color: #e57373 !important;
+  }
+
+  position: relative;
+}
+
+.tool-error-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  background: #e57373;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba($red, 0.8);
 }
 
 .contextual-panels-stack {
@@ -1386,5 +1419,19 @@ $red:         #C62828;
 
   &:active {
     transform: translateY(0);
+  }
+}
+
+.textarea-premium {
+  &.input-error {
+    border-color: $red !important;
+    background: rgba($red, 0.05);
+  }
+}
+
+.input-feature-title {
+  &.input-error {
+    color: #e57373 !important;
+    border-bottom: 2px solid $red !important;
   }
 }

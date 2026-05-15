@@ -20,6 +20,7 @@
       <ion-col size="8">
         <div class="info-box">
           <div class="info-line"><strong>Clase:</strong> {{ pj.fullClassName }}</div>
+          <div class="info-line"><strong>Raza:</strong> {{ pj.raceName }} ({{ pj.creatureType }})</div>
           <div class="info-line"><strong>Trasfondo:</strong> {{ pj.background }}</div>
           <div class="info-line"><strong>Alineamiento:</strong> {{ pj.alignment }}</div>
           <div class="info-line"><strong>Experiencia:</strong> {{ pj.xp }} XP</div>
@@ -342,16 +343,26 @@
 
     <ion-list class="transparent-list">
       @for (item of pj.inventory; track $index) {
-      @if (itemIs(item, 'WEAPON')) {
-      <div class="attack-row" [class.unequipped]="!item.equipped">
-        <div class="atk-name" (click)="openDetail(item, 'ITEM')">
-          {{ item.name }}
-          @if (!item.equipped) { <small style="color: #666; font-size: 0.6rem;">(OFF)</small> }
-        </div>
-        <div class="atk-bonus" (click)="toggleEquip(item.id)">{{ getAttackBonus(item) }}</div>
-        <div class="atk-damage" (click)="toggleEquip(item.id)">{{ getWeaponDamage(item) }}</div>
-      </div>
+        @if (itemIs(item, 'WEAPON')) {
+          <div class="attack-row" [class.unequipped]="!item.equipped">
+            <div class="atk-name" (click)="openDetail(item, 'ITEM')">
+              {{ item.name }}
+              @if (!item.equipped) { <small style="color: #666; font-size: 0.6rem;">(OFF)</small> }
+            </div>
+            <div class="atk-bonus" (click)="toggleEquip(item.id)">{{ getAttackBonus(item) }}</div>
+            <div class="atk-damage" (click)="toggleEquip(item.id)">{{ getWeaponDamage(item) }}</div>
+          </div>
+        }
       }
+
+      @for (nw of pj.naturalWeapons; track $index) {
+        <div class="attack-row natural-weapon">
+          <div class="atk-name">
+            {{ nw.name }} <small style="color: #888;">(Natural)</small>
+          </div>
+          <div class="atk-bonus">{{ getNaturalWeaponAttackBonus(nw) }}</div>
+          <div class="atk-damage">{{ getNaturalWeaponDamage(nw) }}</div>
+        </div>
       }
     </ion-list>
 

@@ -104,7 +104,10 @@ export class CharacterSheetPage implements OnInit {
     savingThrowsProficiencies: {},
     spellSlots: {},
     resourceCounters: {},
-    preparationStyle: 'KNOWN'
+    preparationStyle: 'KNOWN',
+    naturalWeapons: [],
+    raceName: '...',
+    creatureType: 'Humanoide'
   };
 
   rawCharacter: any = null; // Store raw data for level-up calculations
@@ -434,7 +437,10 @@ export class CharacterSheetPage implements OnInit {
           _rawClassFeatures: data.dndClass?.classFeatures || {},
           _rawRaceFeatures: data.dndRace?.raceFeatures || {},
           preparationStyle: data.dndClass?.classFeatures?.['spellcasting']?.['preparationStyle'] || 'KNOWN',
-          knowledgeStyle: data.dndClass?.classFeatures?.['spellcasting']?.['knowledgeStyle'] || 'ALL_LIST'
+          knowledgeStyle: data.dndClass?.classFeatures?.['spellcasting']?.['knowledgeStyle'] || 'ALL_LIST',
+          naturalWeapons: data.dndRace?.raceFeatures?.naturalWeapons || [],
+          raceName: data.dndRace?.name || 'Desconocida',
+          creatureType: data.dndRace?.raceFeatures?.creatureType || 'Humanoide'
         };
 
         this.calculateResourcePools();
@@ -1807,6 +1813,24 @@ export class CharacterSheetPage implements OnInit {
     return mod > 0 ? `+${mod}` : `${mod}`;
   }
 
+  getNaturalWeaponAttackBonus(nw: any): string {
+    const stat = nw.stat || 'str';
+    const score = this.pj.stats[stat] || 10;
+    const mod = Math.floor((score - 10) / 2);
+    const total = mod + (this.pj.proficiencyBonus || 0);
+    return total >= 0 ? `+${total}` : `${total}`;
+  }
+
+  getNaturalWeaponDamage(nw: any): string {
+    const stat = nw.stat || 'str';
+    const score = this.pj.stats[stat] || 10;
+    const mod = Math.floor((score - 10) / 2);
+    const bonusPart = mod > 0 ? `+${mod}` : mod < 0 ? `${mod}` : '';
+    const dicePart = `${nw.diceCount || 1}${nw.dieType || 'd6'}`;
+    const dmgType = nw.damageType || '';
+    return `${dicePart}${bonusPart} ${dmgType}`.trim() || '—';
+  }
+
   // Calcula el modificador de tirada de salvación (Modificador de Stat + Competencia si aplica)
   // Calcula el modificador de tirada de salvación (Modificador de Stat + Competencia si aplica)
   getSavingThrowMod(statKey: string): string {
@@ -1954,34 +1978,71 @@ export class CharacterSheetPage implements OnInit {
   calculateAutomatedEffects() {
     const res: Set<string> = new Set();
     const imm: Set<string> = new Set();
-    const condImm: Set<string> = new Set();
-    const sen: Set<string> = new Set();
+    const conditionImm: Set<string> = new Set();
+    const senses: Set<string> = new Set();
 
     const allFeatures = this.getAllCharacterFeatures(this.rawCharacter);
 
     allFeatures.forEach(f => {
-      const itemsToScan = [f, ...(f.selectedOptions || [])];
-      itemsToScan.forEach(obj => {
-        const effects = obj.properties?.effects || obj.options?.effects || [];
-        effects.forEach((eff: any) => {
-          const type = eff.type;
-          const target = eff.target;
+      // 1. Check global feature effects
+      const globalEffects = f.properties?.effects || [];
+      globalEffects.forEach((e: any) => this.applyEffect(e, res, imm, conditionImm, senses));
 
-          if (type === 'DAMAGE_RESISTANCE') res.add(target);
-          if (type === 'DAMAGE_IMMUNITY') imm.add(target);
-          if (type === 'CONDITION_IMMUNITY') condImm.add(target);
-          if (type === 'SENSE') {
-             const value = eff.value ? ` (${eff.value} ft)` : '';
-             sen.add(`${target}${value}`);
+      // 2. Check selected options effects
+      if (f.selectedOptions && f.options?.choices) {
+        f.selectedOptions.forEach((selectedId: string) => {
+          // Find option object by ID, label or name
+          const optionObj = f.options.choices.find((c: any) => 
+            c.id === selectedId || c.label === selectedId || c.name === selectedId
+          );
+          if (optionObj) {
+            const optionEffects = optionObj.effects || optionObj.properties?.effects || [];
+            optionEffects.forEach((e: any) => this.applyEffect(e, res, imm, conditionImm, senses));
           }
         });
-      });
+      }
     });
 
-    this.damageResistances = Array.from(res);
-    this.damageImmunities = Array.from(imm);
-    this.conditionImmunities = Array.from(condImm);
-    this.senses = Array.from(sen);
+    // 3. Check racial base senses
+    const racialSenses = this.rawCharacter?.dndRace?.raceFeatures?.senses || {};
+    Object.entries(racialSenses).forEach(([sense, value]) => {
+      if (value && typeof value === 'number' && value > 0) {
+        senses.add(`${sense} ${value}ft`);
+      }
+    });
+
+    // 4. Check core Race/Subclass properties (Resistances, Immunities)
+    const toScan = [
+      this.rawCharacter.dndRace?.raceFeatures,
+      this.rawCharacter.dndClass?.classFeatures,
+      ...(this.rawCharacter.classLevels || []).map((cl: any) => cl.subclass?.subclassFeatures)
+    ].filter(Boolean);
+
+    toScan.forEach(obj => {
+      (obj.damageResistances || []).forEach((r: string) => res.add(r));
+      (obj.damageImmunities || []).forEach((i: string) => imm.add(i));
+      (obj.conditionImmunities || []).forEach((c: string) => conditionImm.add(c));
+    });
+
+    this.pj.resistances = Array.from(res);
+    this.pj.immunities = Array.from(imm);
+    this.pj.conditionImmunities = Array.from(conditionImm);
+    this.pj.senses = Array.from(senses);
+  }
+
+  private applyEffect(e: any, res: Set<string>, imm: Set<string>, conditionImm: Set<string>, senses: Set<string>) {
+    const type = e.type || 'STAT_MODIFIER';
+    const target = e.target || e.customTarget || '';
+    if (!target) return;
+
+    if (type === 'DAMAGE_RESISTANCE') res.add(target);
+    if (type === 'DAMAGE_IMMUNITY') imm.add(target);
+    if (type === 'CONDITION_IMMUNITY') conditionImm.add(target);
+    if (type === 'SENSE') {
+      const val = e.value || 0;
+      const unit = (val.toString().includes('ft')) ? '' : 'ft';
+      senses.add(`${target} ${val}${unit}`);
+    }
   }
 
   private detectResourceInFeature(feat: any): any | null {
@@ -2122,6 +2183,14 @@ export class CharacterSheetPage implements OnInit {
           }
         }
       });
+
+      // --- RACE NATURAL ARMOR ---
+      const natArmor = data.dndRace?.raceFeatures?.naturalArmor;
+      if (natArmor && natArmor.enabled) {
+        let val = natArmor.baseAC || 10;
+        if (natArmor.addDex) val += dexMod;
+        calculations.push(val);
+      }
 
       // --- HARDCODED FALLBACKS (Standard 5e) ---
       const conMod = getModifier(stats.con);

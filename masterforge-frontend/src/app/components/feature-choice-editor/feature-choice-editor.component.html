@@ -1,6 +1,6 @@
 <div class="forge-choice-engine" [formGroup]="parentForm">
   <!-- Engine Header -->
-  <header class="engine-header">
+  <header class="engine-header" [class.header--error]="(choices.invalid || progression.invalid) && parentForm.touched">
     <div class="engine-info">
       <h2 class="engine-title">Configuración de Elecciones</h2>
       <p class="engine-subtitle">Define cómo los jugadores personalizarán este rasgo al subir de nivel.</p>
@@ -19,7 +19,11 @@
       @if (parentForm.get('type')?.value === 'SELECT_MANY') {
         <div class="control-group narrow">
           <label>Cantidad</label>
-          <input type="number" class="forge-input-native" formControlName="count" placeholder="2">
+          <input type="number" class="forge-input-native" formControlName="count" placeholder="2"
+                 [class.input-error]="parentForm.get('count')?.invalid && parentForm.get('count')?.touched">
+          @if (parentForm.get('count')?.invalid && parentForm.get('count')?.touched) {
+            <span class="error-text-mini">Mín. 1</span>
+          }
         </div>
       }
     </div>
@@ -54,8 +58,10 @@
           <tbody>
             @for (prog of progression.controls; track prog; let pi = $index) {
               <tr [formGroupName]="pi">
-                <td><input type="number" class="forge-input-native-small" formControlName="level" placeholder="Nivel"></td>
-                <td><input type="number" class="forge-input-native-small" formControlName="additionalChoices" placeholder="+1"></td>
+                <td><input type="number" class="forge-input-native-small" formControlName="level" placeholder="Nivel"
+                           [class.input-error]="prog.get('level')?.invalid && prog.get('level')?.touched"></td>
+                <td><input type="number" class="forge-input-native-small" formControlName="additionalChoices" placeholder="+1"
+                           [class.input-error]="prog.get('additionalChoices')?.invalid && prog.get('additionalChoices')?.touched"></td>
                 <td>
                   <button type="button" class="btn-icon-delete" (click)="removeProgression(pi)">
                     <ion-icon name="trash-outline"></ion-icon>
@@ -77,7 +83,11 @@
           <div class="card-content">
             <div class="card-top-row">
               <div class="field-wrapper flex-grow">
-                <input type="text" class="input-ghost-title" formControlName="label" placeholder="Nombre de la opción (Ej: Estilo de Combate)">
+                <input type="text" class="input-ghost-title" formControlName="label" placeholder="Nombre de la opción (Ej: Estilo de Combate)"
+                       [class.input-error]="choice.get('label')?.invalid && choice.get('label')?.touched">
+                @if (choice.get('label')?.invalid && choice.get('label')?.touched) {
+                  <span class="error-text-mini">Nombre obligatorio</span>
+                }
               </div>
               <button type="button" class="btn-card-delete" (click)="removeChoice(i)" title="Eliminar opción">
                 <ion-icon name="trash"></ion-icon>
@@ -85,7 +95,11 @@
             </div>
 
             <div class="field-wrapper">
-              <textarea class="textarea-simple" formControlName="description" rows="2" placeholder="Describe los beneficios de esta opción..."></textarea>
+              <textarea class="textarea-simple" formControlName="description" rows="2" placeholder="Describe los beneficios de esta opción..."
+                        [class.input-error]="choice.get('description')?.invalid && choice.get('description')?.touched"></textarea>
+              @if (choice.get('description')?.invalid && choice.get('description')?.touched) {
+                <p class="error-message">La descripción es obligatoria.</p>
+              }
             </div>
 
             <!-- Nested Effects Section -->
