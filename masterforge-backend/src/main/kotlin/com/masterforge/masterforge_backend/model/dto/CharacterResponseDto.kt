@@ -16,12 +16,6 @@ data class UserSimpleDto(
 data class DndRaceSummaryDto(
     val id: Int,
     val name: String,
-    val bonusStr: Int,
-    val bonusDex: Int,
-    val bonusCon: Int,
-    val bonusInt: Int,
-    val bonusWis: Int,
-    val bonusCha: Int,
     val traits: List<RaceTraitDto> = emptyList(),
     val raceFeatures: Map<String, Any> = emptyMap()
     // Add other fields from DndRace entity as needed, e.g., traits, author, price
@@ -31,12 +25,6 @@ data class DndRaceSummaryDto(
             return DndRaceSummaryDto(
                 id = race.id!!,
                 name = race.name,
-                bonusStr = race.bonusStr,
-                bonusDex = race.bonusDex,
-                bonusCon = race.bonusCon,
-                bonusInt = race.bonusInt,
-                bonusWis = race.bonusWis,
-                bonusCha = race.bonusCha,
                 traits = race.traits.map {
                     RaceTraitDto(
                         id = it.id,

@@ -88,34 +88,6 @@
       </div>
 
       <!-- ══════════════════════════════════════════════════════════════════
-           SECCIÓN 2 · BONIFICADORES DE CARACTERÍSTICAS
-      ══════════════════════════════════════════════════════════════════ -->
-      <div class="form-section col-right">
-        <h2 class="section-title">Bonificadores de Características</h2>
-        <p class="section-hint">Cada valor debe estar entre -10 y 10.</p>
-
-        <div class="ability-scores-grid">
-          @for (key of abilityBonusKeys; track key) {
-            <div class="ability-score-item">
-              <label class="ability-label">{{ abilityBonusLabels[key] }}</label>
-              <ion-input
-                class="forge-input"
-                type="number"
-                [formControlName]="key"
-                placeholder="0"
-                [attr.data-testid]="key + '-input'"
-                [class.input-error]="form.get(key)?.invalid && form.get(key)?.touched">
-              </ion-input>
-              @if (form.get(key)?.invalid && form.get(key)?.touched) {
-                <p class="error-message" [attr.data-testid]="key + '-error'">-10 a 10.</p>
-              }
-            </div>
-          }
-        </div>
-
-      </div>
-
-      <!-- ══════════════════════════════════════════════════════════════════
            SECCIÓN 3 · VELOCIDAD
       ══════════════════════════════════════════════════════════════════ -->
       <div class="form-section col-left" formGroupName="speeds">

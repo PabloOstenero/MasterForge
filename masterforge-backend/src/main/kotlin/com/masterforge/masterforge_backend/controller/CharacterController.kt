@@ -940,12 +940,46 @@ class CharacterController(
         return ResponseEntity.noContent().build()
     }
 
+    private fun getStatModifierFromProperties(properties: Map<String, Any>?, stat: String): Int {
+        val statModifiers = properties?.get("statModifiers") as? Map<*, *>
+        return (statModifiers?.get(stat) as? Number)?.toInt() ?: 0
+    }
+
+    private fun extractConModifier(character: Character): Int {
+        var conBonus = 0
+        val choices = character.choicesJson ?: emptyMap()
+
+        fun processFeature(id: Int?, name: String, options: Map<String, Any>?, properties: Map<String, Any>?) {
+            conBonus += getStatModifierFromProperties(properties, "con")
+            val featureKey = id?.toString() ?: name
+            val userChoice = choices[featureKey]
+            if (userChoice != null && options != null) {
+                val choicesList = options["choices"] as? List<*>
+                val choiceArray = if (userChoice is List<*>) userChoice else listOf(userChoice)
+                choiceArray.forEach { choiceLabel ->
+                    val opt = choicesList?.find { (it as? Map<*, *>)?.get("label") == choiceLabel } as? Map<*, *>
+                    if (opt != null) {
+                        conBonus += getStatModifierFromProperties(opt["properties"] as? Map<String, Any>, "con")
+                    }
+                }
+            }
+        }
+
+        character.dndRace?.traits?.forEach { processFeature(it.id, it.name, it.options, it.properties) }
+        character.dndClass.features.forEach { processFeature(it.id, it.name, it.options, it.properties) }
+        character.classLevels.forEach { cl ->
+            cl.subclass?.features?.forEach { processFeature(it.id, it.name, it.options, it.properties) }
+        }
+
+        return conBonus
+    }
+
     private fun calculateEffectiveMaxHp(character: Character): Int {
-        val raceConBonus = character.dndRace?.bonusCon ?: 0
-        var effectiveCon = character.baseCon + raceConBonus
+        val featureConBonus = extractConModifier(character)
+        var effectiveCon = character.baseCon + featureConBonus
         var itemFlatBonus = 0
 
-        println("DEBUG: Calculating effective HP. Base CON: ${character.baseCon}, Race Bonus: $raceConBonus")
+        println("DEBUG: Calculating effective HP. Base CON: ${character.baseCon}")
 
         character.inventory.forEach { slot ->
             if (slot.isEquipped) {
@@ -963,8 +997,8 @@ class CharacterController(
         }
 
         val conMod = Math.floor((effectiveCon - 10) / 2.0).toInt()
-        val baseConWithRace = character.baseCon + raceConBonus
-        val baseConMod = Math.floor((baseConWithRace - 10) / 2.0).toInt()
+        val baseConWithFeatures = character.baseCon + featureConBonus
+        val baseConMod = Math.floor((baseConWithFeatures - 10) / 2.0).toInt()
         val retroactiveHp = (conMod - baseConMod) * character.level
         
         val total = character.maxHp + character.bonusMaxHp + itemFlatBonus + retroactiveHp

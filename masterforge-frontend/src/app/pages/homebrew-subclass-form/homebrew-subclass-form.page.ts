@@ -650,29 +650,28 @@ export class HomebrewSubclassFormPage implements OnInit {
               additionalChoices: [p.additionalChoices ?? 0],
               description: [p.description || '']
             }))),
-            properties: this.fb.group({
-              acCalculation: this.fb.group({
-                base: [entry.properties?.acCalculation?.base ?? 10],
-                stats: [entry.properties?.acCalculation?.stats ?? []],
-                requiresNoArmor: [entry.properties?.acCalculation?.requiresNoArmor ?? false]
-              }),
-              acBonus: [entry.properties?.acBonus ?? 0],
-              acBonusArmorOnly: [entry.properties?.acBonusArmorOnly ?? false],
-              resourcePool: this.fb.group({
-                name: [entry.properties?.resourcePool?.name ?? ''],
-                max: [entry.properties?.resourcePool?.max ?? ''],
-                reset: [entry.properties?.resourcePool?.reset ?? 'LONG_REST']
-              }),
-              effects: this.fb.array((entry.properties?.effects ?? []).map((e: any) => this.fb.group({
-                type: [e.type ?? 'STAT_MODIFIER'],
-                target: [e.target ?? ''],
-                customTarget: [e.customTarget ?? ''],
-                value: [e.value ?? 1],
-                useProficiencyBonus: [e.useProficiencyBonus ?? false],
-                condition: [e.condition ?? null]
-              })))
-            })
-          });
+              properties: this.fb.group({
+                effects: this.fb.array((entry.properties?.effects ?? []).map((e: any) => this.fb.group({
+                  type: [e.type ?? 'STAT_MODIFIER'],
+                  target: [e.target ?? ''],
+                  customTarget: [e.customTarget ?? ''],
+                  value: [e.value ?? 1],
+                  useProficiencyBonus: [e.useProficiencyBonus ?? false],
+                  condition: [e.condition ?? null]
+                })))
+              })
+            });
+
+            if (entry.properties) {
+              const propsGroup = featureGroup.get('properties') as FormGroup;
+              if (entry.properties.statModifiers) propsGroup.addControl('statModifiers', this.fb.group(entry.properties.statModifiers));
+              if (entry.properties.acCalculation) propsGroup.addControl('acCalculation', this.fb.group(entry.properties.acCalculation));
+              if (entry.properties.acBonus !== undefined && entry.properties.acBonus !== null) {
+                propsGroup.addControl('acBonus', this.fb.control(entry.properties.acBonus));
+                propsGroup.addControl('acBonusArmorOnly', this.fb.control(entry.properties.acBonusArmorOnly ?? false));
+              }
+              if (entry.properties.resourcePool) propsGroup.addControl('resourcePool', this.fb.group(entry.properties.resourcePool));
+            }
 
           this.features.push(featureGroup);
         });
@@ -1142,16 +1141,9 @@ export class HomebrewSubclassFormPage implements OnInit {
     const subclassFeatureEntries: FeatureEntry[] = this.features.controls.map(ctrl => {
       const fg = ctrl as FormGroup;
       const optionsValue = fg.get('hasOptions')?.value ? fg.get('options')?.value : null;
-      const propertiesValue = fg.get('properties')?.value;
-      const cleanProps: any = {};
-      if (propertiesValue.acCalculation) cleanProps.acCalculation = propertiesValue.acCalculation;
-      if (propertiesValue.acBonus !== undefined && propertiesValue.acBonus !== null) {
-        cleanProps.acBonus = propertiesValue.acBonus;
-        cleanProps.acBonusArmorOnly = propertiesValue.acBonusArmorOnly;
-      }
-      if (propertiesValue.resourcePool) cleanProps.resourcePool = propertiesValue.resourcePool;
+      const propertiesValue = fg.get('properties')?.value || {};
       const properties = {
-        ...cleanProps,
+        ...propertiesValue,
         effects: propertiesValue.effects || []
       };
 

@@ -67,12 +67,6 @@ export interface CreateRaceDto {
   price: number;
   description: string;
   size: string;
-  bonusStr: number;
-  bonusDex: number;
-  bonusCon: number;
-  bonusInt: number;
-  bonusWis: number;
-  bonusCha: number;
   raceFeatures: RaceFeatures;
   authorId: string;
 }

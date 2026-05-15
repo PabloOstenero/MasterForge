@@ -4,101 +4,160 @@ import { ReactiveFormsModule, FormGroup, FormBuilder, FormArray } from '@angular
 import { IonInput, IonCheckbox, IonItem, IonLabel, IonIcon, IonButton } from '@ionic/angular/standalone';
 import { ABILITIES } from '../../pages/homebrew-class-form/homebrew-class-form.page';
 import { addIcons } from 'ionicons';
-import { shieldOutline, addOutline, flashOutline } from 'ionicons/icons';
+import { shieldOutline, addOutline, flashOutline, trendingUpOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-feature-mechanics',
   template: `
     <div [formGroup]="parentForm" class="mechanics-container">
       <div formGroupName="properties">
+
+        <!-- TOGGLES -->
+        <div class="mechanics-toggles">
+          <label class="toggle-switch-mini">
+            <input type="checkbox" [checked]="hasStats" (change)="toggleStats($event)">
+            <span class="slider-mini"></span>
+            <span class="toggle-label-mini">Modificadores de Atributo</span>
+          </label>
+          <label class="toggle-switch-mini">
+            <input type="checkbox" [checked]="hasDefense" (change)="toggleDefense($event)">
+            <span class="slider-mini"></span>
+            <span class="toggle-label-mini">Defensa y Armadura</span>
+          </label>
+          <label class="toggle-switch-mini">
+            <input type="checkbox" [checked]="hasResource" (change)="toggleResource($event)">
+            <span class="slider-mini"></span>
+            <span class="toggle-label-mini">Contador de Recursos</span>
+          </label>
+        </div>
         
-        <!-- AC CALCULATION -->
-        <div class="mechanic-group-box">
-          <header class="mechanic-box-header">
-            <ion-icon name="shield-outline"></ion-icon>
-            <h4>Cálculo de Armadura Base</h4>
-          </header>
-          <div formGroupName="acCalculation" class="mechanic-details">
-            <div class="field-grid">
-              <div class="field-group">
-                <label class="field-label">Base CA</label>
-                <ion-input type="number" formControlName="base" class="forge-input" placeholder="10"></ion-input>
-              </div>
-              <div class="field-group">
-                <label class="field-label">Modificadores (Atributos)</label>
-                <div class="stat-chips">
-                  @for (stat of abilities; track stat) {
-                    <button type="button" class="chip" 
-                      [class.chip--active]="isStatSelected(stat)"
-                      (click)="toggleStat(stat)">
-                      {{ stat.substring(0,3).toUpperCase() }}
-                    </button>
-                  }
+        <!-- STAT MODIFIERS -->
+        @if (hasStats) {
+          <div class="mechanic-group-box">
+            <header class="mechanic-box-header">
+              <ion-icon name="trending-up-outline"></ion-icon>
+              <h4>Modificadores de Atributo</h4>
+            </header>
+            <div formGroupName="statModifiers" class="mechanic-details">
+              <div class="field-grid stat-mod-grid">
+                <div class="field-group">
+                  <label class="field-label">FU</label>
+                  <ion-input type="number" formControlName="str" class="forge-input" placeholder="0"></ion-input>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">DES</label>
+                  <ion-input type="number" formControlName="dex" class="forge-input" placeholder="0"></ion-input>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">CON</label>
+                  <ion-input type="number" formControlName="con" class="forge-input" placeholder="0"></ion-input>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">INT</label>
+                  <ion-input type="number" formControlName="int" class="forge-input" placeholder="0"></ion-input>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">SAB</label>
+                  <ion-input type="number" formControlName="wis" class="forge-input" placeholder="0"></ion-input>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">CAR</label>
+                  <ion-input type="number" formControlName="cha" class="forge-input" placeholder="0"></ion-input>
                 </div>
               </div>
-            </div>
-            <div class="field-group checkbox-group">
-              <label class="toggle-switch-mini">
-                <input type="checkbox" formControlName="requiresNoArmor">
-                <span class="slider-mini"></span>
-                <span class="toggle-label-mini">Requiere NO llevar armadura (Unarmored Defense)</span>
-              </label>
+              <p class="field-hint-mini">Usa esto para Mejoras de Puntuación de Característica (ej: +2 DES). Deja en 0 los que no cambian.</p>
             </div>
           </div>
-        </div>
+        }
 
-        <!-- AC BONUS -->
-        <div class="mechanic-group-box">
-          <header class="mechanic-box-header">
-            <ion-icon name="add-outline"></ion-icon>
-            <h4>Bono de CA Pasivo</h4>
-          </header>
-          <div class="mechanic-details">
-            <div class="field-grid">
-              <div class="field-group">
-                <label class="field-label">Bono</label>
-                <ion-input type="number" formControlName="acBonus" class="forge-input" placeholder="+1"></ion-input>
+        <!-- DEFENSE AND ARMOR -->
+        @if (hasDefense) {
+          <div class="mechanic-group-box">
+            <header class="mechanic-box-header">
+              <ion-icon name="shield-outline"></ion-icon>
+              <h4>Defensa y Armadura</h4>
+            </header>
+            <div class="mechanic-details">
+              
+              <h5 class="sub-section-title">Cálculo de Base (Unarmored Defense)</h5>
+              <div formGroupName="acCalculation" class="field-grid" style="margin-bottom: 16px;">
+                <div class="field-group">
+                  <label class="field-label">Base CA</label>
+                  <ion-input type="number" formControlName="base" class="forge-input" placeholder="10"></ion-input>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Modificadores (Atributos)</label>
+                  <div class="stat-chips">
+                    @for (stat of abilities; track stat) {
+                      <button type="button" class="chip" 
+                        [class.chip--active]="isStatSelected(stat)"
+                        (click)="toggleStat(stat)">
+                        {{ stat.substring(0,3).toUpperCase() }}
+                      </button>
+                    }
+                  </div>
+                </div>
+                <div class="field-group checkbox-group" style="grid-column: 1 / -1;">
+                  <label class="toggle-switch-mini">
+                    <input type="checkbox" formControlName="requiresNoArmor">
+                    <span class="slider-mini"></span>
+                    <span class="toggle-label-mini">Requiere NO llevar armadura</span>
+                  </label>
+                </div>
               </div>
-              <div class="field-group" style="margin-top: 10px;">
-                <label class="toggle-switch-mini">
-                  <input type="checkbox" formControlName="acBonusArmorOnly">
-                  <span class="slider-mini"></span>
-                  <span class="toggle-label-mini">Solo si lleva Armadura (Ej: Estilo de Defensa)</span>
-                </label>
+
+              <div class="divider"></div>
+
+              <h5 class="sub-section-title">Bono de CA Pasivo (Estilo de Defensa)</h5>
+              <div class="field-grid">
+                <div class="field-group">
+                  <label class="field-label">Bono</label>
+                  <ion-input type="number" formControlName="acBonus" class="forge-input" placeholder="+1"></ion-input>
+                </div>
+                <div class="field-group" style="align-self: flex-end; padding-bottom: 8px;">
+                  <label class="toggle-switch-mini">
+                    <input type="checkbox" formControlName="acBonusArmorOnly">
+                    <span class="slider-mini"></span>
+                    <span class="toggle-label-mini">Solo si lleva Armadura</span>
+                  </label>
+                </div>
               </div>
+
             </div>
           </div>
-        </div>
+        }
 
         <!-- RESOURCE POOL -->
-        <div class="mechanic-group-box">
-          <header class="mechanic-box-header">
-            <ion-icon name="flash-outline"></ion-icon>
-            <h4>Contador de Recursos</h4>
-          </header>
-          <div formGroupName="resourcePool" class="mechanic-details">
-            <div class="field-grid">
-              <div class="field-group">
-                <label class="field-label">Nombre del Recurso</label>
-                <ion-input formControlName="name" class="forge-input" placeholder="Puntos de Ki"></ion-input>
+        @if (hasResource) {
+          <div class="mechanic-group-box">
+            <header class="mechanic-box-header">
+              <ion-icon name="flash-outline"></ion-icon>
+              <h4>Contador de Recursos</h4>
+            </header>
+            <div formGroupName="resourcePool" class="mechanic-details">
+              <div class="field-grid">
+                <div class="field-group">
+                  <label class="field-label">Nombre del Recurso</label>
+                  <ion-input formControlName="name" class="forge-input" placeholder="Puntos de Ki"></ion-input>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Máximo (Nº o "level")</label>
+                  <ion-input formControlName="max" class="forge-input" placeholder="Ej: 5 o level"></ion-input>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Restauración</label>
+                  <select formControlName="reset" class="forge-select-native">
+                    <option value="SHORT_REST">Descanso Corto</option>
+                    <option value="LONG_REST">Descanso Largo</option>
+                    <option value="DAWN">Al Amanecer</option>
+                    <option value="NONE">Nunca (Manual)</option>
+                  </select>
+                </div>
               </div>
-              <div class="field-group">
-                <label class="field-label">Máximo (Nº o "level")</label>
-                <ion-input formControlName="max" class="forge-input" placeholder="Ej: 5 o level"></ion-input>
-              </div>
-              <div class="field-group">
-                <label class="field-label">Restauración</label>
-                <select formControlName="reset" class="forge-select-native">
-                  <option value="SHORT_REST">Descanso Corto</option>
-                  <option value="LONG_REST">Descanso Largo</option>
-                  <option value="DAWN">Al Amanecer</option>
-                  <option value="NONE">Nunca (Manual)</option>
-                </select>
-              </div>
+              <p class="field-hint-mini">Usa "level" o "PB" (Bono Competencia) en Máximo para escalado dinámico.</p>
             </div>
-            <p class="field-hint-mini">Usa "level" o "PB" (Bono Competencia) en Máximo para escalado dinámico.</p>
           </div>
-        </div>
+        }
       </div>
     </div>
   `,
@@ -106,7 +165,28 @@ import { shieldOutline, addOutline, flashOutline } from 'ionicons/icons';
     .mechanics-container {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
+    }
+    .mechanics-toggles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 16px;
+      padding: 10px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+    }
+    .sub-section-title {
+      font-size: 0.75rem;
+      color: #C5A059;
+      text-transform: uppercase;
+      margin-top: 0;
+      margin-bottom: 12px;
+    }
+    .divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.05);
+      margin: 16px 0;
     }
     .mechanic-group-box {
       background: rgba(255, 255, 255, 0.02);
@@ -131,6 +211,14 @@ import { shieldOutline, addOutline, flashOutline } from 'ionicons/icons';
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 16px;
+    }
+    .stat-mod-grid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+    @media (max-width: 600px) {
+      .stat-mod-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
     }
     .stat-chips {
       display: flex;
@@ -222,34 +310,68 @@ export class FeatureMechanicsComponent implements OnInit {
   
   abilities = ABILITIES;
 
+  hasStats = false;
+  hasDefense = false;
+  hasResource = false;
+
   constructor(private fb: FormBuilder) {
-    addIcons({ shieldOutline, addOutline, flashOutline });
+    addIcons({ shieldOutline, addOutline, flashOutline, trendingUpOutline });
   }
 
   ngOnInit() {
-    const props = this.parentForm.get('properties') as FormGroup;
-    if (!props) return;
+    let props = this.parentForm.get('properties') as FormGroup;
+    if (!props) {
+      this.parentForm.addControl('properties', this.fb.group({}));
+      props = this.parentForm.get('properties') as FormGroup;
+    }
 
-    // Ensure all sub-groups exist for the UI to bind correctly
-    if (!props.get('acCalculation')) {
+    // Check existing values to set toggles
+    this.hasStats = !!props.get('statModifiers');
+    this.hasDefense = !!props.get('acCalculation') || props.get('acBonus') !== null;
+    this.hasResource = !!props.get('resourcePool');
+  }
+
+  toggleStats(event: any) {
+    this.hasStats = event.target.checked;
+    const props = this.parentForm.get('properties') as FormGroup;
+    if (this.hasStats) {
+      props.addControl('statModifiers', this.fb.group({
+        str: [0], dex: [0], con: [0], int: [0], wis: [0], cha: [0]
+      }));
+    } else {
+      props.removeControl('statModifiers');
+    }
+  }
+
+  toggleDefense(event: any) {
+    this.hasDefense = event.target.checked;
+    const props = this.parentForm.get('properties') as FormGroup;
+    if (this.hasDefense) {
       props.addControl('acCalculation', this.fb.group({
         base: [10],
         stats: [[]],
         requiresNoArmor: [true]
       }));
-    }
-    if (props.get('acBonus') === null || props.get('acBonus') === undefined) {
       props.addControl('acBonus', this.fb.control(0));
-    }
-    if (props.get('acBonusArmorOnly') === null || props.get('acBonusArmorOnly') === undefined) {
       props.addControl('acBonusArmorOnly', this.fb.control(false));
+    } else {
+      props.removeControl('acCalculation');
+      props.removeControl('acBonus');
+      props.removeControl('acBonusArmorOnly');
     }
-    if (!props.get('resourcePool')) {
+  }
+
+  toggleResource(event: any) {
+    this.hasResource = event.target.checked;
+    const props = this.parentForm.get('properties') as FormGroup;
+    if (this.hasResource) {
       props.addControl('resourcePool', this.fb.group({
         name: [''],
         max: ['level'],
         reset: ['LONG_REST']
       }));
+    } else {
+      props.removeControl('resourcePool');
     }
   }
 

@@ -7,7 +7,8 @@ data class RaceTraitSummary(
     val name: String,
     val description: String,
     val levelRequired: Int = 1,
-    val options: Map<String, Any>? = null
+    val options: Map<String, Any>? = null,
+    val properties: Map<String, Any>? = null
 )
 
 data class DndRaceResponseDto(
@@ -16,12 +17,6 @@ data class DndRaceResponseDto(
     val price: BigDecimal,
     val description: String?,
     val size: String?,
-    val bonusStr: Int,
-    val bonusDex: Int,
-    val bonusCon: Int,
-    val bonusInt: Int,
-    val bonusWis: Int,
-    val bonusCha: Int,
     val raceFeatures: Map<String, Any>,
     val traits: List<RaceTraitSummary>
 )

@@ -9,7 +9,7 @@ import {
 import { ApiService, CharacterSummary } from '../../services/api';
 import { AuthService } from '../../services/auth.service';
 import { addIcons } from 'ionicons';
-import { trashOutline } from 'ionicons/icons';
+import { trashOutline, addOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-my-characters',
@@ -38,7 +38,7 @@ export class MyCharactersPage implements OnInit {
     private alertController: AlertController,
     private toastController: ToastController
   ) {
-    addIcons({ 'trash-outline': trashOutline });
+    addIcons({ 'trash-outline': trashOutline, 'add-outline': addOutline });
   }
 
   ngOnInit(): void {

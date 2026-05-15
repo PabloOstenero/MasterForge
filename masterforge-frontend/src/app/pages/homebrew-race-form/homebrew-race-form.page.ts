@@ -276,7 +276,6 @@ export class HomebrewRaceFormPage implements OnInit {
   readonly damageTypes = DAMAGE_TYPES;
   readonly conditions = CONDITIONS;
   readonly skillNames = SKILL_NAMES;
-  readonly abilityBonusKeys = ABILITY_BONUS_KEYS;
   readonly creatureTypes = CREATURE_TYPES;
   readonly dieTypes = DIE_TYPES;
   readonly naturalWeaponDamageTypes = NATURAL_WEAPON_DAMAGE_TYPES;
@@ -291,15 +290,6 @@ export class HomebrewRaceFormPage implements OnInit {
   availableSpells: any[] = [];
   spellSearchQueries: Record<number, string> = {};
   spellDropdownOpen: Record<number, boolean> = {};
-
-  readonly abilityBonusLabels: Record<string, string> = {
-    bonusStr: 'FUE',
-    bonusDex: 'DES',
-    bonusCon: 'CON',
-    bonusInt: 'INT',
-    bonusWis: 'SAB',
-    bonusCha: 'CAR',
-  };
 
   constructor(
     private fb: FormBuilder,
@@ -322,15 +312,6 @@ export class HomebrewRaceFormPage implements OnInit {
   // ---------------------------------------------------------------------------
 
   ngOnInit(): void {
-    // Build ability score bonus controls — optional, clamped to [-10, 10]
-    const abilityBonusControls = ABILITY_BONUS_KEYS.reduce(
-      (acc, key) => ({
-        ...acc,
-        [key]: [0, [Validators.min(-10), Validators.max(10)]],
-      }),
-      {} as Record<string, any>,
-    );
-
     // Build skills FormGroup — one entry per skill
     const skillsGroup = SKILL_NAMES.reduce((acc, skill) => ({
       ...acc,
@@ -343,9 +324,6 @@ export class HomebrewRaceFormPage implements OnInit {
       description: [''],
       size:        ['', Validators.required],
       price:       [null, Validators.min(0)],
-
-      // Ability score bonuses
-      ...abilityBonusControls,
 
       // Speed (nested FormGroup)
       speeds: this.fb.group({
@@ -416,6 +394,16 @@ export class HomebrewRaceFormPage implements OnInit {
       next: (spells) => { this.availableSpells = spells.sort((a, b) => a.name.localeCompare(b.name)); },
       error: () => { /* non-critical, fall back to free text */ },
     });
+
+    if (!id) {
+      this.addTrait();
+      const firstTrait = this.traits.at(0);
+      firstTrait.patchValue({
+        name: 'Mejora de Puntuación de Característica',
+        description: 'Aumenta tus puntuaciones de característica según tu elección.'
+      });
+      // You can manually add a STAT_MODIFIER effect to guide them, but they can use the builder.
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -433,12 +421,6 @@ export class HomebrewRaceFormPage implements OnInit {
           description: race.description ?? '',
           size:        race.size ?? '',
           price:       race.price ?? null,
-          bonusStr:    race.bonusStr ?? 0,
-          bonusDex:    race.bonusDex ?? 0,
-          bonusCon:    race.bonusCon ?? 0,
-          bonusInt:    race.bonusInt ?? 0,
-          bonusWis:    race.bonusWis ?? 0,
-          bonusCha:    race.bonusCha ?? 0,
           extraLanguageChoices: rf.extraLanguageChoices ?? null,
           skillChoiceCount:     rf.skillProficiencies?.choiceCount ?? null,
         });
@@ -549,8 +531,9 @@ export class HomebrewRaceFormPage implements OnInit {
             if (t.properties) {
               const props = t.properties;
               const propsGroup = traitGroup.get('properties') as FormGroup;
+              if (props.statModifiers) propsGroup.addControl('statModifiers', this.fb.group(props.statModifiers));
               if (props.acCalculation) propsGroup.addControl('acCalculation', this.fb.group(props.acCalculation));
-              if (props.acBonus !== undefined) {
+              if (props.acBonus !== undefined && props.acBonus !== null) {
                 propsGroup.addControl('acBonus', this.fb.control(props.acBonus));
                 propsGroup.addControl('acBonusArmorOnly', this.fb.control(props.acBonusArmorOnly ?? false));
               }
@@ -787,16 +770,8 @@ export class HomebrewRaceFormPage implements OnInit {
       const options = fg.get('options')?.value;
       const progression = fg.get('progression')?.value;
       const choiceCount = fg.get('choiceCount')?.value;
-      const propertiesValue = fg.get('properties')?.value;
+      const propertiesValue = fg.get('properties')?.value || {};
       
-      const cleanProps: any = {};
-      if (propertiesValue.acCalculation) cleanProps.acCalculation = propertiesValue.acCalculation;
-      if (propertiesValue.acBonus !== undefined && propertiesValue.acBonus !== null) {
-        cleanProps.acBonus = propertiesValue.acBonus;
-        cleanProps.acBonusArmorOnly = propertiesValue.acBonusArmorOnly;
-      }
-      if (propertiesValue.resourcePool) cleanProps.resourcePool = propertiesValue.resourcePool;
-
       return {
         id:          fg.get('id')?.value as number | null,
         name:        fg.get('name')?.value as string,
@@ -814,7 +789,7 @@ export class HomebrewRaceFormPage implements OnInit {
             additionalChoices: p.additionalChoices
           }))
         } : null,
-        properties: Object.keys(cleanProps).length > 0 ? cleanProps : null
+        properties: Object.keys(propertiesValue).length > 0 ? propertiesValue : null
       };
     });
 

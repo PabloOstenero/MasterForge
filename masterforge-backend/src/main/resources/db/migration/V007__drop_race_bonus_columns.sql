@@ -1,0 +1,6 @@
+ALTER TABLE dnd_races DROP COLUMN IF EXISTS bonus_str;
+ALTER TABLE dnd_races DROP COLUMN IF EXISTS bonus_dex;
+ALTER TABLE dnd_races DROP COLUMN IF EXISTS bonus_con;
+ALTER TABLE dnd_races DROP COLUMN IF EXISTS bonus_int;
+ALTER TABLE dnd_races DROP COLUMN IF EXISTS bonus_wis;
+ALTER TABLE dnd_races DROP COLUMN IF EXISTS bonus_cha;

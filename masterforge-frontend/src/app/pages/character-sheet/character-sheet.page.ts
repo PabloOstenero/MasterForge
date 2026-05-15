@@ -10,7 +10,7 @@ import {
 } from '@ionic/angular/standalone';
 import { ApiService } from '../../services/api';
 import { addIcons } from 'ionicons';
-import { statsChart, sparkles, shield, briefcase, trash, add, addCircleOutline, checkmarkCircle, trashOutline, syncOutline, book, bookOutline, settingsOutline, trendingUpOutline, removeCircleOutline, refreshOutline, sparklesOutline, flaskOutline, hammerOutline, flashOutline } from 'ionicons/icons';
+import { statsChart, sparkles, shield, briefcase, trash, add, addCircleOutline, checkmarkCircle, trashOutline, syncOutline, book, bookOutline, settingsOutline, trendingUpOutline, removeCircleOutline, refreshOutline, sparklesOutline, flaskOutline, hammerOutline, flashOutline, addOutline } from 'ionicons/icons';
 import { FeatureChoicePickerComponent } from '../../components/feature-choice-picker/feature-choice-picker.component';
 import { getProficiencyBonus, getModifier, calculatePassive, calculateMulticlassHp } from '../../utils/dnd-utils';
 
@@ -160,6 +160,7 @@ export class CharacterSheetPage implements OnInit {
       'briefcase': briefcase,
       'trash': trash,
       'add': add,
+      'add-outline': addOutline,
       'add-circle-outline': addCircleOutline,
       'trash-outline': trashOutline,
       'sync-outline': syncOutline,
@@ -209,14 +210,28 @@ export class CharacterSheetPage implements OnInit {
   // Helper: Calculate effective stats and values considering item bonuses/overrides
   private calculateEffectiveValues(data: any): any {
     const stats = {
-      str: (data.baseStr || 10) + (data.dndRace?.bonusStr || 0),
-      dex: (data.baseDex || 10) + (data.dndRace?.bonusDex || 0),
-      con: (data.baseCon || 10) + (data.dndRace?.bonusCon || 0),
-      int: (data.baseInt || 10) + (data.dndRace?.bonusInt || 0),
-      wis: (data.baseWis || 10) + (data.dndRace?.bonusWis || 0),
-      cha: (data.baseCha || 10) + (data.dndRace?.bonusCha || 0)
+      str: data.baseStr || 10,
+      dex: data.baseDex || 10,
+      con: data.baseCon || 10,
+      int: data.baseInt || 10,
+      wis: data.baseWis || 10,
+      cha: data.baseCha || 10
     };
     let itemBonusMaxHp = 0;
+
+    // Apply Feature-based Stat Modifiers
+    const allFeatures = this.getAllCharacterFeatures(data);
+    allFeatures.forEach(f => {
+      const sm = f.properties?.statModifiers;
+      if (sm) {
+        if (typeof sm.str === 'number') stats.str += sm.str;
+        if (typeof sm.dex === 'number') stats.dex += sm.dex;
+        if (typeof sm.con === 'number') stats.con += sm.con;
+        if (typeof sm.int === 'number') stats.int += sm.int;
+        if (typeof sm.wis === 'number') stats.wis += sm.wis;
+        if (typeof sm.cha === 'number') stats.cha += sm.cha;
+      }
+    });
     
     const equipped = (data.inventory || []).filter((s: any) => s.equipped);
 
@@ -287,8 +302,8 @@ export class CharacterSheetPage implements OnInit {
         const conMod = getModifier(effectiveStats.con);
 
         // Retroactive HP from CON items (D&D 5e Rule: Mod change * level)
-        const baseConWithRace = (data.baseCon || 10) + (data.dndRace?.bonusCon || 0);
-        const baseConMod = getModifier(baseConWithRace);
+        const baseCon = data.baseCon || 10;
+        const baseConMod = getModifier(baseCon);
         const conDiff = conMod - baseConMod;
         const retroactiveConHp = conDiff * (data.level || 1);
 
@@ -347,12 +362,12 @@ export class CharacterSheetPage implements OnInit {
           deathSaves: { success: 0, failure: 0 },
           stats: effectiveStats,
           baseStats: {
-            str: (data.baseStr || 10) + (data.dndRace?.bonusStr || 0),
-            dex: (data.baseDex || 10) + (data.dndRace?.bonusDex || 0),
-            con: (data.baseCon || 10) + (data.dndRace?.bonusCon || 0),
-            int: (data.baseInt || 10) + (data.dndRace?.bonusInt || 0),
-            wis: (data.baseWis || 10) + (data.dndRace?.bonusWis || 0),
-            cha: (data.baseCha || 10) + (data.dndRace?.bonusCha || 0)
+            str: data.baseStr || 10,
+            dex: data.baseDex || 10,
+            con: data.baseCon || 10,
+            int: data.baseInt || 10,
+            wis: data.baseWis || 10,
+            cha: data.baseCha || 10
           },
           hitDiceSpent: data.hitDiceSpent || 0,
           resourceCounters: data.resourceCounters || {},

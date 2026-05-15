@@ -41,12 +41,6 @@ class DndRaceController(
         val dndRace = DndRace(
             name = dto.name,
             price = dto.price,
-            bonusStr = dto.bonusStr,
-            bonusDex = dto.bonusDex,
-            bonusCon = dto.bonusCon,
-            bonusInt = dto.bonusInt,
-            bonusWis = dto.bonusWis,
-            bonusCha = dto.bonusCha,
             raceFeatures = dto.raceFeatures ?: emptyMap(),
             size = dto.size,
             description = dto.description,
@@ -66,7 +60,8 @@ class DndRaceController(
                     name = trait.name,
                     description = trait.description,
                     levelRequired = trait.levelRequired,
-                    options = trait.options
+                    options = trait.options,
+                    properties = trait.properties
                 )
             }
             val responseDto = DndRaceResponseDto(
@@ -75,12 +70,6 @@ class DndRaceController(
                 price = race.price,
                 description = race.description,
                 size = race.size,
-                bonusStr = race.bonusStr,
-                bonusDex = race.bonusDex,
-                bonusCon = race.bonusCon,
-                bonusInt = race.bonusInt,
-                bonusWis = race.bonusWis,
-                bonusCha = race.bonusCha,
                 raceFeatures = race.raceFeatures ?: emptyMap(),
                 traits = traitSummaries
             )
@@ -105,12 +94,6 @@ class DndRaceController(
         val updatedRace = existingRace.copy(
             name = dto.name,
             price = dto.price,
-            bonusStr = dto.bonusStr,
-            bonusDex = dto.bonusDex,
-            bonusCon = dto.bonusCon,
-            bonusInt = dto.bonusInt,
-            bonusWis = dto.bonusWis,
-            bonusCha = dto.bonusCha,
             raceFeatures = dto.raceFeatures ?: emptyMap(),
             size = dto.size,
             description = dto.description,

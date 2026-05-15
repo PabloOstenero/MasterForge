@@ -717,18 +717,6 @@ export class HomebrewClassFormPage implements OnInit {
                 description: [p.description || '']
               }))),
               properties: this.fb.group({
-                acCalculation: this.fb.group({
-                  base: [f.properties?.acCalculation?.base ?? 10],
-                  stats: [f.properties?.acCalculation?.stats ?? []],
-                  requiresNoArmor: [f.properties?.acCalculation?.requiresNoArmor ?? false]
-                }),
-                acBonus: [f.properties?.acBonus ?? 0],
-                acBonusArmorOnly: [f.properties?.acBonusArmorOnly ?? false],
-                resourcePool: this.fb.group({
-                  name: [f.properties?.resourcePool?.name ?? ''],
-                  max: [f.properties?.resourcePool?.max ?? ''],
-                  reset: [f.properties?.resourcePool?.reset ?? 'LONG_REST']
-                }),
                 innateSpells: this.fb.array([]),
                 effects: this.fb.array((f.properties?.effects ?? []).map((e: any) => this.fb.group({
                   type: [e.type ?? 'STAT_MODIFIER'],
@@ -740,6 +728,17 @@ export class HomebrewClassFormPage implements OnInit {
                 })))
               })
             });
+
+            if (f.properties) {
+              const propsGroup = featureGroup.get('properties') as FormGroup;
+              if (f.properties.statModifiers) propsGroup.addControl('statModifiers', this.fb.group(f.properties.statModifiers));
+              if (f.properties.acCalculation) propsGroup.addControl('acCalculation', this.fb.group(f.properties.acCalculation));
+              if (f.properties.acBonus !== undefined && f.properties.acBonus !== null) {
+                propsGroup.addControl('acBonus', this.fb.control(f.properties.acBonus));
+                propsGroup.addControl('acBonusArmorOnly', this.fb.control(f.properties.acBonusArmorOnly ?? false));
+              }
+              if (f.properties.resourcePool) propsGroup.addControl('resourcePool', this.fb.group(f.properties.resourcePool));
+            }
 
 
             this.features.push(featureGroup);
@@ -1264,13 +1263,6 @@ export class HomebrewClassFormPage implements OnInit {
       const id = ctrl.get('id')?.value;
       if (id === null) {
         const propertiesValue = ctrl.get('properties')?.value || {};
-        const cleanProps: any = {};
-        if (propertiesValue.acCalculation) cleanProps.acCalculation = propertiesValue.acCalculation;
-        if (propertiesValue.acBonus !== undefined && propertiesValue.acBonus !== null) {
-          cleanProps.acBonus = propertiesValue.acBonus;
-          cleanProps.acBonusArmorOnly = propertiesValue.acBonusArmorOnly;
-        }
-        if (propertiesValue.resourcePool) cleanProps.resourcePool = propertiesValue.resourcePool;
 
         promises.push(
           this.homebrewService.createClassFeature({
@@ -1282,7 +1274,7 @@ export class HomebrewClassFormPage implements OnInit {
             options: ctrl.get('hasOptions')?.value ? ctrl.get('options')?.value : null,
             progression: ctrl.get('progression')?.value || [],
             properties: {
-              ...cleanProps,
+              ...propertiesValue,
               effects: propertiesValue.effects || []
             }
           }).toPromise(),
@@ -1307,15 +1299,8 @@ export class HomebrewClassFormPage implements OnInit {
           : null;
 
         const propertiesValue = currentFormFeature?.get('properties')?.value || {};
-        const cleanProps: any = {};
-        if (propertiesValue.acCalculation) cleanProps.acCalculation = propertiesValue.acCalculation;
-        if (propertiesValue.acBonus !== undefined && propertiesValue.acBonus !== null) {
-          cleanProps.acBonus = propertiesValue.acBonus;
-          cleanProps.acBonusArmorOnly = propertiesValue.acBonusArmorOnly;
-        }
-        if (propertiesValue.resourcePool) cleanProps.resourcePool = propertiesValue.resourcePool;
         const properties = {
-          ...cleanProps,
+          ...propertiesValue,
           effects: propertiesValue.effects || []
         };
 

@@ -71,6 +71,14 @@ export interface FeatureEntry {
   options?: FeatureOptionPool;
   progression?: FeatureProgression[];
   properties?: {
+    statModifiers?: {
+      str?: number;
+      dex?: number;
+      con?: number;
+      int?: number;
+      wis?: number;
+      cha?: number;
+    };
     acCalculation?: {
       base: number;
       stats: string[];
