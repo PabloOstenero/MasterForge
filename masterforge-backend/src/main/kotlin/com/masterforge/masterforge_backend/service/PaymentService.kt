@@ -51,6 +51,34 @@ interface PaymentService {
     fun subscribeUser(userId: UUID, request: PaymentRequest): PaymentResult
 
     /**
+     * Top up a user's internal balance using a simulated external payment.
+     *
+     * @param userId the user to top up
+     * @param request payment details including amount
+     * @return result indicating success or failure
+     */
+    fun topUpBalance(userId: UUID, request: PaymentRequest): PaymentResult
+
+    /**
+     * Process an internal currency transfer between two users.
+     * Used for campaign joins and homebrew purchases.
+     *
+     * @param fromUserId user who is paying
+     * @param toUserId user who is receiving funds (e.g. DM or Creator)
+     * @param amount the amount to transfer
+     * @param type the type of transaction (e.g. "CAMPAIGN_JOIN", "HOMEBREW_PURCHASE")
+     * @param campaignId optional reference to a campaign
+     * @return result indicating success or failure (e.g. insufficient funds)
+     */
+    fun processInternalTransfer(
+        fromUserId: UUID, 
+        toUserId: UUID, 
+        amount: java.math.BigDecimal, 
+        type: String, 
+        campaignId: UUID? = null
+    ): PaymentResult
+
+    /**
      * Retrieve the full payment transaction history for a user.
      *
      * @param userId the user whose history to retrieve

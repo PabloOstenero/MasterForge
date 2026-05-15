@@ -46,7 +46,8 @@ import {
   textOutline,
   starOutline,
   calendarOutline,
-  diamondOutline
+  diamondOutline,
+  addCircleOutline
 } from 'ionicons/icons';
 import * as QRCode from 'qrcode';
 
@@ -127,7 +128,8 @@ export class ConfigPage implements OnInit {
       textOutline,
       starOutline,
       calendarOutline,
-      diamondOutline
+      diamondOutline,
+      addCircleOutline
     });
 
     this.userForm = this.fb.group({
@@ -424,10 +426,55 @@ export class ConfigPage implements OnInit {
     };
   }
 
+  async onTopUpClick() {
+    const alert = await this.alertCtrl.create({
+      header: 'Cargar Tesorería',
+      message: '¿Cuánto oro quieres añadir a tu bolsa?',
+      cssClass: 'custom-alert',
+      inputs: [
+        {
+          name: 'amount',
+          type: 'number',
+          placeholder: 'Cantidad (e.g. 15.00)',
+          min: 1,
+          value: 10.00
+        }
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Continuar',
+          handler: (data) => {
+            const amount = parseFloat(data.amount);
+            if (!amount || amount <= 0) {
+              this.showToast('Por favor, introduce una cantidad válida.', 'warning');
+              return false;
+            }
+
+            this.paymentItem = {
+              id: 'balance-topup',
+              name: 'Cargar Tesorería',
+              joinPrice: amount,
+              description: `Añade ${amount}€ a tu bolsa para adquirir contenidos y campañas.`
+            };
+            return true;
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
   onPaymentSubmit(paymentData: PaymentData) {
     if (!this.paymentItem) return;
 
-    this.paymentService.subscribe(paymentData).subscribe({
+    const isTopUp = this.paymentItem.id === 'balance-topup';
+    const request$ = isTopUp 
+      ? this.paymentService.topUp(paymentData)
+      : this.paymentService.subscribe(paymentData);
+
+    request$.subscribe({
       next: (enrollmentResult) => {
         const result: PaymentResult = {
           success: enrollmentResult.success,
@@ -436,7 +483,8 @@ export class ConfigPage implements OnInit {
         };
         this.paymentProcessor?.notifyResult(result);
         if (result.success) {
-          this.showToast('¡Suscripción PRO activada correctamente!', 'success');
+          const successMsg = isTopUp ? '¡Fondos añadidos correctamente!' : '¡Suscripción PRO activada correctamente!';
+          this.showToast(successMsg, 'success');
           
           this.authService.getMe().subscribe((user) => {
             this.currentUser = user;
@@ -447,7 +495,7 @@ export class ConfigPage implements OnInit {
       error: (err: any) => {
         const result: PaymentResult = {
           success: false,
-          errorMessage: err.message ?? 'Error al procesar la suscripción. Por favor, inténtalo de nuevo.',
+          errorMessage: err.message ?? 'Error al procesar la operación. Por favor, inténtalo de nuevo.',
         };
         this.paymentProcessor?.notifyResult(result);
       }

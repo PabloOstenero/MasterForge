@@ -26,10 +26,21 @@ class SchemaFixConfig {
                 jdbcTemplate.execute("ALTER TABLE payment_transactions ALTER COLUMN campaign_id DROP NOT NULL")
                 
                 // Drop enum check constraint to allow new scenarios (EXPIRED_SUBSCRIPTION)
-                // Hibernate won't update this automatically when we add enum values.
                 jdbcTemplate.execute("ALTER TABLE payment_transactions DROP CONSTRAINT IF EXISTS payment_transactions_simulation_scenario_check")
+
+                // Fix for is_credit column in case auto-update fails on existing data
+                jdbcTemplate.execute("""
+                    DO $$ 
+                    BEGIN 
+                        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='payment_transactions' AND column_name='is_credit') THEN
+                            ALTER TABLE payment_transactions ADD COLUMN is_credit BOOLEAN DEFAULT FALSE;
+                        END IF;
+                        UPDATE payment_transactions SET is_credit = FALSE WHERE is_credit IS NULL;
+                        ALTER TABLE payment_transactions ALTER COLUMN is_credit SET NOT NULL;
+                    END $$;
+                """.trimIndent())
                 
-                logger.info("Successfully adjusted payment_transactions schema for subscriptions and test scenarios.")
+                logger.info("Successfully adjusted payment_transactions schema for subscriptions, scenarios and is_credit logic.")
             } catch (e: Exception) {
                 // If the table doesn't exist yet or the column is already nullable, this might fail.
                 // We log it as a warning but don't stop the application.

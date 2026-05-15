@@ -13,6 +13,8 @@ import { eye, close, skull, heart, shield, flash, star, informationCircle } from
 
 import { HomebrewService, HomebrewSummary, HomebrewItem, ContentType } from '../../services/homebrew.service';
 import { AuthService } from '../../services/auth.service';
+import { NotificationService } from '../../services/notification.service';
+import { ToastNotificationComponent } from '../search-campaigns/components/toast-notification/toast-notification.component';
 import { getModifier } from '../../utils/dnd-utils';
 
 @Component({
@@ -25,7 +27,8 @@ import { getModifier } from '../../utils/dnd-utils';
     IonSegment, IonSegmentButton, IonModal, IonHeader,
     IonToolbar, IonTitle, IonContent, IonButtons, IonIcon,
     IonBadge, IonNote, IonGrid, IonRow, IonCol, IonFooter,
-    CommonModule, FormsModule, RouterLink
+    CommonModule, FormsModule, RouterLink,
+    ToastNotificationComponent
   ]
 })
 export class HomebrewPage implements OnInit {
@@ -62,7 +65,8 @@ export class HomebrewPage implements OnInit {
   constructor(
     private homebrewService: HomebrewService,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private notificationService: NotificationService
   ) {
     addIcons({ eye, close, skull, heart, shield, flash, star, 'information-circle': informationCircle });
   }
@@ -118,15 +122,26 @@ export class HomebrewPage implements OnInit {
   }
 
   purchaseItem(item: HomebrewItem): void {
+    if (item.price > (this.currentUser?.balance || 0)) {
+      this.notificationService.showError(`Saldo insuficiente. El item cuesta ${item.price}€ y tienes ${this.currentUser?.balance || 0}€`);
+      return;
+    }
+
+    const confirmPurchase = window.confirm(`¿Quieres adquirir "${item.name}" por ${item.price}€?`);
+    if (!confirmPurchase) return;
+
     this.purchasingId = item.id;
+    this.error = null;
     this.homebrewService.purchaseItem(item.contentType, item.id).subscribe({
       next: () => {
         item.isOwned = true;
         this.purchasingId = null;
+        this.notificationService.showSuccess(`¡"${item.name}" adquirido correctamente!`);
+        this.authService.getMe().subscribe(user => this.currentUser = user);
       },
       error: (err) => {
         console.error('Error al adquirir item', err);
-        this.error = 'Error al adquirir el item';
+        this.notificationService.showError(err?.error?.message ?? 'Error al adquirir el item');
         this.purchasingId = null;
       }
     });

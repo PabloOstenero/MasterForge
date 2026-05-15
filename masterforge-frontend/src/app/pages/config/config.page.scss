@@ -286,6 +286,15 @@
   font-weight: 700;
 }
 
+.top-up-btn {
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  --padding-start: 8px;
+  --padding-end: 8px;
+}
+
 .social-connections {
   display: flex;
   flex-direction: column;

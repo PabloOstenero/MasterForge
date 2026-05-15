@@ -228,13 +228,31 @@ export class SearchCampaignsPage implements OnInit, OnDestroy {
    * Called by CampaignListComponent when user clicks join on a campaign.
    * Req 4.2: For paid campaigns, initiates the payment process via PaymentProcessorComponent.
    */
-  onJoinCampaign(campaignId: string): void {
+  async onJoinCampaign(campaignId: string) {
     const campaign = this.campaigns.find((c) => c.id === campaignId);
     if (!campaign) return;
 
     if (campaign.joinPrice > 0) {
-      // Paid campaign — open the PaymentProcessorComponent (Req 4.2)
-      this.paymentCampaign = campaign;
+      const currentUser = this.authService.getCurrentUser();
+      const balance = currentUser?.balance || 0;
+
+      if (campaign.joinPrice > balance) {
+        this.notificationService.showError(`Saldo insuficiente. La campaña cuesta ${campaign.joinPrice}€ y tienes ${balance}€`);
+        return;
+      }
+
+      // If user has enough balance, ask for confirmation instead of card details
+      const confirmJoin = window.confirm(`¿Quieres unirte a "${campaign.name}" usando ${campaign.joinPrice}€ de tu tesorería?`);
+      if (confirmJoin) {
+        this.loading = true;
+        // Use a dummy PaymentData for internal balance transfer
+        const dummyPayment: PaymentData = {
+          campaignId: campaign.id,
+          amount: campaign.joinPrice,
+          cardData: { cardNumber: '', expiryDate: '', cvv: '', cardholderName: '' }
+        };
+        this.onPaymentSubmit(dummyPayment);
+      }
     } else {
       // Free campaign
       this.campaignSearchService.joinFreeCampaign(campaignId)
@@ -242,6 +260,7 @@ export class SearchCampaignsPage implements OnInit, OnDestroy {
         .subscribe({
           next: () => {
             this.notificationService.showSuccess('¡Te has unido a la campaña exitosamente!');
+            this.authService.getMe().subscribe(); // Refresh balance
             this.refreshCurrentPage();
           },
           error: (err) => {
@@ -258,32 +277,47 @@ export class SearchCampaignsPage implements OnInit, OnDestroy {
    * Req 4.2, 5.4, 5.5
    */
   onPaymentSubmit(paymentData: PaymentData): void {
-    if (!this.paymentCampaign) return;
+    if (this.paymentCampaign) {
+      this.campaignSearchService.joinPaidCampaign(this.paymentCampaign.id, paymentData)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (enrollmentResult) => {
+            const result: PaymentResult = {
+              success: enrollmentResult.success,
+              errorMessage: enrollmentResult.success ? undefined : enrollmentResult.message,
+              enrollmentConfirmed: enrollmentResult.success,
+            };
+            
+            if (this.paymentProcessor) {
+              this.paymentProcessor.notifyResult(result);
+            }
 
-    this.campaignSearchService.joinPaidCampaign(this.paymentCampaign.id, paymentData)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (enrollmentResult) => {
-          const result: PaymentResult = {
-            success: enrollmentResult.success,
-            errorMessage: enrollmentResult.success ? undefined : enrollmentResult.message,
-            enrollmentConfirmed: enrollmentResult.success,
-          };
-          this.paymentProcessor?.notifyResult(result);
-          if (result.success) {
-            this.notificationService.showSuccess('¡Pago procesado y campaña unida exitosamente!');
-            this.paymentCampaign = null;
-            this.refreshCurrentPage();
-          }
-        },
-        error: (err: Error) => {
-          const result: PaymentResult = {
-            success: false,
-            errorMessage: err.message ?? 'Error al procesar el pago. Por favor, inténtalo de nuevo.',
-          };
-          this.paymentProcessor?.notifyResult(result);
-        },
-      });
+            if (result.success) {
+              this.notificationService.showSuccess('¡Pago procesado y campaña unida exitosamente!');
+              this.paymentCampaign = null;
+              this.authService.getMe().subscribe(); // Refresh balance
+              this.refreshCurrentPage();
+            } else if (!this.paymentProcessor) {
+              // If we don't have a modal, show error as toast
+              this.notificationService.showError(result.errorMessage || 'Error al procesar el pago');
+              this.loading = false;
+            }
+          },
+          error: (err: any) => {
+            const errorMsg = err.error?.message ?? err.message ?? 'Error al procesar el pago';
+            if (this.paymentProcessor) {
+              const result: PaymentResult = {
+                success: false,
+                errorMessage: errorMsg,
+              };
+              this.paymentProcessor.notifyResult(result);
+            } else {
+              this.notificationService.showError(errorMsg);
+              this.loading = false;
+            }
+          },
+        });
+    }
   }
 
   /**

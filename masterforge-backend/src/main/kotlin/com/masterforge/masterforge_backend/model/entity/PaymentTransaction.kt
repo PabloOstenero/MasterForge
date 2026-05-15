@@ -53,6 +53,12 @@ class PaymentTransaction(
     @Column(name = "simulation_scenario")
     val simulationScenario: PaymentScenario? = null,
     
+    @Column(name = "related_user_id", nullable = true)
+    val relatedUserId: UUID? = null,
+    
+    @Column(name = "is_credit", nullable = false, columnDefinition = "boolean default false")
+    val isCredit: Boolean = false,
+
     @Column(name = "academic_disclaimer", nullable = false)
     val academicDisclaimer: String = "MOCK_TRANSACTION_FOR_ACADEMIC_PURPOSES_ONLY"
 )

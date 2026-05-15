@@ -228,7 +228,7 @@ class EnrollmentService(
         userId: UUID,
         paymentRequest: PaymentRequest
     ): EnrollmentResultDto {
-        // Step 1: eligibility check — no payment attempted if not eligible
+        // Step 1: eligibility check
         val eligibility = checkEligibility(campaignId, userId)
         if (!eligibility.eligible) {
             return EnrollmentResultDto(
@@ -238,40 +238,31 @@ class EnrollmentService(
             )
         }
 
-        // Step 2: process mock payment
-        // The payment transaction is saved in its own nested context so it is NOT
-        // rolled back even if the enrollment step fails (audit requirement, Req 5.6).
-        val paymentResult = processPaymentInNewTransaction(paymentRequest)
+        val campaign = campaignRepository.findById(campaignId).orElseThrow()
+        val dmId = campaign.owner.id!!
+
+        // Step 2: Process internal transfer from Player to DM
+        // Requirements: 5.4, 5.5, Economy Fix
+        val paymentResult = paymentService.processInternalTransfer(
+            fromUserId = userId,
+            toUserId = dmId,
+            amount = campaign.joinPrice,
+            type = "CAMPAIGN_JOIN",
+            campaignId = campaignId
+        )
 
         // Step 3: handle payment outcome
         if (!paymentResult.success) {
             return EnrollmentResultDto(
                 success = false,
-                message = paymentResult.errorMessage
-                    ?: "Payment failed: please try again",
+                message = paymentResult.errorMessage ?: "Payment failed: please try again",
                 campaignId = campaignId
             )
         }
 
-        // Step 4: enroll the user — this is part of the outer transaction
-        val transactionId = paymentResult.transactionId
-            ?: return EnrollmentResultDto(
-                success = false,
-                message = "Payment succeeded but transaction ID was missing",
-                campaignId = campaignId
-            )
-
+        // Step 4: enroll the user
+        val transactionId = paymentResult.transactionId!!
         return enrollInPaidCampaign(campaignId, userId, transactionId)
     }
 
-    /**
-     * Delegates payment processing to [PaymentService] in a new transaction so that
-     * the payment audit record is persisted independently of the enrollment transaction.
-     *
-     * ACADEMIC DISCLAIMER: This is a mock payment system for educational purposes only.
-     */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun processPaymentInNewTransaction(
-        paymentRequest: PaymentRequest
-    ) = paymentService.processPayment(paymentRequest)
 }

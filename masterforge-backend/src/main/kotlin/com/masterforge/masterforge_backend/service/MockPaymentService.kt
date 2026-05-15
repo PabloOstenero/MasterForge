@@ -51,6 +51,103 @@ class MockPaymentService(
     }
 
     @Transactional
+    override fun topUpBalance(userId: UUID, request: PaymentRequest): PaymentResult {
+        val amount = request.resolvedAmount()
+        if (amount <= BigDecimal.ZERO) {
+            return PaymentResult(
+                success = false,
+                transactionId = null,
+                errorMessage = "Invalid top-up amount. Must be greater than zero.",
+                scenario = PaymentScenario.SUCCESS
+            )
+        }
+        
+        val scenario = request.simulationScenario ?: PaymentScenario.SUCCESS
+        val result = doSimulate(
+            campaignId = null,
+            userId = userId,
+            amount = amount,
+            mockCardLastFour = request.resolvedCardLastFour(),
+            scenario = scenario,
+            transactionType = "BALANCE_TOPUP"
+        )
+
+        if (result.success) {
+            val user = userRepository.findById(userId).orElseThrow()
+            user.balance = user.balance.add(request.resolvedAmount())
+            userRepository.saveAndFlush(user)
+        }
+
+        return result
+    }
+
+    @Transactional
+    override fun processInternalTransfer(
+        fromUserId: UUID,
+        toUserId: UUID,
+        amount: BigDecimal,
+        type: String,
+        campaignId: UUID?
+    ): PaymentResult {
+        val fromUser = userRepository.findById(fromUserId).orElseThrow()
+        val toUser = userRepository.findById(toUserId).orElseThrow()
+
+        // Check sufficient funds
+        if (fromUser.balance < amount) {
+            return PaymentResult(
+                success = false,
+                transactionId = null,
+                errorMessage = "Insufficient funds. Required: $amount, Available: ${fromUser.balance}",
+                scenario = PaymentScenario.SUCCESS // Normal flow, just no funds
+            )
+        }
+
+        // Perform transfer
+        fromUser.balance = fromUser.balance.subtract(amount)
+        toUser.balance = toUser.balance.add(amount)
+
+        userRepository.saveAndFlush(fromUser)
+        userRepository.saveAndFlush(toUser)
+
+        // Log transaction for the payer (DEBIT)
+        paymentTransactionRepository.save(
+            PaymentTransaction(
+                userId = fromUserId,
+                relatedUserId = toUserId,
+                campaignId = campaignId,
+                amount = amount,
+                status = PaymentStatus.COMPLETED,
+                transactionType = type,
+                isCredit = false,
+                processedAt = LocalDateTime.now(),
+                mockCardLastFour = "WALLET"
+            )
+        )
+
+        // Log transaction for the receiver (CREDIT)
+        val transaction = paymentTransactionRepository.save(
+            PaymentTransaction(
+                userId = toUserId,
+                relatedUserId = fromUserId,
+                campaignId = campaignId,
+                amount = amount,
+                status = PaymentStatus.COMPLETED,
+                transactionType = type,
+                isCredit = true,
+                processedAt = LocalDateTime.now(),
+                mockCardLastFour = "WALLET"
+            )
+        )
+
+        return PaymentResult(
+            success = true,
+            transactionId = transaction.id,
+            errorMessage = null,
+            scenario = PaymentScenario.SUCCESS
+        )
+    }
+
+    @Transactional
     override fun subscribeUser(userId: UUID, request: PaymentRequest): PaymentResult {
         val scenario = request.simulationScenario ?: PaymentScenario.SUCCESS
         val result = doSimulate(
@@ -158,7 +255,8 @@ class MockPaymentService(
                 transactionType = transactionType,
                 processedAt = LocalDateTime.now(),
                 mockCardLastFour = mockCardLastFour,
-                simulationScenario = scenario
+                simulationScenario = scenario,
+                isCredit = (transactionType == "BALANCE_TOPUP" && status == PaymentStatus.COMPLETED)
             )
         )
 

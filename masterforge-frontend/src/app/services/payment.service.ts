@@ -136,6 +136,33 @@ export class PaymentService {
   }
 
   /**
+   * Top up the user's internal balance using a mock payment.
+   *
+   * ⚠️  ACADEMIC DISCLAIMER: This is a simulated payment — no real money
+   * is charged. The payment gateway is mocked for academic demonstration.
+   */
+  topUp(paymentData: PaymentData): Observable<PaymentResult> {
+    const requestBody: ProcessPaymentRequest = {
+      campaignId: paymentData.campaignId,
+      amount: paymentData.amount,
+      mockCardData: {
+        cardNumber: paymentData.cardData.cardNumber,
+        expiryDate: paymentData.cardData.expiryDate,
+        cvv: paymentData.cardData.cvv,
+        cardholderName: paymentData.cardData.cardholderName,
+      },
+      simulationScenario: paymentData.simulationScenario,
+    };
+
+    return this.http
+      .post<PaymentResult>(`${API_URL}/payments/top-up`, requestBody)
+      .pipe(
+        timeout(REQUEST_TIMEOUT_MS),
+        catchError((err) => this.handleError(err)),
+      );
+  }
+
+  /**
    * Simulates a specific payment scenario for testing and demonstration.
    *
    * Supported scenarios:

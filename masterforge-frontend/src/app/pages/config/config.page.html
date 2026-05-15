@@ -180,6 +180,9 @@
             <div class="balance-display">
               <span class="label">Tesorería:</span>
               <span class="value">{{ (currentUser?.balance | number:'1.2-2') }}€</span>
+              <button class="dnd-button ghost small top-up-btn" (click)="onTopUpClick()">
+                <ion-icon name="add-circle-outline"></ion-icon> Cargar
+              </button>
             </div>
             
             <button class="dnd-button gold" *ngIf="!isPro" (click)="upgradeToPro()">
@@ -271,7 +274,7 @@
       <div class="payment-modal-overlay" data-testid="payment-modal-overlay" (click)="onPaymentCancelled()">
         <div class="payment-modal" data-testid="payment-modal" (click)="$event.stopPropagation()">
           <div class="payment-modal__header">
-            <h2 class="payment-modal__title">Suscripción MasterForge Pro</h2>
+            <h2 class="payment-modal__title">{{ paymentItem.name }}</h2>
           </div>
           <app-payment-processor
             [item]="paymentItem"

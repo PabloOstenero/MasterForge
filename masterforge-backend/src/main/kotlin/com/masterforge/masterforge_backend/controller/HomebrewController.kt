@@ -5,8 +5,12 @@ import com.masterforge.masterforge_backend.model.dto.HomebrewItemDto
 import com.masterforge.masterforge_backend.model.dto.HomebrewSummaryDto
 import com.masterforge.masterforge_backend.model.entity.HomebrewCollection
 import com.masterforge.masterforge_backend.repository.*
+import com.masterforge.masterforge_backend.service.PaymentService
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
+import java.math.BigDecimal
 import java.util.UUID
 
 @RestController
@@ -18,7 +22,8 @@ class HomebrewController(
     private val monsterRepository: MonsterRepository,
     private val spellRepository: SpellRepository,
     private val itemRepository: ItemRepository,
-    private val homebrewCollectionRepository: HomebrewCollectionRepository
+    private val homebrewCollectionRepository: HomebrewCollectionRepository,
+    private val paymentService: PaymentService
 ) {
 
     @GetMapping("/my")
@@ -92,14 +97,41 @@ class HomebrewController(
             userId, request.contentType, request.contentId
         )
         
-        if (!alreadyOwned) {
-            val collection = HomebrewCollection(
-                userId = userId,
-                contentType = request.contentType,
-                contentId = request.contentId
-            )
-            homebrewCollectionRepository.save(collection)
+        if (alreadyOwned) return
+
+        // 1. Fetch item details (price and author)
+        val (price, authorId) = when (request.contentType) {
+            "CLASS" -> dndClassRepository.findById(request.contentId.toInt()).map { it.price to it.author?.id }.orElseThrow()
+            "SUBCLASS" -> dndSubclassRepository.findById(request.contentId.toInt()).map { it.price to it.author?.id }.orElseThrow()
+            "RACE" -> dndRaceRepository.findById(request.contentId.toInt()).map { it.price to it.author?.id }.orElseThrow()
+            "MONSTER" -> monsterRepository.findById(UUID.fromString(request.contentId)).map { it.price to it.author?.id }.orElseThrow()
+            "SPELL" -> spellRepository.findById(UUID.fromString(request.contentId)).map { it.price to it.author?.id }.orElseThrow()
+            "ITEM" -> itemRepository.findById(UUID.fromString(request.contentId)).map { it.price to it.author?.id }.orElseThrow()
+            else -> throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid content type")
         }
+
+        // 2. Process payment if there's a price and an author
+        if (price > BigDecimal.ZERO && authorId != null && authorId != userId) {
+            val result = paymentService.processInternalTransfer(
+                fromUserId = userId,
+                toUserId = authorId,
+                amount = price,
+                type = "HOMEBREW_PURCHASE",
+                campaignId = null
+            )
+            
+            if (!result.success) {
+                throw ResponseStatusException(HttpStatus.PAYMENT_REQUIRED, result.errorMessage)
+            }
+        }
+
+        // 3. Grant access
+        val collection = HomebrewCollection(
+            userId = userId,
+            contentType = request.contentType,
+            contentId = request.contentId
+        )
+        homebrewCollectionRepository.save(collection)
     }
 }
 

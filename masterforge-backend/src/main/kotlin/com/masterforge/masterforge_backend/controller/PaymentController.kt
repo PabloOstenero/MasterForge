@@ -79,6 +79,22 @@ class PaymentController(
     }
 
     /**
+     * Top up the user's internal balance using a mock payment.
+     * 
+     * POST /api/payments/top-up
+     */
+    @PostMapping("/top-up")
+    fun topUp(@RequestBody request: PaymentRequest): ResponseEntity<PaymentResult> {
+        val userId = getCurrentUserId()
+        val result = paymentService.topUpBalance(userId, request)
+        return if (result.success) {
+            ResponseEntity.ok(result)
+        } else {
+            ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(result)
+        }
+    }
+
+    /**
      * Simulate a specific payment scenario for testing and demonstration.
      *
      * ACADEMIC DISCLAIMER: This is a mock payment system for educational purposes only.
