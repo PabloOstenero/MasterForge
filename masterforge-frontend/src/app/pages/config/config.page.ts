@@ -95,7 +95,9 @@ export class ConfigPage implements OnInit {
   passwordForm: FormGroup;
   currentUser: any;
   isLoading = true;
-  showPassword = false;
+  showCurrentPassword = false;
+  showNewPassword = false;
+  showConfirmPassword = false;
   sessionNotifications = true;
   
   // 2FA variables
@@ -390,8 +392,16 @@ export class ConfigPage implements OnInit {
     await alert.present();
   }
 
-  togglePasswordVisibility() {
-    this.showPassword = !this.showPassword;
+  toggleCurrentPasswordVisibility() {
+    this.showCurrentPassword = !this.showCurrentPassword;
+  }
+
+  toggleNewPasswordVisibility() {
+    this.showNewPassword = !this.showNewPassword;
+  }
+
+  toggleConfirmPasswordVisibility() {
+    this.showConfirmPassword = !this.showConfirmPassword;
   }
 
   get isPro(): boolean {

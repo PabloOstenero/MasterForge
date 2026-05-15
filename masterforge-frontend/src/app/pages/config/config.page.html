@@ -41,14 +41,17 @@
           <div class="form-group">
             <label>Contraseña Actual</label>
             <div class="password-wrapper">
-              <input [type]="showPassword ? 'text' : 'password'" formControlName="currentPassword" class="dnd-input">
+              <input [type]="showCurrentPassword ? 'text' : 'password'" formControlName="currentPassword" class="dnd-input">
+              <ion-icon [name]="showCurrentPassword ? 'eye-off-outline' : 'eye-outline'" (click)="toggleCurrentPasswordVisibility()"
+                class="password-toggle">
+              </ion-icon>
             </div>
           </div>
           <div class="form-group">
             <label>Nueva Contraseña</label>
             <div class="password-wrapper">
-              <input [type]="showPassword ? 'text' : 'password'" formControlName="newPassword" class="dnd-input">
-              <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'" (click)="togglePasswordVisibility()"
+              <input [type]="showNewPassword ? 'text' : 'password'" formControlName="newPassword" class="dnd-input">
+              <ion-icon [name]="showNewPassword ? 'eye-off-outline' : 'eye-outline'" (click)="toggleNewPasswordVisibility()"
                 class="password-toggle">
               </ion-icon>
             </div>
@@ -60,7 +63,10 @@
           <div class="form-group">
             <label>Confirmar Contraseña</label>
             <div class="password-wrapper">
-              <input [type]="showPassword ? 'text' : 'password'" formControlName="confirmPassword" class="dnd-input">
+              <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword" class="dnd-input">
+              <ion-icon [name]="showConfirmPassword ? 'eye-off-outline' : 'eye-outline'" (click)="toggleConfirmPasswordVisibility()"
+                class="password-toggle">
+              </ion-icon>
             </div>
             <p *ngIf="passwordForm.errors?.['mismatch'] && passwordForm.get('confirmPassword')?.touched"
               class="error-hint">
