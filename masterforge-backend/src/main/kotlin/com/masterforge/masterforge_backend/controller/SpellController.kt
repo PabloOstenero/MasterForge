@@ -17,7 +17,8 @@ import java.util.UUID
 @RequestMapping("/api/spells")
 class SpellController(
     private val spellRepository: SpellRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val homebrewService: com.masterforge.masterforge_backend.service.HomebrewService
 ) {
 
     @GetMapping
@@ -29,8 +30,11 @@ class SpellController(
     @Transactional
     fun createSpell(@RequestBody dto: SpellDto): Spell {
         val author: User? = dto.authorId?.let {
-            userRepository.findById(it)
+            val user = userRepository.findById(it)
                 .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Author not found with id $it") }
+            homebrewService.verifyCreationLimit(user)
+            homebrewService.verifyMonetization(user, dto.price ?: java.math.BigDecimal.ZERO)
+            user
         }
 
         val spell = Spell(
@@ -73,8 +77,10 @@ class SpellController(
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Spell not found with id $id") }
 
         val author: User? = dto.authorId?.let {
-            userRepository.findById(it)
+            val user = userRepository.findById(it)
                 .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Author not found with id $it") }
+            homebrewService.verifyMonetization(user, dto.price ?: java.math.BigDecimal.ZERO)
+            user
         }
 
         val updatedSpell = existingSpell.copy(

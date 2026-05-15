@@ -12,7 +12,7 @@ import { Component, Input, OnChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ValidationErrors } from '@angular/forms';
 
-import { ErrorHandlerService } from '../../../../services/error-handler.service';
+import { ErrorHandlerService } from '../../../services/error-handler.service';
 
 @Component({
   selector: 'app-validation-error',

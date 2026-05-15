@@ -218,16 +218,15 @@ class UserController(
             }
         }
 
-        val updatedUser = existingUser.copy(
-            name = userDto.name ?: existingUser.name,
-            email = userDto.email ?: existingUser.email,
-            passwordHash = userDto.passwordHash?.let { passwordEncoder.encode(it) } ?: existingUser.passwordHash,
-            subscriptionTier = userDto.subscriptionTier ?: existingUser.subscriptionTier,
-            balance = userDto.balance ?: existingUser.balance,
-            isActive = userDto.isActive ?: existingUser.isActive,
-            sessionNotifications = userDto.sessionNotifications ?: existingUser.sessionNotifications
-        )
-        return ResponseEntity.ok(UserResponseDto.fromEntity(userRepository.save(updatedUser)))
+        existingUser.name = userDto.name ?: existingUser.name
+        existingUser.email = userDto.email ?: existingUser.email
+        existingUser.passwordHash = userDto.passwordHash?.let { passwordEncoder.encode(it) } ?: existingUser.passwordHash
+        existingUser.subscriptionTier = userDto.subscriptionTier ?: existingUser.subscriptionTier
+        existingUser.balance = userDto.balance ?: existingUser.balance
+        existingUser.isActive = userDto.isActive ?: existingUser.isActive
+        existingUser.sessionNotifications = userDto.sessionNotifications ?: existingUser.sessionNotifications
+
+        return ResponseEntity.ok(UserResponseDto.fromEntity(userRepository.save(existingUser)))
     }
 
     @DeleteMapping("/me")
@@ -266,16 +265,15 @@ class UserController(
             }
         }
 
-        val updatedUser = existingUser.copy(
-            name = userDto.name ?: existingUser.name,
-            email = userDto.email ?: existingUser.email,
-            passwordHash = userDto.passwordHash?.let { passwordEncoder.encode(it) } ?: existingUser.passwordHash,
-            subscriptionTier = userDto.subscriptionTier ?: existingUser.subscriptionTier,
-            balance = userDto.balance ?: existingUser.balance,
-            isActive = userDto.isActive ?: existingUser.isActive,
-            sessionNotifications = userDto.sessionNotifications ?: existingUser.sessionNotifications
-        )
-        return UserResponseDto.fromEntity(userRepository.save(updatedUser))
+        existingUser.name = userDto.name ?: existingUser.name
+        existingUser.email = userDto.email ?: existingUser.email
+        existingUser.passwordHash = userDto.passwordHash?.let { passwordEncoder.encode(it) } ?: existingUser.passwordHash
+        existingUser.subscriptionTier = userDto.subscriptionTier ?: existingUser.subscriptionTier
+        existingUser.balance = userDto.balance ?: existingUser.balance
+        existingUser.isActive = userDto.isActive ?: existingUser.isActive
+        existingUser.sessionNotifications = userDto.sessionNotifications ?: existingUser.sessionNotifications
+
+        return UserResponseDto.fromEntity(userRepository.save(existingUser))
     }
 
     @DeleteMapping("/{id}")

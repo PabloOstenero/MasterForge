@@ -9,5 +9,6 @@ enum class PaymentScenario {
     INSUFFICIENT_FUNDS,
     CARD_DECLINED,
     NETWORK_ERROR,
-    TIMEOUT
+    TIMEOUT,
+    EXPIRED_SUBSCRIPTION
 }

@@ -22,6 +22,21 @@
 
     <!-- ── Campaign list ── -->
     @if (!loadingCampaigns) {
+      <div class="list-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 class="section-title" style="margin: 0; color: #8C8C8C; font-size: 1rem; text-transform: uppercase;">Mis Campañas</h2>
+        <div class="limit-counter" [class.warning]="limitReached" style="font-weight: 600; color: #8C8C8C;">
+          {{ campaigns.length }}{{ isPro ? '' : '/2' }} Campañas
+        </div>
+      </div>
+
+      <div class="limit-banner" *ngIf="limitReached" style="background: rgba(201, 168, 76, 0.1); border: 1px solid #C9A84C; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div class="banner-text">
+          <strong style="color: #C9A84C; display: block;">Límite alcanzado</strong>
+          <span style="font-size: 0.85rem; color: #8C8C8C;">Libera espacio o pásate a PRO para dirigir más campañas.</span>
+        </div>
+        <ion-button size="small" color="warning" routerLink="/config">VER PLANES</ion-button>
+      </div>
+
       <div class="campaigns-list" data-testid="campaigns-section">
 
         @for (campaign of campaigns; track campaign.id) {
@@ -41,7 +56,7 @@
                 {{ campaign.maxPlayers }} jugadores máx.
               </span>
               <span class="meta-item meta-item--gold">
-                {{ campaign.joinPrice === 0 ? 'Gratis' : campaign.joinPrice + ' €' }}
+                {{ campaign.joinPrice === 0 ? 'Gratis' : (campaign.joinPrice | number:'1.2-2') + '€' }}
               </span>
             </div>
           </div>
@@ -61,9 +76,10 @@
         expand="block"
         class="btn-gold"
         (click)="toggleCampaignForm()"
+        [disabled]="limitReached"
         data-testid="btn-nueva-campanya">
         <ion-icon name="add-circle-outline" slot="start"></ion-icon>
-        Nueva Campaña
+        {{ limitReached ? 'Límite de Campañas' : 'Nueva Campaña' }}
       </ion-button>
     }
 
@@ -118,7 +134,7 @@
 
         <!-- Join price -->
         <div class="field-group">
-          <label class="field-label">Precio de entrada</label>
+          <label class="field-label">Precio de entrada (€)</label>
           <ion-input
             class="forge-input"
             type="number"

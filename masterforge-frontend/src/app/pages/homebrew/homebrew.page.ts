@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   IonSpinner, IonList, IonItem, IonLabel, IonButton,
   IonSegment, IonSegmentButton, IonModal, IonHeader,
@@ -25,7 +25,7 @@ import { getModifier } from '../../utils/dnd-utils';
     IonSegment, IonSegmentButton, IonModal, IonHeader,
     IonToolbar, IonTitle, IonContent, IonButtons, IonIcon,
     IonBadge, IonNote, IonGrid, IonRow, IonCol, IonFooter,
-    CommonModule, FormsModule
+    CommonModule, FormsModule, RouterLink
   ]
 })
 export class HomebrewPage implements OnInit {
@@ -42,6 +42,7 @@ export class HomebrewPage implements OnInit {
   error: string | null = null;
   deletingId: string | null = null;
   purchasingId: string | null = null;
+  currentUser: any = null;
 
   sectionNames: Record<string, string> = {
     classes: 'Clases',
@@ -67,6 +68,7 @@ export class HomebrewPage implements OnInit {
   }
 
   ngOnInit() {
+    this.currentUser = this.authService.getCurrentUser();
     this.loadContent();
   }
 
@@ -294,5 +296,22 @@ export class HomebrewPage implements OnInit {
       .filter(([_, value]) => value === true)
       .map(([key]) => key)
       .join(', ');
+  }
+
+  get isPro(): boolean {
+    return this.authService.isPro(this.currentUser);
+  }
+
+  get totalHomebrewCount(): number {
+    return (this.homebrewItems.classes?.length || 0) +
+           (this.homebrewItems.subclasses?.length || 0) +
+           (this.homebrewItems.races?.length || 0) +
+           (this.homebrewItems.monsters?.length || 0) +
+           (this.homebrewItems.spells?.length || 0) +
+           (this.homebrewItems.items?.length || 0);
+  }
+
+  get limitReached(): boolean {
+    return !this.isPro && this.totalHomebrewCount >= 5;
   }
 }

@@ -55,9 +55,8 @@ import {
   PaymentData,
   PaymentResult,
   PaymentScenario,
-} from '../../../../shared/models/payment.models';
-import { Campaign } from '../../models/campaign.models';
-import { CampaignFormatter } from '../../models/campaign.formatter';
+  PayableItem,
+} from '../../models/payment.models';
 import { ValidationErrorComponent } from '../validation-error/validation-error.component';
 import { HelpTooltipComponent } from '../help-tooltip/help-tooltip.component';
 
@@ -93,10 +92,10 @@ export interface PaymentScenarioOption {
 })
 export class PaymentProcessorComponent implements OnInit, OnDestroy {
   /**
-   * The paid campaign the user is attempting to join.
+   * The item the user is attempting to purchase.
    * Req 5.1: Display the exact join price before simulated payment.
    */
-  @Input() campaign!: Campaign;
+  @Input() item!: PayableItem;
 
   /**
    * Emits the PaymentData when the user submits the form.
@@ -161,8 +160,14 @@ export class PaymentProcessorComponent implements OnInit, OnDestroy {
     {
       label: 'Tiempo de espera agotado',
       value: PaymentScenario.TIMEOUT,
-      description: 'Simula un timeout en el procesador de pagos',
+      description: 'Simula un tiempo de espera de red agotado',
       isFailure: true,
+    },
+    {
+      label: 'Suscripción caducada (TEST)',
+      value: PaymentScenario.EXPIRED_SUBSCRIPTION,
+      description: 'Establece la suscripción como caducada (ayer) para pruebas',
+      isFailure: false, // It's a success in terms of transaction, but with an expired date
     },
   ];
 
@@ -214,8 +219,8 @@ export class PaymentProcessorComponent implements OnInit, OnDestroy {
   /**
    * Req 5.1: Returns the formatted join price for display.
    */
-  get formattedPrice(): string {
-    return this.campaign ? CampaignFormatter.formatPrice(this.campaign.joinPrice) : '';
+  get formattedPrice(): number {
+    return this.item ? this.item.joinPrice : 0;
   }
 
   /**
@@ -232,8 +237,8 @@ export class PaymentProcessorComponent implements OnInit, OnDestroy {
 
     const formValue = this.paymentForm.value;
     const paymentData: PaymentData = {
-      campaignId: this.campaign.id,
-      amount: this.campaign.joinPrice,
+      campaignId: this.item.id,
+      amount: this.item.joinPrice,
       cardData: {
         cardNumber: formValue.cardNumber.replace(/\s/g, ''),
         expiryDate: formValue.expiryDate,

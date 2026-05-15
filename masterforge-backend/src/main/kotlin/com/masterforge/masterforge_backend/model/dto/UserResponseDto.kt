@@ -28,7 +28,9 @@ data class UserResponseDto(
     val recoveryCodes: List<String> = emptyList(),
     val characters: List<CharacterSimpleDto>,
     val discordId: String? = null,
-    val discordUsername: String? = null
+    val discordUsername: String? = null,
+    @get:JsonProperty("subscriptionExpiresAt")
+    val subscriptionExpiresAt: String? = null
 ) {
     companion object {
         fun fromEntity(user: User): UserResponseDto {
@@ -52,7 +54,8 @@ data class UserResponseDto(
                     )
                 },
                 discordId = user.discordId,
-                discordUsername = user.discordUsername
+                discordUsername = user.discordUsername,
+                subscriptionExpiresAt = user.subscriptionExpiresAt?.toString()
             )
         }
     }

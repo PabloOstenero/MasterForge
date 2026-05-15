@@ -26,6 +26,23 @@
     <!-- Content (only shown when not loading) -->
     @if (!loading) {
 
+      @if (selectedTab === 'mine') {
+        <div class="limit-status" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 5px;">
+          <span style="color: #8C8C8C; font-size: 0.9rem; font-weight: 600;">Total Homebrew:</span>
+          <span [style.color]="limitReached ? '#ff4961' : '#C9A84C'" style="font-weight: 700;">
+            {{ totalHomebrewCount }}{{ isPro ? '' : '/5' }}
+          </span>
+        </div>
+
+        <div class="limit-banner animate__animated animate__fadeIn" *ngIf="limitReached" style="background: rgba(201, 168, 76, 0.1); border: 1px solid #C9A84C; padding: 12px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+          <div class="banner-text">
+            <strong style="color: #C9A84C; display: block; font-size: 0.9rem;">Límite de Forge alcanzado</strong>
+            <span style="font-size: 0.8rem; color: #8C8C8C;">Libera espacio o pásate a PRO para forjar más contenido.</span>
+          </div>
+          <ion-button size="small" color="warning" routerLink="/config">VER PLANES</ion-button>
+        </div>
+      }
+
       @let currentItems = selectedTab === 'mine' ? homebrewItems : communityItems;
 
       @for (key of ['classes', 'subclasses', 'races', 'monsters', 'spells', 'items']; track key) {
@@ -36,7 +53,7 @@
           <div class="section-header">
             <h2 class="section-title">{{ sectionNames[key] }}</h2>
             @if (selectedTab === 'mine') {
-              <ion-button fill="outline" size="small" (click)="navigateToCreate(type)" [attr.data-testid]="'create-' + type">
+              <ion-button fill="outline" size="small" (click)="navigateToCreate(type)" [disabled]="limitReached" [attr.data-testid]="'create-' + type">
                 + Crear {{ sectionNames[key].slice(0, -1) }}
               </ion-button>
             }
@@ -53,7 +70,7 @@
                   <ion-label>
                     <h3 class="gold-title">{{ item.name }}</h3>
                     @if (selectedTab === 'community' && !item.isOwned) {
-                      <p class="price-label">{{ item.price === 0 ? 'GRATIS' : (item.price | currency:'USD':'symbol':'1.2-2') }}</p>
+                      <p class="price-label">{{ item.price === 0 ? 'GRATIS' : (item.price | number:'1.2-2') + '€' }}</p>
                     }
                   </ion-label>
 
@@ -236,7 +253,7 @@
       @if (selectedPreviewItem && !selectedPreviewItem.isOwned && selectedTab === 'community') {
         <ion-footer class="ion-no-border">
           <ion-toolbar color="warning" class="ion-text-center" (click)="purchaseItem(selectedPreviewItem); closePreview()">
-            <ion-title size="small">ADQUIRIR POR {{ selectedPreviewItem.price === 0 ? 'GRATIS' : (selectedPreviewItem.price | currency:'EUR') }}</ion-title>
+            <ion-title size="small">ADQUIRIR POR {{ selectedPreviewItem.price === 0 ? 'GRATIS' : (selectedPreviewItem.price | number:'1.2-2') + '€' }}</ion-title>
           </ion-toolbar>
         </ion-footer>
       }

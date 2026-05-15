@@ -29,8 +29,8 @@ class PasswordMigrationService(
                 
                 // We use a custom query or save to update
                 // Since it's a small number of users usually, save() is fine
-                val updatedUser = user.copy(passwordHash = hashedPassword)
-                userRepository.save(updatedUser)
+                user.passwordHash = hashedPassword
+                userRepository.save(user)
                 migratedCount++
             }
         }

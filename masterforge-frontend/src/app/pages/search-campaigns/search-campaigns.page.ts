@@ -55,10 +55,10 @@ import { PaymentData, PaymentResult } from '../../shared/models/payment.models';
 import { CampaignFilterComponent } from './components/campaign-filter/campaign-filter.component';
 import { CampaignListComponent } from './components/campaign-list/campaign-list.component';
 import { SearchInputComponent } from './components/search-input/search-input.component';
-import { PaymentProcessorComponent } from './components/payment-processor/payment-processor.component';
+import { PaymentProcessorComponent } from '../../shared/components/payment-processor/payment-processor.component';
 import { LoadingOverlayComponent } from './components/loading-overlay/loading-overlay.component';
 import { ToastNotificationComponent } from './components/toast-notification/toast-notification.component';
-import { HelpTooltipComponent } from './components/help-tooltip/help-tooltip.component';
+import { HelpTooltipComponent } from '../../shared/components/help-tooltip/help-tooltip.component';
 
 /** Default page size per requirement 1.2 (load first 20 campaigns). */
 const DEFAULT_PAGE_SIZE = 20;

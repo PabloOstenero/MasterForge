@@ -3,6 +3,7 @@ package com.masterforge.masterforge_backend.model.entity
 import jakarta.persistence.*
 import com.fasterxml.jackson.annotation.JsonIgnore
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.util.UUID
 
 /**
@@ -11,29 +12,32 @@ import java.util.UUID
  */
 @Entity
 @Table(name = "users")
-data class User(
+class User(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     val id: UUID? = null,
 
     @Column(nullable = false)
-    val name: String,
+    var name: String = "",
 
     @Column(nullable = false, unique = true)
-    val email: String,
+    var email: String = "",
 
     @JsonIgnore
     @Column(name = "password_hash", nullable = false)
-    val passwordHash: String,
+    var passwordHash: String = "",
 
     @Column(name = "subscription_tier", nullable = false)
-    val subscriptionTier: String = "FREE",
+    var subscriptionTier: String = "FREE",
+
+    @Column(name = "subscription_expires_at")
+    var subscriptionExpiresAt: LocalDateTime? = null,
 
     @Column(nullable = false)
-    val balance: BigDecimal = BigDecimal.ZERO,
+    var balance: BigDecimal = BigDecimal.ZERO,
 
     @Column(name = "is_active", nullable = false)
-    val isActive: Boolean = true,
+    var isActive: Boolean = true,
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
@@ -67,4 +71,14 @@ data class User(
 
     @Column(name = "discord_username")
     var discordUsername: String? = null
-)
+) {
+    /**
+     * Checks if the user has an active Pro subscription.
+     * Returns true if tier is PRO and it hasn't expired yet.
+     */
+    fun isPro(): Boolean {
+        if (subscriptionTier != "PRO") return false
+        val expiry = subscriptionExpiresAt ?: return false
+        return expiry.isAfter(LocalDateTime.now())
+    }
+}

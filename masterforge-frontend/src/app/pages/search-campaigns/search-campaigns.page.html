@@ -35,7 +35,7 @@
             <h2 class="payment-modal__title">Unirse a campaña de pago</h2>
           </div>
           <app-payment-processor
-            [campaign]="paymentCampaign"
+            [item]="paymentCampaign"
             (paymentSubmit)="onPaymentSubmit($event)"
             (paymentCancelled)="onPaymentCancelled()"
             data-testid="payment-processor-component">

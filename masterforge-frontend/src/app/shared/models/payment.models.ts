@@ -23,6 +23,7 @@ export enum PaymentScenario {
   CARD_DECLINED = 'CARD_DECLINED',
   NETWORK_ERROR = 'NETWORK_ERROR',
   TIMEOUT = 'TIMEOUT',
+  EXPIRED_SUBSCRIPTION = 'EXPIRED_SUBSCRIPTION',
 }
 
 /**
@@ -38,6 +39,16 @@ export enum PaymentStatus {
 // ---------------------------------------------------------------------------
 // Interfaces
 // ---------------------------------------------------------------------------
+
+/**
+ * Generic interface for any item that can be purchased (Campaign, Subscription, Homebrew).
+ */
+export interface PayableItem {
+  id: string;
+  name: string;
+  joinPrice: number; // Keeping name 'joinPrice' for compatibility with existing Campaign model
+  description?: string;
+}
 
 /**
  * Mock credit-card data used by the simulated payment processor.
@@ -59,8 +70,8 @@ export interface MockCardData {
  * The itemId field is generic so this can be reused for campaigns, homebrew, etc.
  */
 export interface PaymentData {
-  /** ID of the item being purchased (campaign ID, homebrew ID, etc.). */
-  campaignId: string;
+  /** ID of the item being purchased (campaign ID, homebrew ID, subscription, etc.). */
+  campaignId?: string;
   /** Amount to charge, in USD. */
   amount: number;
   /** Mock card details provided by the user. */

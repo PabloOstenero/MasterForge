@@ -68,6 +68,17 @@ class CampaignController(
         val owner = userRepository.findById(campaignDto.ownerId)
             .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Owner not found with id ${campaignDto.ownerId}") }
 
+        // Enforce 2-campaign limit for Free users
+        val ownedCampaignsCount = campaignRepository.findByOwnerId(owner.id!!).size
+        if (!owner.isPro() && ownedCampaignsCount >= 2) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Free users are limited to 2 campaigns. Upgrade to PRO for unlimited campaigns.")
+        }
+
+        // Enforce monetization rules: only Pro users can charge to join
+        if (!owner.isPro() && campaignDto.joinPrice > BigDecimal.ZERO) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Only PRO users can monetize their campaigns. Free users must set joinPrice to 0.")
+        }
+
         val campaign = Campaign(
             name = campaignDto.name,
             description = campaignDto.description,

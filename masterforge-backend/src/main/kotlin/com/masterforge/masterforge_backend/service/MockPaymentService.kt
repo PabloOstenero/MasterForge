@@ -6,6 +6,7 @@ import com.masterforge.masterforge_backend.model.entity.PaymentScenario
 import com.masterforge.masterforge_backend.model.entity.PaymentStatus
 import com.masterforge.masterforge_backend.model.entity.PaymentTransaction
 import com.masterforge.masterforge_backend.repository.PaymentTransactionRepository
+import com.masterforge.masterforge_backend.repository.UserRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -25,6 +26,7 @@ import java.util.UUID
 @Service
 class MockPaymentService(
     private val paymentTransactionRepository: PaymentTransactionRepository,
+    private val userRepository: UserRepository,
     @Value("\${mock.payment.delay-ms:100}") private val simulatedDelayMs: Long = 100L
 ) : PaymentService {
 
@@ -43,8 +45,38 @@ class MockPaymentService(
             userId = request.userId ?: UUID.randomUUID(),
             amount = request.resolvedAmount(),
             mockCardLastFour = request.resolvedCardLastFour(),
-            scenario = scenario
+            scenario = scenario,
+            transactionType = "CAMPAIGN_JOIN"
         )
+    }
+
+    @Transactional
+    override fun subscribeUser(userId: UUID, request: PaymentRequest): PaymentResult {
+        val scenario = request.simulationScenario ?: PaymentScenario.SUCCESS
+        val result = doSimulate(
+            campaignId = null,
+            userId = userId,
+            amount = request.resolvedAmount(),
+            mockCardLastFour = request.resolvedCardLastFour(),
+            scenario = scenario,
+            transactionType = "SUBSCRIPTION"
+        )
+
+        if (result.success) {
+            val user = userRepository.findById(userId).orElseThrow()
+            user.subscriptionTier = "PRO"
+            
+            // For testing expiration: if the scenario is EXPIRED_SUBSCRIPTION, set to yesterday
+            if (scenario == PaymentScenario.EXPIRED_SUBSCRIPTION) {
+                user.subscriptionExpiresAt = LocalDateTime.now().minusDays(1)
+            } else {
+                user.subscriptionExpiresAt = LocalDateTime.now().plusDays(30)
+            }
+            
+            userRepository.saveAndFlush(user)
+        }
+
+        return result
     }
 
     /**
@@ -61,7 +93,8 @@ class MockPaymentService(
             userId = request.userId ?: UUID.randomUUID(),
             amount = request.resolvedAmount(),
             mockCardLastFour = request.resolvedCardLastFour(),
-            scenario = scenario
+            scenario = scenario,
+            transactionType = "SIMULATION"
         )
     }
 
@@ -84,11 +117,12 @@ class MockPaymentService(
      * ACADEMIC DISCLAIMER: This is a mock payment system for educational purposes only.
      */
     private fun doSimulate(
-        campaignId: UUID,
+        campaignId: UUID?,
         userId: UUID,
         amount: BigDecimal,
         mockCardLastFour: String,
-        scenario: PaymentScenario
+        scenario: PaymentScenario,
+        transactionType: String
     ): PaymentResult {
         // Simulate realistic payment gateway latency (Req 5.3)
         Thread.sleep(simulatedDelayMs)
@@ -111,6 +145,7 @@ class MockPaymentService(
                 PaymentStatus.FAILED,
                 "Payment failed: simulated timeout — payment gateway did not respond in time"
             )
+            PaymentScenario.EXPIRED_SUBSCRIPTION -> Pair(PaymentStatus.COMPLETED, null)
         }
 
         // Store every transaction attempt for audit purposes (Req 5.6)
@@ -120,7 +155,7 @@ class MockPaymentService(
                 campaignId = campaignId,
                 amount = amount,
                 status = status,
-                transactionType = "CAMPAIGN_JOIN",
+                transactionType = transactionType,
                 processedAt = LocalDateTime.now(),
                 mockCardLastFour = mockCardLastFour,
                 simulationScenario = scenario

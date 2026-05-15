@@ -29,6 +29,7 @@ export class MyCharactersPage implements OnInit {
   characters: CharacterSummary[] = [];
   loading = false;
   error: string | null = null;
+  currentUser: any = null;
 
   constructor(
     private apiService: ApiService,
@@ -41,6 +42,7 @@ export class MyCharactersPage implements OnInit {
   }
 
   ngOnInit(): void {
+    this.currentUser = this.authService.getCurrentUser();
     this.loadCharacters();
   }
 
@@ -105,6 +107,14 @@ export class MyCharactersPage implements OnInit {
       position: 'bottom'
     });
     await toast.present();
+  }
+
+  get isPro(): boolean {
+    return this.authService.isPro(this.currentUser);
+  }
+
+  get limitReached(): boolean {
+    return !this.isPro && this.characters.length >= 3;
   }
 
 }

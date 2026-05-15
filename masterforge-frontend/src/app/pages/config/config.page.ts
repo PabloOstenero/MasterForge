@@ -17,12 +17,17 @@ import {
   IonAvatar,
   IonSpinner,
   IonToggle,
+  IonModal,
   AlertController, 
   ToastController 
 } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { DiscordService } from '../../services/discord.service';
+import { PaymentService } from '../../services/payment.service';
 import { Router } from '@angular/router';
+import { ViewChild } from '@angular/core';
+import { PaymentProcessorComponent } from '../../shared/components/payment-processor/payment-processor.component';
+import { PayableItem, PaymentData, PaymentResult } from '../../shared/models/payment.models';
 import { addIcons } from 'ionicons';
 import { 
   personOutline, 
@@ -38,13 +43,17 @@ import {
   shieldCheckmarkOutline,
   copyOutline,
   downloadOutline,
-  textOutline
+  textOutline,
+  starOutline,
+  calendarOutline,
+  diamondOutline
 } from 'ionicons/icons';
 import * as QRCode from 'qrcode';
 
 @Component({
   selector: 'app-config',
   templateUrl: './config.page.html',
+  styleUrls: ['./config.page.scss'],
   standalone: true,
   imports: [
     CommonModule, 
@@ -64,23 +73,21 @@ import * as QRCode from 'qrcode';
     IonMenuButton,
     IonAvatar,
     IonSpinner,
-    IonToggle
-  ],
-  styles: [`
-    :host {
-      display: block;
-    }
-    .config-page-wrapper {
-      background: #121212;
-    }
-  `]
+    IonToggle,
+    IonModal,
+    PaymentProcessorComponent
+  ]
 })
 export class ConfigPage implements OnInit {
+  @ViewChild(PaymentProcessorComponent)
+  private paymentProcessor?: PaymentProcessorComponent;
+  
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private discordService = inject(DiscordService);
   private alertCtrl = inject(AlertController);
   private toastCtrl = inject(ToastController);
+  private paymentService = inject(PaymentService);
   private router = inject(Router);
 
   userForm: FormGroup;
@@ -99,6 +106,9 @@ export class ConfigPage implements OnInit {
   showRecoveryCodes = false;
   fontScale = parseFloat(localStorage.getItem('app-font-scale') || '1.0');
 
+  // Subscription Modal State
+  paymentItem: PayableItem | null = null;
+
   constructor() {
     addIcons({ 
       personOutline, 
@@ -114,7 +124,10 @@ export class ConfigPage implements OnInit {
       shieldCheckmarkOutline,
       copyOutline,
       downloadOutline,
-      textOutline
+      textOutline,
+      starOutline,
+      calendarOutline,
+      diamondOutline
     });
 
     this.userForm = this.fb.group({
@@ -135,7 +148,6 @@ export class ConfigPage implements OnInit {
   }
 
   ionViewDidEnter() {
-    // Force the slider to snap to the correct value after the view is ready
     const savedScale = localStorage.getItem('app-font-scale');
     if (savedScale) {
       this.fontScale = parseFloat(savedScale);
@@ -268,7 +280,6 @@ export class ConfigPage implements OnInit {
     }
   }
 
-  // 2FA methods
   async start2faSetup() {
     try {
       const setup = await this.authService.setup2fa().toPromise();
@@ -379,6 +390,72 @@ export class ConfigPage implements OnInit {
 
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
+  }
+
+  get isPro(): boolean {
+    return this.authService.isPro(this.currentUser);
+  }
+
+  get subscriptionExpiryDate(): string {
+    const rawDate = this.currentUser?.subscriptionExpiresAt;
+    if (!rawDate) return 'No disponible';
+    
+    try {
+      const date = new Date(rawDate);
+      if (isNaN(date.getTime())) {
+        return 'Fecha inválida';
+      }
+      return date.toLocaleDateString('es-ES', { 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+      });
+    } catch (e) {
+      return 'Error de fecha';
+    }
+  }
+
+  async upgradeToPro() {
+    this.paymentItem = {
+      id: 'subscription-pro',
+      name: 'Suscripción Mensual PRO',
+      joinPrice: 9.99,
+      description: 'Acceso ilimitado a personajes, campañas y forjado de homebrew.'
+    };
+  }
+
+  onPaymentSubmit(paymentData: PaymentData) {
+    if (!this.paymentItem) return;
+
+    this.paymentService.subscribe(paymentData).subscribe({
+      next: (enrollmentResult) => {
+        const result: PaymentResult = {
+          success: enrollmentResult.success,
+          errorMessage: enrollmentResult.success ? undefined : enrollmentResult.errorMessage,
+          enrollmentConfirmed: enrollmentResult.success,
+        };
+        this.paymentProcessor?.notifyResult(result);
+        if (result.success) {
+          this.showToast('¡Suscripción PRO activada correctamente!', 'success');
+          
+          this.authService.getMe().subscribe((user) => {
+            this.currentUser = user;
+            this.paymentItem = null;
+          });
+        }
+      },
+      error: (err: any) => {
+        const result: PaymentResult = {
+          success: false,
+          errorMessage: err.message ?? 'Error al procesar la suscripción. Por favor, inténtalo de nuevo.',
+        };
+        this.paymentProcessor?.notifyResult(result);
+      }
+    });
+  }
+
+  onPaymentCancelled() {
+    this.paymentItem = null;
   }
 
   async showToast(message: string, color: string) {

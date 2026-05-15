@@ -3,8 +3,9 @@ package com.masterforge.masterforge_backend.model.dto
 import java.util.UUID
 
 data class SpellDto(
-    val id: UUID? = null,
+    val id: java.util.UUID? = null,
     val name: String,
+    val price: java.math.BigDecimal? = null,
     val level: Int,
     val school: String,
     val castingTime: String,
@@ -21,5 +22,5 @@ data class SpellDto(
     val spellClasses: List<String>? = null,
     val higherLevelDescription: String? = null,
     val description: String,
-    val authorId: UUID? = null,
+    val authorId: java.util.UUID? = null,
 )

@@ -35,6 +35,7 @@ export class CampaignsPage implements OnInit {
   loadingCampaigns = false;
   errorCampaigns: string | null = null;
   validationErrorCampaign: string | null = null;
+  currentUser: any = null;
 
   showNewCampaignForm = false;
 
@@ -57,6 +58,7 @@ export class CampaignsPage implements OnInit {
   }
 
   ngOnInit() {
+    this.currentUser = this.authService.getCurrentUser();
     this.loadCampaigns();
   }
 
@@ -136,5 +138,13 @@ export class CampaignsPage implements OnInit {
       case 'INVITE_ONLY': return 'Solo invitación';
       default:            return 'Privada';
     }
+  }
+
+  get isPro(): boolean {
+    return this.authService.isPro(this.currentUser);
+  }
+
+  get limitReached(): boolean {
+    return !this.isPro && this.campaigns.length >= 2;
   }
 }

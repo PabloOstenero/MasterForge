@@ -35,7 +35,7 @@ import {
   CapacityFilterType,
   AvailabilityFilterType,
 } from '../../models/campaign.models';
-import { HelpTooltipComponent } from '../help-tooltip/help-tooltip.component';
+import { HelpTooltipComponent } from '../../../../shared/components/help-tooltip/help-tooltip.component';
 
 // ---------------------------------------------------------------------------
 // Option types
@@ -79,9 +79,9 @@ export class CampaignFilterComponent implements OnInit, OnDestroy {
   priceRangeOptions: PriceRangeOption[] = [
     { label: 'Todos los precios', value: null },
     { label: 'Gratis', value: PriceRangePreset.FREE, range: { preset: PriceRangePreset.FREE, min: 0, max: 0 } },
-    { label: 'Menos de $10', value: PriceRangePreset.UNDER_10, range: { preset: PriceRangePreset.UNDER_10, max: 10 } },
-    { label: 'Menos de $25', value: PriceRangePreset.UNDER_25, range: { preset: PriceRangePreset.UNDER_25, max: 25 } },
-    { label: 'Menos de $50', value: PriceRangePreset.UNDER_50, range: { preset: PriceRangePreset.UNDER_50, max: 50 } },
+    { label: 'Menos de 10€', value: PriceRangePreset.UNDER_10, range: { preset: PriceRangePreset.UNDER_10, max: 10 } },
+    { label: 'Menos de 25€', value: PriceRangePreset.UNDER_25, range: { preset: PriceRangePreset.UNDER_25, max: 25 } },
+    { label: 'Menos de 50€', value: PriceRangePreset.UNDER_50, range: { preset: PriceRangePreset.UNDER_50, max: 50 } },
     { label: 'Rango personalizado', value: PriceRangePreset.CUSTOM, range: { preset: PriceRangePreset.CUSTOM } },
   ];
 

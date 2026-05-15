@@ -42,6 +42,15 @@ interface PaymentService {
     fun simulatePaymentScenario(request: PaymentRequest, scenario: PaymentScenario): PaymentResult
 
     /**
+     * Process a subscription request to upgrade a user to PRO.
+     *
+     * @param userId the user to upgrade
+     * @param request payment details
+     * @return result indicating success or failure
+     */
+    fun subscribeUser(userId: UUID, request: PaymentRequest): PaymentResult
+
+    /**
      * Retrieve the full payment transaction history for a user.
      *
      * @param userId the user whose history to retrieve

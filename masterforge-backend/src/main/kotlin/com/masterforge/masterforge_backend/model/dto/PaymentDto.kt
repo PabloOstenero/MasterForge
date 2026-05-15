@@ -17,7 +17,7 @@ import java.util.UUID
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PaymentRequest(
-    val campaignId: UUID? = null,
+    val campaignId: String? = null,
     val userId: UUID? = null,          // overridden from JWT in controller
     val amount: BigDecimal? = null,
     val mockCardLastFour: String? = null,
@@ -38,9 +38,14 @@ data class PaymentRequest(
     /** Returns the amount as BigDecimal, defaulting to zero if not provided. */
     fun resolvedAmount(): BigDecimal = amount ?: BigDecimal.ZERO
 
-    /** Returns the campaignId, throwing if not provided. */
-    fun resolvedCampaignId(): UUID = campaignId
-        ?: throw IllegalArgumentException("campaignId is required")
+    /** Returns the campaignId as UUID, or null if not provided or invalid. */
+    fun resolvedCampaignId(): UUID? {
+        return try {
+            campaignId?.let { UUID.fromString(it) }
+        } catch (e: Exception) {
+            null
+        }
+    }
 }
 
 /**
@@ -78,7 +83,7 @@ data class PaymentResult(
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class SimulationRequest(
-    val campaignId: UUID? = null,
+    val campaignId: String? = null,
     val userId: UUID? = null,
     val amount: BigDecimal? = null,
     val mockCardLastFour: String? = null,

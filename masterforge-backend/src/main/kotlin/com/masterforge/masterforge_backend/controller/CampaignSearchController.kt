@@ -120,7 +120,7 @@ class CampaignSearchController(
 
         // Ensure the payment request targets the correct campaign and user
         val resolvedRequest = paymentRequest.copy(
-            campaignId = campaignId,
+            campaignId = campaignId.toString(),
             userId = userId
         )
 

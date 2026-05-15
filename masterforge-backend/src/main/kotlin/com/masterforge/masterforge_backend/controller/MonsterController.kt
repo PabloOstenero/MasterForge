@@ -16,7 +16,8 @@ import java.util.UUID
 @RequestMapping("/api/monsters")
 class MonsterController(
     private val monsterRepository: MonsterRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val homebrewService: com.masterforge.masterforge_backend.service.HomebrewService
 ) {
 
     @GetMapping
@@ -29,8 +30,11 @@ class MonsterController(
         // The author is optional. If an authorId is provided, find the user.
         // If not, the author will be null, marking it as a system-owned entity.
         val author: User? = dto.authorId?.let {
-            userRepository.findById(it)
+            val user = userRepository.findById(it)
                 .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Author not found with id $it") }
+            homebrewService.verifyCreationLimit(user)
+            homebrewService.verifyMonetization(user, dto.price ?: java.math.BigDecimal.ZERO)
+            user
         }
 
         val monster = Monster(
@@ -71,8 +75,10 @@ class MonsterController(
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Monster not found with id $id") }
 
         val author: User? = dto.authorId?.let {
-            userRepository.findById(it)
+            val user = userRepository.findById(it)
                 .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Author not found with id $it") }
+            homebrewService.verifyMonetization(user, dto.price ?: java.math.BigDecimal.ZERO)
+            user
         }
 
         val updatedMonster = existingMonster.copy(

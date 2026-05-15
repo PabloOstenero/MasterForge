@@ -78,6 +78,11 @@ class CharacterController(
         val user = userRepository.findById(dto.user.id)
             .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found with id ${dto.user.id}") }
         
+        // Enforce 3-character limit for Free users
+        if (!user.isPro() && user.characters.size >= 3) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Free users are limited to 3 characters. Upgrade to PRO for unlimited characters.")
+        }
+        
         // Campaign is now optional
         val campaign = dto.campaign?.id?.let { campaignId ->
             campaignRepository.findById(campaignId)

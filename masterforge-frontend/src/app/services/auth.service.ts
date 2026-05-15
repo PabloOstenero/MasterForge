@@ -130,6 +130,25 @@ export class AuthService {
     localStorage.removeItem('mf_user');
     this._currentUser = null;
   }
+
+  isPro(user?: any): boolean {
+    const u = user || this._currentUser;
+    if (!u) return false;
+    
+    // Basic tier check
+    if (u.subscriptionTier !== 'PRO') return false;
+    
+    // Date check (if present)
+    if (!u.subscriptionExpiresAt) return true; // Assume active if tier is PRO but date is missing
+    
+    try {
+      const expiry = new Date(u.subscriptionExpiresAt);
+      return expiry > new Date();
+    } catch (e) {
+      console.error('Error parsing subscription date', e);
+      return true; // Fallback to true if we can't parse but tier is PRO
+    }
+  }
 }
 
 export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {

@@ -17,7 +17,8 @@ import org.springframework.web.server.ResponseStatusException
 class DndSubclassController(
     private val dndSubclassRepository: DndSubclassRepository,
     private val dndClassRepository: DndClassRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val homebrewService: com.masterforge.masterforge_backend.service.HomebrewService
 ) {
 
     @GetMapping
@@ -36,8 +37,11 @@ class DndSubclassController(
             .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Parent class not found with id ${dto.parentClassId}") }
 
         val author: User? = dto.authorId?.let {
-            userRepository.findById(it)
+            val user = userRepository.findById(it)
                 .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Author not found with id $it") }
+            homebrewService.verifyCreationLimit(user)
+            homebrewService.verifyMonetization(user, dto.price ?: java.math.BigDecimal.ZERO)
+            user
         }
 
         val dndSubclass = DndSubclass(
@@ -69,8 +73,10 @@ class DndSubclassController(
             .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Parent class not found with id ${dto.parentClassId}") }
 
         val author: User? = dto.authorId?.let {
-            userRepository.findById(it)
+            val user = userRepository.findById(it)
                 .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Author not found with id $it") }
+            homebrewService.verifyMonetization(user, dto.price ?: java.math.BigDecimal.ZERO)
+            user
         }
 
         val updatedSubclass = existingSubclass.copy(

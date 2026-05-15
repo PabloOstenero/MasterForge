@@ -28,7 +28,21 @@
   }
 
   @if (!loading && !error && characters.length > 0) {
-    <h2 class="section-title">Mis Personajes</h2>
+    <div class="list-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2 class="section-title" style="margin: 0;">Mis Personajes</h2>
+      <div class="limit-counter" [class.warning]="limitReached" style="font-weight: 600; color: #8C8C8C;">
+        {{ characters.length }}{{ isPro ? '' : '/3' }} Personajes
+      </div>
+    </div>
+
+    <div class="limit-banner" *ngIf="limitReached" style="background: rgba(201, 168, 76, 0.1); border: 1px solid #C9A84C; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+      <div class="banner-text">
+        <strong style="color: #C9A84C; display: block;">Límite alcanzado</strong>
+        <span style="font-size: 0.85rem; color: #8C8C8C;">Libera espacio o pásate a PRO para crear más personajes.</span>
+      </div>
+      <ion-button size="small" color="warning" routerLink="/config">VER PLANES</ion-button>
+    </div>
+
     <ion-row data-testid="characters-list">
       @for (char of characters; track char.id) {
         <ion-col size="12" size-md="6">
@@ -46,6 +60,13 @@
           </ion-card>
         </ion-col>
       }
+
+      <ion-col size="12" size-md="6" *ngIf="!limitReached">
+        <ion-card class="create-card" routerLink="/forge-character" style="border: 2px dashed #333; background: transparent; height: 100px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+          <ion-icon name="add-outline" style="font-size: 2rem; color: #333;"></ion-icon>
+          <span style="color: #333; font-weight: 600; margin-left: 10px;">Nuevo Personaje</span>
+        </ion-card>
+      </ion-col>
     </ion-row>
   }
 

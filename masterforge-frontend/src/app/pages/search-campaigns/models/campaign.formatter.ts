@@ -20,7 +20,7 @@ export class CampaignFormatter {
     if (joinPrice === 0) {
       return 'Free';
     }
-    return `$${joinPrice.toFixed(2)}`;
+    return `${joinPrice.toFixed(2)}€`;
   }
 
   /**

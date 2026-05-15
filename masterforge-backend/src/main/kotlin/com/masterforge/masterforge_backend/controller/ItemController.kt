@@ -16,7 +16,8 @@ import java.util.UUID
 @RequestMapping("/api/items")
 class ItemController(
     private val itemRepository: ItemRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val homebrewService: com.masterforge.masterforge_backend.service.HomebrewService
 ) {
 
     @GetMapping
@@ -27,8 +28,11 @@ class ItemController(
     @PostMapping
     fun createItem(@RequestBody dto: ItemDto): Item {
         val author: User? = dto.authorId?.let {
-            userRepository.findById(it)
+            val user = userRepository.findById(it)
                 .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Author not found with id $it") }
+            homebrewService.verifyCreationLimit(user)
+            homebrewService.verifyMonetization(user, dto.price ?: java.math.BigDecimal.ZERO)
+            user
         }
 
         val item = Item(
@@ -57,8 +61,10 @@ class ItemController(
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Item not found with id $id") }
 
         val author: User? = dto.authorId?.let {
-            userRepository.findById(it)
+            val user = userRepository.findById(it)
                 .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Author not found with id $it") }
+            homebrewService.verifyMonetization(user, dto.price ?: java.math.BigDecimal.ZERO)
+            user
         }
 
         val updatedItem = existingItem.copy(

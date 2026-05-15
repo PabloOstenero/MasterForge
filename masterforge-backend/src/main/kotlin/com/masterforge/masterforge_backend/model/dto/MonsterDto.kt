@@ -4,6 +4,7 @@ import java.util.UUID
 
 data class MonsterDto(
     val name: String,
+    val price: java.math.BigDecimal? = null,
     val type: String,
     val size: String,
     val alignment: String,
@@ -19,5 +20,5 @@ data class MonsterDto(
     val challengeRating: Double,
     val xp: Int,
     val combatMechanics: Map<String, Any>,
-    val authorId: UUID? = null
+    val authorId: java.util.UUID? = null
 )

@@ -27,7 +27,7 @@
         </div>
         <h3 class="result-title" data-testid="payment-success-title">¡Pago simulado exitoso!</h3>
         <p class="result-message" data-testid="payment-success-message">
-          Te has unido a <strong>{{ campaign.name }}</strong> correctamente.
+          Operación con <strong>{{ item.name }}</strong> finalizada correctamente.
         </p>
         @if (paymentResult.transactionId) {
           <p class="result-transaction-id" data-testid="transaction-id">
@@ -76,12 +76,12 @@
         <div class="price-summary__campaign">
           <ion-icon name="cash-outline" class="price-icon"></ion-icon>
           <div class="price-summary__details">
-            <span class="price-summary__label">Unirse a</span>
-            <span class="price-summary__campaign-name" data-testid="campaign-name-display">{{ campaign?.name }}</span>
+            <span class="price-summary__label">Adquirir</span>
+            <span class="price-summary__campaign-name" data-testid="campaign-name-display">{{ item?.name }}</span>
           </div>
         </div>
         <div class="price-summary__amount" data-testid="payment-amount">
-          <span class="price-summary__price">{{ formattedPrice }}</span>
+          <span class="price-summary__price">{{ formattedPrice | number:'1.2-2' }}€</span>
           <span class="price-summary__note">(simulado)</span>
         </div>
       </div>
@@ -252,10 +252,10 @@
               Procesando...
             } @else if (isFailureScenario) {
               <ion-icon name="alert-circle-outline"></ion-icon>
-              Simular fallo ({{ formattedPrice }})
+              Simular fallo ({{ formattedPrice | number:'1.2-2' }}€)
             } @else {
               <ion-icon name="lock-closed-outline"></ion-icon>
-              Pagar {{ formattedPrice }} (simulado)
+              Pagar {{ formattedPrice | number:'1.2-2' }}€ (simulado)
             }
           </button>
 

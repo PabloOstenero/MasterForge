@@ -17,7 +17,8 @@ import org.springframework.web.server.ResponseStatusException
 @RequestMapping("/api/dnd-races")
 class DndRaceController(
     private val dndRaceRepository: DndRaceRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val homebrewService: com.masterforge.masterforge_backend.service.HomebrewService
 ) {
 
     @GetMapping
@@ -30,8 +31,11 @@ class DndRaceController(
         // The author is optional. If an authorId is provided, find the user.
         // If not, the author will be null, marking it as a system-owned entity.
         val author: User? = dto.authorId?.let {
-            userRepository.findById(it)
+            val user = userRepository.findById(it)
                 .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Author not found with id $it") }
+            homebrewService.verifyCreationLimit(user)
+            homebrewService.verifyMonetization(user, dto.price)
+            user
         }
 
         val dndRace = DndRace(
@@ -92,8 +96,10 @@ class DndRaceController(
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "D&D Race not found with id $id") }
 
         val author: User? = dto.authorId?.let {
-            userRepository.findById(it)
+            val user = userRepository.findById(it)
                 .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Author not found with id $it") }
+            homebrewService.verifyMonetization(user, dto.price)
+            user
         }
 
         val updatedRace = existingRace.copy(

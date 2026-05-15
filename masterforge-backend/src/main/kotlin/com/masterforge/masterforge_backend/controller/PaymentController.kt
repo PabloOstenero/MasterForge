@@ -58,6 +58,27 @@ class PaymentController(
     }
 
     /**
+     * Process a mock subscription request to upgrade the user to PRO.
+     *
+     * ACADEMIC DISCLAIMER: This is a mock payment system for educational purposes only.
+     *
+     * POST /api/payments/subscribe
+     *
+     * @param request mock payment details
+     * @return payment result with success status and transaction ID
+     */
+    @PostMapping("/subscribe")
+    fun subscribe(@RequestBody request: PaymentRequest): ResponseEntity<PaymentResult> {
+        val userId = getCurrentUserId()
+        val result = paymentService.subscribeUser(userId, request)
+        return if (result.success) {
+            ResponseEntity.ok(result)
+        } else {
+            ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(result)
+        }
+    }
+
+    /**
      * Simulate a specific payment scenario for testing and demonstration.
      *
      * ACADEMIC DISCLAIMER: This is a mock payment system for educational purposes only.

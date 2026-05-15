@@ -44,7 +44,7 @@ const MAX_RETRIES = 2;
  * ⚠️  ACADEMIC DISCLAIMER: All card data is mock/simulated.
  */
 interface ProcessPaymentRequest {
-  campaignId: string;
+  campaignId?: string;
   amount: number;
   mockCardData: {
     cardNumber: string;
@@ -102,6 +102,33 @@ export class PaymentService {
 
     return this.http
       .post<PaymentResult>(`${API_URL}/payments/process`, requestBody)
+      .pipe(
+        timeout(REQUEST_TIMEOUT_MS),
+        catchError((err) => this.handleError(err)),
+      );
+  }
+
+  /**
+   * Processes a mock subscription to upgrade to PRO.
+   *
+   * ⚠️  ACADEMIC DISCLAIMER: This is a simulated payment — no real money
+   * is charged. The payment gateway is mocked for academic demonstration.
+   */
+  subscribe(paymentData: PaymentData): Observable<PaymentResult> {
+    const requestBody: ProcessPaymentRequest = {
+      campaignId: paymentData.campaignId,
+      amount: paymentData.amount,
+      mockCardData: {
+        cardNumber: paymentData.cardData.cardNumber,
+        expiryDate: paymentData.cardData.expiryDate,
+        cvv: paymentData.cardData.cvv,
+        cardholderName: paymentData.cardData.cardholderName,
+      },
+      simulationScenario: paymentData.simulationScenario,
+    };
+
+    return this.http
+      .post<PaymentResult>(`${API_URL}/payments/subscribe`, requestBody)
       .pipe(
         timeout(REQUEST_TIMEOUT_MS),
         catchError((err) => this.handleError(err)),

@@ -22,23 +22,23 @@ import java.util.UUID
         Index(name = "idx_payment_transactions_processed_at", columnList = "processed_at")
     ]
 )
-data class PaymentTransaction(
+class PaymentTransaction(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     val id: UUID? = null,
     
     @Column(name = "user_id", nullable = false)
-    val userId: UUID,
+    val userId: UUID = UUID.randomUUID(),
     
-    @Column(name = "campaign_id", nullable = false)
-    val campaignId: UUID,
+    @Column(name = "campaign_id", nullable = true)
+    val campaignId: UUID? = null,
     
     @Column(name = "amount", nullable = false, precision = 10, scale = 2)
-    val amount: BigDecimal,
+    val amount: BigDecimal = BigDecimal.ZERO,
     
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    val status: PaymentStatus,
+    val status: PaymentStatus = PaymentStatus.COMPLETED,
     
     @Column(name = "transaction_type", nullable = false)
     val transactionType: String = "CAMPAIGN_JOIN",
