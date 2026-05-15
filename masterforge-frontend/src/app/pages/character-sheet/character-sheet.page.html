@@ -195,6 +195,9 @@
             @if (feature.actionType && feature.actionType !== 'PASSIVE') {
               <ion-badge color="warning" style="font-size: 0.6rem; padding: 2px 6px;">{{ getActionTypeLabel(feature.actionType) }}</ion-badge>
             }
+            @if (feature._scalingText) {
+              <ion-badge color="danger" style="font-size: 0.6rem; padding: 2px 6px; --background: #8b0000;">{{ feature._scalingText }}</ion-badge>
+            }
             @if (feature.isSubclassFeature) {
               <span class="subclass-badge">{{ pj.subclass }}</span>
             }

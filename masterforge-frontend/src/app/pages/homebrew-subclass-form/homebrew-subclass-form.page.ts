@@ -645,9 +645,11 @@ export class HomebrewSubclassFormPage implements OnInit {
                 additionalChoices: [p.additionalChoices, Validators.required]
               })))
             }),
-            progression: this.fb.array(((entry.progression && entry.progression.length > 0) ? entry.progression : ((entry.options as any)?.progression ?? [])).map((p: any) => this.fb.group({
+            progression: this.fb.array(((entry.properties?.progression && entry.properties?.progression.length > 0) ? entry.properties.progression : ((entry.options as any)?.progression ?? [])).map((p: any) => this.fb.group({
               level: [p.level, Validators.required],
               additionalChoices: [p.additionalChoices ?? 0],
+              diceCount: [p.diceCount ?? null],
+              diceType: [p.diceType ?? 'd6'],
               description: [p.description || '']
             }))),
               properties: this.fb.group({
@@ -857,6 +859,8 @@ export class HomebrewSubclassFormPage implements OnInit {
     progression.push(this.fb.group({
       level: [null, [Validators.required, Validators.min(1), Validators.max(20)]],
       additionalChoices: [1],
+      diceCount: [null],
+      diceType: ['d6'],
       description: ['']
     }));
   }
@@ -1154,8 +1158,10 @@ export class HomebrewSubclassFormPage implements OnInit {
         levelRequired: fg.get('levelRequired')?.value,
         actionType: fg.get('actionType')?.value,
         options: optionsValue,
-        progression: fg.get('progression')?.value || [],
-        properties: properties
+        properties: {
+          ...properties,
+          progression: fg.get('progression')?.value || []
+        }
       };
     });
 

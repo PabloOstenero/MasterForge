@@ -463,6 +463,8 @@
                               <tr>
                                 <th>Nivel</th>
                                 <th>Nº Elecciones</th>
+                                <th>Nº Dados</th>
+                                <th>Tipo Dado</th>
                                 <th>Valor/Bono</th>
                                 <th></th>
                               </tr>
@@ -472,6 +474,16 @@
                                 <tr [formGroupName]="pi">
                                   <td><input type="number" class="forge-input-native-small" formControlName="level" placeholder="Nivel"></td>
                                   <td><input type="number" class="forge-input-native-small" formControlName="additionalChoices" placeholder="+1"></td>
+                                  <td><input type="number" class="forge-input-native-small" formControlName="diceCount" placeholder="Ej: 1"></td>
+                                  <td>
+                                    <select class="forge-input-native-small" formControlName="diceType">
+                                      <option value="d4">d4</option>
+                                      <option value="d6">d6</option>
+                                      <option value="d8">d8</option>
+                                      <option value="d10">d10</option>
+                                      <option value="d12">d12</option>
+                                    </select>
+                                  </td>
                                   <td><input type="text" class="forge-input-native-small" formControlName="description" placeholder="Ej: +1 CA"></td>
                                   <td>
                                     <button type="button" class="btn-icon-delete" (click)="removeFeatureProgressionRow(i, pi)">

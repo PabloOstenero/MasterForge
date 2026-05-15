@@ -53,6 +53,8 @@ export interface FeatureProgression {
   additionalChoices?: number;
   resourceMax?: number | string;
   bonus?: number;
+  diceCount?: number;
+  diceType?: string;
   description?: string;
 }
 
@@ -93,6 +95,7 @@ export interface FeatureEntry {
     };
     innateSpells?: any[]; // Array of InnateSpell objects
     effects?: any[];
+    progression?: FeatureProgression[];
   };
 }
 

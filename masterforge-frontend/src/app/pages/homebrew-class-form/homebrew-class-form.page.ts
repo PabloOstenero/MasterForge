@@ -711,9 +711,11 @@ export class HomebrewClassFormPage implements OnInit {
               actionType: [f.actionType || 'PASSIVE'],
               hasOptions: [!!f.options],
               options: optionsGroup,
-              progression: this.fb.array(((f.progression && f.progression.length > 0) ? f.progression : ((f.options as any)?.progression ?? [])).map((p: any) => this.fb.group({
+              progression: this.fb.array(((f.properties?.progression && f.properties?.progression.length > 0) ? f.properties.progression : ((f.options as any)?.progression ?? [])).map((p: any) => this.fb.group({
                 level: [p.level, Validators.required],
                 additionalChoices: [p.additionalChoices ?? 0],
+                diceCount: [p.diceCount ?? null],
+                diceType: [p.diceType ?? 'd6'],
                 description: [p.description || '']
               }))),
               properties: this.fb.group({
@@ -962,6 +964,8 @@ export class HomebrewClassFormPage implements OnInit {
     progression.push(this.fb.group({
       level: [null, [Validators.required, Validators.min(1), Validators.max(20)]],
       additionalChoices: [1],
+      diceCount: [null],
+      diceType: ['d6'],
       description: ['']
     }));
   }
@@ -1272,9 +1276,9 @@ export class HomebrewClassFormPage implements OnInit {
             actionType: ctrl.get('actionType')?.value,
             classId,
             options: ctrl.get('hasOptions')?.value ? ctrl.get('options')?.value : null,
-            progression: ctrl.get('progression')?.value || [],
             properties: {
               ...propertiesValue,
+              progression: ctrl.get('progression')?.value || [],
               effects: propertiesValue.effects || []
             }
           }).toPromise(),
@@ -1301,6 +1305,7 @@ export class HomebrewClassFormPage implements OnInit {
         const propertiesValue = currentFormFeature?.get('properties')?.value || {};
         const properties = {
           ...propertiesValue,
+          progression: currentFormFeature?.get('progression')?.value || [],
           effects: propertiesValue.effects || []
         };
 
@@ -1320,7 +1325,6 @@ export class HomebrewClassFormPage implements OnInit {
               actionType: currentFormFeature?.get('actionType')?.value,
               classId,
               options: options as any,
-              progression: currentFormFeature?.get('progression')?.value || [],
               properties: properties
             }).toPromise(),
           );

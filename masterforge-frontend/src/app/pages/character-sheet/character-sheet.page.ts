@@ -428,10 +428,25 @@ export class CharacterSheetPage implements OnInit {
                 .map(f => ({ ...f, _className: data.dndClass?.name }));
               allFeats.push(...mapped);
             }
-            return allFeats.map(f => ({
-              ...f,
-              selectedOptions: (data.choicesJson?.featureOptions?.[f.name] || [])
-            }));
+            return allFeats.map(f => {
+              let scalingText = '';
+              const prog = (f.progression && f.progression.length > 0) ? f.progression : ((f.options as any)?.progression ?? []);
+              if (prog && Array.isArray(prog)) {
+                const effLevel = f._className ? (data.classLevels?.find((c:any) => c.dndClass.name === f._className)?.level || data.level) : data.level;
+                const validProgs = prog.filter((p: any) => p.level <= effLevel).sort((a: any, b: any) => b.level - a.level);
+                if (validProgs.length > 0) {
+                  const currentProg = validProgs[0];
+                  if (currentProg.diceCount && currentProg.diceType) {
+                    scalingText = `${currentProg.diceCount}${currentProg.diceType}`;
+                  }
+                }
+              }
+              return {
+                ...f,
+                _scalingText: scalingText,
+                selectedOptions: (data.choicesJson?.featureOptions?.[f.name] || [])
+              };
+            });
           })(),
           proficiencies: {
             armor: this.extractArrayFromClassFeatures(data.dndClass?.classFeatures, 'armorProficiencies'),
