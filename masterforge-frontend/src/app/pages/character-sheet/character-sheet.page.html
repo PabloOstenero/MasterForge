@@ -303,9 +303,12 @@
         </div>
       </ion-col>
       <ion-col size="6">
-        <div class="combat-square-box">
-          <div class="combat-value">{{ pj.speed }}</div>
+        <div class="combat-square-box" [style.border-color]="armorStrengthPenalty < 0 ? '#e57373' : ''">
+          <div class="combat-value" [style.color]="armorStrengthPenalty < 0 ? '#e57373' : ''">{{ effectiveSpeed }}</div>
           <div class="combat-label">Velocidad</div>
+          @if (armorStrengthPenalty < 0) {
+            <div style="font-size: 0.6rem; color: #e57373; margin-top: 2px; line-height: 1.2;">⚠ FUE insuficiente (–10)</div>
+          }
         </div>
       </ion-col>
     </ion-row>
@@ -394,6 +397,9 @@
         {{ item.name }}
         @if (item.properties?.stealthDisadvantage && item.equipped) {
           <span style="font-size: 0.7rem; margin-left: 3px;" title="Desventaja en Sigilo">⚠</span>
+        }
+        @if (item.equipped && (pj.stats?.str ?? 10) < (item.properties?.strengthRequirement ?? 0)) {
+          <span style="font-size: 0.7rem; margin-left: 3px;" title="FUE insuficiente: –10 ft velocidad">⚠ FUE</span>
         }
       </ion-badge>
       }

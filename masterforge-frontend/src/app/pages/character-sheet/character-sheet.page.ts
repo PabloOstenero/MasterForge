@@ -72,6 +72,27 @@ export class CharacterSheetPage implements OnInit {
     );
   }
 
+  /**
+   * Returns –10 if the character's STR is below the equipped armor's strengthRequirement,
+   * or 0 if there is no penalty. Implements D&D 5e PHB rule (pg. 144).
+   */
+  get armorStrengthPenalty(): number {
+    const str = this.pj.stats?.str ?? 10;
+    const penaltyArmor = (this.pj.inventory || []).find(
+      (item: any) =>
+        item.equipped &&
+        this.itemIs(item, 'ARMOR') &&
+        typeof item.properties?.strengthRequirement === 'number' &&
+        str < item.properties.strengthRequirement
+    );
+    return penaltyArmor ? -10 : 0;
+  }
+
+  /** Effective movement speed after applying any armor strength penalty. */
+  get effectiveSpeed(): number {
+    return (this.pj.speed || 30) + this.armorStrengthPenalty;
+  }
+
   // We initialize with default values so that the screen doesn't break while waiting for the backend
   pj: any = {
     name: 'Cargando...',
