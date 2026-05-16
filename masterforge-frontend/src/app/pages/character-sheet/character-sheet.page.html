@@ -275,6 +275,9 @@
           [class.outline]="!pj.skillProficiencies?.[skill.id]"></div>
         <ion-label>
           <h2>{{ skill.name }}
+            @if (skill.id === 'stealth' && hasStealthDisadvantage) {
+              <span style="color: #e57373; font-size: 0.75rem; margin-left: 4px;" title="Desventaja en Sigilo por armadura equipada">⚠ Desventaja</span>
+            }
             @if (pj.choicesJson?.expertise?.includes(skill.id)) {
             <span class="accent-text" title="Pericia">[P+]</span>
             }
@@ -389,6 +392,9 @@
       @if (itemIs(item, 'ARMOR', 'SHIELD')) {
       <ion-badge [color]="item.equipped ? 'success' : 'medium'" (click)="toggleEquip(item.id)" class="ion-margin-end">
         {{ item.name }}
+        @if (item.properties?.stealthDisadvantage && item.equipped) {
+          <span style="font-size: 0.7rem; margin-left: 3px;" title="Desventaja en Sigilo">⚠</span>
+        }
       </ion-badge>
       }
       }

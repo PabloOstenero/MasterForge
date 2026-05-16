@@ -65,6 +65,13 @@ export class CharacterSheetPage implements OnInit {
     return types.some(type => type.toUpperCase() === t);
   }
 
+  // Returns true if the character is wearing heavy armor that imposes stealth disadvantage
+  get hasStealthDisadvantage(): boolean {
+    return (this.pj.inventory || []).some(
+      (item: any) => item.equipped && this.itemIs(item, 'ARMOR') && item.properties?.stealthDisadvantage === true
+    );
+  }
+
   // We initialize with default values so that the screen doesn't break while waiting for the backend
   pj: any = {
     name: 'Cargando...',
