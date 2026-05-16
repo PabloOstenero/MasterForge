@@ -623,7 +623,7 @@ export class HomebrewSubclassFormPage implements OnInit {
         // Features FormArray
         // ---------------------------------------------------------------
         this.features.clear();
-        (sf.features ?? sf.subclassFeatureEntries ?? []).forEach((entry: FeatureEntry) => {
+        (sf.features ?? sf.subclassFeatureEntries ?? []).forEach((entry: any) => {
           const featureGroup = this.fb.group({
             id: [entry.id ?? null],
             name: [entry.name, Validators.required],
@@ -673,6 +673,9 @@ export class HomebrewSubclassFormPage implements OnInit {
                 propsGroup.addControl('acBonusArmorOnly', this.fb.control(entry.properties.acBonusArmorOnly ?? false));
               }
               if (entry.properties.resourcePool) propsGroup.addControl('resourcePool', this.fb.group(entry.properties.resourcePool));
+              if (entry.properties.bonusAttunementSlots !== undefined && entry.properties.bonusAttunementSlots !== null) {
+                propsGroup.addControl('bonusAttunementSlots', this.fb.control(entry.properties.bonusAttunementSlots));
+              }
             }
 
           this.features.push(featureGroup);

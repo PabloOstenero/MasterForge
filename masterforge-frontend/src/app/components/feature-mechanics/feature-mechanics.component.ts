@@ -4,7 +4,7 @@ import { ReactiveFormsModule, FormGroup, FormBuilder, FormArray } from '@angular
 import { IonInput, IonCheckbox, IonItem, IonLabel, IonIcon, IonButton } from '@ionic/angular/standalone';
 import { ABILITIES } from '../../pages/homebrew-class-form/homebrew-class-form.page';
 import { addIcons } from 'ionicons';
-import { shieldOutline, addOutline, flashOutline, trendingUpOutline } from 'ionicons/icons';
+import { shieldOutline, addOutline, flashOutline, trendingUpOutline, wifiOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-feature-mechanics',
@@ -28,6 +28,11 @@ import { shieldOutline, addOutline, flashOutline, trendingUpOutline } from 'ioni
             <input type="checkbox" [checked]="hasResource" (change)="toggleResource($event)">
             <span class="slider-mini"></span>
             <span class="toggle-label-mini">Contador de Recursos</span>
+          </label>
+          <label class="toggle-switch-mini">
+            <input type="checkbox" [checked]="hasAttunement" (change)="toggleAttunement($event)">
+            <span class="slider-mini"></span>
+            <span class="toggle-label-mini">Sintonización</span>
           </label>
         </div>
         
@@ -155,6 +160,25 @@ import { shieldOutline, addOutline, flashOutline, trendingUpOutline } from 'ioni
                 </div>
               </div>
               <p class="field-hint-mini">Usa "level" o "PB" (Bono Competencia) en Máximo para escalado dinámico.</p>
+            </div>
+          </div>
+        }
+
+        <!-- ATTUNEMENT MODIFIER -->
+        @if (hasAttunement) {
+          <div class="mechanic-group-box">
+            <header class="mechanic-box-header">
+              <ion-icon name="wifi-outline"></ion-icon>
+              <h4>Espacios de Sintonización</h4>
+            </header>
+            <div class="mechanic-details">
+              <div class="field-grid">
+                <div class="field-group">
+                  <label class="field-label">Espacios Adicionales</label>
+                  <ion-input type="number" formControlName="bonusAttunementSlots" class="forge-input" placeholder="+1"></ion-input>
+                </div>
+              </div>
+              <p class="field-hint-mini">Esto aumentará el límite máximo de objetos mágicos sintonizados (Base 3) para el personaje.</p>
             </div>
           </div>
         }
@@ -313,9 +337,10 @@ export class FeatureMechanicsComponent implements OnInit {
   hasStats = false;
   hasDefense = false;
   hasResource = false;
+  hasAttunement = false;
 
   constructor(private fb: FormBuilder) {
-    addIcons({ shieldOutline, addOutline, flashOutline, trendingUpOutline });
+    addIcons({ shieldOutline, addOutline, flashOutline, trendingUpOutline, wifiOutline });
   }
 
   ngOnInit() {
@@ -329,6 +354,7 @@ export class FeatureMechanicsComponent implements OnInit {
     this.hasStats = !!props.get('statModifiers');
     this.hasDefense = !!props.get('acCalculation') || props.get('acBonus') !== null;
     this.hasResource = !!props.get('resourcePool');
+    this.hasAttunement = props.get('bonusAttunementSlots') !== null;
   }
 
   toggleStats(event: any) {
@@ -372,6 +398,16 @@ export class FeatureMechanicsComponent implements OnInit {
       }));
     } else {
       props.removeControl('resourcePool');
+    }
+  }
+
+  toggleAttunement(event: any) {
+    this.hasAttunement = event.target.checked;
+    const props = this.parentForm.get('properties') as FormGroup;
+    if (this.hasAttunement) {
+      props.addControl('bonusAttunementSlots', this.fb.control(1));
+    } else {
+      props.removeControl('bonusAttunementSlots');
     }
   }
 

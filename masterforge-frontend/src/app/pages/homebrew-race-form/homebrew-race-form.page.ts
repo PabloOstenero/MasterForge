@@ -538,6 +538,9 @@ export class HomebrewRaceFormPage implements OnInit {
                 propsGroup.addControl('acBonusArmorOnly', this.fb.control(props.acBonusArmorOnly ?? false));
               }
               if (props.resourcePool) propsGroup.addControl('resourcePool', this.fb.group(props.resourcePool));
+              if (props.bonusAttunementSlots !== undefined && props.bonusAttunementSlots !== null) {
+                propsGroup.addControl('bonusAttunementSlots', this.fb.control(props.bonusAttunementSlots));
+              }
             }
 
             if (options.options) {

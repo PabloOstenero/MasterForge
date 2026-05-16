@@ -10,7 +10,7 @@ import {
 } from '@ionic/angular/standalone';
 import { ApiService } from '../../services/api';
 import { addIcons } from 'ionicons';
-import { statsChart, sparkles, shield, briefcase, trash, add, addCircleOutline, checkmarkCircle, trashOutline, syncOutline, book, bookOutline, settingsOutline, trendingUpOutline, removeCircleOutline, refreshOutline, sparklesOutline, flaskOutline, hammerOutline, flashOutline, addOutline } from 'ionicons/icons';
+import { statsChart, sparkles, shield, briefcase, trash, add, addCircleOutline, checkmarkCircle, trashOutline, syncOutline, book, bookOutline, settingsOutline, trendingUpOutline, removeCircleOutline, refreshOutline, sparklesOutline, flaskOutline, hammerOutline, flashOutline, addOutline, wifiOutline } from 'ionicons/icons';
 import { FeatureChoicePickerComponent } from '../../components/feature-choice-picker/feature-choice-picker.component';
 import { getProficiencyBonus, getModifier, calculatePassive, calculateMulticlassHp } from '../../utils/dnd-utils';
 
@@ -276,7 +276,8 @@ export class CharacterSheetPage implements OnInit {
       'checkmark-circle': checkmarkCircle,
       'flask-outline': flaskOutline,
       'hammer-outline': hammerOutline,
-      'flash-outline': flashOutline
+      'flash-outline': flashOutline,
+      'wifi-outline': wifiOutline
     });
   }
 
@@ -334,8 +335,13 @@ export class CharacterSheetPage implements OnInit {
         if (typeof sm.cha === 'number') stats.cha += sm.cha;
       }
     });
-    
-    const equipped = (data.inventory || []).filter((s: any) => s.equipped);
+    const isItemActive = (s: any) => {
+      const reqAtt = s.item.properties?.requiresAttunement;
+      const requiresAttunement = reqAtt === true || reqAtt === 'true';
+      return !requiresAttunement || s.isAttuned || s.attuned;
+    };
+
+    const equipped = (data.inventory || []).filter((s: any) => (s.equipped || s.isEquipped) && isItemActive(s));
 
     equipped.forEach((slot: any) => {
       const props = slot.item.properties || {};
@@ -489,7 +495,8 @@ export class CharacterSheetPage implements OnInit {
             name: slot.item.name,
             type: slot.item.type,
             quantity: slot.quantity,
-            equipped: slot.equipped,
+            equipped: slot.equipped || slot.isEquipped,
+            isAttuned: slot.isAttuned || slot.attuned || false,
             weight: slot.item.weight,
             description: slot.item.properties?.description || slot.item.description || '',
             properties: slot.item.properties || {}
@@ -591,6 +598,49 @@ export class CharacterSheetPage implements OnInit {
       next: (updatedChar) => {
         // Re-load to trigger recalculation of AC and modifiers
         this.loadCharacter(this.characterId!);
+      }
+    });
+  }
+
+  getAttunedCount(): number {
+    if (!this.pj?.inventory) return 0;
+    return this.pj.inventory.filter((s: any) => s.isAttuned).length;
+  }
+
+  getMaxAttunementSlots(): number {
+    if (!this.pj) return 3;
+    let bonusSlots = 0;
+    const allFeats = this.getAllCharacterFeatures(this.rawCharacter || this.pj);
+    allFeats.forEach(f => {
+      // Check base feature and all selected options
+      const itemsToScan = [f, ...(f.selectedOptions || [])];
+      itemsToScan.forEach(obj => {
+        const props = obj.properties || obj.options || {};
+        if (props.bonusAttunementSlots) {
+          bonusSlots += Number(props.bonusAttunementSlots);
+        }
+      });
+    });
+    return 3 + bonusSlots;
+  }
+
+  async toggleAttune(slotId: number) {
+    if (!this.characterId) return;
+    this.apiService.toggleAttune(this.characterId, slotId).subscribe({
+      next: (updatedChar) => {
+        this.loadCharacter(this.characterId!);
+      },
+      error: async (err) => {
+        if (err.status === 400) {
+          const alert = await this.alertController.create({
+            header: 'Sintonización Máxima',
+            message: err.error?.message || 'No puedes sintonizar más objetos.',
+            buttons: ['OK']
+          });
+          await alert.present();
+        } else {
+          console.error('Error toggling attunement:', err);
+        }
       }
     });
   }
@@ -2393,8 +2443,14 @@ export class CharacterSheetPage implements OnInit {
   private calculateEffectiveAC(data: any, stats: any): number {
     const dexMod = getModifier(stats.dex);
     const inventory = data.inventory || [];
-    const armor = inventory.find((s: any) => s.equipped && s.item.type === 'ARMOR');
-    const shield = inventory.find((s: any) => s.equipped && s.item.type === 'SHIELD');
+    const isItemActive = (s: any) => {
+      const reqAtt = s.item.properties?.requiresAttunement;
+      const requiresAttunement = reqAtt === true || reqAtt === 'true';
+      return !requiresAttunement || s.isAttuned || s.attuned;
+    };
+
+    const armor = inventory.find((s: any) => (s.equipped || s.isEquipped) && s.item.type === 'ARMOR');
+    const shield = inventory.find((s: any) => (s.equipped || s.isEquipped) && s.item.type === 'SHIELD' && isItemActive(s));
 
     // Get features that the character actually has at their current level
     const allFeatures = this.getAllCharacterFeatures(data);
@@ -2490,7 +2546,7 @@ export class CharacterSheetPage implements OnInit {
     });
 
     // - Magic Items (additive AC bonuses)
-    inventory.filter((s: any) => s.equipped && s.item.properties?.bonusAc).forEach((s: any) => {
+    inventory.filter((s: any) => (s.equipped || s.isEquipped) && s.item.properties?.bonusAc && isItemActive(s)).forEach((s: any) => {
       finalAc += Number(s.item.properties.bonusAc);
     });
 

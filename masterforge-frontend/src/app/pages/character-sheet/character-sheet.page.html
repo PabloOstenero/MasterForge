@@ -440,6 +440,12 @@
       </div>
     </div>
 
+    <div style="padding: 10px 16px 0; display: flex; justify-content: space-between; align-items: center;">
+      <h3 style="color: #C5A059; margin: 0; font-family: 'Cinzel', serif; font-size: 1.1rem;">
+        Sintonización: {{ getAttunedCount() }} / {{ getMaxAttunementSlots() }}
+      </h3>
+    </div>
+
     <ion-list class="transparent-list">
       @for (item of pj.inventory; track $index) {
       <ion-item lines="none" class="skill-item">
@@ -447,7 +453,7 @@
           <h2>
             {{ item.name }}
             @if (item.properties?.requiresAttunement) {
-              <ion-badge color="tertiary" style="font-size: 0.55rem; margin-left: 6px; vertical-align: middle;">Sintonía</ion-badge>
+              <ion-badge color="tertiary" [style.opacity]="item.isAttuned ? 1 : 0.4" style="font-size: 0.55rem; margin-left: 6px; vertical-align: middle;">Sintonía</ion-badge>
             }
           </h2>
           <p>Tipo: {{ item.type }} | Cantidad: x{{ item.quantity }}</p>
@@ -483,10 +489,21 @@
         <ion-button slot="end" fill="clear" (click)="removeItem(item.id)">
           <ion-icon name="trash" color="danger"></ion-icon>
         </ion-button>
-        <ion-badge [color]="item.equipped ? 'success' : 'medium'" slot="end" (click)="toggleEquip(item.id)"
-          style="cursor: pointer;">
-          {{ item.equipped ? 'Equipado' : 'Mochila' }}
-        </ion-badge>
+        
+        <div slot="end" style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+          <ion-badge [color]="item.equipped ? 'success' : 'medium'" (click)="toggleEquip(item.id)"
+            style="cursor: pointer; width: 100%;">
+            {{ item.equipped ? 'Equipado' : 'Mochila' }}
+          </ion-badge>
+          
+          @if (item.properties?.requiresAttunement) {
+            <ion-badge [color]="item.isAttuned ? 'tertiary' : 'medium'" (click)="toggleAttune(item.id)"
+              style="cursor: pointer; width: 100%;">
+              <ion-icon name="wifi-outline" style="vertical-align: middle; margin-right: 2px;"></ion-icon>
+              {{ item.isAttuned ? 'Sintonizado' : 'Sin Sintonizar' }}
+            </ion-badge>
+          }
+        </div>
       </ion-item>
       }
     </ion-list>

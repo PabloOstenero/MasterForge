@@ -51,6 +51,10 @@ export class ApiService {
     return this.http.put(`${this.apiUrl}/characters/${charId}/inventory/${slotId}/toggle-equip`, {});
   }
 
+  toggleAttune(charId: string, slotId: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/characters/${charId}/inventory/${slotId}/toggle-attune`, {});
+  }
+
   // Consumes one use of an item
   useItem(charId: string, slotId: number): Observable<any> {
     return this.http.put(`${this.apiUrl}/characters/${charId}/inventory/${slotId}/use`, {});

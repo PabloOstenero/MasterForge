@@ -649,6 +649,41 @@ class CharacterController(
         return ResponseEntity.ok(CharacterResponseDto.fromEntity(saved))
     }
 
+    @PutMapping("/{id}/inventory/{slotId}/toggle-attune")
+    @Transactional
+    fun toggleAttune(@PathVariable id: UUID, @PathVariable slotId: Int): ResponseEntity<CharacterResponseDto> {
+        val character = characterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+
+        val index = character.inventory.indexOfFirst { it.id == slotId }
+        if (index == -1) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Slot not found")
+        }
+
+        val slot = character.inventory[index]
+
+        if (!slot.isAttuned) {
+            val maxSlots = getMaxAttunementSlots(character)
+            val currentAttunedCount = character.inventory.count { it.isAttuned }
+            if (currentAttunedCount >= maxSlots) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "No tienes más espacios de sintonización (Máximo: $maxSlots)")
+            }
+        }
+
+        val oldMax = calculateEffectiveMaxHp(character)
+        
+        character.inventory[index] = slot.copy(isAttuned = !slot.isAttuned)
+        
+        val newMax = calculateEffectiveMaxHp(character)
+        val delta = newMax - oldMax
+        
+        val updatedHp = Math.max(0, Math.min(newMax, character.currentHp + delta))
+        val finalCharacter = character.copy(currentHp = updatedHp)
+        
+        val saved = characterRepository.save(finalCharacter)
+        return ResponseEntity.ok(CharacterResponseDto.fromEntity(saved))
+    }
+
     @PostMapping("/{id}/inventory/{itemId}")
     @Transactional
     fun addItemToInventory(@PathVariable id: UUID, @PathVariable itemId: UUID): ResponseEntity<CharacterResponseDto> {
@@ -978,6 +1013,39 @@ class CharacterController(
         return conBonus
     }
 
+    private fun getMaxAttunementSlots(character: Character): Int {
+        var bonusSlots = 0
+        val choices = character.choicesJson ?: emptyMap()
+
+        fun processFeature(id: Int?, name: String, options: Map<String, Any>?, properties: Map<String, Any>?) {
+            bonusSlots += (properties?.get("bonusAttunementSlots") as? Number)?.toInt() ?: 0
+            val featureKey = id?.toString() ?: name
+            val userChoice = choices[featureKey]
+            if (userChoice != null && options != null) {
+                val choicesList = options["choices"] as? List<*>
+                val choiceArray = if (userChoice is List<*>) userChoice else listOf(userChoice)
+                choiceArray.forEach { choiceLabel ->
+                    val opt = choicesList?.find { (it as? Map<*, *>)?.get("label") == choiceLabel } as? Map<*, *>
+                    if (opt != null) {
+                        bonusSlots += (opt["properties"] as? Map<String, Any>)?.get("bonusAttunementSlots") as? Int ?: 0
+                    }
+                }
+            }
+        }
+
+        character.dndRace?.traits?.forEach { processFeature(it.id, it.name, it.options, it.properties) }
+        character.dndClass.features
+            .filter { it.levelRequired <= character.level }
+            .forEach { processFeature(it.id, it.name, it.options, it.properties) }
+        character.classLevels.forEach { cl ->
+            cl.subclass?.features
+                ?.filter { it.levelRequired <= cl.level }
+                ?.forEach { processFeature(it.id, it.name, it.options, it.properties) }
+        }
+
+        return 3 + bonusSlots
+    }
+
     private fun calculateEffectiveMaxHp(character: Character): Int {
         val featureConBonus = extractConModifier(character)
         var effectiveCon = character.baseCon + featureConBonus
@@ -986,8 +1054,11 @@ class CharacterController(
         println("DEBUG: Calculating effective HP. Base CON: ${character.baseCon}")
 
         character.inventory.forEach { slot ->
-            if (slot.isEquipped) {
-                val props = slot.item.properties
+            val props = slot.item.properties
+            val reqAtt = props?.get("requiresAttunement")
+            val requiresAttunement = reqAtt == true || reqAtt?.toString() == "true"
+            
+            if (slot.isEquipped && (!requiresAttunement || slot.isAttuned)) {
                 // Stat Overrides
                 props?.get("overrideCon")?.let { 
                     val v = (it as? Number)?.toInt() ?: 0
