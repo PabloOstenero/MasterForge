@@ -444,9 +444,37 @@
       @for (item of pj.inventory; track $index) {
       <ion-item lines="none" class="skill-item">
         <ion-label (click)="openDetail(item, 'ITEM')">
-          <h2>{{ item.name }}</h2>
+          <h2>
+            {{ item.name }}
+            @if (item.properties?.requiresAttunement) {
+              <ion-badge color="tertiary" style="font-size: 0.55rem; margin-left: 6px; vertical-align: middle;">Sintonía</ion-badge>
+            }
+          </h2>
           <p>Tipo: {{ item.type }} | Cantidad: x{{ item.quantity }}</p>
+          @if (hasMagicCharges(item)) {
+            <p style="color: #C5A059; font-size: 0.8rem; margin: 2px 0 0;">
+              Cargas: {{ getItemCharges(item) }} / {{ item.properties?.charges }}
+              @if (item.properties?.recharge === 'SHORT_REST') {
+                <span style="color: #888; margin-left: 4px;">(Descanso Corto)</span>
+              } @else if (item.properties?.recharge === 'LONG_REST') {
+                <span style="color: #888; margin-left: 4px;">(Descanso Largo)</span>
+              } @else {
+                <span style="color: #888; margin-left: 4px;">(Manual)</span>
+              }
+            </p>
+          }
         </ion-label>
+        @if (hasMagicCharges(item)) {
+          <ion-button slot="end" fill="clear" (click)="useItemCharge(item)"
+            [disabled]="getItemCharges(item) <= 0" title="Gastar 1 carga">
+            <ion-icon name="remove-circle-outline" color="danger"></ion-icon>
+          </ion-button>
+          <ion-button slot="end" fill="clear" (click)="incrementItemCharge(item)"
+            [disabled]="getItemCharges(item) >= item.properties?.charges"
+            title="Añadir 1 carga">
+            <ion-icon name="add-circle-outline" color="success"></ion-icon>
+          </ion-button>
+        }
         @if (itemIs(item, 'POTION', 'CONSUMABLE')) {
         <ion-button slot="end" fill="clear" (click)="useItem(item)">
           <ion-icon name="sparkles" color="warning"></ion-icon>

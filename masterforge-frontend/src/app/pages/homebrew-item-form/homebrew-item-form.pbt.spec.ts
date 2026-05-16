@@ -96,9 +96,12 @@ const potionFormArb: fc.Arbitrary<PotionFormValues> = fc.record({
 
 /** Arbitrary for MagicalFormValues */
 const magicalFormArb: fc.Arbitrary<MagicalFormValues> = fc.record({
-  charges:      fc.option(fc.integer({ min: 0, max: 20 }), { nil: null }),
-  recharge:     fc.oneof(fc.constant(''), fc.string({ minLength: 1, maxLength: 40 })),
-  attunementBy: fc.oneof(fc.constant(''), fc.string({ minLength: 1, maxLength: 60 })),
+  charges:           fc.option(fc.integer({ min: 0, max: 20 }), { nil: null }),
+  recharge:          fc.oneof(fc.constant(''), fc.string({ minLength: 1, maxLength: 40 })),
+  rechargeDiceCount: fc.option(fc.integer({ min: 1, max: 10 }), { nil: null }),
+  rechargeDieType:   fc.constantFrom('d4', 'd6', 'd8', 'd10', 'd12', 'd20'),
+  rechargeBonus:     fc.option(fc.integer({ min: -5, max: 10 }), { nil: null }),
+  attunementBy:      fc.oneof(fc.constant(''), fc.string({ minLength: 1, maxLength: 60 })),
 });
 
 /** Arbitrary for AmmunitionFormValues */
@@ -139,7 +142,14 @@ const defaultShield: ShieldFormValues = { acBonus: 2, magicalBonus: 0 };
 
 const defaultPotion: PotionFormValues = { healingDiceCount: null, healingDieType: 'd4', healingAmount: null, effectDescription: '' };
 
-const defaultMagical: MagicalFormValues = { charges: null, recharge: '', attunementBy: '' };
+const defaultMagical: MagicalFormValues = { 
+  charges: null, 
+  recharge: '', 
+  rechargeDiceCount: null, 
+  rechargeDieType: 'd4', 
+  rechargeBonus: null, 
+  attunementBy: '' 
+};
 
 const defaultAmmunition: AmmunitionFormValues = { damageBonus: null, magicalBonus: 0 };
 
@@ -323,6 +333,9 @@ describe('buildItemProperties() — Property-Based Tests', () => {
     const emptyMagical: MagicalFormValues = {
       charges: null,
       recharge: '',
+      rechargeDiceCount: null,
+      rechargeDieType: 'd4',
+      rechargeBonus: null,
       attunementBy: '',
     };
 

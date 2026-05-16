@@ -320,7 +320,24 @@
 
             <div class="field-group">
               <label class="field-label">Recarga <span class="optional-tag">opcional</span></label>
-              <ion-input class="forge-input" formControlName="recharge" placeholder="Al amanecer"></ion-input>
+              <select class="forge-select-native" formControlName="recharge">
+                <option value="">-- Sin recarga definida --</option>
+                @for (opt of rechargeOptions; track opt.value) {
+                  <option [value]="opt.value">{{ opt.label }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Cantidad a recargar <span class="optional-tag">dejar vacío para TODO</span></label>
+              <div class="dice-row">
+                <ion-input class="forge-input dice-count" type="number" formControlName="rechargeDiceCount" placeholder="1" min="1"></ion-input>
+                <select class="forge-select-native die-type" formControlName="rechargeDieType">
+                  @for (d of dieTypes; track $index) { <option [value]="d">{{ d }}</option> }
+                </select>
+                <span class="dice-plus">+</span>
+                <ion-input class="forge-input dice-bonus" type="number" formControlName="rechargeBonus" placeholder="0"></ion-input>
+              </div>
             </div>
 
             <div class="field-group">

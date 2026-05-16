@@ -54,6 +54,13 @@ export const ARMOR_CATEGORIES = ['Light', 'Medium', 'Heavy'] as const;
 /** Ability score keys used for weapon attack/damage rolls. */
 export const ABILITY_STATS = ['str', 'dex'] as const;
 
+/** Structured recharge options — replaces the old free-text field. */
+export const RECHARGE_OPTIONS = [
+  { value: 'SHORT_REST', label: 'Descanso Corto' },
+  { value: 'LONG_REST',  label: 'Descanso Largo' },
+  { value: 'MANUAL',     label: 'Manual' },
+] as const;
+
 import { FeatureEntry } from '../../models/homebrew.models';
 
 /** Form values for the weapon properties sub-group. */
@@ -101,6 +108,9 @@ export interface PotionFormValues {
 export interface MagicalFormValues {
   charges: number | null;
   recharge: string;
+  rechargeDiceCount: number | null;
+  rechargeDieType: string;
+  rechargeBonus: number | null;
   attunementBy: string;
 }
 
@@ -232,6 +242,9 @@ export function buildItemProperties(
   } else if ((MAGICAL_ITEM_TYPES as readonly string[]).includes(itemType)) {
     addOptional('charges', magical.charges);
     addOptional('recharge', magical.recharge);
+    addOptional('rechargeDiceCount', magical.rechargeDiceCount);
+    addOptional('rechargeDieType', magical.rechargeDieType);
+    addOptional('rechargeBonus', magical.rechargeBonus);
     addOptional('attunementBy', magical.attunementBy);
     if (specialAbilities.length > 0) {
       props['specialAbilities'] = specialAbilities;
@@ -302,6 +315,7 @@ export class HomebrewItemFormPage implements OnInit {
   readonly magicalBonuses = MAGICAL_BONUSES;
   readonly armorCategories = ARMOR_CATEGORIES;
   readonly abilityStats = ABILITY_STATS;
+  readonly rechargeOptions = RECHARGE_OPTIONS;
 
   constructor(
     private fb: FormBuilder,
@@ -481,9 +495,12 @@ export class HomebrewItemFormPage implements OnInit {
 
       // Magical item sub-group
       magical: this.fb.group({
-        charges:      [null, Validators.min(0)],
-        recharge:     [''],
-        attunementBy: [''],
+        charges:           [null, Validators.min(0)],
+        recharge:          [''],
+        rechargeDiceCount: [null, Validators.min(1)],
+        rechargeDieType:   ['d4'],
+        rechargeBonus:     [null],
+        attunementBy:      [''],
       }),
 
       // Ammunition sub-group
@@ -604,9 +621,12 @@ export class HomebrewItemFormPage implements OnInit {
         });
 
         this.form.get('magical')?.patchValue({
-          charges:      p.charges ?? null,
-          recharge:     p.recharge ?? '',
-          attunementBy: p.attunementBy ?? '',
+          charges:           p.charges ?? null,
+          recharge:          p.recharge ?? '',
+          rechargeDiceCount: p.rechargeDiceCount ?? null,
+          rechargeDieType:   p.rechargeDieType ?? 'd4',
+          rechargeBonus:     p.rechargeBonus ?? null,
+          attunementBy:      p.attunementBy ?? '',
         });
 
         this.form.get('ammunition')?.patchValue({

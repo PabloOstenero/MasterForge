@@ -6,7 +6,7 @@ import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonSegment, IonSegmentButton, IonLabel,
   IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
   IonItem, IonBadge, IonList, IonIcon, IonButton, IonFooter, IonBackButton, IonButtons,
-  AlertController, ActionSheetController, ModalController, IonSearchbar, IonModal, IonCheckbox
+  AlertController, ActionSheetController, ModalController, IonSearchbar, IonModal, IonCheckbox, ToastController
 } from '@ionic/angular/standalone';
 import { ApiService } from '../../services/api';
 import { addIcons } from 'ionicons';
@@ -91,6 +91,79 @@ export class CharacterSheetPage implements OnInit {
   /** Effective movement speed after applying any armor strength penalty. */
   get effectiveSpeed(): number {
     return (this.pj.speed || 30) + this.armorStrengthPenalty;
+  }
+
+  // ── Magic Item Charges Engine ─────────────────────────────────────────────
+
+  /** Stable key for storing this item's charge count in resourceCounters. */
+  private getItemChargeKey(item: any): string {
+    return `__item_charge_${item.id}`;
+  }
+
+  /** Returns true for items that have a charge pool defined. */
+  hasMagicCharges(item: any): boolean {
+    return typeof item.properties?.charges === 'number' && item.properties.charges > 0;
+  }
+
+  /** Current charges — reads from resourceCounters, falls back to max on first load. */
+  getItemCharges(item: any): number {
+    const key = this.getItemChargeKey(item);
+    const max = item.properties?.charges ?? 0;
+    return this.pj.resourceCounters[key] ?? max;
+  }
+
+  /** Spends one charge and persists. */
+  useItemCharge(item: any): void {
+    const current = this.getItemCharges(item);
+    if (current <= 0) return;
+    const key = this.getItemChargeKey(item);
+    this.pj.resourceCounters[key] = current - 1;
+    if (this.characterId) {
+      this.apiService.updateResourceCounters(this.characterId, this.pj.resourceCounters).subscribe();
+    }
+  }
+
+  /** Increments charges by 1 (clamped to max) and persists. */
+  incrementItemCharge(item: any): void {
+    const key = this.getItemChargeKey(item);
+    const max = item.properties?.charges ?? 0;
+    const current = this.getItemCharges(item);
+    if (current >= max) return;
+    
+    this.pj.resourceCounters[key] = current + 1;
+    if (this.characterId) {
+      this.apiService.updateResourceCounters(this.characterId, this.pj.resourceCounters).subscribe();
+    }
+  }
+
+  /** Calculates the recovered amount based on structured dice fields. */
+  rollRecharge(item: any, maxCharges: number): number {
+    const props = item.properties || {};
+    const count = props.rechargeDiceCount;
+    const bonus = props.rechargeBonus || 0;
+    
+    // If no dice and no bonus are specified, assume "restore all"
+    if (!count && !bonus) return maxCharges;
+    
+    let total = 0;
+    if (count && props.rechargeDieType) {
+      const faces = parseInt(props.rechargeDieType.replace('d', ''), 10) || 0;
+      for (let i = 0; i < count; i++) {
+        total += Math.floor(Math.random() * faces) + 1;
+      }
+    }
+    
+    return total + bonus;
+  }
+
+  async presentToast(message: string) {
+    const toast = await this.toastController.create({
+      message: message,
+      duration: 3000,
+      position: 'bottom',
+      color: 'dark'
+    });
+    toast.present();
   }
 
   // We initialize with default values so that the screen doesn't break while waiting for the backend
@@ -179,7 +252,8 @@ export class CharacterSheetPage implements OnInit {
     private route: ActivatedRoute,
     private alertController: AlertController,
     private actionSheetController: ActionSheetController,
-    private modalController: ModalController
+    private modalController: ModalController,
+    private toastController: ToastController
   ) {
     addIcons({
       'stats-chart': statsChart,
@@ -1404,14 +1478,41 @@ export class CharacterSheetPage implements OnInit {
         {
           text: 'Descansar',
           handler: () => {
+            const recoveredMessages: string[] = [];
+
             // Restore resources that reset on Short Rest
             this.resourcePools.forEach(p => {
               if (p.reset === 'SHORT_REST') p.current = p.max;
             });
+
+            // Auto-restore magic item charges that recharge on Short Rest
+            this.pj.inventory
+              .filter((item: any) => item.properties?.recharge === 'SHORT_REST')
+              .forEach((item: any) => {
+                const key = this.getItemChargeKey(item);
+                const current = this.getItemCharges(item);
+                const max = item.properties?.charges ?? 0;
+                if (current < max) {
+                  const recovered = this.rollRecharge(item, max);
+                  const newTotal = Math.min(max, current + recovered);
+                  this.pj.resourceCounters[key] = newTotal;
+                  
+                  const actualRecovered = newTotal - current;
+                  if (actualRecovered > 0) {
+                    recoveredMessages.push(`🪄 ${item.name} recuperó ${actualRecovered} cargas`);
+                  }
+                }
+              });
+
+            // Sync all changes to backend in one single network call
             this.syncResourceCounters();
             
             // Also suggest spending hit dice
             this.updateHitDiceAlert();
+
+            if (recoveredMessages.length > 0) {
+              this.presentToast(recoveredMessages.join('\n'));
+            }
           }
         }
       ]
@@ -1431,10 +1532,47 @@ export class CharacterSheetPage implements OnInit {
           handler: () => {
             this.apiService.performLongRest(this.characterId!).subscribe({
               next: () => {
+                const recoveredMessages: string[] = [];
+
                 // Reset local resource pools
                 this.resourcePools.forEach(p => p.current = p.max);
-                this.syncResourceCounters();
-                this.loadCharacter(this.characterId!);
+
+                // Auto-restore magic item charges that recharge on Long or Short Rest
+                this.pj.inventory
+                  .filter((item: any) =>
+                    item.properties?.recharge === 'LONG_REST' ||
+                    item.properties?.recharge === 'SHORT_REST'
+                  )
+                  .forEach((item: any) => {
+                    const key = this.getItemChargeKey(item);
+                    const current = this.getItemCharges(item);
+                    const max = item.properties?.charges ?? 0;
+                    if (current < max) {
+                      const recovered = this.rollRecharge(item, max);
+                      const newTotal = Math.min(max, current + recovered);
+                      this.pj.resourceCounters[key] = newTotal;
+                      
+                      const actualRecovered = newTotal - current;
+                      if (actualRecovered > 0) {
+                        recoveredMessages.push(`🪄 ${item.name} recuperó ${actualRecovered} cargas`);
+                      }
+                    }
+                  });
+
+                // Manually sync counters and wait for it to finish BEFORE reloading
+                // This prevents the race condition where loadCharacter fetches old data
+                const counters: Record<string, number> = { ...(this.pj.resourceCounters || {}) };
+                this.resourcePools.forEach(p => counters[p.name] = p.current);
+                this.pj.resourceCounters = counters;
+
+                this.apiService.updateResourceCounters(this.characterId!, counters).subscribe({
+                  next: () => {
+                    this.loadCharacter(this.characterId!);
+                    if (recoveredMessages.length > 0) {
+                      this.presentToast(recoveredMessages.join('\n'));
+                    }
+                  }
+                });
               },
               error: (err) => console.error('Error performing long rest:', err)
             });
@@ -2238,10 +2376,13 @@ export class CharacterSheetPage implements OnInit {
   }
 
   private syncResourceCounters() {
-    const counters: Record<string, number> = {};
+    // Preserve existing counters (like magic item charges) that are not part of resourcePools
+    const counters: Record<string, number> = { ...(this.pj.resourceCounters || {}) };
+    
     this.resourcePools.forEach(p => {
       counters[p.name] = p.current;
     });
+    
     this.pj.resourceCounters = counters;
     if (this.characterId) {
       this.apiService.updateResourceCounters(this.characterId, counters).subscribe();
