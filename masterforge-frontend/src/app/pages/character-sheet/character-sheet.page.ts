@@ -494,9 +494,16 @@ export class CharacterSheetPage implements OnInit {
           level: data.level,
           dndClass: data.dndClass?.name || 'Aventurero',
           subclass: data.subclass?.name || 'Sin subclase',
-          fullClassName: (data.classLevels && data.classLevels.length > 0)
-            ? data.classLevels.map((cl: any) => `${cl.dndClass.name} ${cl.level}`).join(' / ')
-            : `${data.dndClass?.name || 'Aventurero'} ${data.level}`,
+          fullClassName: (() => {
+            if (data.classLevels && data.classLevels.length > 0) {
+              const mcSum = data.classLevels.reduce((sum: number, cl: any) => sum + cl.level, 0);
+              const primaryLevel = (data.level || 1) - mcSum;
+              const primaryStr = `${data.dndClass?.name || 'Aventurero'} ${primaryLevel}`;
+              const mcStrings = data.classLevels.map((cl: any) => `${cl.dndClass.name} ${cl.level}`);
+              return [primaryStr, ...mcStrings].join(' / ');
+            }
+            return `${data.dndClass?.name || 'Aventurero'} ${data.level}`;
+          })(),
           choicesJson: data.choicesJson || {},
           maxHp: data.maxHp ?? 10,
           currentHp: data.currentHp ?? 10,
@@ -2550,26 +2557,59 @@ export class CharacterSheetPage implements OnInit {
     }
   }
 
+  private getStatModifier(statCode: string): number {
+    const code = statCode.toLowerCase();
+    let score = 10;
+    if (this.pj && this.pj.stats) {
+      if (code.includes('str')) score = this.pj.stats.str || 10;
+      else if (code.includes('dex')) score = this.pj.stats.dex || 10;
+      else if (code.includes('con')) score = this.pj.stats.con || 10;
+      else if (code.includes('int')) score = this.pj.stats.int || 10;
+      else if (code.includes('wis')) score = this.pj.stats.wis || 10;
+      else if (code.includes('cha')) score = this.pj.stats.cha || 10;
+    }
+    return Math.floor((Number(score) - 10) / 2);
+  }
+
   private calculateResourceMax(rp: any, feat?: any): number {
     let max = rp.max;
 
-    // Handle "level" keyword (dynamic scaling)
-    if (max === 'level') {
-      // If we have a class context, use class level
-      const className = feat?._className || feat?.dndClass?.name;
-      if (className) {
-        const cl = (this.rawCharacter.classLevels || []).find((l: any) =>
-          l.dndClass.name.toLowerCase() === className.toLowerCase()
-        );
-        return cl?.level || this.pj.level;
-      }
-      // Default to character total level
-      return this.pj.level;
-    }
+    if (typeof max === 'string') {
+      const trimmed = max.replace(/\s+/g, '').toUpperCase();
 
-    // Handle "PB" keyword (Proficiency Bonus scaling)
-    if (max === 'PB' || max === 'pb') {
-      return this.pj.proficiencyBonus || 2;
+      // Handle "level" keyword (dynamic scaling)
+      if (trimmed === 'LEVEL') {
+        // If we have a class context, use class level
+        const className = feat?._className || feat?.dndClass?.name;
+        if (className && this.rawCharacter) {
+          const cl = (this.rawCharacter.classLevels || []).find((l: any) =>
+            l.dndClass.name.toLowerCase() === className.toLowerCase()
+          );
+          if (cl) return cl.level;
+
+          // Check if matches the primary class name
+          if (this.rawCharacter.dndClass?.name?.toLowerCase() === className.toLowerCase()) {
+            const multiclassLevelsSum = (this.rawCharacter.classLevels || []).reduce((sum: number, l: any) => sum + l.level, 0);
+            return (this.pj?.level || this.rawCharacter.level || 1) - multiclassLevelsSum;
+          }
+        }
+        // Default to character total level
+        return this.pj?.level || 1;
+      }
+
+      // Handle "PB" keyword (Proficiency Bonus scaling)
+      if (trimmed === 'PB') {
+        return this.pj?.proficiencyBonus || 2;
+      }
+
+      // Match formulas like "1+CHA", "CHA", "WIS", "2+INT", "CON", "1 + WIS"
+      const statMatch = trimmed.match(/^(?:(\d+)\+)?(STR|DEX|CON|INT|WIS|CHA)$/);
+      if (statMatch) {
+        const base = statMatch[1] ? parseInt(statMatch[1], 10) : 0;
+        const stat = statMatch[2];
+        const mod = this.getStatModifier(stat);
+        return Math.max(1, base + mod); // D&D 5e resources always have a minimum of 1 use
+      }
     }
 
     // Handle legacy/other resource types
