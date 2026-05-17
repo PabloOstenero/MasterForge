@@ -687,6 +687,37 @@
           animated="true" mode="md">
         </ion-searchbar>
       </ion-toolbar>
+      <ion-toolbar class="header-toolbar" style="--padding-top: 0; --padding-bottom: 8px;">
+        <div style="display: flex; gap: 8px; padding: 0 16px;">
+          <!-- Level Select -->
+          <div class="custom-filter-select-wrapper" style="flex: 1; position: relative;">
+            <select [value]="selectedSpellLevelFilter" (change)="filterSpellsByLevel($event)" 
+                    style="width: 100%; height: 38px; background: rgba(0,0,0,0.3); color: #C5A059; border: 1px solid rgba(197, 160, 89, 0.4); border-radius: 8px; padding: 0 12px; font-family: 'Outfit', sans-serif; font-size: 0.9rem; font-weight: 500; cursor: pointer; outline: none; appearance: none; -webkit-appearance: none;">
+              <option value="all" style="background: #111; color: #fff;">Todos los Niveles</option>
+              @for (lvl of availableSpellLevels; track lvl) {
+                <option [value]="lvl" style="background: #111; color: #fff;">
+                  {{ lvl === 0 ? 'Trucos' : 'Nivel ' + lvl }}
+                </option>
+              }
+            </select>
+            <div style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #C5A059; font-size: 0.8rem;">▼</div>
+          </div>
+
+          <!-- School Select -->
+          <div class="custom-filter-select-wrapper" style="flex: 1; position: relative;">
+            <select [value]="selectedSpellSchoolFilter" (change)="filterSpellsBySchool($event)" 
+                    style="width: 100%; height: 38px; background: rgba(0,0,0,0.3); color: #C5A059; border: 1px solid rgba(197, 160, 89, 0.4); border-radius: 8px; padding: 0 12px; font-family: 'Outfit', sans-serif; font-size: 0.9rem; font-weight: 500; cursor: pointer; outline: none; appearance: none; -webkit-appearance: none;">
+              <option value="all" style="background: #111; color: #fff;">Todas las Escuelas</option>
+              @for (sch of availableSpellSchools; track sch) {
+                <option [value]="sch" style="background: #111; color: #fff;">
+                  {{ sch }}
+                </option>
+              }
+            </select>
+            <div style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #C5A059; font-size: 0.8rem;">▼</div>
+          </div>
+        </div>
+      </ion-toolbar>
     </ion-header>
 
     <ion-content class="char-sheet-content">

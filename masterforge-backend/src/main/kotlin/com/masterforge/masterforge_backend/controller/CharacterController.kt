@@ -231,7 +231,10 @@ class CharacterController(
                                 ?.mapNotNull { it["name"] as? String } ?: emptyList()
 
         val knownSpellIds = characterSpellRepository.findByCharacterId(id).map { it.spell.id }.toSet()
-        val maxLevel = getMaxSpellLevel(character, targetClass, level)
+        var maxLevel = getMaxSpellLevel(character, targetClass, level)
+        if (maxLevel == 0) {
+            maxLevel = 9 // Ultimate fallback for martial classes or unconfigured spellcaster classes
+        }
 
         // Use a set to avoid duplicates from multiple sources
         val allAvailable = mutableSetOf<Spell>()
@@ -284,8 +287,10 @@ class CharacterController(
         val spell = spellRepository.findById(dto.spellId)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Spell not found") }
         
-        // Final safety check: level must be within capacity
-        val maxLevel = getMaxSpellLevel(character)
+        var maxLevel = getMaxSpellLevel(character)
+        if (maxLevel == 0) {
+            maxLevel = 9 // Ultimate fallback for martial classes or unconfigured spellcaster classes
+        }
         if (spell.level > maxLevel && spell.level != 0) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Spell level too high for character capacity")
         }
@@ -383,7 +388,10 @@ class CharacterController(
             val allIds = (learnedSpells + selectedSpells).distinct().filter { it !in knownStrIds }
             spellRepository.findAllById(allIds.map { UUID.fromString(it) })
         } else {
-            val maxLevel = getMaxSpellLevel(character)
+            var maxLevel = getMaxSpellLevel(character)
+            if (maxLevel == 0) {
+                maxLevel = 9
+            }
             spellRepository.findBySpellClassesContainingIgnoreCase(className)
                 .filter { it.id !in knownSpellIds && it.level > 0 && it.level <= maxLevel }
         }
@@ -459,6 +467,35 @@ class CharacterController(
                     else -> 1
                 }
                 else -> 0
+            }
+        }
+
+        // 4. Heuristic fallback based on class name (in case database seeding is missing)
+        val name = targetClass.name.lowercase()
+        val isFullCaster = name.contains("clérigo") || name.contains("clerico") || name.contains("cleric") ||
+                           name.contains("mago") || name.contains("wizard") ||
+                           name.contains("hechicero") || name.contains("sorcerer") ||
+                           name.contains("druida") || name.contains("druid") ||
+                           name.contains("bardo") || name.contains("bard")
+        
+        val isHalfCaster = name.contains("paladín") || name.contains("paladin") ||
+                           name.contains("explorador") || name.contains("ranger")
+        
+        val isPactMagic = name.contains("brujo") || name.contains("warlock")
+
+        if (isFullCaster) {
+            return (effectiveLevel + 1) / 2
+        }
+        if (isHalfCaster) {
+            return (effectiveLevel / 2 + 1) / 2
+        }
+        if (isPactMagic) {
+            return when {
+                effectiveLevel >= 9 -> 5
+                effectiveLevel >= 7 -> 4
+                effectiveLevel >= 5 -> 3
+                effectiveLevel >= 3 -> 2
+                else -> 1
             }
         }
 

@@ -1010,34 +1010,90 @@ export class CharacterSheetPage implements OnInit {
   availableSpells: any[] = [];
   filteredAvailableSpells: any[] = [];
   spellSearchQuery = '';
+  selectedSpellLevelFilter = 'all';
+  selectedSpellSchoolFilter = 'all';
+  availableSpellSchools: string[] = [];
+  availableSpellLevels: number[] = [];
 
   async openAddSpellPicker() {
     if (!this.characterId) return;
 
     this.apiService.getAvailableSpells(this.characterId).subscribe({
       next: (spells: any[]) => {
-        const maxLevel = this.getMaxSpellLevel();
+        let maxLevel = this.getMaxSpellLevel();
+        if (maxLevel === 0) {
+          maxLevel = 9; // Ultimate fallback so martial classes or custom caster setups can still choose feat/racial spells
+        }
         this.availableSpells = spells.filter(s => s.level === 0 || s.level <= maxLevel)
           .sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
-        this.filteredAvailableSpells = [...this.availableSpells];
+
+        // Extract unique schools and levels dynamically
+        const schoolsSet = new Set<string>();
+        const levelsSet = new Set<number>();
+        this.availableSpells.forEach(s => {
+          if (s.school) {
+            schoolsSet.add(s.school.trim());
+          }
+          if (s.level !== undefined && s.level !== null) {
+            levelsSet.add(s.level);
+          }
+        });
+        
+        this.availableSpellSchools = Array.from(schoolsSet).sort((a, b) => a.localeCompare(b));
+        this.availableSpellLevels = Array.from(levelsSet).sort((a, b) => a - b);
+
+        // Reset filter values
+        this.selectedSpellLevelFilter = 'all';
+        this.selectedSpellSchoolFilter = 'all';
         this.spellSearchQuery = '';
+        
+        this.filteredAvailableSpells = [...this.availableSpells];
         this.isSpellModalOpen = true;
       },
       error: () => console.error('Error loading available spells')
     });
   }
 
-  filterSpells(event: any) {
-    const query = event.detail.value?.toLowerCase() || '';
-    this.spellSearchQuery = query;
-    if (!query) {
-      this.filteredAvailableSpells = [...this.availableSpells];
-      return;
+  applySpellFilters() {
+    let result = [...this.availableSpells];
+
+    // 1. Search Query Filter
+    if (this.spellSearchQuery.trim()) {
+      const query = this.spellSearchQuery.toLowerCase().trim();
+      result = result.filter(s =>
+        s.name.toLowerCase().includes(query) ||
+        (s.school && s.school.toLowerCase().includes(query))
+      );
     }
-    this.filteredAvailableSpells = this.availableSpells.filter(s =>
-      s.name.toLowerCase().includes(query) ||
-      s.school.toLowerCase().includes(query)
-    );
+
+    // 2. Level Filter
+    if (this.selectedSpellLevelFilter !== 'all') {
+      const levelNum = Number(this.selectedSpellLevelFilter);
+      result = result.filter(s => s.level === levelNum);
+    }
+
+    // 3. School Filter
+    if (this.selectedSpellSchoolFilter !== 'all') {
+      const schoolName = this.selectedSpellSchoolFilter.toLowerCase();
+      result = result.filter(s => s.school && s.school.toLowerCase() === schoolName);
+    }
+
+    this.filteredAvailableSpells = result;
+  }
+
+  filterSpells(event: any) {
+    this.spellSearchQuery = event.detail.value || '';
+    this.applySpellFilters();
+  }
+
+  filterSpellsByLevel(event: any) {
+    this.selectedSpellLevelFilter = event.target.value || 'all';
+    this.applySpellFilters();
+  }
+
+  filterSpellsBySchool(event: any) {
+    this.selectedSpellSchoolFilter = event.target.value || 'all';
+    this.applySpellFilters();
   }
 
   selectSpell(spellId: string) {
@@ -2298,6 +2354,26 @@ export class CharacterSheetPage implements OnInit {
     for (let i = 1; i <= 9; i++) {
       if (this.getSpellSlots(i.toString()).max > 0) {
         max = i;
+      }
+    }
+
+    // Heuristic fallback if max is still 0 (database seeding missing or legacy data)
+    if (max === 0 && this.pj) {
+      const name = (this.pj.dndClass || '').toLowerCase();
+      const level = this.pj.level || 1;
+      
+      const isFullCaster = ['clérigo', 'clerico', 'cleric', 'mago', 'wizard', 'hechicero', 'sorcerer', 'druida', 'druid', 'bardo', 'bard'].some(n => name.includes(n));
+      const isHalfCaster = ['paladín', 'paladin', 'explorador', 'ranger'].some(n => name.includes(n));
+      const isPactMagic = ['brujo', 'warlock'].some(n => name.includes(n));
+
+      if (isFullCaster) {
+        return Math.floor((level + 1) / 2);
+      }
+      if (isHalfCaster) {
+        return Math.floor((Math.floor(level / 2) + 1) / 2);
+      }
+      if (isPactMagic) {
+        return level >= 9 ? 5 : (level >= 7 ? 4 : (level >= 5 ? 3 : (level >= 3 ? 2 : 1)));
       }
     }
     return max;
