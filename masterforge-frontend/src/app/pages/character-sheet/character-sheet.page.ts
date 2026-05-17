@@ -1641,7 +1641,10 @@ export class CharacterSheetPage implements OnInit {
     const conMod = getModifier(this.pj.stats.con + this.levelUpData.statChanges.con);
     const oldConMod = getModifier(this.pj.stats.con);
     const retroactive = (conMod - oldConMod) * this.pj.level;
-    const finalHpBonus = this.levelUpData.hpBonus + conMod + retroactive;
+    
+    // D&D 5e rule: Gaining a level always grants at least 1 HP, even with a negative CON modifier.
+    const baseLevelHpGain = Math.max(1, this.levelUpData.hpBonus + conMod);
+    const finalHpBonus = baseLevelHpGain + retroactive;
 
     const request: any = {
       hpBonus: finalHpBonus,
