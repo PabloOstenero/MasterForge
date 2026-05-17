@@ -294,21 +294,27 @@
 
   @if (currentTab === 'combat') {
   <div class="ion-padding">
-    <!-- Combat Stats: Initiative and Speed -->
+    <!-- Combat Stats: Initiative, Speed and Passive Perception -->
     <ion-row class="ion-margin-bottom">
-      <ion-col size="6">
+      <ion-col size="4">
         <div class="combat-square-box">
           <div class="combat-value">{{ pj.initiative >= 0 ? '+' : '' }}{{ pj.initiative }}</div>
           <div class="combat-label">Iniciativa</div>
         </div>
       </ion-col>
-      <ion-col size="6">
+      <ion-col size="4">
         <div class="combat-square-box" [style.border-color]="armorStrengthPenalty < 0 ? '#e57373' : ''">
           <div class="combat-value" [style.color]="armorStrengthPenalty < 0 ? '#e57373' : ''">{{ effectiveSpeed }}</div>
           <div class="combat-label">Velocidad</div>
           @if (armorStrengthPenalty < 0) {
-            <div style="font-size: 0.6rem; color: #e57373; margin-top: 2px; line-height: 1.2;">⚠ FUE insuficiente (–10)</div>
+            <div style="font-size: 0.5rem; color: #e57373; margin-top: 2px; line-height: 1.2;">⚠ FUE insuficiente (–10)</div>
           }
+        </div>
+      </ion-col>
+      <ion-col size="4">
+        <div class="combat-square-box">
+          <div class="combat-value">{{ pj.passivePerception }}</div>
+          <div class="combat-label">Percepción Pasiva</div>
         </div>
       </ion-col>
     </ion-row>

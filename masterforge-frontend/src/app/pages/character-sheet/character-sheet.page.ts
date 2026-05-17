@@ -3033,6 +3033,12 @@ export class CharacterSheetPage implements OnInit {
     this.pj.immunities = Array.from(imm);
     this.pj.conditionImmunities = Array.from(conditionImm);
     this.pj.senses = Array.from(senses);
+
+    // 5. Dynamic Passive Perception (10 + perception modifier calculated via getSkillMod)
+    const perceptionSkill = { id: 'perception', name: 'Percepción', stat: 'wis' };
+    const perceptionModText = this.getSkillMod(perceptionSkill);
+    const perceptionMod = parseInt(perceptionModText.replace('+', ''), 10);
+    this.pj.passivePerception = 10 + (isNaN(perceptionMod) ? 0 : perceptionMod);
   }
 
   private applyEffect(e: any, res: Set<string>, imm: Set<string>, conditionImm: Set<string>, senses: Set<string>) {
@@ -3277,6 +3283,48 @@ export class CharacterSheetPage implements OnInit {
     inventory.filter((s: any) => (s.equipped || s.isEquipped) && s.item.properties?.bonusAc && isItemActive(s)).forEach((s: any) => {
       finalAc += Number(s.item.properties.bonusAc);
     });
+
+    // - Check for Minimum AC overrides from features and items
+    let minAcOverride = 0;
+
+    // Scan features & selected options
+    allFeatures.forEach(f => {
+      const itemsToScan = [f, ...(f.selectedOptions || [])];
+      itemsToScan.forEach(obj => {
+        const props = obj.properties || obj.options || {};
+        const effects = props.effects || [];
+        effects.forEach((e: any) => {
+          if (e.type === 'MINIMUM_AC' || e.type === 'AC_MINIMUM') {
+            const val = Number(e.value);
+            if (!isNaN(val) && val > minAcOverride) {
+              minAcOverride = val;
+            }
+          }
+        });
+      });
+    });
+
+    // Scan equipped items
+    inventory.filter((s: any) => (s.equipped || s.isEquipped) && isItemActive(s)).forEach((s: any) => {
+      const props = s.item.properties || {};
+      const effects = props.effects || [];
+      effects.forEach((e: any) => {
+        if (e.type === 'MINIMUM_AC' || e.type === 'AC_MINIMUM') {
+          const val = Number(e.value);
+          if (!isNaN(val) && val > minAcOverride) {
+            minAcOverride = val;
+          }
+        }
+      });
+      // Direct property override
+      if (typeof props.minimumAc === 'number') {
+        minAcOverride = Math.max(minAcOverride, props.minimumAc);
+      }
+    });
+
+    if (minAcOverride > 0) {
+      finalAc = Math.max(finalAc, minAcOverride);
+    }
 
     return finalAc;
   }
