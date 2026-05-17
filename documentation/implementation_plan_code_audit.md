@@ -36,6 +36,20 @@ We must ensure the backend and frontend data models can express complex 5e conce
 - **Armor Logic:** Base AC, Max Dex bonus (Medium armor), Stealth disadvantage, Strength requirements for Heavy armor.
 - **Magic Items & Attunement:** Items granting stat overrides (e.g., Gauntlets of Ogre Power setting Str to 19), granting spells, or modifying AC/Saves.
 
+### 1.5 Spellcasting & Magic Management [NEW]
+- **Concentration Tracking:** Visual indicator for active concentration spells.
+- **Pact Magic vs. Spellcasting:** Separation of Warlock slots from other casters.
+- **Prepared vs. Known:** Enforcement of preparation limits based on Level + Mod.
+
+### 1.6 Rest & Recovery Engine [NEW]
+- **Short Rest:** Healing via Hit Dice consumption and resource recovery (Ki, Fighter features).
+- **Long Rest:** Full HP/Spell Slot recovery and Half-Max Hit Dice restoration.
+- **Recharge Mechanics:** Random recharge for magic items (e.g., "1d4+1 at dawn").
+
+### 1.7 Resources & Custom Counters [NEW]
+- **Dynamic Scaling:** Resource max values that scale with `level` or `mod` (e.g., Bardic Inspiration).
+- **Custom Tracking:** Support for user-defined counters in the Homebrew features.
+
 ## Phase 2: The Automated Effects Engine (The Glue)
 The `calculateAutomatedEffects` logic in the Character Sheet is the heart of the app. It must process the data models into character stats.
 
@@ -75,7 +89,3 @@ To prove the system works, we will implement "Test Case Entities" using the Home
 2. **The Warlock Test:** Tests Pact Magic (unique spell slots), Eldritch Invocations (dynamic feature choices), and Subclass spell lists.
 3. **The Half-Elf Rogue Test:** Tests flexible ASIs, Expertise (skill calculation), and Sneak Attack (scaling dice).
 4. **The Multiclass Paladin/Sorcerer (Sorcadin) Test:** Tests multiclass spell slot aggregation, fighting styles, and prerequisite enforcement.
-
-## Next Steps
-
-If this plan looks complete to you, please approve it, and tell me where we should begin. I recommend starting with **Phase 1.1 & 1.2 (Data Structure Audit)** to see if the current backend Kotlin models and frontend TypeScript models can represent the complex scenarios (like flexible ASIs or Unarmored Defense).

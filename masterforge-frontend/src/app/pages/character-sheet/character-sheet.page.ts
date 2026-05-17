@@ -129,7 +129,7 @@ export class CharacterSheetPage implements OnInit {
     const max = item.properties?.charges ?? 0;
     const current = this.getItemCharges(item);
     if (current >= max) return;
-    
+
     this.pj.resourceCounters[key] = current + 1;
     if (this.characterId) {
       this.apiService.updateResourceCounters(this.characterId, this.pj.resourceCounters).subscribe();
@@ -141,10 +141,10 @@ export class CharacterSheetPage implements OnInit {
     const props = item.properties || {};
     const count = props.rechargeDiceCount;
     const bonus = props.rechargeBonus || 0;
-    
+
     // If no dice and no bonus are specified, assume "restore all"
     if (!count && !bonus) return maxCharges;
-    
+
     let total = 0;
     if (count && props.rechargeDieType) {
       const faces = parseInt(props.rechargeDieType.replace('d', ''), 10) || 0;
@@ -152,7 +152,7 @@ export class CharacterSheetPage implements OnInit {
         total += Math.floor(Math.random() * faces) + 1;
       }
     }
-    
+
     return total + bonus;
   }
 
@@ -345,7 +345,7 @@ export class CharacterSheetPage implements OnInit {
 
     equipped.forEach((slot: any) => {
       const props = slot.item.properties || {};
-      
+
       // 1. Stat Overrides (highest value takes precedence)
       if (typeof props.overrideStr === 'number') stats.str = Math.max(stats.str, props.overrideStr);
       if (typeof props.overrideDex === 'number') stats.dex = Math.max(stats.dex, props.overrideDex);
@@ -375,14 +375,14 @@ export class CharacterSheetPage implements OnInit {
       return typeof cls?.hitDie === 'string' ? parseInt(cls.hitDie.replace('d', ''), 10) : (cls?.hitDie || 8);
     }
     if (this.levelUpMode === 'EXISTING' && this.levelUpData.classToLevelId) {
-       // Find in character's existing classes
-       if (this.rawCharacter?.dndClass?.id === this.levelUpData.classToLevelId) {
-         const hd = this.rawCharacter.dndClass.hitDie;
-         return typeof hd === 'string' ? parseInt(hd.replace('d', ''), 10) : (hd || 8);
-       }
-       const cl = (this.rawCharacter?.classLevels || []).find((l: any) => l.dndClass.id === this.levelUpData.classToLevelId);
-       const hd = cl?.dndClass?.hitDie;
-       return typeof hd === 'string' ? parseInt(hd.replace('d', ''), 10) : (hd || 8);
+      // Find in character's existing classes
+      if (this.rawCharacter?.dndClass?.id === this.levelUpData.classToLevelId) {
+        const hd = this.rawCharacter.dndClass.hitDie;
+        return typeof hd === 'string' ? parseInt(hd.replace('d', ''), 10) : (hd || 8);
+      }
+      const cl = (this.rawCharacter?.classLevels || []).find((l: any) => l.dndClass.id === this.levelUpData.classToLevelId);
+      const hd = cl?.dndClass?.hitDie;
+      return typeof hd === 'string' ? parseInt(hd.replace('d', ''), 10) : (hd || 8);
     }
     return typeof this.pj.hitDieType === 'string' ? parseInt(this.pj.hitDieType.replace('d', ''), 10) : (this.pj.hitDieType || 8);
   }
@@ -453,7 +453,7 @@ export class CharacterSheetPage implements OnInit {
           level: data.level,
           dndClass: data.dndClass?.name || 'Aventurero',
           subclass: data.subclass?.name || 'Sin subclase',
-          fullClassName: (data.classLevels && data.classLevels.length > 0) 
+          fullClassName: (data.classLevels && data.classLevels.length > 0)
             ? data.classLevels.map((cl: any) => `${cl.dndClass.name} ${cl.level}`).join(' / ')
             : `${data.dndClass?.name || 'Aventurero'} ${data.level}`,
           choicesJson: data.choicesJson || {},
@@ -541,7 +541,7 @@ export class CharacterSheetPage implements OnInit {
               let scalingText = '';
               const prog = (f.progression && f.progression.length > 0) ? f.progression : ((f.options as any)?.progression ?? []);
               if (prog && Array.isArray(prog)) {
-                const effLevel = f._className ? (data.classLevels?.find((c:any) => c.dndClass.name === f._className)?.level || data.level) : data.level;
+                const effLevel = f._className ? (data.classLevels?.find((c: any) => c.dndClass.name === f._className)?.level || data.level) : data.level;
                 const validProgs = prog.filter((p: any) => p.level <= effLevel).sort((a: any, b: any) => b.level - a.level);
                 if (validProgs.length > 0) {
                   const currentProg = validProgs[0];
@@ -1037,7 +1037,7 @@ export class CharacterSheetPage implements OnInit {
     if (!this.rawCharacter) return;
 
     this.isLevelUpModalOpen = true;
-    
+
     // Reset data
     this.levelUpData = {
       hpBonus: 0,
@@ -1063,7 +1063,7 @@ export class CharacterSheetPage implements OnInit {
 
   updateLevelUpFeatures() {
     if (!this.rawCharacter) return;
-    
+
     // Determine which class we are leveling up and what its NEW level will be
     let targetClass: any = null;
     let targetSubclass: any = null;
@@ -1073,16 +1073,16 @@ export class CharacterSheetPage implements OnInit {
       targetClass = this.allClasses.find(c => c.id === this.levelUpData.newClassId);
       newClassLevel = 1;
     } else if (this.levelUpMode === 'EXISTING' && this.levelUpData.classToLevelId) {
-       const cl = (this.rawCharacter.classLevels || []).find((l: any) => l.dndClass.id === this.levelUpData.classToLevelId);
-       if (cl) {
-         targetClass = cl.dndClass;
-         targetSubclass = cl.subclass;
-         newClassLevel = cl.level + 1;
-       } else if (this.rawCharacter.dndClass?.id === this.levelUpData.classToLevelId) {
-         targetClass = this.rawCharacter.dndClass;
-         targetSubclass = this.rawCharacter.subclass;
-         newClassLevel = this.pj.level + 1; // Fallback if classLevels missing
-       }
+      const cl = (this.rawCharacter.classLevels || []).find((l: any) => l.dndClass.id === this.levelUpData.classToLevelId);
+      if (cl) {
+        targetClass = cl.dndClass;
+        targetSubclass = cl.subclass;
+        newClassLevel = cl.level + 1;
+      } else if (this.rawCharacter.dndClass?.id === this.levelUpData.classToLevelId) {
+        targetClass = this.rawCharacter.dndClass;
+        targetSubclass = this.rawCharacter.subclass;
+        newClassLevel = this.pj.level + 1; // Fallback if classLevels missing
+      }
     }
 
     if (!targetClass) {
@@ -1413,10 +1413,10 @@ export class CharacterSheetPage implements OnInit {
       if (f.options) {
         const key = f.id ? f.id.toString() : f.name;
         const selected = this.levelUpData.choicesJson[key];
-        
+
         // Basic validation: if there are options, there must be a choice
         if (!selected) return false;
-        
+
         // If it's a list (SELECT_MANY), check the count
         if (Array.isArray(selected)) {
           const max = this.calculateMaxChoices(f, this.pj.level + 1);
@@ -1483,11 +1483,11 @@ export class CharacterSheetPage implements OnInit {
       const minScore = req.minScore || 13;
       const key = ability.substring(0, 3).toLowerCase();
       const score = scores[key] || 0;
-      return { 
-        ability: this.statLabels[key] || ability, 
-        met: score >= minScore, 
-        current: score, 
-        required: minScore 
+      return {
+        ability: this.statLabels[key] || ability,
+        met: score >= minScore,
+        current: score,
+        required: minScore
       };
     });
 
@@ -1546,7 +1546,7 @@ export class CharacterSheetPage implements OnInit {
                   const recovered = this.rollRecharge(item, max);
                   const newTotal = Math.min(max, current + recovered);
                   this.pj.resourceCounters[key] = newTotal;
-                  
+
                   const actualRecovered = newTotal - current;
                   if (actualRecovered > 0) {
                     recoveredMessages.push(`🪄 ${item.name} recuperó ${actualRecovered} cargas`);
@@ -1556,7 +1556,7 @@ export class CharacterSheetPage implements OnInit {
 
             // Sync all changes to backend in one single network call
             this.syncResourceCounters();
-            
+
             // Also suggest spending hit dice
             this.updateHitDiceAlert();
 
@@ -1601,7 +1601,7 @@ export class CharacterSheetPage implements OnInit {
                       const recovered = this.rollRecharge(item, max);
                       const newTotal = Math.min(max, current + recovered);
                       this.pj.resourceCounters[key] = newTotal;
-                      
+
                       const actualRecovered = newTotal - current;
                       if (actualRecovered > 0) {
                         recoveredMessages.push(`🪄 ${item.name} recuperó ${actualRecovered} cargas`);
@@ -1911,7 +1911,6 @@ export class CharacterSheetPage implements OnInit {
 
     // 2. Fallback: If no table, use standard 5e progression based on caster type
     const type = casting.spellcastingType || casting.type;
-    console.log(`Spellcasting type detected: ${type} for level ${level}. Applying standard fallback.`);
 
     const fullCasterRow = [
       [2], [3], [4, 2], [4, 3], [4, 3, 2], [4, 3, 3], [4, 3, 3, 1], [4, 3, 3, 2], [4, 3, 3, 3, 1], [4, 3, 3, 3, 2],
@@ -1982,17 +1981,24 @@ export class CharacterSheetPage implements OnInit {
   // --- Prepared Spells Tracking ---
   getMaxPreparedSpells(): number {
     if (!this.pj) return 0;
-    const level = this.pj.level || 1;
     const mod = this.getSpellcastingMod();
     const className = (this.pj.dndClass || '').toLowerCase();
 
-    // Half-casters (Paladin, Ranger)
+    // Resolve the caster class level: use the per-class level if multiclassed,
+    // otherwise fall back to total character level for pure single-class characters.
+    const classLevels = this.rawCharacter?.classLevels || [];
+    const primaryClassEntry = classLevels.find((cl: any) =>
+      cl.dndClass?.name?.toLowerCase() === className
+    );
+    const casterLevel = primaryClassEntry?.level ?? (this.pj.level || 1);
+
+    // Half-casters (Paladin, Ranger) prepare based on half their class level
     if (['paladín', 'paladin', 'explorador', 'exploradora', 'ranger'].includes(className)) {
-      return Math.max(1, Math.floor(level / 2) + mod);
+      return Math.max(1, Math.floor(casterLevel / 2) + mod);
     }
 
-    // Full-casters (Cleric, Druid, Wizard)
-    return Math.max(1, level + mod);
+    // Full-casters (Cleric, Druid, Wizard) prepare their full class level + mod
+    return Math.max(1, casterLevel + mod);
   }
 
   getPreparedSpellsCount(): number {
@@ -2024,16 +2030,16 @@ export class CharacterSheetPage implements OnInit {
   getWeaponBadges(item: any): string[] {
     const props: string[] = item.properties?.weaponProperties ?? [];
     const labelMap: Record<string, string> = {
-      'Finesse':    'FIN',
-      'Versatile':  'VER',
+      'Finesse': 'FIN',
+      'Versatile': 'VER',
       'Two-Handed': '2H',
-      'Reach':      'RCH',
-      'Heavy':      'HVY',
-      'Light':      'LGT',
-      'Thrown':     'THR',
-      'Range':      'RNG',
-      'Loading':    'LOAD',
-      'Special':    'ESP',
+      'Reach': 'RCH',
+      'Heavy': 'HVY',
+      'Light': 'LGT',
+      'Thrown': 'THR',
+      'Range': 'RNG',
+      'Loading': 'LOAD',
+      'Special': 'ESP',
       'Ammunition': 'AMM',
     };
     return props.map(p => labelMap[p]).filter(Boolean);
@@ -2252,7 +2258,7 @@ export class CharacterSheetPage implements OnInit {
   calculateResourcePools() {
     if (!this.rawCharacter) return;
     const pools: any[] = [];
-    
+
     // 1. Scan Class & Subclass Features
     this.pj.features.forEach((feat: any) => {
       const itemsToScan = [feat, ...(feat.selectedOptions || [])];
@@ -2289,7 +2295,7 @@ export class CharacterSheetPage implements OnInit {
       if (f.selectedOptions && f.options?.choices) {
         f.selectedOptions.forEach((selectedId: string) => {
           // Find option object by ID, label or name
-          const optionObj = f.options.choices.find((c: any) => 
+          const optionObj = f.options.choices.find((c: any) =>
             c.id === selectedId || c.label === selectedId || c.name === selectedId
           );
           if (optionObj) {
@@ -2384,7 +2390,7 @@ export class CharacterSheetPage implements OnInit {
       // If we have a class context, use class level
       const className = feat?._className || feat?.dndClass?.name;
       if (className) {
-        const cl = (this.rawCharacter.classLevels || []).find((l: any) => 
+        const cl = (this.rawCharacter.classLevels || []).find((l: any) =>
           l.dndClass.name.toLowerCase() === className.toLowerCase()
         );
         return cl?.level || this.pj.level;
@@ -2407,7 +2413,7 @@ export class CharacterSheetPage implements OnInit {
       const cl = (this.rawCharacter.classLevels || []).find((l: any) => l.dndClass.name === rp.className);
       return rp.table[cl?.level || 0] || 0;
     }
-    
+
     return Number(max) || 0;
   }
 
@@ -2428,11 +2434,11 @@ export class CharacterSheetPage implements OnInit {
   private syncResourceCounters() {
     // Preserve existing counters (like magic item charges) that are not part of resourcePools
     const counters: Record<string, number> = { ...(this.pj.resourceCounters || {}) };
-    
+
     this.resourcePools.forEach(p => {
       counters[p.name] = p.current;
     });
-    
+
     this.pj.resourceCounters = counters;
     if (this.characterId) {
       this.apiService.updateResourceCounters(this.characterId, counters).subscribe();
@@ -2464,7 +2470,7 @@ export class CharacterSheetPage implements OnInit {
       let appliedDex = dexMod;
       if (props.dexBonus === false || props.noDex === true) appliedDex = 0;
       else if (typeof props.dexLimit === 'number') appliedDex = Math.min(dexMod, props.dexLimit);
-      
+
       calculations.push(base + appliedDex);
     } else {
       // Unarmored Path (Default)
@@ -2531,7 +2537,7 @@ export class CharacterSheetPage implements OnInit {
     allFeatures.forEach(f => {
       // Check base feature and all selected options
       const itemsToScan = [f, ...(f.selectedOptions || [])];
-      
+
       itemsToScan.forEach(obj => {
         const props = obj.properties || obj.options || {};
         if (props.acBonus !== undefined && props.acBonus !== null) {
@@ -2569,7 +2575,7 @@ export class CharacterSheetPage implements OnInit {
    */
   private getAllCharacterFeatures(data: any): any[] {
     const allFeats: any[] = [];
-    
+
     // 1. Race traits
     if (data.dndRace?.traits) {
       allFeats.push(...data.dndRace.traits);
