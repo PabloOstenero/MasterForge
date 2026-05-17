@@ -1684,23 +1684,18 @@ export class CharacterSheetPage implements OnInit {
           text: 'Descansar',
           handler: () => {
             this.apiService.performLongRest(this.characterId!).subscribe({
-              next: () => {
+              next: (updatedChar: any) => {
                 const recoveredMessages: string[] = [];
 
-                // Reset local resource pools
+                // Update frontend state with backend's recalculated rest values
+                this.pj.currentHp = updatedChar.currentHp;
+                this.pj.tempHp = updatedChar.tempHp;
+                this.pj.hitDiceSpent = updatedChar.hitDiceSpent;
+                this.pj.resourceCounters = updatedChar.resourceCounters || {};
+                this.pj.spellSlots = updatedChar.spellSlots || {};
+
+                // Reset local resource pools (custom features)
                 this.resourcePools.forEach(p => p.current = p.max);
-
-                // Fully restore all spell slots (standard level_ and pact_) on the frontend
-                const slots = { ...this.pj.spellSlots };
-                Object.keys(slots).forEach(key => {
-                  if ((key.startsWith('level_') || key.startsWith('pact_')) && slots[key]) {
-                    slots[key] = { max: slots[key].max, available: slots[key].max };
-                  }
-                });
-                this.pj.spellSlots = slots;
-
-                // Sync spell slots to backend
-                this.apiService.updateSpellSlots(this.characterId!, slots).subscribe();
 
                 // Auto-restore magic item charges that recharge on Long or Short Rest
                 this.pj.inventory
@@ -1724,8 +1719,7 @@ export class CharacterSheetPage implements OnInit {
                     }
                   });
 
-                // Manually sync counters and wait for it to finish BEFORE reloading
-                // This prevents the race condition where loadCharacter fetches old data
+                // Sync the custom resource pools combined with newly recharged hit dice counters
                 const counters: Record<string, number> = { ...(this.pj.resourceCounters || {}) };
                 this.resourcePools.forEach(p => counters[p.name] = p.current);
                 this.pj.resourceCounters = counters;
