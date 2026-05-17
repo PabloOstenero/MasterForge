@@ -103,10 +103,15 @@ import { shieldOutline, addOutline, flashOutline, trendingUpOutline, wifiOutline
                   </div>
                 </div>
                 <div class="field-group checkbox-group" style="grid-column: 1 / -1;">
-                  <label class="toggle-switch-mini">
+                  <label class="toggle-switch-mini" style="margin-bottom: 8px;">
                     <input type="checkbox" formControlName="requiresNoArmor">
                     <span class="slider-mini"></span>
                     <span class="toggle-label-mini">Requiere NO llevar armadura</span>
+                  </label>
+                  <label class="toggle-switch-mini">
+                    <input type="checkbox" formControlName="requiresNoShield">
+                    <span class="slider-mini"></span>
+                    <span class="toggle-label-mini">Requiere NO llevar escudo</span>
                   </label>
                 </div>
               </div>
@@ -376,7 +381,8 @@ export class FeatureMechanicsComponent implements OnInit {
       props.addControl('acCalculation', this.fb.group({
         base: [10],
         stats: [[]],
-        requiresNoArmor: [true]
+        requiresNoArmor: [true],
+        requiresNoShield: [true]
       }));
       props.addControl('acBonus', this.fb.control(0));
       props.addControl('acBonusArmorOnly', this.fb.control(false));

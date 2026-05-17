@@ -85,6 +85,7 @@ export interface FeatureEntry {
       base: number;
       stats: string[];
       requiresNoArmor?: boolean;
+      requiresNoShield?: boolean;
     };
     acBonus?: number;
     acBonusArmorOnly?: boolean;

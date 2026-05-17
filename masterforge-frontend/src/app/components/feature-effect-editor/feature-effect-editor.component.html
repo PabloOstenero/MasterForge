@@ -6,7 +6,7 @@
 
   <div class="effects-grid">
     @for (effect of effectsArray.controls; track effect; let ei = $index) {
-      <div class="effect-strip" [formGroup]="$any(effect)" [class.no-value]="effect.get('type')?.value === 'PROFICIENCY'">
+      <div class="effect-strip" [formGroup]="$any(effect)" [class.no-value]="!['STAT_MODIFIER', 'RESOURCE_MAX', 'SENSE', 'PROFICIENCY'].includes(effect.get('type')?.value)">
         <div class="effect-col type">
           <label>Tipo</label>
           <select class="forge-select-native-small" formControlName="type" (change)="onTypeChange(ei)"
@@ -36,17 +36,25 @@
           }
         </div>
 
-        @if (['STAT_MODIFIER', 'RESOURCE_MAX', 'SENSE'].includes(effect.get('type')?.value)) {
+        @if (['STAT_MODIFIER', 'RESOURCE_MAX', 'SENSE', 'PROFICIENCY'].includes(effect.get('type')?.value)) {
           <div class="effect-col value">
             <label>Valor</label>
-            <div class="value-input-wrapper">
-              <input type="number" class="forge-input-native-small" formControlName="value" placeholder="1"
-                     [class.input-error]="effect.get('value')?.invalid && effect.get('value')?.touched">
-              <label class="pb-checkbox" title="Sumar Bono de Competencia">
-                <input type="checkbox" formControlName="useProficiencyBonus">
-                <span>+PB</span>
-              </label>
-            </div>
+            @if (effect.get('type')?.value === 'PROFICIENCY') {
+              <select class="forge-select-native-small" formControlName="value" style="width: 100%;">
+                <option [value]="1">Competencia Estándar (1x PB)</option>
+                <option [value]="2">Pericia / Doble (2x PB)</option>
+                <option [value]="0.5">Media Competencia (0.5x PB)</option>
+              </select>
+            } @else {
+              <div class="value-input-wrapper">
+                <input type="number" class="forge-input-native-small" formControlName="value" placeholder="1"
+                       [class.input-error]="effect.get('value')?.invalid && effect.get('value')?.touched">
+                <label class="pb-checkbox" title="Sumar Bono de Competencia">
+                  <input type="checkbox" formControlName="useProficiencyBonus">
+                  <span>+PB</span>
+                </label>
+              </div>
+            }
           </div>
         }
 

@@ -31,6 +31,10 @@
         <button type="button" class="tab-btn" [class.tab-btn--active]="currentTab === 'defensas'" (click)="setTab('defensas')">
           Defensas
         </button>
+        <button type="button" class="tab-btn" [class.tab-btn--active]="currentTab === 'equipamiento'" (click)="setTab('equipamiento')">
+          Equipo Inicial
+          @if (tabHasError['equipamiento'] && form.touched) { <span class="tab-error-dot"></span> }
+        </button>
         <button type="button" class="tab-btn" [class.tab-btn--active]="currentTab === 'rasgos'" (click)="setTab('rasgos')">
           Rasgos
           @if (tabHasError['rasgos'] && form.touched) { <span class="tab-error-dot"></span> }
@@ -352,41 +356,43 @@
         </div><!-- .tab-content defensas -->
       }
 
+      <!-- Tab: Equipo Inicial -->
+      @if (currentTab === 'equipamiento') {
+        <div class="tab-content">
+          <div style="max-width: 800px; margin: 0 auto; width: 100%;">
+            <!-- S11 EQUIPO INICIAL -->
+            <div class="form-section">
+              <h2 class="section-title">Equipo Inicial <span class="section-badge">opcional</span></h2>
+              <app-starting-equipment-picker
+                #equipmentPicker
+                [initialValue]="equipmentInitialValue"
+                [legacyText]="equipmentLegacyText"
+                (equipmentChange)="onEquipmentChange($event)"
+                (validityChange)="onPickerValidityChange($event)"
+                data-testid="starting-equipment-picker">
+              </app-starting-equipment-picker>
+              @if (!isPickerValid && form.touched) {
+                <p class="error-message">El equipo inicial tiene selecciones incompletas.</p>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
       <!-- Tab: Rasgos -->
       @if (currentTab === 'rasgos') {
         <div class="tab-content">
-          <div class="form-grid">
-            <div class="col-left">
-
-      <!-- S11 EQUIPO INICIAL -->
-      <div class="form-section">
-        <h2 class="section-title">Equipo Inicial <span class="section-badge">opcional</span></h2>
-        <app-starting-equipment-picker
-          #equipmentPicker
-          [initialValue]="equipmentInitialValue"
-          [legacyText]="equipmentLegacyText"
-          (equipmentChange)="onEquipmentChange($event)"
-          (validityChange)="onPickerValidityChange($event)"
-          data-testid="starting-equipment-picker">
-        </app-starting-equipment-picker>
-        @if (!isPickerValid && form.touched) {
-          <p class="error-message">El equipo inicial tiene selecciones incompletas.</p>
-        }
-      </div>
-
-            </div><!-- .col-left -->
-            <div class="col-right">
-
-      <!-- S15 RASGOS DE CLASE -->
-      <header class="tab-section-header">
-        <div class="header-info">
-          <h2 class="section-title">Habilidades y Rasgos de Clase</h2>
-          <p class="section-subtitle">Define las capacidades fundamentales que todos los miembros de esta clase obtienen.</p>
-        </div>
-        <button type="button" class="btn-forge-primary" (click)="addFeature()" data-testid="add-feature-button">
-          <ion-icon name="add"></ion-icon> Nuevo Rasgo
-        </button>
-      </header>
+          <div style="max-width: 1000px; margin: 0 auto; width: 100%;">
+            <!-- S15 RASGOS DE CLASE -->
+            <header class="tab-section-header">
+              <div class="header-info">
+                <h2 class="section-title">Habilidades y Rasgos de Clase</h2>
+                <p class="section-subtitle">Define las capacidades fundamentales que todos los miembros de esta clase obtienen.</p>
+              </div>
+              <button type="button" class="btn-forge-primary" (click)="addFeature()" data-testid="add-feature-button">
+                <ion-icon name="add"></ion-icon> Nuevo Rasgo
+              </button>
+            </header>
 
       <div class="features-stack" formArrayName="features">
         @for (feat of features.controls; track $index; let i = $index) {
@@ -573,8 +579,7 @@
         }
       </div>
 
-            </div><!-- .col-right -->
-          </div><!-- .form-grid -->
+          </div><!-- Centered max-width wrapper -->
         </div><!-- .tab-content rasgos -->
       }
       <!-- Tab: Multiclase -->

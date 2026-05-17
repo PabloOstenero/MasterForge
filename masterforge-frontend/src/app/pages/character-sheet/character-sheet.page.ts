@@ -512,7 +512,13 @@ export class CharacterSheetPage implements OnInit {
           speed: data.speed || 30,
           proficiencyBonus: proficiencyBonus,
           passivePerception: passivePerception,
-          initiative: dexMod,
+          initiative: (() => {
+            let initVal = dexMod;
+            if (this.hasFeature(data, ['Jack of All Trades', 'Instinto Improvisado', 'Competente en todo'])) {
+              initVal += Math.floor(proficiencyBonus / 2);
+            }
+            return initVal;
+          })(),
           armorClass: finalAc,
           hitDiceTotal: data.hitDiceTotal || 0,
           deathSaves: { success: 0, failure: 0 },
@@ -2104,8 +2110,47 @@ export class CharacterSheetPage implements OnInit {
     const baseScore = this.pj.stats[skill.stat] || 10;
     const baseMod = Math.floor((Number(baseScore) - 10) / 2);
 
-    const isProficient = !!this.pj.skillProficiencies?.[skill.id];
-    const hasExpertise = this.pj.choicesJson?.expertise?.includes(skill.id);
+    let profValue = this.pj.skillProficiencies?.[skill.id];
+
+    // Dynamic resolution from feature effects
+    if (this.rawCharacter) {
+      const allFeatures = this.getAllCharacterFeatures(this.rawCharacter);
+      allFeatures.forEach(f => {
+        const globalEffects = f.properties?.effects || [];
+        const optionEffects: any[] = [];
+        if (f.selectedOptions && f.options?.choices) {
+          f.selectedOptions.forEach((selectedId: string) => {
+            const optionObj = f.options.choices.find((c: any) =>
+              c.id === selectedId || c.label === selectedId || c.name === selectedId
+            );
+            if (optionObj) {
+              optionEffects.push(...(optionObj.effects || optionObj.properties?.effects || []));
+            }
+          });
+        }
+        
+        const allEffects = [...globalEffects, ...optionEffects];
+        allEffects.forEach((e: any) => {
+          if (e.type === 'PROFICIENCY' && (e.target === `skill_${skill.id}` || e.target === skill.id)) {
+            const val = e.value !== undefined && e.value !== null ? e.value : 1;
+            // Take the highest value (expertise > standard > half)
+            const getValWeight = (v: any) => {
+              if (v === 'expertise' || v === 2 || v === '2') return 3;
+              if (v === true || v === 'proficient' || v === 1 || v === '1') return 2;
+              if (v === 'half' || v === 0.5 || v === '0.5') return 1;
+              return 0;
+            };
+            if (getValWeight(val) > getValWeight(profValue)) {
+              profValue = val;
+            }
+          }
+        });
+      });
+    }
+
+    const isProficient = profValue === true || profValue === 'proficient' || profValue === 1 || profValue === '1';
+    const isHalfProficient = profValue === 'half' || profValue === 0.5 || profValue === '0.5';
+    const hasExpertise = this.pj.choicesJson?.expertise?.includes(skill.id) || profValue === 'expertise' || profValue === 2 || profValue === '2';
     const profBonus = this.pj.proficiencyBonus || 0;
 
     let total = baseMod;
@@ -2113,6 +2158,14 @@ export class CharacterSheetPage implements OnInit {
       total += (profBonus * 2);
     } else if (isProficient) {
       total += profBonus;
+    } else if (isHalfProficient) {
+      total += Math.floor(profBonus / 2);
+    } else if (this.rawCharacter) {
+      // Dynamic Jack of All Trades (half proficiency to any skill without proficiency)
+      const hasJack = this.hasFeature(this.rawCharacter, ['Jack of All Trades', 'Instinto Improvisado', 'Competente en todo']);
+      if (hasJack) {
+        total += Math.floor(profBonus / 2);
+      }
     }
 
     return total >= 0 ? `+${total}` : `${total}`;
@@ -2716,7 +2769,6 @@ export class CharacterSheetPage implements OnInit {
   }
 
   // Calcula el modificador de tirada de salvación (Modificador de Stat + Competencia si aplica)
-  // Calcula el modificador de tirada de salvación (Modificador de Stat + Competencia si aplica)
   getSavingThrowMod(statKey: string): string {
     const baseScore = this.pj.stats[statKey] || 10;
     const baseMod = Math.floor((Number(baseScore) - 10) / 2);
@@ -2732,7 +2784,36 @@ export class CharacterSheetPage implements OnInit {
     };
 
     const synonyms = longKeys[statKey] || [statKey];
-    const isProficient = synonyms.some(key => !!this.pj.savingThrowsProficiencies?.[key] || !!this.pj.savingThrowsProficiencies?.[key.toLowerCase()]);
+    let isProficient = synonyms.some(key => !!this.pj.savingThrowsProficiencies?.[key] || !!this.pj.savingThrowsProficiencies?.[key.toLowerCase()]);
+
+    // Dynamic resolution from feature effects
+    if (this.rawCharacter) {
+      const allFeatures = this.getAllCharacterFeatures(this.rawCharacter);
+      allFeatures.forEach(f => {
+        const globalEffects = f.properties?.effects || [];
+        const optionEffects: any[] = [];
+        if (f.selectedOptions && f.options?.choices) {
+          f.selectedOptions.forEach((selectedId: string) => {
+            const optionObj = f.options.choices.find((c: any) =>
+              c.id === selectedId || c.label === selectedId || c.name === selectedId
+            );
+            if (optionObj) {
+              optionEffects.push(...(optionObj.effects || optionObj.properties?.effects || []));
+            }
+          });
+        }
+        
+        const allEffects = [...globalEffects, ...optionEffects];
+        allEffects.forEach((e: any) => {
+          if (e.type === 'PROFICIENCY') {
+            const isTargetMatch = e.target === `save_${statKey}` || synonyms.some(syn => e.target === `save_${syn.toLowerCase()}` || e.target === syn.toLowerCase());
+            if (isTargetMatch) {
+              isProficient = true;
+            }
+          }
+        });
+      });
+    }
 
     const profBonus = this.pj.proficiencyBonus || 0;
     const total = isProficient ? baseMod + profBonus : baseMod;
@@ -2752,7 +2833,38 @@ export class CharacterSheetPage implements OnInit {
       cha: ['cha', 'Charisma', 'Carisma', 'CAR']
     };
     const synonyms = longKeys[statKey] || [statKey];
-    return synonyms.some(key => !!this.pj.savingThrowsProficiencies?.[key] || !!this.pj.savingThrowsProficiencies?.[key.toLowerCase()]);
+    let isProf = synonyms.some(key => !!this.pj.savingThrowsProficiencies?.[key] || !!this.pj.savingThrowsProficiencies?.[key.toLowerCase()]);
+
+    // Dynamic resolution from feature effects
+    if (this.rawCharacter) {
+      const allFeatures = this.getAllCharacterFeatures(this.rawCharacter);
+      allFeatures.forEach(f => {
+        const globalEffects = f.properties?.effects || [];
+        const optionEffects: any[] = [];
+        if (f.selectedOptions && f.options?.choices) {
+          f.selectedOptions.forEach((selectedId: string) => {
+            const optionObj = f.options.choices.find((c: any) =>
+              c.id === selectedId || c.label === selectedId || c.name === selectedId
+            );
+            if (optionObj) {
+              optionEffects.push(...(optionObj.effects || optionObj.properties?.effects || []));
+            }
+          });
+        }
+        
+        const allEffects = [...globalEffects, ...optionEffects];
+        allEffects.forEach((e: any) => {
+          if (e.type === 'PROFICIENCY') {
+            const isTargetMatch = e.target === `save_${statKey}` || synonyms.some(syn => e.target === `save_${syn.toLowerCase()}` || e.target === syn.toLowerCase());
+            if (isTargetMatch) {
+              isProf = true;
+            }
+          }
+        });
+      });
+    }
+
+    return isProf;
   }
 
   // Calcula el modificador de D&D a partir de la puntuación base (Ej: 16 -> +3)
@@ -3107,14 +3219,17 @@ export class CharacterSheetPage implements OnInit {
           // Most special calculations (Unarmored Defense) don't work with armor
           // but we check if the feature explicitly allows it
           if (calc.requiresNoArmor === false || !armor) {
-            let val = calc.base || 10;
-            if (calc.stats) {
-              calc.stats.forEach((s: string) => {
-                const statVal = stats[s.toLowerCase()];
-                if (statVal !== undefined) val += getModifier(statVal);
-              });
+            // Also validate shield constraint if specified
+            if (calc.requiresNoShield !== true || !shield) {
+              let val = calc.base || 10;
+              if (calc.stats) {
+                calc.stats.forEach((s: string) => {
+                  const statVal = stats[s.toLowerCase()];
+                  if (statVal !== undefined) val += getModifier(statVal);
+                });
+              }
+              calculations.push(val);
             }
-            calculations.push(val);
           }
         }
       });
@@ -3125,22 +3240,6 @@ export class CharacterSheetPage implements OnInit {
         let val = natArmor.baseAC || 10;
         if (natArmor.addDex) val += dexMod;
         calculations.push(val);
-      }
-
-      // --- HARDCODED FALLBACKS (Standard 5e) ---
-      const conMod = getModifier(stats.con);
-      const wisMod = getModifier(stats.wis);
-      // Barbarian: 10 + DEX + CON
-      if (this.hasFeature(data, ['Defensa sin armadura', 'Unarmored Defense'], 'Barbarian')) {
-        calculations.push(10 + dexMod + conMod);
-      }
-      // Monk: 10 + DEX + WIS
-      if (this.hasFeature(data, ['Defensa sin armadura', 'Unarmored Defense'], 'Monk')) {
-        calculations.push(10 + dexMod + wisMod);
-      }
-      // Draconic Resilience / Natural Armor (13 + DEX)
-      if (this.hasFeature(data, ['Resiliencia Dracónica', 'Draconic Resilience', 'Armadura Natural', 'Natural Armor'])) {
-        calculations.push(13 + dexMod);
       }
     }
 

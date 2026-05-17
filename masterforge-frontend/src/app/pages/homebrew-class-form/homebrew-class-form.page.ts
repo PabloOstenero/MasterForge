@@ -336,7 +336,7 @@ export class HomebrewClassFormPage implements OnInit {
   // Tab navigation
   // ---------------------------------------------------------------------------
 
-  currentTab: 'identidad' | 'competencias' | 'defensas' | 'rasgos' | 'multiclase' | 'conjuros' = 'identidad';
+  currentTab: 'identidad' | 'competencias' | 'defensas' | 'equipamiento' | 'rasgos' | 'multiclase' | 'conjuros' = 'identidad';
 
   setTab(tab: typeof this.currentTab): void {
     this.currentTab = tab;
@@ -353,7 +353,8 @@ export class HomebrewClassFormPage implements OnInit {
       ),
       competencias: !!(f.get('savingThrows')?.invalid),
       defensas: false,
-      rasgos: !!(this.features.controls.some(c => c.invalid) || !this.isPickerValid),
+      equipamiento: !this.isPickerValid,
+      rasgos: !!(this.features.controls.some(c => c.invalid)),
       multiclase: !!(this.multiclassingPrerequisites.controls.some(c => c.invalid)),
       conjuros: !!(
         f.get('spellcastingAbility')?.invalid ||
@@ -936,7 +937,8 @@ export class HomebrewClassFormPage implements OnInit {
         acCalculation: this.fb.group({
           base: [10],
           stats: [[]],
-          requiresNoArmor: [false]
+          requiresNoArmor: [false],
+          requiresNoShield: [false]
         }),
         acBonus: [0],
         acBonusArmorOnly: [false],

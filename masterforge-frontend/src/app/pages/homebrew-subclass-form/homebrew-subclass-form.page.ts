@@ -831,7 +831,8 @@ export class HomebrewSubclassFormPage implements OnInit {
         acCalculation: this.fb.group({
           base: [10],
           stats: [[]],
-          requiresNoArmor: [false]
+          requiresNoArmor: [false],
+          requiresNoShield: [false]
         }),
         acBonus: [0],
         acBonusArmorOnly: [false],
