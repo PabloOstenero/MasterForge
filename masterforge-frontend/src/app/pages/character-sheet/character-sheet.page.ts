@@ -1676,7 +1676,7 @@ export class CharacterSheetPage implements OnInit {
     return (this.rawCharacter.classLevels || []).some((cl: any) => cl.dndClass.id === classId);
   }
 
-  validatePrereq(cls: any): { met: boolean; text: string } {
+  checkSinglePrereq(cls: any, scores: any): { met: boolean; text: string } {
     const prereqs = cls.classFeatures?.multiclassingPrerequisites;
     if (!prereqs || !prereqs.requirements || prereqs.requirements.length === 0) {
       return { met: true, text: 'Sin requisitos' };
@@ -1684,7 +1684,6 @@ export class CharacterSheetPage implements OnInit {
 
     const requirements = prereqs.requirements;
     const logic = prereqs.logic || 'AND';
-    const scores = this.pj.stats; // Use current effective stats
 
     const results = requirements.map((req: any) => {
       const ability = (req.ability || '').toUpperCase();
@@ -1700,10 +1699,47 @@ export class CharacterSheetPage implements OnInit {
     });
 
     const metCount = results.filter((r: any) => r.met).length;
-    const isMet = logic === 'OR' ? metCount > 0 : metCount === requirements.length;
+    const isMet = logic === 'OR' ? metCount > 0 : metCount === results.length;
 
     const text = results.map((r: any) => `${r.ability} ${r.required}`).join(', ');
     return { met: isMet, text };
+  }
+
+  validatePrereq(cls: any): { met: boolean; text: string } {
+    if (!this.rawCharacter) return { met: true, text: '' };
+
+    // 1. Check prerequisites of the new class being entered
+    const targetResult = this.checkSinglePrereq(cls, this.pj.stats);
+    if (!targetResult.met) {
+      return targetResult;
+    }
+
+    // 2. Check prerequisites of the current primary class (if different from target)
+    if (this.rawCharacter.dndClass && this.rawCharacter.dndClass.id !== cls.id) {
+      const primaryResult = this.checkSinglePrereq(this.rawCharacter.dndClass, this.pj.stats);
+      if (!primaryResult.met) {
+        return {
+          met: false,
+          text: `Falta req. de clase actual (${this.rawCharacter.dndClass.name}): ${primaryResult.text}`
+        };
+      }
+    }
+
+    // 3. Check prerequisites of all other existing secondary classes
+    const secondaryClasses = this.rawCharacter.classLevels || [];
+    for (const cl of secondaryClasses) {
+      if (cl.dndClass && cl.dndClass.id !== cls.id) {
+        const secResult = this.checkSinglePrereq(cl.dndClass, this.pj.stats);
+        if (!secResult.met) {
+          return {
+            met: false,
+            text: `Falta req. de clase actual (${cl.dndClass.name}): ${secResult.text}`
+          };
+        }
+      }
+    }
+
+    return targetResult;
   }
 
   selectMulticlass(cls: any) {

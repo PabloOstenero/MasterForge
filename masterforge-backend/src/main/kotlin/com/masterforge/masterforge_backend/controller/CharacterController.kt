@@ -929,6 +929,7 @@ class CharacterController(
             
             // Check prerequisites for ALL current classes and the new one
             validatePrerequisites(saved, newClass)
+            validatePrerequisites(saved, saved.dndClass)
             saved.classLevels.forEach { validatePrerequisites(saved, it.dndClass) }
 
             val subclass = if (dto.subclassId != null) {

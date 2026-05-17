@@ -784,7 +784,7 @@ export class ForgeCharacterPage implements OnInit {
     return !this.formData.multiclasses.some((m: MulticlassEntry) => m.classId === classId);
   }
 
-  validatePrereq(cls: any): { met: boolean; text: string } {
+  checkSinglePrereq(cls: any, scores: any): { met: boolean; text: string } {
     const prereqs = cls.classFeatures?.multiclassingPrerequisites;
     if (!prereqs || !prereqs.requirements || prereqs.requirements.length === 0) {
       return { met: true, text: 'Sin requisitos' };
@@ -792,7 +792,6 @@ export class ForgeCharacterPage implements OnInit {
 
     const requirements = prereqs.requirements;
     const logic = prereqs.logic || 'AND';
-    const scores = this.calculateFinalScores();
 
     const results = requirements.map((req: any) => {
       const ability = (req.ability || '').toUpperCase();
@@ -812,6 +811,43 @@ export class ForgeCharacterPage implements OnInit {
     
     const text = results.map((r: any) => `${r.ability} ${r.required}`).join(logic === 'OR' ? ' o ' : ' y ');
     return { met: isMet, text };
+  }
+
+  validatePrereq(cls: any): { met: boolean; text: string } {
+    const scores = this.calculateFinalScores();
+
+    // 1. Check prerequisites of the new class being entered
+    const targetResult = this.checkSinglePrereq(cls, scores);
+    if (!targetResult.met) {
+      return targetResult;
+    }
+
+    // 2. Check prerequisites of the current primary class (if different from target)
+    if (this.formData.selectedClass && this.formData.selectedClass.id !== cls.id) {
+      const primaryResult = this.checkSinglePrereq(this.formData.selectedClass, scores);
+      if (!primaryResult.met) {
+        return {
+          met: false,
+          text: `Falta req. de clase actual (${this.formData.selectedClass.name}): ${primaryResult.text}`
+        };
+      }
+    }
+
+    // 3. Check prerequisites of all other existing secondary classes
+    const secondaryClasses = this.formData.multiclasses || [];
+    for (const mc of secondaryClasses) {
+      if (mc.dndClass && mc.dndClass.id !== cls.id) {
+        const secResult = this.checkSinglePrereq(mc.dndClass, scores);
+        if (!secResult.met) {
+          return {
+            met: false,
+            text: `Falta req. de clase actual (${mc.dndClass.name}): ${secResult.text}`
+          };
+        }
+      }
+    }
+
+    return targetResult;
   }
 
   calculateFinalScores(): { str: number; dex: number; con: number; int: number; wis: number; cha: number } {
