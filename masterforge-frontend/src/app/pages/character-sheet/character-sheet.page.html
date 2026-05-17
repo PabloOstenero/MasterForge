@@ -571,17 +571,32 @@
     <div class="spell-level-section">
       <div class="spell-level-header">
         <h3>{{ group.level }}</h3>
-        @if (group.levelNum !== '0' && getSpellSlots(group.levelNum).max > 0) {
-        <div class="spell-slots">
-          @for (slot of getSlotArray(group.levelNum); track $index; let idx = $index) {
-          <div class="slot-dot" [class.filled]="getSpellSlots(group.levelNum).available > idx"
-            (click)="toggleSpellSlot(group.levelNum, idx)">
+        <div class="spell-slots-container">
+          <!-- Standard slots -->
+          @if (group.levelNum !== '0' && getSpellSlots(group.levelNum, false).max > 0) {
+          <div class="spell-slots standard-slots">
+            @for (slot of getSlotArray(group.levelNum, false); track $index; let idx = $index) {
+            <div class="slot-dot" [class.filled]="getSpellSlots(group.levelNum, false).available > idx"
+              (click)="toggleSpellSlot(group.levelNum, idx, false)" title="Espacio de Conjuro">
+            </div>
+            }
+            <span class="slot-count">{{ getSpellSlots(group.levelNum, false).available }}/{{ getSpellSlots(group.levelNum, false).max }}</span>
           </div>
           }
-          <span class="slot-count">{{ getSpellSlots(group.levelNum).available }}/{{ getSpellSlots(group.levelNum).max
-            }}</span>
+
+          <!-- Pact slots -->
+          @if (group.levelNum !== '0' && getSpellSlots(group.levelNum, true).max > 0) {
+          <div class="spell-slots pact-slots">
+            <span class="pact-label">Pacto</span>
+            @for (slot of getSlotArray(group.levelNum, true); track $index; let idx = $index) {
+            <div class="slot-dot pact-dot" [class.filled]="getSpellSlots(group.levelNum, true).available > idx"
+              (click)="toggleSpellSlot(group.levelNum, idx, true)" title="Espacio de Pacto">
+            </div>
+            }
+            <span class="slot-count">{{ getSpellSlots(group.levelNum, true).available }}/{{ getSpellSlots(group.levelNum, true).max }}</span>
+          </div>
+          }
         </div>
-        }
       </div>
 
       <ion-list class="transparent-list">

@@ -143,6 +143,7 @@ export interface Spellcasting {
   cantripsKnown: number[];
   spellsKnown?: number[];
   spellSlots: SpellSlotTable;
+  recharge?: 'SHORT_REST' | 'LONG_REST';
 }
 
 export interface MulticlassingPrerequisite {

@@ -513,6 +513,7 @@ export class HomebrewClassFormPage implements OnInit {
       spellcastingEnabled: [false],
       spellcastingAbility: [''],
       spellcastingType: [''],
+      spellcastingRecharge: ['LONG_REST'],
       ritualCasting: [false],
       preparationStyle: ['PREPARED'],
       knowledgeStyle: ['ALL_LIST'],
@@ -766,6 +767,7 @@ export class HomebrewClassFormPage implements OnInit {
           this.form.patchValue({
             spellcastingAbility: sc.ability ?? '',
             spellcastingType: sc.spellcastingType ?? '',
+            spellcastingRecharge: sc.recharge ?? (sc.spellcastingType === 'Pact Magic' ? 'SHORT_REST' : 'LONG_REST'),
             ritualCasting: sc.ritualCasting ?? false,
             preparationStyle: sc.preparationStyle ?? 'PREPARED',
             knowledgeStyle: sc.knowledgeStyle ?? 'ALL_LIST',
@@ -1429,6 +1431,7 @@ export class HomebrewClassFormPage implements OnInit {
       spellcastingObj = {
         ability: v.spellcastingAbility ?? '',
         spellcastingType: v.spellcastingType ?? '',
+        recharge: v.spellcastingRecharge || (v.spellcastingType === 'Pact Magic' ? 'SHORT_REST' : 'LONG_REST'),
         ritualCasting: v.ritualCasting ?? false,
         preparationStyle: (v.preparationStyle ?? 'PREPARED') as 'PREPARED' | 'KNOWN',
         knowledgeStyle: (v.knowledgeStyle ?? 'ALL_LIST') as 'ALL_LIST' | 'LEARNED',

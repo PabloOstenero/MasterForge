@@ -395,6 +395,7 @@ export class HomebrewSubclassFormPage implements OnInit {
       spellcastingEnabled: [false],
       spellcastingAbility: [''],   // validators added dynamically when enabled
       spellcastingType: [''],   // validators added dynamically when enabled
+      spellcastingRecharge: ['LONG_REST'],
       ritualCasting: [false],
       preparationStyle: ['PREPARED'],
       cantripsKnown: this.fb.array(Array(20).fill(null).map(() => new FormControl(0))),
@@ -720,6 +721,7 @@ export class HomebrewSubclassFormPage implements OnInit {
           this.form.patchValue({
             spellcastingAbility: sc.ability ?? '',
             spellcastingType: sc.spellcastingType ?? '',
+            spellcastingRecharge: sc.recharge ?? (sc.spellcastingType === 'Pact Magic' ? 'SHORT_REST' : 'LONG_REST'),
             ritualCasting: sc.ritualCasting ?? false,
             preparationStyle: sc.preparationStyle ?? 'PREPARED',
           });
@@ -1195,9 +1197,11 @@ export class HomebrewSubclassFormPage implements OnInit {
 
     if (spellcastingEnabled) {
       const preparationStyle = this.form.get('preparationStyle')?.value as 'PREPARED' | 'KNOWN';
+      const type = this.form.get('spellcastingType')?.value;
       spellcasting = {
         ability: this.form.get('spellcastingAbility')?.value,
-        spellcastingType: this.form.get('spellcastingType')?.value,
+        spellcastingType: type,
+        recharge: this.form.get('spellcastingRecharge')?.value || (type === 'Pact Magic' ? 'SHORT_REST' : 'LONG_REST'),
         ritualCasting: this.form.get('ritualCasting')?.value ?? false,
         preparationStyle,
         cantripsKnown: this.cantripsKnown.value,

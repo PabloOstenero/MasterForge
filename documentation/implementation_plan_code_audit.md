@@ -50,6 +50,19 @@ We must ensure the backend and frontend data models can express complex 5e conce
 - **Dynamic Scaling:** Resource max values that scale with `level` or `mod` (e.g., Bardic Inspiration).
 - **Custom Tracking:** Support for user-defined counters in the Homebrew features.
 
+### 1.8 Feats & Custom Feat Engine [FUTURE CONTENT]
+- **ASI vs. Feat Selection**: Model choices at level 4/8/12/16/19, allowing custom/homebrew feats.
+- **Dynamic Feature Injection**: Support feats that grant spells (e.g., Fey Touched), ASIs (e.g., Resilient), or resource counters (e.g., Martial Adept).
+
+### 1.9 Backgrounds & Starting Assets [FUTURE CONTENT]
+- **Standard & Custom Backgrounds**: Database schema and creation form for D&D backgrounds.
+- **Initial Proficiencies**: Granting skill/tool proficiencies, languages, and starting gold/equipment.
+- **Background Features**: Embedding unique background actions/properties (e.g., Shelter of the Faithful).
+
+### 1.10 Multiclass Spellcasting Slot Consolidation [NEW]
+- **Aggregated Spellcaster Levels**: Implement standard 5e multiclass caster slot math based on combined levels of Full Casters, Half Casters, and Third Casters.
+- **Pact Magic Isolation**: Keep Warlock Pact slots visually distinct and tracked separately, while allowing cross-casting with regular spell slots.
+
 ## Phase 2: The Automated Effects Engine (The Glue)
 The `calculateAutomatedEffects` logic in the Character Sheet is the heart of the app. It must process the data models into character stats.
 

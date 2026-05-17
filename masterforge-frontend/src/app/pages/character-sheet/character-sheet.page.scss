@@ -1112,3 +1112,34 @@ ion-segment-button {
     }
   }
 }
+
+.spell-slots-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.pact-slots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  .pact-label {
+    font-size: 0.6rem;
+    color: #df4cf0; /* Beautiful violet/pink color for Pact Magic */
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    margin-right: 4px;
+  }
+
+  .slot-dot.pact-dot {
+    border-color: #df4cf0 !important;
+    
+    &.filled {
+      background: #df4cf0 !important;
+      box-shadow: 0 0 4px #df4cf0;
+    }
+  }
+}

@@ -474,8 +474,7 @@ export class CharacterSheetPage implements OnInit {
         const mergedSaves = { ...classSaves, ...charSaves };
 
         // Calculate automated max slots using raw data from DB
-        const rawClassFeatures = data.dndClass?.classFeatures || {};
-        const autoSlots = this.getAutoSpellSlots(data.level, rawClassFeatures);
+        const autoSlots = this.getAutoSpellSlots(data);
         const savedSlots = data.spellSlots || {};
         const mergedSlots: Record<string, any> = {};
 
@@ -1581,6 +1580,64 @@ export class CharacterSheetPage implements OnInit {
               if (p.reset === 'SHORT_REST') p.current = p.max;
             });
 
+            // Retrieve all active spellcasting classes
+            const activeClasses: any[] = [];
+            if (this.rawCharacter) {
+              if (this.rawCharacter.dndClass) {
+                const casting = this.rawCharacter.dndClass.classFeatures?.spellcasting || this.rawCharacter.subclass?.subclassFeatures?.spellcasting;
+                if (casting) activeClasses.push({ casting, isPact: (casting.spellcastingType || casting.type) === 'Pact Magic' });
+              }
+              if (this.rawCharacter.classLevels && this.rawCharacter.classLevels.length > 0) {
+                this.rawCharacter.classLevels.forEach((cl: any) => {
+                  if (cl.dndClass) {
+                    const casting = cl.dndClass.classFeatures?.spellcasting || cl.subclass?.subclassFeatures?.spellcasting;
+                    if (casting) activeClasses.push({ casting, isPact: (casting.spellcastingType || casting.type) === 'Pact Magic' });
+                  }
+                });
+              }
+            }
+
+            // Determine what slots to recharge based on the unified data-driven recharge model
+            let rechargeStandard = false;
+            let rechargePact = false;
+
+            activeClasses.forEach(ac => {
+              const recharge = ac.casting.recharge || (ac.isPact ? 'SHORT_REST' : 'LONG_REST');
+              if (recharge === 'SHORT_REST') {
+                if (ac.isPact) rechargePact = true;
+                else rechargeStandard = true;
+              }
+            });
+
+            // Recharge spell slots
+            const slots = { ...this.pj.spellSlots };
+            let changed = false;
+
+            if (rechargeStandard) {
+              Object.keys(slots).forEach(key => {
+                if (key.startsWith('level_') && slots[key]) {
+                  slots[key] = { max: slots[key].max, available: slots[key].max };
+                  changed = true;
+                }
+              });
+            }
+
+            if (rechargePact) {
+              Object.keys(slots).forEach(key => {
+                if (key.startsWith('pact_') && slots[key]) {
+                  slots[key] = { max: slots[key].max, available: slots[key].max };
+                  changed = true;
+                }
+              });
+            }
+
+            if (changed) {
+              this.pj.spellSlots = slots;
+              if (this.characterId) {
+                this.apiService.updateSpellSlots(this.characterId, slots).subscribe();
+              }
+            }
+
             // Auto-restore magic item charges that recharge on Short Rest
             this.pj.inventory
               .filter((item: any) => item.properties?.recharge === 'SHORT_REST')
@@ -1632,6 +1689,18 @@ export class CharacterSheetPage implements OnInit {
 
                 // Reset local resource pools
                 this.resourcePools.forEach(p => p.current = p.max);
+
+                // Fully restore all spell slots (standard level_ and pact_) on the frontend
+                const slots = { ...this.pj.spellSlots };
+                Object.keys(slots).forEach(key => {
+                  if ((key.startsWith('level_') || key.startsWith('pact_')) && slots[key]) {
+                    slots[key] = { max: slots[key].max, available: slots[key].max };
+                  }
+                });
+                this.pj.spellSlots = slots;
+
+                // Sync spell slots to backend
+                this.apiService.updateSpellSlots(this.characterId!, slots).subscribe();
 
                 // Auto-restore magic item charges that recharge on Long or Short Rest
                 this.pj.inventory
@@ -1932,9 +2001,33 @@ export class CharacterSheetPage implements OnInit {
   getMaxSpellLevel(characterLevel?: number): number {
     // If a level is provided, we calculate based on the class progression table (for Level Up)
     if (characterLevel !== undefined && this.rawCharacter) {
-      const cls = this.rawCharacter.dndClass;
-      const rawFeatures = cls?.classFeatures || {};
-      const autoSlots = this.getAutoSpellSlots(characterLevel, rawFeatures);
+      // Simulate level up state
+      const simulatedData = { ...this.rawCharacter };
+      simulatedData.level = characterLevel;
+
+      if (this.levelUpMode === 'MULTICLASS' && this.levelUpData.newClassId) {
+        const targetClass = this.allClasses.find((c: any) => c.id === this.levelUpData.newClassId);
+        if (targetClass) {
+          simulatedData.classLevels = [
+            ...(simulatedData.classLevels || []),
+            { dndClass: targetClass, level: 1 }
+          ];
+        }
+      } else if (this.levelUpMode === 'EXISTING' && this.levelUpData.classToLevelId) {
+        if (simulatedData.dndClass?.id === this.levelUpData.classToLevelId) {
+          // Primary class leveled up
+        } else {
+          // Multiclass leveled up
+          simulatedData.classLevels = (simulatedData.classLevels || []).map((cl: any) => {
+            if (cl.dndClass?.id === this.levelUpData.classToLevelId) {
+              return { ...cl, level: (cl.level || 0) + 1 };
+            }
+            return cl;
+          });
+        }
+      }
+
+      const autoSlots = this.getAutoSpellSlots(simulatedData);
 
       let max = 0;
       for (let i = 1; i <= 9; i++) {
@@ -1964,10 +2057,10 @@ export class CharacterSheetPage implements OnInit {
     // Pre-initialize groups for all levels that have slots (1 to 9)
     if (this.pj.spellSlots) {
       Object.keys(this.pj.spellSlots).forEach(key => {
-        const levelMatch = key.match(/level_(\d+)/);
+        const levelMatch = key.match(/level_(\d+)/) || key.match(/pact_(\d+)/);
         if (levelMatch) {
           const levelNum = levelMatch[1];
-          const slots = this.getSpellSlots(levelNum);
+          const slots = this.getSpellSlots(levelNum, key.startsWith('pact_'));
           if (slots.max > 0) {
             groups[levelNum] = [];
           }
@@ -2007,8 +2100,8 @@ export class CharacterSheetPage implements OnInit {
 
   // Helper to get spell slot status — handles that JSON deserialization
   // may return the inner map values as numbers OR nested objects
-  getSpellSlots(level: string): { max: number; available: number } {
-    const key = `level_${level}`;
+  getSpellSlots(level: string, isPact = false): { max: number; available: number } {
+    const key = isPact ? `pact_${level}` : `level_${level}`;
     const raw = this.pj.spellSlots?.[key];
     if (!raw) return { max: 0, available: 0 };
 
@@ -2028,16 +2121,16 @@ export class CharacterSheetPage implements OnInit {
 
   // Returns a typed array of `max` length for @for slot rendering
   // (replaces the brittle [].constructor(N) pattern)
-  getSlotArray(level: string): number[] {
-    const { max } = this.getSpellSlots(level);
+  getSlotArray(level: string, isPact = false): number[] {
+    const { max } = this.getSpellSlots(level, isPact);
     return Array.from({ length: max }, (_, i) => i);
   }
 
   // Helper to toggle spell slot availability and SAVE to backend
-  toggleSpellSlot(level: string, index: number) {
-    const key = `level_${level}`;
+  toggleSpellSlot(level: string, index: number, isPact = false) {
+    const key = isPact ? `pact_${level}` : `level_${level}`;
     const slots = { ...this.pj.spellSlots };
-    const current = this.getSpellSlots(level);
+    const current = this.getSpellSlots(level, isPact);
 
     // Calculate new available count
     let newAvailable = current.available;
@@ -2057,27 +2150,11 @@ export class CharacterSheetPage implements OnInit {
   }
 
   // Automated Spell Slot calculation using the class's own slot table with safety fallbacks
-  getAutoSpellSlots(level: number, classFeatures?: any): Record<string, any> {
+  getAutoSpellSlots(data: any, classFeatures?: any): Record<string, any> {
     const slots: Record<string, any> = {};
-    const casting = classFeatures?.spellcasting || this.pj?._rawClassFeatures?.spellcasting;
-    if (!casting) return slots;
+    if (!data) return slots;
 
-    // 1. Try to use the custom table from the class features
-    const table = casting.spellSlots?.slots || casting.spell_slots?.slots;
-
-    if (table && table[level - 1]) {
-      const row = table[level - 1];
-      row.forEach((count: number, idx: number) => {
-        if (count > 0) {
-          slots[`level_${idx + 1}`] = { max: count, available: count };
-        }
-      });
-      if (Object.keys(slots).length > 0) return slots;
-    }
-
-    // 2. Fallback: If no table, use standard 5e progression based on caster type
-    const type = casting.spellcastingType || casting.type;
-
+    // Standard 5e spell slot progressions
     const fullCasterRow = [
       [2], [3], [4, 2], [4, 3], [4, 3, 2], [4, 3, 3], [4, 3, 3, 1], [4, 3, 3, 2], [4, 3, 3, 3, 1], [4, 3, 3, 3, 2],
       [4, 3, 3, 3, 2, 1], [4, 3, 3, 3, 2, 1], [4, 3, 3, 3, 2, 1, 1], [4, 3, 3, 3, 2, 1, 1], [4, 3, 3, 3, 2, 1, 1, 1],
@@ -2089,19 +2166,115 @@ export class CharacterSheetPage implements OnInit {
       [4, 3, 3], [4, 3, 3], [4, 3, 3, 1], [4, 3, 3, 1], [4, 3, 3, 2], [4, 3, 3, 2], [4, 3, 3, 3, 1], [4, 3, 3, 3, 1], [4, 3, 3, 3, 2], [4, 3, 3, 3, 2]
     ];
 
-    let row: number[] = [];
-    if (type === 'Full Caster') row = fullCasterRow[level - 1] || [];
-    else if (type === 'Half Caster') row = halfCasterRow[level - 1] || [];
-    else if (type === 'Pact Magic') {
-      const warlockSlots = level >= 17 ? 4 : (level >= 11 ? 3 : (level >= 2 ? 2 : 1));
-      const warlockLvl = level >= 9 ? 5 : (level >= 7 ? 4 : (level >= 5 ? 3 : (level >= 3 ? 2 : 1)));
-      slots[`level_${warlockLvl}`] = { max: warlockSlots, available: warlockSlots };
-      return slots;
+    const thirdCasterRow = [
+      [], [], [2], [3], [3], [3], [4, 2], [4, 2], [4, 2], [4, 3],
+      [4, 3], [4, 3], [4, 3, 2], [4, 3, 2], [4, 3, 2], [4, 3, 3], [4, 3, 3], [4, 3, 3], [4, 3, 3, 1], [4, 3, 3, 1]
+    ];
+
+    // Collect all active classes
+    const activeClasses: { name: string; level: number; casting: any }[] = [];
+
+    if (typeof data === 'object' && data !== null && data.dndClass) {
+      // Calculate primary class level: TotalLevel - Sum(MulticlassLevels)
+      const mcSum = (data.classLevels || []).reduce((sum: number, cl: any) => sum + (cl.level || 0), 0);
+      const primaryLevel = Math.max(1, (data.level || 1) - mcSum);
+
+      const casting = data.dndClass.classFeatures?.spellcasting || data.subclass?.subclassFeatures?.spellcasting;
+      if (casting) {
+        activeClasses.push({
+          name: data.dndClass.name,
+          level: primaryLevel,
+          casting
+        });
+      }
+
+      // Add multiclasses
+      if (data.classLevels && data.classLevels.length > 0) {
+        data.classLevels.forEach((cl: any) => {
+          if (cl.dndClass) {
+            const casting = cl.dndClass.classFeatures?.spellcasting || cl.subclass?.subclassFeatures?.spellcasting;
+            if (casting) {
+              activeClasses.push({
+                name: cl.dndClass.name,
+                level: cl.level || 1,
+                casting
+              });
+            }
+          }
+        });
+      }
+    } else {
+      // Legacy fallback
+      const level = typeof data === 'number' ? data : (data.level || 1);
+      const features = classFeatures || this.pj?._rawClassFeatures;
+      const casting = features?.spellcasting;
+      if (casting) {
+        activeClasses.push({
+          name: 'Manual',
+          level: level,
+          casting
+        });
+      }
     }
 
-    row.forEach((count, idx) => {
-      if (count > 0) slots[`level_${idx + 1}`] = { max: count, available: count };
+    let fullLevels = 0;
+    let halfLevels = 0;
+    let thirdLevels = 0;
+    let pactLevel = 0;
+    let standardCasterCount = 0;
+
+    activeClasses.forEach(ac => {
+      const type = ac.casting.spellcastingType || ac.casting.type;
+      if (type === 'Full Caster') {
+        fullLevels += ac.level;
+        standardCasterCount++;
+      } else if (type === 'Half Caster') {
+        halfLevels += ac.level;
+        standardCasterCount++;
+      } else if (type === 'Third Caster') {
+        thirdLevels += ac.level;
+        standardCasterCount++;
+      } else if (type === 'Pact Magic') {
+        pactLevel += ac.level;
+      }
     });
+
+    // 1. Calculate standard caster slots
+    if (standardCasterCount > 0) {
+      let ECL = 0;
+      let progressionType: 'Full' | 'Half' | 'Third' = 'Full';
+
+      if (standardCasterCount === 1) {
+        // Single-class caster uses their specific progression directly (no rounding down)
+        if (fullLevels > 0) { ECL = fullLevels; progressionType = 'Full'; }
+        else if (halfLevels > 0) { ECL = halfLevels; progressionType = 'Half'; }
+        else if (thirdLevels > 0) { ECL = thirdLevels; progressionType = 'Third'; }
+      } else {
+        // Multiclass standard casters combine levels using standard 5e math (rounded down)
+        ECL = fullLevels + Math.floor(halfLevels / 2) + Math.floor(thirdLevels / 3);
+        progressionType = 'Full';
+      }
+
+      if (ECL > 0) {
+        let row: number[] = [];
+        if (progressionType === 'Full') row = fullCasterRow[ECL - 1] || [];
+        else if (progressionType === 'Half') row = halfCasterRow[ECL - 1] || [];
+        else if (progressionType === 'Third') row = thirdCasterRow[ECL - 1] || [];
+
+        row.forEach((count, idx) => {
+          if (count > 0) {
+            slots[`level_${idx + 1}`] = { max: count, available: count };
+          }
+        });
+      }
+    }
+
+    // 2. Calculate Pact Magic slots separately and add them (Issue 3 isolates this to pact_)
+    if (pactLevel > 0) {
+      const warlockSlots = pactLevel >= 17 ? 4 : (pactLevel >= 11 ? 3 : (pactLevel >= 2 ? 2 : 1));
+      const warlockLvl = pactLevel >= 9 ? 5 : (pactLevel >= 7 ? 4 : (pactLevel >= 5 ? 3 : (pactLevel >= 3 ? 2 : 1)));
+      slots[`pact_${warlockLvl}`] = { max: warlockSlots, available: warlockSlots };
+    }
 
     return slots;
   }
