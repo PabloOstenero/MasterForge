@@ -1466,9 +1466,39 @@ export class CharacterSheetPage implements OnInit {
     await alert.present();
   }
 
+  getCurrentLevelUpClassAndLevel(): { dndClass: any; level: number } | null {
+    if (!this.rawCharacter) return null;
+
+    let targetClass: any = null;
+    let newClassLevel = 1;
+
+    if (this.levelUpMode === 'MULTICLASS' && this.levelUpData.newClassId) {
+      targetClass = this.allClasses.find(c => c.id === this.levelUpData.newClassId);
+      newClassLevel = 1;
+    } else if (this.levelUpMode === 'EXISTING' && this.levelUpData.classToLevelId) {
+      const cl = (this.rawCharacter.classLevels || []).find((l: any) => l.dndClass.id === this.levelUpData.classToLevelId);
+      if (cl) {
+        targetClass = cl.dndClass;
+        newClassLevel = cl.level + 1;
+      } else if (this.rawCharacter.dndClass?.id === this.levelUpData.classToLevelId) {
+        targetClass = this.rawCharacter.dndClass;
+        const multiclassLevelsSum = (this.rawCharacter.classLevels || []).reduce((sum: number, l: any) => sum + l.level, 0);
+        const primaryClassLevel = this.pj.level - multiclassLevelsSum;
+        newClassLevel = primaryClassLevel + 1;
+      }
+    }
+
+    if (!targetClass) return null;
+    return { dndClass: targetClass, level: newClassLevel };
+  }
+
   isASIDue(): boolean {
-    const nextLevel = this.pj.level + 1;
-    return [4, 8, 12, 16, 19].includes(nextLevel);
+    const info = this.getCurrentLevelUpClassAndLevel();
+    if (!info) return false;
+
+    // Retrieve class-specific ASI levels from metadata, fallback to standard [4, 8, 12, 16, 19]
+    const asiLevels = info.dndClass.classFeatures?.asiLevels || [4, 8, 12, 16, 19];
+    return asiLevels.includes(info.level);
   }
 
   getTotalASISpent(): number {

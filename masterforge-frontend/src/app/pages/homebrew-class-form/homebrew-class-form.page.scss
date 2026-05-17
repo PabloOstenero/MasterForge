@@ -1435,3 +1435,36 @@ $red:         #C62828;
     border-bottom: 2px solid $red !important;
   }
 }
+
+.asi-levels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.selectable-card {
+  background: #141414;
+  border: 1px solid $border-card;
+  border-radius: 8px;
+  padding: 8px 4px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.78rem;
+  color: $text-muted;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+
+  &:hover {
+    border-color: rgba($gold, 0.4);
+    color: $text-white;
+  }
+
+  &.selected {
+    background: rgba($gold, 0.12);
+    border-color: $gold;
+    color: $gold;
+    box-shadow: 0 0 12px rgba($gold, 0.15);
+  }
+}

@@ -170,6 +170,7 @@ export interface ClassFeatures extends CommonHomebrewFeatures {
   multiclassingPrerequisites?: MulticlassingPrerequisites;
   multiclassingProficiencies?: MulticlassingProficiencies;
   spellcasting?: Spellcasting;
+  asiLevels?: number[];
 }
 
 export interface ExpandedSpellEntry {

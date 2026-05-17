@@ -237,6 +237,7 @@ export function buildClassFeatures(
   damageResistances: string[],
   damageImmunities: string[],
   conditionImmunities: string[],
+  asiLevels: number[] = [4, 8, 12, 16, 19],
 ): ClassFeatures {
   const result: ClassFeatures = {
     primaryAbility,
@@ -248,6 +249,7 @@ export function buildClassFeatures(
     damageResistances,
     damageImmunities,
     conditionImmunities,
+    asiLevels,
   };
 
   if (startingEquipment && startingEquipment.trim() !== '') {
@@ -509,6 +511,7 @@ export class HomebrewClassFormPage implements OnInit {
 
       // Class features
       features: this.fb.array([]),
+      asiLevels: [[4, 8, 12, 16, 19]],
 
       // Spellcasting
       spellcastingEnabled: [false],
@@ -566,10 +569,11 @@ export class HomebrewClassFormPage implements OnInit {
           });
         }
 
-        // Patch primaryAbility and subclassLevel
+        // Patch primaryAbility, subclassLevel, and asiLevels
         this.form.patchValue({
           primaryAbility: cf.primaryAbility ?? '',
           subclassLevel: cf.subclassLevel ?? 3,
+          asiLevels: cf.asiLevels ?? [4, 8, 12, 16, 19],
         });
 
         // Detect legacy vs structured equipment and pass to picker
@@ -1464,6 +1468,7 @@ export class HomebrewClassFormPage implements OnInit {
       damageResistances,
       damageImmunities,
       conditionImmunities,
+      v.asiLevels ?? [4, 8, 12, 16, 19],
     );
 
     // Backend expects hitDie as a number (e.g. 8 for d8), not a string
@@ -1517,6 +1522,27 @@ export class HomebrewClassFormPage implements OnInit {
   // ---------------------------------------------------------------------------
   // Cancel
   // ---------------------------------------------------------------------------
+
+  isAsiLevelSelected(lvl: number): boolean {
+    const current: number[] = this.form.get('asiLevels')?.value || [];
+    return current.includes(lvl);
+  }
+
+  toggleAsiLevel(lvl: number): void {
+    const ctrl = this.form.get('asiLevels');
+    if (!ctrl) return;
+    const current: number[] = [...(ctrl.value || [])];
+    const idx = current.indexOf(lvl);
+    if (idx > -1) {
+      current.splice(idx, 1);
+    } else {
+      current.push(lvl);
+      current.sort((a, b) => a - b);
+    }
+    ctrl.setValue(current);
+    ctrl.markAsDirty();
+    ctrl.markAsTouched();
+  }
 
   cancel(): void {
     this.router.navigate(['/homebrew']);
