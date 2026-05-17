@@ -909,6 +909,7 @@ class CharacterController(
         // 2. Update basic stats
         val updatedCharacter = character.copy(
             level = character.level + 1,
+            hitDiceTotal = character.hitDiceTotal + 1,
             maxHp = character.maxHp + dto.hpBonus,
             currentHp = character.currentHp + dto.hpBonus,
             baseStr = character.baseStr + (dto.statChanges["str"] ?: 0),
