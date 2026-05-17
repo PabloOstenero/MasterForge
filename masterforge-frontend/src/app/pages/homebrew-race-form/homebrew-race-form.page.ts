@@ -22,7 +22,8 @@ import {
   FeatureEntry,
   RaceFeatures,
   InnateSpell,
-  SKILL_DATA
+  SKILL_DATA,
+  FlexibleAsi
 } from '../../models/homebrew.models';
 
 // ---------------------------------------------------------------------------
@@ -117,6 +118,13 @@ export function buildRaceFeatures(
   naturalWeapons?: NaturalWeapon[],
   creatureType?: string,
   flyRestriction?: string,
+  flexibleAsi?: FlexibleAsi | null,
+  bonusStr?: number | null,
+  bonusDex?: number | null,
+  bonusCon?: number | null,
+  bonusInt?: number | null,
+  bonusWis?: number | null,
+  bonusCha?: number | null,
 ): RaceFeatures {
   // Omit speed keys whose value is null or 0
   const filteredSpeeds: Partial<{ walk: number; swim: number; climb: number; fly: number }> = {};
@@ -202,6 +210,17 @@ export function buildRaceFeatures(
     result.flyRestriction = flyRestriction.trim();
   }
 
+  if (flexibleAsi) {
+    result.flexibleAsi = flexibleAsi;
+  }
+
+  if (bonusStr !== undefined && bonusStr !== null) result.bonusStr = Number(bonusStr);
+  if (bonusDex !== undefined && bonusDex !== null) result.bonusDex = Number(bonusDex);
+  if (bonusCon !== undefined && bonusCon !== null) result.bonusCon = Number(bonusCon);
+  if (bonusInt !== undefined && bonusInt !== null) result.bonusInt = Number(bonusInt);
+  if (bonusWis !== undefined && bonusWis !== null) result.bonusWis = Number(bonusWis);
+  if (bonusCha !== undefined && bonusCha !== null) result.bonusCha = Number(bonusCha);
+
   return result;
 }
 
@@ -285,6 +304,7 @@ export class HomebrewRaceFormPage implements OnInit {
   // ---------------------------------------------------------------------------
 
   naturalArmorEnabled: boolean = false;
+  flexibleAsiEnabled: boolean = false;
 
   // Spell picker state
   availableSpells: any[] = [];
@@ -363,7 +383,13 @@ export class HomebrewRaceFormPage implements OnInit {
 
       // ── New controls (task 3.2) ─────────────────────────────────────────
 
-      // ASI config — removed
+      // Static ASI modifiers
+      bonusStr: [null, [Validators.min(0), Validators.max(5)]],
+      bonusDex: [null, [Validators.min(0), Validators.max(5)]],
+      bonusCon: [null, [Validators.min(0), Validators.max(5)]],
+      bonusInt: [null, [Validators.min(0), Validators.max(5)]],
+      bonusWis: [null, [Validators.min(0), Validators.max(5)]],
+      bonusCha: [null, [Validators.min(0), Validators.max(5)]],
 
       // Feat grant — removed
 
@@ -379,6 +405,11 @@ export class HomebrewRaceFormPage implements OnInit {
 
       // Natural weapons FormArray
       naturalWeapons: this.fb.array([]),
+
+      // Flexible ASI controls
+      flexibleAsiChoicesCount: [1],
+      flexibleAsiBonusValue: [1],
+      flexibleAsiAllowAbilityOverlap: [false],
     });
 
     // Detect edit mode from route param
@@ -423,6 +454,12 @@ export class HomebrewRaceFormPage implements OnInit {
           price:       race.price ?? null,
           extraLanguageChoices: rf.extraLanguageChoices ?? null,
           skillChoiceCount:     rf.skillProficiencies?.choiceCount ?? null,
+          bonusStr:    (rf.bonusStr ?? race.bonusStr) ?? null,
+          bonusDex:    (rf.bonusDex ?? race.bonusDex) ?? null,
+          bonusCon:    (rf.bonusCon ?? race.bonusCon) ?? null,
+          bonusInt:    (rf.bonusInt ?? race.bonusInt) ?? null,
+          bonusWis:    (rf.bonusWis ?? race.bonusWis) ?? null,
+          bonusCha:    (rf.bonusCha ?? race.bonusCha) ?? null,
         });
 
         // Patch speeds
@@ -624,11 +661,35 @@ export class HomebrewRaceFormPage implements OnInit {
           creatureType:   rf.creatureType   ?? '',
           flyRestriction: rf.flyRestriction ?? '',
         });
+
+        // Restore flexible ASI config
+        if (rf.flexibleAsi) {
+          this.flexibleAsiEnabled = true;
+          this.form.patchValue({
+            flexibleAsiChoicesCount: rf.flexibleAsi.choicesCount ?? 1,
+            flexibleAsiBonusValue: rf.flexibleAsi.bonusValue ?? 1,
+            flexibleAsiAllowAbilityOverlap: rf.flexibleAsi.allowAbilityOverlap ?? false,
+          });
+        }
       },
       error: (_err: any) => {
         this.error = 'No se pudo cargar la raza para editar.';
       },
     });
+  }
+
+  toggleFlexibleAsi(): void {
+    this.flexibleAsiEnabled = !this.flexibleAsiEnabled;
+    const choicesCtrl = this.form.get('flexibleAsiChoicesCount');
+    const bonusCtrl = this.form.get('flexibleAsiBonusValue');
+    if (this.flexibleAsiEnabled) {
+      choicesCtrl?.setValue(choicesCtrl.value ?? 1);
+      bonusCtrl?.setValue(bonusCtrl.value ?? 1);
+    } else {
+      choicesCtrl?.setValue(1);
+      bonusCtrl?.setValue(1);
+      this.form.patchValue({ flexibleAsiAllowAbilityOverlap: false });
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -690,6 +751,12 @@ export class HomebrewRaceFormPage implements OnInit {
       stat:       ctrl.get('stat')?.value       ?? 'str',
     }));
 
+    const flexibleAsi = this.flexibleAsiEnabled ? {
+      choicesCount: Number(v.flexibleAsiChoicesCount ?? 1),
+      bonusValue: Number(v.flexibleAsiBonusValue ?? 1),
+      allowAbilityOverlap: !!v.flexibleAsiAllowAbilityOverlap
+    } : null;
+
     const raceFeatures = buildRaceFeatures(
       v.speeds ?? { walk: null, swim: null, climb: null, fly: null },
       v.senses ?? { darkvision: null, blindsight: null, tremorsense: null, truesight: null },
@@ -708,6 +775,13 @@ export class HomebrewRaceFormPage implements OnInit {
       naturalWeaponValues,
       v.creatureType ?? '',
       v.flyRestriction ?? '',
+      flexibleAsi,
+      v.bonusStr,
+      v.bonusDex,
+      v.bonusCon,
+      v.bonusInt,
+      v.bonusWis,
+      v.bonusCha,
     );
 
     const dto = {

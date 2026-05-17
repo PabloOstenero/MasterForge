@@ -498,6 +498,37 @@
           </div>
         }
 
+        <!-- Flexible ASI Selections -->
+        @if (formData.selectedRace?.raceFeatures?.flexibleAsi) {
+          <h3 class="subsection-title" style="margin-top: 24px;">Mejora de Característica Flexible</h3>
+          <p class="mode-hint">Tu raza ({{ formData.selectedRace.name }}) te permite elegir {{ formData.selectedRace.raceFeatures.flexibleAsi.choicesCount }} mejoras de característica adicionales de +{{ formData.selectedRace.raceFeatures.flexibleAsi.bonusValue }}.</p>
+          
+          <div class="flexible-asis-container" style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px;">
+            @for (choice of [].constructor(formData.selectedRace.raceFeatures.flexibleAsi.choicesCount); track $index) {
+              <div class="field-group" style="margin-bottom: 0;">
+                <label class="field-label">Mejora #{{ $index + 1 }}</label>
+                <select
+                  class="forge-select-native"
+                  [ngModel]="formData.selectedFlexibleAsis?.[$index] || ''"
+                  (ngModelChange)="onFlexibleAsiChange($index, $event)"
+                  [attr.data-testid]="'flexible-asi-select-' + $index">
+                  <option value="" disabled>Selecciona una característica…</option>
+                  <option value="str" [disabled]="hasStaticBonus('str')">Fuerza (STR) {{ hasStaticBonus('str') ? '(Fija)' : '' }}</option>
+                  <option value="dex" [disabled]="hasStaticBonus('dex')">Destreza (DEX) {{ hasStaticBonus('dex') ? '(Fija)' : '' }}</option>
+                  <option value="con" [disabled]="hasStaticBonus('con')">Constitución (CON) {{ hasStaticBonus('con') ? '(Fija)' : '' }}</option>
+                  <option value="int" [disabled]="hasStaticBonus('int')">Inteligencia (INT) {{ hasStaticBonus('int') ? '(Fija)' : '' }}</option>
+                  <option value="wis" [disabled]="hasStaticBonus('wis')">Sabiduría (WIS) {{ hasStaticBonus('wis') ? '(Fija)' : '' }}</option>
+                  <option value="cha" [disabled]="hasStaticBonus('cha')">Carisma (CHA) {{ hasStaticBonus('cha') ? '(Fija)' : '' }}</option>
+                </select>
+              </div>
+            }
+          </div>
+
+          @if (validationErrors['flexibleAsis']) {
+            <p class="error-message" style="margin-top: 8px;" data-testid="flexible-asi-error">{{ validationErrors['flexibleAsis'] }}</p>
+          }
+        }
+
       </div>
     }
 

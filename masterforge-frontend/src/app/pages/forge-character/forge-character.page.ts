@@ -165,6 +165,9 @@ export interface CharacterFormData {
   // Step (dynamic): Feature Options
   featureSelections: Record<string, string[]>;
 
+  // Flexible ASI choices
+  selectedFlexibleAsis?: string[];
+
   // Derived (computed at review/submit)
   finalScores: { str: number; dex: number; con: number; int: number; wis: number; cha: number };
   calculatedHp: number;
@@ -634,6 +637,15 @@ export class ForgeCharacterPage implements OnInit {
   selectRace(race: any): void {
     this.formData.selectedRace = race;
     this.formData.selectedLanguages = []; // Reset language choices
+    
+    // Initialize or reset flexible ASI selections
+    const flexible = race?.raceFeatures?.flexibleAsi;
+    if (flexible) {
+      this.formData.selectedFlexibleAsis = Array(flexible.choicesCount || 1).fill('');
+    } else {
+      delete this.formData.selectedFlexibleAsis;
+    }
+    
     if (this.validationErrors['race']) {
       delete this.validationErrors['race'];
     }
@@ -904,7 +916,54 @@ export class ForgeCharacterPage implements OnInit {
       str: 'bonusStr', dex: 'bonusDex', con: 'bonusCon',
       int: 'bonusInt', wis: 'bonusWis', cha: 'bonusCha'
     };
-    return race[fieldMap[key]] ?? 0;
+    const fieldName = fieldMap[key];
+    let bonus = (race.raceFeatures && typeof race.raceFeatures[fieldName] === 'number')
+      ? race.raceFeatures[fieldName]
+      : (race[fieldName] ?? 0);
+
+    const flexible = race.raceFeatures?.flexibleAsi;
+    if (flexible && Array.isArray(this.formData.selectedFlexibleAsis)) {
+      const occurrences = this.formData.selectedFlexibleAsis.filter(k => k === key).length;
+      bonus += occurrences * (flexible.bonusValue || 1);
+    }
+
+    return bonus;
+  }
+
+  onFlexibleAsiChange(index: number, value: string): void {
+    if (!this.formData.selectedFlexibleAsis) {
+      this.formData.selectedFlexibleAsis = [];
+    }
+    this.formData.selectedFlexibleAsis[index] = value;
+    
+    // Validate in real-time so error is updated instantly on screen
+    const stepErrors = this._validateAbilityScoresStep();
+    if (stepErrors['flexibleAsis']) {
+      this.validationErrors['flexibleAsis'] = stepErrors['flexibleAsis'];
+    } else {
+      delete this.validationErrors['flexibleAsis'];
+    }
+  }
+
+  hasStaticBonus(key: string): boolean {
+    const race = this.formData.selectedRace;
+    if (!race) return false;
+    
+    // If overlap is explicitly allowed in the homebrew race config, never disable it
+    if (race.raceFeatures?.flexibleAsi?.allowAbilityOverlap) {
+      return false;
+    }
+    
+    const staticFields: Record<string, string> = {
+      str: 'bonusStr', dex: 'bonusDex', con: 'bonusCon',
+      int: 'bonusInt', wis: 'bonusWis', cha: 'bonusCha'
+    };
+    const fieldName = staticFields[key];
+    const staticBonusValue = (race.raceFeatures && typeof race.raceFeatures[fieldName] === 'number')
+      ? race.raceFeatures[fieldName]
+      : (race[fieldName] ?? 0);
+      
+    return staticBonusValue > 0;
   }
 
   /** Returns the base score for a given ability key based on current mode. */
@@ -1456,6 +1515,57 @@ export class ForgeCharacterPage implements OnInit {
          errors['hpRolledValue'] = `El valor de HP debe estar entre ${minRoll} y ${maxRoll}`;
       }
     }
+
+    const flexible = this.formData.selectedRace?.raceFeatures?.flexibleAsi;
+    if (flexible) {
+      const selections = this.formData.selectedFlexibleAsis || [];
+      const choicesCount = flexible.choicesCount || 1;
+      const allowOverlap = !!flexible.allowAbilityOverlap;
+
+      // 1. Check for D&D 5e Fixed Stat Overlap first
+      const race = this.formData.selectedRace;
+      const staticFields: Record<string, string> = {
+        str: 'bonusStr', dex: 'bonusDex', con: 'bonusCon',
+        int: 'bonusInt', wis: 'bonusWis', cha: 'bonusCha'
+      };
+      const statNameSpanish: Record<string, string> = {
+        str: 'Fuerza', dex: 'Destreza', con: 'Constitución',
+        int: 'Inteligencia', wis: 'Sabiduría', cha: 'Carisma'
+      };
+      
+      let overlapError: string | null = null;
+      for (const selectedStat of selections) {
+        if (!selectedStat) continue;
+        const staticFieldName = staticFields[selectedStat];
+        const staticBonusValue = (race?.raceFeatures && typeof race.raceFeatures[staticFieldName] === 'number')
+          ? race.raceFeatures[staticFieldName]
+          : (race?.[staticFieldName] ?? 0);
+        if (staticBonusValue > 0) {
+          overlapError = `No puedes seleccionar ${statNameSpanish[selectedStat]} porque ya recibe una mejora fija de esta raza.`;
+          break;
+        }
+      }
+
+      if (overlapError) {
+        errors['flexibleAsis'] = overlapError;
+      }
+      // 2. Check for Duplicate choices
+      else if (!allowOverlap) {
+        const nonNullSelections = selections.filter(Boolean);
+        const unique = new Set(nonNullSelections);
+        if (unique.size !== nonNullSelections.length) {
+          errors['flexibleAsis'] = 'No puedes seleccionar la misma característica más de una vez.';
+        }
+      }
+
+      // 3. Finally check for completeness
+      if (!errors['flexibleAsis']) {
+        if (selections.length < choicesCount || selections.some(s => !s)) {
+          errors['flexibleAsis'] = `Selecciona exactamente ${choicesCount} mejoras de característica.`;
+        }
+      }
+    }
+
     return errors;
   }
 
@@ -1569,9 +1679,14 @@ export function formatRaceBonuses(race: any): string {
   ];
 
   const parts = BONUS_LABELS
-    .filter(({ field }) => race[field] && race[field] !== 0)
     .map(({ field, label }) => {
-      const val: number = race[field];
+      const val = (race.raceFeatures && typeof race.raceFeatures[field] === 'number')
+        ? race.raceFeatures[field]
+        : (typeof race[field] === 'number' ? race[field] : 0);
+      return { val, label };
+    })
+    .filter(({ val }) => val !== 0)
+    .map(({ val, label }) => {
       return `${val > 0 ? '+' : ''}${val} ${label}`;
     });
 
@@ -1678,7 +1793,8 @@ export function buildCharacterDto(
     spellSlots: {},
     choicesJson: {
       ...(formData.selectedLanguages?.length > 0 ? { languages: formData.selectedLanguages } : {}),
-      ...(Object.keys(formData.featureSelections || {}).length > 0 ? { featureOptions: formData.featureSelections } : {})
+      ...(Object.keys(formData.featureSelections || {}).length > 0 ? { featureOptions: formData.featureSelections } : {}),
+      ...(formData.selectedFlexibleAsis && formData.selectedFlexibleAsis.length > 0 ? { selectedRacialAsis: formData.selectedFlexibleAsis } : {})
     },
     cp: 0, sp: 0, ep: 0, gp: 0, pp: 0,
     dndRace: { id: Number(formData.selectedRace?.id) },

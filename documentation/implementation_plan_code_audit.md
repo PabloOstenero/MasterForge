@@ -13,7 +13,7 @@ This plan details every system we must review, test, and potentially refactor to
 We must ensure the backend and frontend data models can express complex 5e concepts.
 
 ### 1.1 Races & Subraces
-- **Flexible ASI [OPTIONAL FUTURE CONTENT]:** Support for customizable ability score choices during character creation (e.g., Half-Elf +2 Cha / +1 to two distinct stats; Variant Human +1 to two distinct stats) with validation.
+- **Flexible ASI [COMPLETED]:** Support for customizable ability score choices during character creation (e.g., Half-Elf +2 Cha / +1 to two distinct stats; Variant Human +1 to two distinct stats) with strict D&D 5e overlap validation, persistent JSONB storage, and dedicated homebrew form ASI configuration card.
 - **Subrace Inheritance:** Ensure subraces inherit parent race traits correctly while adding or overriding others.
 - **Innate Spellcasting:** Support for spells gained at specific levels with specific casting abilities (e.g., Tiefling Infernal Legacy).
 - **Conditional Speeds:** Climbing, swimming, flying speeds.
@@ -65,12 +65,12 @@ We must ensure the backend and frontend data models can express complex 5e conce
 
 ---
 
-## 🛠️ Phase 1 Backlog: Technical Designs (Optional Future Content)
+## 🛠️ Phase 1 Backlog: Technical Designs
 
-### A. Flexible Ability Score Increases (ASI)
+### A. Flexible Ability Score Increases (ASI) [COMPLETED]
 * **Goal**: Enable races like Half-Elves (+2 Cha, +1 to two distinct stats) or Variant Humans (+1 to two distinct stats) to select their custom stat choices.
-* **Proposed Implementation**:
-  1. **Schema Extension**: In the `raceFeatures` JSON block, support a new object:
+* **Final Implementation**:
+  1. **JSONB Persistence Schema**: Configured `bonusStr` ... `bonusCha` to serialize directly inside the dynamic JSONB map `raceFeatures` under both flat static bonuses and the optional `flexibleAsi` key:
      ```json
      "flexibleAsi": {
        "choicesCount": 2,
@@ -78,9 +78,10 @@ We must ensure the backend and frontend data models can express complex 5e conce
        "allowAbilityOverlap": false
      }
      ```
-  2. **Character Forge UI**: In the Ability Scores step of `forge-character.page`, if `selectedRace.raceFeatures.flexibleAsi` is active, display dropdowns allowing players to choose which stats receive the bonus.
-  3. **Validation**: Check that the chosen stats do not overlap if `allowAbilityOverlap` is false.
-  4. **Serialization**: Save chosen stats in the character's `choicesJson` (e.g., `{"selectedRacialAsis": {"dex": 1, "con": 1}}`). The stat calculation engine will aggregate these selections into the final score.
+  2. **Unified ASI Form Card**: Built a stunning full-width **"Mejoras de Característica (ASI)"** section card inside the Homebrew Race Form to configure flat static stats and flexible choices side-by-side.
+  3. **Character Forge UI**: Displays styled dropdown selectors using gold-accented visual tokens with high readability in the dark theme.
+  4. **Proactive & Reactive Validation**: Options that conflict with the race's fixed static modifiers (or result in duplicate choices if disallowing overlaps) are automatically grayed out and disabled. Step transition is strictly blocked, preventing the player from advancing to subsequent steps if any overlap validation fails.
+  5. **Serialization**: Saved chosen stats inside `choicesJson.selectedRacialAsis` on character submission.
 
 ### B. Spell Preparation Limits & Concentration Tracking
 * **Goal**: Keep spellcasting honest on the sheet by limiting active spell choices and showing concentration states.

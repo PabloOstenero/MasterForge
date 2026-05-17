@@ -213,6 +213,40 @@
   }
 }
 
+.forge-select-native {
+  background: #1E1E1E;
+  color: white;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  outline: none;
+  width: 100%;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+  option {
+    background: #1E1E1E;
+    color: white;
+    padding: 8px;
+    
+    &:disabled {
+      color: #666;
+      background: #141414;
+    }
+  }
+
+  &:focus {
+    border-color: #C5A059;
+    box-shadow: 0 0 8px rgba(197, 160, 89, 0.25);
+  }
+
+  &.input-error {
+    border-color: #C62828;
+  }
+}
+
 // ─── Step placeholder (temporary, removed in later tasks) ────────────────────
 .step-placeholder {
   background: #1E1E1E;

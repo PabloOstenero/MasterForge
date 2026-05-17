@@ -203,6 +203,12 @@ export interface InnateSpell {
   rechargeOn: string;
 }
 
+export interface FlexibleAsi {
+  choicesCount: number;
+  bonusValue: number;
+  allowAbilityOverlap: boolean;
+}
+
 export interface RaceFeatures extends CommonHomebrewFeatures {
   languages?: string[]; // Deprecated: use languageProficiencies
   extraLanguageChoices?: number; // Deprecated: use languageProficiencies
@@ -211,6 +217,13 @@ export interface RaceFeatures extends CommonHomebrewFeatures {
   naturalWeapons?: NaturalWeapon[];
   creatureType?: string;
   flyRestriction?: string;
+  flexibleAsi?: FlexibleAsi;
+  bonusStr?: number;
+  bonusDex?: number;
+  bonusCon?: number;
+  bonusInt?: number;
+  bonusWis?: number;
+  bonusCha?: number;
 }
 
 export interface AttackEntry {
