@@ -537,15 +537,30 @@
       </div>
     </div>
 
+    @if (pj?.resourceCounters?.['activeConcentrationSpell']) {
+    <div class="active-concentration-banner" style="margin-top: 16px; padding: 12px 16px; background: linear-gradient(135deg, rgba(46, 213, 115, 0.15) 0%, rgba(46, 213, 115, 0.05) 100%); border: 1px solid rgba(46, 213, 115, 0.3); border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 0 10px rgba(46, 213, 115, 0.1); animation: concentrationGlow 2s infinite alternate;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="display: inline-block; width: 8px; height: 8px; background-color: #2ed573; border-radius: 50%; animation: concentrationPulse 1.5s infinite;"></span>
+        <span style="font-size: 0.85rem; font-weight: 600; color: #2ed573; text-transform: uppercase; letter-spacing: 0.5px;">Concentración:</span>
+        <span style="font-size: 0.95rem; font-weight: bold; color: #fff; font-family: 'Outfit', sans-serif;">{{ pj.resourceCounters['activeConcentrationSpell'] }}</span>
+      </div>
+      <ion-button fill="clear" color="danger" size="small" style="margin: 0; --padding-start: 0; --padding-end: 0;" (click)="breakConcentration()" title="Romper Concentración">
+        <ion-icon name="close-circle-outline" slot="icon-only" style="font-size: 1.25rem;"></ion-icon>
+      </ion-button>
+    </div>
+    }
+
     <div
       style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; margin-bottom: 16px;">
       <h2 class="section-title" style="margin: 0;">
         Conjuros y Trucos
-        @if (pj.preparationStyle === 'PREPARED') {
-        <span [style.color]="getPreparedSpellsCount() > getMaxPreparedSpells() ? '#ff4961' : '#888'"
-          style="font-size: 0.8rem; margin-left: 10px; font-weight: normal;">
-          ({{ getPreparedSpellsCount() }}/{{ getMaxPreparedSpells() }} prep.)
-        </span>
+        @if (getSpellcastingClasses().length > 0) {
+          @for (pool of getSpellcastingClasses(); track pool.dndClass.id) {
+            <span [style.color]="pool.currentPrepared > pool.maxPrepared ? '#ff4961' : '#888'"
+              style="font-size: 0.8rem; margin-left: 10px; font-weight: normal;">
+              ({{ pool.dndClass.name }}: {{ pool.currentPrepared }}/{{ pool.maxPrepared }} prep.)
+            </span>
+          }
         }
       </h2>
       <div style="display: flex; gap: 4px;">
@@ -612,6 +627,14 @@
             <p>{{ cs.spell.castingTime }} &bull; {{ cs.spell.range }} &bull; {{ cs.spell.duration }}</p>
           </ion-label>
           <div slot="end" class="spell-school-badge">{{ cs.spell.school.substring(0,3).toUpperCase() }}</div>
+
+          @if (cs.spell.concentration) {
+          <ion-button slot="end" fill="clear" (click)="$event.stopPropagation(); toggleConcentration(cs.spell.name)" title="Concentrarse">
+            <ion-icon [name]="isConcentratingOn(cs.spell.name) ? 'sparkles' : 'sparkles-outline'"
+              [color]="isConcentratingOn(cs.spell.name) ? 'success' : 'medium'"
+              [style.animation]="isConcentratingOn(cs.spell.name) ? 'concentrationPulse 1.5s infinite' : 'none'"></ion-icon>
+          </ion-button>
+          }
 
           @if (group.levelNum !== '0') {
           <ion-button slot="end" fill="clear" (click)="$event.stopPropagation(); toggleSpellPrepare(cs.id)">
@@ -1212,6 +1235,19 @@
         </div>
 
         <div class="ion-padding">
+          @if (detailType === 'SPELL' && selectedDetail.spell?.concentration) {
+            @if (isConcentratingOn(selectedDetail.spell.name)) {
+              <ion-button expand="block" color="danger" (click)="toggleConcentration(selectedDetail.spell.name)" style="--border-radius: 12px; margin-bottom: 10px; font-weight: bold;">
+                <ion-icon name="close-circle-outline" slot="start"></ion-icon>
+                Romper Concentración
+              </ion-button>
+            } @else {
+              <ion-button expand="block" color="success" (click)="toggleConcentration(selectedDetail.spell.name)" style="--border-radius: 12px; margin-bottom: 10px; font-weight: bold;">
+                <ion-icon name="sparkles-outline" slot="start"></ion-icon>
+                Concentrarse
+              </ion-button>
+            }
+          }
           <ion-button expand="block" fill="outline" color="medium" (click)="closeDetail()" style="--border-radius: 12px;">
             Cerrar
           </ion-button>

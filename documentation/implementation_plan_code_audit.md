@@ -13,7 +13,7 @@ This plan details every system we must review, test, and potentially refactor to
 We must ensure the backend and frontend data models can express complex 5e concepts.
 
 ### 1.1 Races & Subraces
-- **Flexible ASI:** Support for flexible ability score increases (e.g., Half-Elf: +2 Cha, +1 to two other distinct stats).
+- **Flexible ASI [OPTIONAL FUTURE CONTENT]:** Support for customizable ability score choices during character creation (e.g., Half-Elf +2 Cha / +1 to two distinct stats; Variant Human +1 to two distinct stats) with validation.
 - **Subrace Inheritance:** Ensure subraces inherit parent race traits correctly while adding or overriding others.
 - **Innate Spellcasting:** Support for spells gained at specific levels with specific casting abilities (e.g., Tiefling Infernal Legacy).
 - **Conditional Speeds:** Climbing, swimming, flying speeds.
@@ -34,17 +34,17 @@ We must ensure the backend and frontend data models can express complex 5e conce
 ### 1.4 Items & Equipment
 - **Weapon Properties:** Finesse, heavy, light, reach, thrown, versatile, loading, ammunition. The character sheet must respect these (e.g., using Dex for Finesse, applying disadvantage for Heavy if Small).
 - **Armor Logic:** Base AC, Max Dex bonus (Medium armor), Stealth disadvantage, Strength requirements for Heavy armor.
-- **Magic Items & Attunement:** Items granting stat overrides (e.g., Gauntlets of Ogre Power setting Str to 19), granting spells, or modifying AC/Saves.
+- **Magic Items & Attunement [COMPLETED]:** Limit attunement to 3 active slots (plus customizable bonus slots from subclass/race features), backend attunement validation with 400 error responses, and dynamic passive stat overrides (e.g., setting Strength to a flat 19, or taking the natural score if higher) computed in the effective stats pipeline.
 
 ### 1.5 Spellcasting & Magic Management [NEW]
-- **Concentration Tracking:** Visual indicator for active concentration spells.
-- **Pact Magic vs. Spellcasting:** Separation of Warlock slots from other casters.
-- **Prepared vs. Known:** Enforcement of preparation limits based on Level + Mod.
+- **Concentration Tracking [OPTIONAL FUTURE CONTENT]:** Visual indicator for active concentration spells on the sheet, with a confirmation warning when trying to cast a second concentration spell.
+- **Pact Magic vs. Spellcasting [COMPLETED]:** Separation of Warlock slots from other casters with visual purple design and rest recharge separation.
+- **Prepared vs. Known [OPTIONAL FUTURE CONTENT]:** Enforcement and visual counter of spell preparation limits based on Level + Ability Modifier.
 
 ### 1.6 Rest & Recovery Engine [NEW]
-- **Short Rest:** Healing via Hit Dice consumption and resource recovery (Ki, Fighter features).
-- **Long Rest:** Full HP/Spell Slot recovery and Half-Max Hit Dice restoration.
-- **Recharge Mechanics:** Random recharge for magic items (e.g., "1d4+1 at dawn").
+- **Short Rest [COMPLETED]:** Healing via Hit Dice consumption and resource recovery (Ki, Fighter features, Pact slots).
+- **Long Rest [COMPLETED]:** Full HP/Spell Slot recovery and Half-Max Hit Dice restoration (complying with D&D 5e minimum 1 recovery rules).
+- **Recharge Mechanics [COMPLETED]:** Random recharge formulas for magic items (e.g., rolling `"1d4 + 1"` charges recovered on a Short or Long Rest) is fully integrated into the Rest & Recovery flow on the frontend.
 
 ### 1.7 Resources & Custom Counters [NEW]
 - **Dynamic Scaling:** Resource max values that scale with `level` or `mod` (e.g., Bardic Inspiration).
@@ -59,9 +59,44 @@ We must ensure the backend and frontend data models can express complex 5e conce
 - **Initial Proficiencies**: Granting skill/tool proficiencies, languages, and starting gold/equipment.
 - **Background Features**: Embedding unique background actions/properties (e.g., Shelter of the Faithful).
 
-### 1.10 Multiclass Spellcasting Slot Consolidation [NEW]
+### 1.10 Multiclass Spellcasting Slot Consolidation [COMPLETED]
 - **Aggregated Spellcaster Levels**: Implement standard 5e multiclass caster slot math based on combined levels of Full Casters, Half Casters, and Third Casters.
 - **Pact Magic Isolation**: Keep Warlock Pact slots visually distinct and tracked separately, while allowing cross-casting with regular spell slots.
+
+---
+
+## 🛠️ Phase 1 Backlog: Technical Designs (Optional Future Content)
+
+### A. Flexible Ability Score Increases (ASI)
+* **Goal**: Enable races like Half-Elves (+2 Cha, +1 to two distinct stats) or Variant Humans (+1 to two distinct stats) to select their custom stat choices.
+* **Proposed Implementation**:
+  1. **Schema Extension**: In the `raceFeatures` JSON block, support a new object:
+     ```json
+     "flexibleAsi": {
+       "choicesCount": 2,
+       "bonusValue": 1,
+       "allowAbilityOverlap": false
+     }
+     ```
+  2. **Character Forge UI**: In the Ability Scores step of `forge-character.page`, if `selectedRace.raceFeatures.flexibleAsi` is active, display dropdowns allowing players to choose which stats receive the bonus.
+  3. **Validation**: Check that the chosen stats do not overlap if `allowAbilityOverlap` is false.
+  4. **Serialization**: Save chosen stats in the character's `choicesJson` (e.g., `{"selectedRacialAsis": {"dex": 1, "con": 1}}`). The stat calculation engine will aggregate these selections into the final score.
+
+### B. Spell Preparation Limits & Concentration Tracking
+* **Goal**: Keep spellcasting honest on the sheet by limiting active spell choices and showing concentration states.
+* **Proposed Implementation**:
+  1. **Prep Limit Formula**: In `character-sheet.page.ts`, compute the preparation capacity dynamically per casting class:
+     $$\text{Prep Capacity} = \text{Class Level} + \text{Spellcasting Ability Modifier}$$
+  2. **Visual Counter**: Show `Prepared Spells: X / Y` under the spell list. If the user tries to prepare more than `Y` spells, display an friendly warning toast.
+  3. **Concentration state**: Add a green/yellow eye icon next to spells requiring concentration. When one is cast, set an `isConcentratingOn: SpellId` state on the character. If they click to cast another concentration spell, prompt them: *"This will end concentration on [Previous Spell]. Proceed?"*
+### 1.8 Feats & Custom Feat Engine [FUTURE CONTENT]
+- **ASI vs. Feat Selection**: Model choices at level 4/8/12/16/19, allowing custom/homebrew feats.
+- **Dynamic Feature Injection**: Support feats that grant spells (e.g., Fey Touched), ASIs (e.g., Resilient), or resource counters (e.g., Martial Adept).
+
+### 1.9 Backgrounds & Starting Assets [FUTURE CONTENT]
+- **Standard & Custom Backgrounds**: Database schema and creation form for D&D backgrounds.
+- **Initial Proficiencies**: Granting skill/tool proficiencies, languages, and starting gold/equipment.
+- **Background Features**: Embedding unique background actions/properties (e.g., Shelter of the Faithful).
 
 ## Phase 2: The Automated Effects Engine (The Glue)
 The `calculateAutomatedEffects` logic in the Character Sheet is the heart of the app. It must process the data models into character stats.

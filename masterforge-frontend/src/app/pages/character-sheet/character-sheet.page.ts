@@ -10,7 +10,7 @@ import {
 } from '@ionic/angular/standalone';
 import { ApiService } from '../../services/api';
 import { addIcons } from 'ionicons';
-import { statsChart, sparkles, shield, briefcase, trash, add, addCircleOutline, checkmarkCircle, trashOutline, syncOutline, book, bookOutline, settingsOutline, trendingUpOutline, removeCircleOutline, refreshOutline, sparklesOutline, flaskOutline, hammerOutline, flashOutline, addOutline, wifiOutline } from 'ionicons/icons';
+import { statsChart, sparkles, shield, briefcase, trash, add, addCircleOutline, checkmarkCircle, trashOutline, syncOutline, book, bookOutline, settingsOutline, trendingUpOutline, removeCircleOutline, refreshOutline, sparklesOutline, flaskOutline, hammerOutline, flashOutline, addOutline, wifiOutline, closeCircleOutline } from 'ionicons/icons';
 import { FeatureChoicePickerComponent } from '../../components/feature-choice-picker/feature-choice-picker.component';
 import { getProficiencyBonus, getModifier, calculatePassive, calculateMulticlassHp } from '../../utils/dnd-utils';
 
@@ -280,7 +280,8 @@ export class CharacterSheetPage implements OnInit {
       'flask-outline': flaskOutline,
       'hammer-outline': hammerOutline,
       'flash-outline': flashOutline,
-      'wifi-outline': wifiOutline
+      'wifi-outline': wifiOutline,
+      'close-circle-outline': closeCircleOutline
     });
   }
 
@@ -1047,11 +1048,137 @@ export class CharacterSheetPage implements OnInit {
   // Toggles the preparation status of a spell
   toggleSpellPrepare(characterSpellId: number) {
     if (!this.characterId) return;
+
+    // Find the spell in question
+    const charSpell = this.pj?.spells?.find((s: any) => s.id === characterSpellId);
+    if (!charSpell) return;
+
+    const isCurrentlyPrepared = charSpell.isPrepared;
+
+    // If the spell is NOT currently prepared, we are preparing it
+    if (!isCurrentlyPrepared) {
+      // Check if it's an always prepared spell
+      const expandedSpells = this.rawCharacter?.subclass?.subclassFeatures?.['expandedSpellList'] || [];
+      const isAlwaysPrepared = expandedSpells.some((s: any) => s.name === charSpell.spell?.name && s.preparationType === 'ALWAYS_PREPARED');
+
+      if (!isAlwaysPrepared) {
+        const rawClasses = charSpell.spell?.spellClasses || '';
+        let spellClassesStr = '';
+        if (Array.isArray(rawClasses)) {
+          spellClassesStr = rawClasses.join(', ').toLowerCase();
+        } else if (typeof rawClasses === 'string') {
+          spellClassesStr = rawClasses.toLowerCase();
+        }
+        const pools = this.getSpellcastingClasses();
+
+        const matchingPools = pools.filter(p => {
+          const className = (p.dndClass?.name || '').toLowerCase();
+          return spellClassesStr.includes(className);
+        });
+
+        let activePool = null;
+        if (matchingPools.length === 1) {
+          activePool = matchingPools[0];
+        } else if (matchingPools.length > 1) {
+          // Shared spell: assign/check against whichever has room, or the first one
+          activePool = matchingPools.find(p => p.currentPrepared < p.maxPrepared) || matchingPools[0];
+        } else if (pools.length === 1) {
+          activePool = pools[0];
+        }
+
+        if (activePool) {
+          if (activePool.currentPrepared >= activePool.maxPrepared) {
+            this.presentMaxPreparedAlert(activePool.dndClass.name, activePool.maxPrepared);
+            return;
+          }
+        }
+      }
+    }
+
     this.apiService.toggleSpellPrepare(this.characterId, characterSpellId).subscribe({
       next: () => this.loadCharacter(this.characterId!),
       error: (err) => console.error('Error toggling spell preparation:', err)
     });
   }
+
+  async presentMaxPreparedAlert(className: string, max: number) {
+    const alert = await this.alertController.create({
+      header: 'Límite de Conjuros',
+      message: `Ya has preparado el número máximo de conjuros de ${className} permitidos (${max}). Debes des-preparar otro conjuro de ${className} primero.`,
+      buttons: ['OK']
+    });
+    await alert.present();
+  }
+
+  isConcentratingOn(spellName: string): boolean {
+    return this.pj?.resourceCounters?.['activeConcentrationSpell'] === spellName;
+  }
+
+  async toggleConcentration(spellName: string) {
+    if (!this.pj.resourceCounters) {
+      this.pj.resourceCounters = {};
+    }
+
+    const current = this.pj.resourceCounters['activeConcentrationSpell'];
+
+    if (current === spellName) {
+      // Break concentration on this spell
+      this.pj.resourceCounters['activeConcentrationSpell'] = null;
+      this.apiService.updateResourceCounters(this.characterId!, this.pj.resourceCounters).subscribe({
+        next: () => {
+          this.loadCharacter(this.characterId!);
+        },
+        error: (err) => console.error('Error updating active concentration:', err)
+      });
+    } else if (current) {
+      // Prompt confirmation to break the current concentration on a different spell
+      const alert = await this.alertController.create({
+        header: 'Cambiar Concentración',
+        message: `Ya te estás concentrando en "${current}". ¿Deseas romper esa concentración para concentrarte en "${spellName}"?`,
+        buttons: [
+          {
+            text: 'Cancelar',
+            role: 'cancel'
+          },
+          {
+            text: 'Sí, Cambiar',
+            handler: () => {
+              this.pj.resourceCounters['activeConcentrationSpell'] = spellName;
+              this.apiService.updateResourceCounters(this.characterId!, this.pj.resourceCounters).subscribe({
+                next: () => {
+                  this.loadCharacter(this.characterId!);
+                },
+                error: (err) => console.error('Error updating active concentration:', err)
+              });
+            }
+          }
+        ]
+      });
+      await alert.present();
+    } else {
+      // Simply start concentrating on this spell
+      this.pj.resourceCounters['activeConcentrationSpell'] = spellName;
+      this.apiService.updateResourceCounters(this.characterId!, this.pj.resourceCounters).subscribe({
+        next: () => {
+          this.loadCharacter(this.characterId!);
+        },
+        error: (err) => console.error('Error updating active concentration:', err)
+      });
+    }
+  }
+
+  breakConcentration() {
+    if (this.pj?.resourceCounters && this.pj.resourceCounters['activeConcentrationSpell']) {
+      this.pj.resourceCounters['activeConcentrationSpell'] = null;
+      this.apiService.updateResourceCounters(this.characterId!, this.pj.resourceCounters).subscribe({
+        next: () => {
+          this.loadCharacter(this.characterId!);
+        },
+        error: (err) => console.error('Error breaking concentration:', err)
+      });
+    }
+  }
+
 
   // Syncs all available class spells to the character
   syncSpells() {
@@ -2277,9 +2404,12 @@ export class CharacterSheetPage implements OnInit {
   // Reads the spellcasting ability from classFeatures, defaulting to INT for Wizards,
   // WIS for Clerics/Druids/Rangers, CHA for Paladins/Bards/Sorcerers/Warlocks.
   getSpellcastingAbility(): string {
-    const fromClass = this.pj.proficiencies?._spellcastingAbility
+    let fromClass = this.pj.proficiencies?._spellcastingAbility
       || this.extractArrayFromClassFeatures(this.pj._rawClassFeatures, 'spellcastingAbility')[0];
-    if (fromClass) return fromClass.toUpperCase();
+    if (Array.isArray(fromClass)) {
+      fromClass = fromClass[0];
+    }
+    if (fromClass && typeof fromClass === 'string') return fromClass.toUpperCase();
     // Heuristic fallback based on class name
     const cls = (this.pj.dndClass || '').toLowerCase();
     if (['mago', 'wizard'].some(n => cls.includes(n))) return 'INT';
@@ -2312,32 +2442,150 @@ export class CharacterSheetPage implements OnInit {
   }
 
   // --- Prepared Spells Tracking ---
-  getMaxPreparedSpells(): number {
-    if (!this.pj) return 0;
-    const mod = this.getSpellcastingMod();
-    const className = (this.pj.dndClass || '').toLowerCase();
+  getAbilityModifier(ability: string): number {
+    if (!ability) return 0;
+    const rawAbility = Array.isArray(ability) ? ability[0] : ability;
+    if (typeof rawAbility !== 'string') return 0;
 
-    // Resolve the caster class level: use the per-class level if multiclassed,
-    // otherwise fall back to total character level for pure single-class characters.
-    const classLevels = this.rawCharacter?.classLevels || [];
-    const primaryClassEntry = classLevels.find((cl: any) =>
-      cl.dndClass?.name?.toLowerCase() === className
-    );
-    const casterLevel = primaryClassEntry?.level ?? (this.pj.level || 1);
+    const statMap: Record<string, string> = {
+      'FUE': 'str', 'STR': 'str', 'STRENGTH': 'str', 'FUERZA': 'str',
+      'DES': 'dex', 'DEX': 'dex', 'DEXTERITY': 'dex', 'DESTREZA': 'dex',
+      'CON': 'con', 'CONSTITUTION': 'con', 'CONSTITUCION': 'con',
+      'INT': 'int', 'INTELLIGENCE': 'int', 'INTELIGENCIA': 'int',
+      'SAB': 'wis', 'WIS': 'wis', 'WISDOM': 'wis', 'SABIDURIA': 'wis',
+      'CAR': 'cha', 'CHA': 'cha', 'CHARISMA': 'cha', 'CARISMA': 'cha'
+    };
+    const statKey = statMap[rawAbility.toUpperCase()] || 'int';
+    const score = this.pj?.stats?.[statKey] || 10;
+    return Math.floor((Number(score) - 10) / 2);
+  }
 
-    // Half-casters (Paladin, Ranger) prepare based on half their class level
-    if (['paladín', 'paladin', 'explorador', 'exploradora', 'ranger'].includes(className)) {
-      return Math.max(1, Math.floor(casterLevel / 2) + mod);
+  getPreparationStyle(dndClass: any): 'PREPARED' | 'KNOWN' {
+    if (!dndClass) return 'KNOWN';
+    const sc = dndClass.classFeatures?.['spellcasting'] || {};
+    const cfStyle = sc['preparationStyle'] || sc['style'];
+    if (cfStyle === 'PREPARED' || cfStyle === 'KNOWN') return cfStyle;
+    return 'KNOWN';
+  }
+
+  getClassSpellcastingAbility(dndClass: any): string {
+    if (!dndClass) return 'CAR';
+    const sc = dndClass.classFeatures?.['spellcasting'] || {};
+    let ability = sc['spellcastingAbility'] || sc['ability'];
+    if (Array.isArray(ability)) {
+      ability = ability[0];
+    }
+    if (ability && typeof ability === 'string') return ability.toUpperCase();
+    return 'CAR';
+  }
+
+  getClassMaxPreparedSpells(dndClass: any, classLevel: number): number {
+    const sc = dndClass.classFeatures?.['spellcasting'] || {};
+    const type = sc['spellcastingType'] || sc['type'] || 'Full Caster';
+    
+    const ability = this.getClassSpellcastingAbility(dndClass);
+    const mod = this.getAbilityModifier(ability);
+
+    if (type === 'Half Caster') {
+      return Math.max(1, Math.floor(classLevel / 2) + mod);
+    }
+    if (type === 'Third Caster') {
+      return Math.max(1, Math.floor(classLevel / 3) + mod);
+    }
+    return Math.max(1, classLevel + mod);
+  }
+
+  getSpellcastingClasses(): Array<{ dndClass: any, level: number, maxPrepared: number, currentPrepared: number }> {
+    const list: any[] = [];
+    if (!this.rawCharacter) return list;
+
+    // 1. Get primary class
+    const primaryClass = this.rawCharacter.dndClass;
+    if (primaryClass && this.getPreparationStyle(primaryClass) === 'PREPARED') {
+      const mcSum = (this.rawCharacter.classLevels || []).reduce((sum: number, cl: any) => sum + (cl.level || 0), 0);
+      const primaryLevel = (this.pj.level || 1) - mcSum;
+      if (primaryLevel > 0) {
+        list.push({
+          dndClass: primaryClass,
+          level: primaryLevel,
+          maxPrepared: this.getClassMaxPreparedSpells(primaryClass, primaryLevel),
+          currentPrepared: 0
+        });
+      }
     }
 
-    // Full-casters (Cleric, Druid, Wizard) prepare their full class level + mod
-    return Math.max(1, casterLevel + mod);
+    // 2. Get secondary classes
+    (this.rawCharacter.classLevels || []).forEach((cl: any) => {
+      if (cl.dndClass && this.getPreparationStyle(cl.dndClass) === 'PREPARED') {
+        list.push({
+          dndClass: cl.dndClass,
+          level: cl.level,
+          maxPrepared: this.getClassMaxPreparedSpells(cl.dndClass, cl.level),
+          currentPrepared: 0
+        });
+      }
+    });
+
+    // 3. Count prepared spells per class
+    if (this.pj.spells) {
+      const expandedSpells = this.rawCharacter?.subclass?.subclassFeatures?.['expandedSpellList'] || [];
+      const alwaysPreparedNames = expandedSpells
+        .filter((s: any) => s.preparationType === 'ALWAYS_PREPARED')
+        .map((s: any) => s.name || '');
+
+      this.pj.spells.forEach((cs: any) => {
+        if (!cs || !cs.spell || cs.spell.level === 0 || !cs.isPrepared) return;
+        if (alwaysPreparedNames.includes(cs.spell.name)) return;
+
+        const rawClasses = cs.spell.spellClasses || '';
+        let spellClassesStr = '';
+        if (Array.isArray(rawClasses)) {
+          spellClassesStr = rawClasses.join(', ').toLowerCase();
+        } else if (typeof rawClasses === 'string') {
+          spellClassesStr = rawClasses.toLowerCase();
+        }
+        
+        // Find matching classes for this spell
+        const matchingCasterClasses = list.filter(c => {
+          const className = (c.dndClass?.name || '').toLowerCase();
+          return spellClassesStr.includes(className);
+        });
+
+        if (matchingCasterClasses.length === 1) {
+          matchingCasterClasses[0].currentPrepared++;
+        } else if (matchingCasterClasses.length > 1) {
+          // Shared spell, assign to the one that has the lowest ratio (or has room)
+          matchingCasterClasses.sort((a, b) => {
+            const ratioA = a.currentPrepared / a.maxPrepared;
+            const ratioB = b.currentPrepared / b.maxPrepared;
+            return ratioA - ratioB;
+          });
+          matchingCasterClasses[0].currentPrepared++;
+        } else {
+          if (list.length === 1) {
+            list[0].currentPrepared++;
+          }
+        }
+      });
+    }
+
+    return list;
+  }
+
+  getMaxPreparedSpells(): number {
+    const pools = this.getSpellcastingClasses();
+    if (pools.length > 0) {
+      return pools[0].maxPrepared;
+    }
+    return 0;
   }
 
   getPreparedSpellsCount(): number {
-    if (!this.pj || !this.pj.spells) return 0;
-    // We only count leveled spells (level > 0) that are prepared
-    return this.pj.spells.filter((s: any) => s.spell && s.spell.level > 0 && s.isPrepared).length;
+    const pools = this.getSpellcastingClasses();
+    if (pools.length > 0) {
+      return pools[0].currentPrepared;
+    }
+    return 0;
   }
 
   // ── Weapon Properties Engine ──────────────────────────────────────────────

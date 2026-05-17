@@ -1143,3 +1143,35 @@ ion-segment-button {
     }
   }
 }
+
+/* --- Active Concentration Styling & Animations --- */
+@keyframes concentrationGlow {
+  0% {
+    border-color: rgba(46, 213, 115, 0.3);
+    box-shadow: 0 0 6px rgba(46, 213, 115, 0.1);
+  }
+  100% {
+    border-color: rgba(46, 213, 115, 0.6);
+    box-shadow: 0 0 14px rgba(46, 213, 115, 0.25);
+  }
+}
+
+@keyframes concentrationPulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+}
+
+.active-concentration-banner {
+  transition: all 0.3s ease-in-out;
+}
+
