@@ -495,14 +495,26 @@ export class CharacterSheetPage implements OnInit {
           dndClass: data.dndClass?.name || 'Aventurero',
           subclass: data.subclass?.name || 'Sin subclase',
           fullClassName: (() => {
+            const primaryName = data.dndClass?.name || 'Aventurero';
+            const primaryId = data.dndClass?.id;
+            
             if (data.classLevels && data.classLevels.length > 0) {
-              const mcSum = data.classLevels.reduce((sum: number, cl: any) => sum + cl.level, 0);
-              const primaryLevel = (data.level || 1) - mcSum;
-              const primaryStr = `${data.dndClass?.name || 'Aventurero'} ${primaryLevel}`;
-              const mcStrings = data.classLevels.map((cl: any) => `${cl.dndClass.name} ${cl.level}`);
-              return [primaryStr, ...mcStrings].join(' / ');
+              const primaryInList = data.classLevels.find((cl: any) => 
+                (primaryId && cl.dndClass?.id === primaryId) || 
+                (cl.dndClass?.name?.toLowerCase() === primaryName.toLowerCase())
+              );
+              
+              if (primaryInList) {
+                return data.classLevels.map((cl: any) => `${cl.dndClass.name} ${cl.level}`).join(' / ');
+              } else {
+                const mcSum = data.classLevels.reduce((sum: number, cl: any) => sum + cl.level, 0);
+                const primaryLevel = Math.max((data.level || 1) - mcSum, 1);
+                const primaryStr = `${primaryName} ${primaryLevel}`;
+                const mcStrings = data.classLevels.map((cl: any) => `${cl.dndClass.name} ${cl.level}`);
+                return [primaryStr, ...mcStrings].join(' / ');
+              }
             }
-            return `${data.dndClass?.name || 'Aventurero'} ${data.level}`;
+            return `${primaryName} ${data.level || 1}`;
           })(),
           choicesJson: data.choicesJson || {},
           maxHp: data.maxHp ?? 10,
