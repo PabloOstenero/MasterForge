@@ -71,9 +71,12 @@ export class ApiService {
   }
 
   // Fetches spells available for a character (filtered by class, excluding already known)
-  getAvailableSpells(charId: string, level?: number): Observable<any[]> {
+  getAvailableSpells(charId: string, level?: number, classId?: number): Observable<any[]> {
     let url = `${this.apiUrl}/characters/${charId}/available-spells`;
-    if (level) url += `?level=${level}`;
+    const params: string[] = [];
+    if (level) params.push(`level=${level}`);
+    if (classId) params.push(`classId=${classId}`);
+    if (params.length > 0) url += `?${params.join('&')}`;
     return this.http.get<any[]>(url);
   }
 

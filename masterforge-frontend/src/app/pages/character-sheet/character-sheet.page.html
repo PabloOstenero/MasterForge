@@ -84,7 +84,7 @@
     @if (resourcePools.length > 0) {
       <h2 class="section-title">Recursos de Clase</h2>
       <div class="resource-grid ion-margin-bottom">
-        @for (pool of resourcePools; track pool.name) {
+        @for (pool of resourcePools; track $index) {
           <div class="resource-pool-card">
             <div class="pool-header">
               <span class="pool-name">{{ pool.name }}</span>
@@ -316,10 +316,19 @@
     <!-- Hit Dice and Death Saves -->
     <ion-row>
       <ion-col size="5">
-        <div class="combat-square-box hit-dice clickable" (click)="updateHitDiceAlert()">
-          <div class="hp-header">Total: {{ pj.hitDiceTotal }}d{{ pj.hitDieType }}</div>
-          <div class="combat-value small">{{ pj.hitDiceTotal - pj.hitDiceSpent }}d{{ pj.hitDieType }}</div>
-          <div class="combat-label">Dados de Golpe</div>
+        <div class="combat-square-box hit-dice clickable" (click)="updateHitDiceAlert()" style="min-height: 90px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 6px;">
+          @if (hitDicePools && hitDicePools.length > 1) {
+            <div class="hp-header" style="font-size: 10px; margin-bottom: 2px;">Dados de Golpe</div>
+            <div class="combat-value small" style="font-size: 11px; line-height: 1.3; font-weight: normal; width: 100%; text-align: center;">
+              @for (pool of hitDicePools; track $index) {
+                <div>{{ pool.total - pool.spent }}d{{ pool.dieType }} <span style="font-size: 9px; opacity: 0.8;">({{ pool.className }})</span></div>
+              }
+            </div>
+          } @else {
+            <div class="hp-header">Total: {{ pj.hitDiceTotal }}d{{ pj.hitDieType }}</div>
+            <div class="combat-value small">{{ pj.hitDiceTotal - pj.hitDiceSpent }}d{{ pj.hitDieType }}</div>
+            <div class="combat-label">Dados de Golpe</div>
+          }
         </div>
       </ion-col>
       <ion-col size="7">

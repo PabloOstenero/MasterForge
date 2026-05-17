@@ -213,6 +213,9 @@ export class CharacterSheetPage implements OnInit {
 
   rawCharacter: any = null; // Store raw data for level-up calculations
 
+  // Hit Dice pools — one entry per class (supports multiclassing)
+  hitDicePools: Array<{ className: string; dieType: number; total: number; spent: number }> = [];
+
   // Level Up State
   isLevelUpModalOpen = false;
   levelUpData: any = {
@@ -400,6 +403,44 @@ export class CharacterSheetPage implements OnInit {
         this.rawCharacter = data;
         console.log('Raw data from DB:', data);
 
+        // Derive Hit Dice pools from classLevels (supports multiclassing)
+        if (data.classLevels && data.classLevels.length > 0) {
+          const pools = data.classLevels.map((cl: any) => {
+            const dieRaw = cl.dndClass?.hitDie ?? 8;
+            const dieType = typeof dieRaw === 'string' ? parseInt(dieRaw.replace('d', ''), 10) : dieRaw;
+            const spent = (data.resourceCounters?.[`hitDice_${cl.dndClass.name}`] as number) ?? 0;
+            return { className: cl.dndClass.name, dieType, total: cl.level, spent };
+          });
+
+          // Add primary class to pools
+          const multiclassLevelsSum = data.classLevels.reduce((sum: number, l: any) => sum + l.level, 0);
+          const primaryClassLevel = (data.level || 1) - multiclassLevelsSum;
+          if (primaryClassLevel > 0) {
+            const primaryDieRaw = data.dndClass?.hitDie ?? 8;
+            const primaryDieType = typeof primaryDieRaw === 'string' ? parseInt(primaryDieRaw.replace('d', ''), 10) : primaryDieRaw;
+            const primarySpent = (data.resourceCounters?.[`hitDice_${data.dndClass.name}`] as number) ?? (data.hitDiceSpent ?? 0);
+            
+            // Insert primary class at the beginning of the list
+            pools.unshift({
+              className: data.dndClass.name,
+              dieType: primaryDieType,
+              total: primaryClassLevel,
+              spent: primarySpent
+            });
+          }
+          this.hitDicePools = pools;
+        } else {
+          // Single-class fallback
+          const dieRaw = data.dndClass?.hitDie ?? 8;
+          const dieType = typeof dieRaw === 'string' ? parseInt(dieRaw.replace('d', ''), 10) : dieRaw;
+          this.hitDicePools = [{
+            className: data.dndClass?.name ?? 'Aventurero',
+            dieType,
+            total: data.hitDiceTotal || data.level || 1,
+            spent: data.hitDiceSpent || 0
+          }];
+        }
+
         // --- CÁLCULO DINÁMICO DE VALORES (ITEMS + RAZA) ---
         const effective = this.calculateEffectiveValues(data);
         const effectiveStats = effective.stats;
@@ -479,8 +520,6 @@ export class CharacterSheetPage implements OnInit {
           },
           hitDiceSpent: data.hitDiceSpent || 0,
           resourceCounters: data.resourceCounters || {},
-
-
 
           hitDieType: data.dndClass?.hitDie || 8,
           money: {
@@ -1081,7 +1120,10 @@ export class CharacterSheetPage implements OnInit {
       } else if (this.rawCharacter.dndClass?.id === this.levelUpData.classToLevelId) {
         targetClass = this.rawCharacter.dndClass;
         targetSubclass = this.rawCharacter.subclass;
-        newClassLevel = this.pj.level + 1; // Fallback if classLevels missing
+        // Calculate primary class level correctly under multiclassing
+        const multiclassLevelsSum = (this.rawCharacter.classLevels || []).reduce((sum: number, l: any) => sum + l.level, 0);
+        const primaryClassLevel = this.pj.level - multiclassLevelsSum;
+        newClassLevel = primaryClassLevel + 1;
       }
     }
 
@@ -1206,17 +1248,14 @@ export class CharacterSheetPage implements OnInit {
     }
 
     if (this.spellsToChoose > 0 || this.cantripsToChoose > 0) {
-      this.fetchAvailableSpellsForLevelUp(newClassLevel);
+      this.fetchAvailableSpellsForLevelUp(newClassLevel, dndClass.id);
     } else {
       this.levelUpAvailableSpells = [];
     }
   }
 
-  private fetchAvailableSpellsForLevelUp(targetClassLevel: number) {
-    // We should ideally filter by class name or ID here if the backend supports it
-    // For now, we use the character's total level for slot capacity but we could use the class level
-    // Actually, available spells depend on the level in THAT class (max slot level)
-    this.apiService.getAvailableSpells(this.pj.id, targetClassLevel).subscribe({
+  private fetchAvailableSpellsForLevelUp(targetClassLevel: number, classId?: number) {
+    this.apiService.getAvailableSpells(this.pj.id, targetClassLevel, classId).subscribe({
       next: (spells: any[]) => {
         this.levelUpAvailableSpells = spells.sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
       },
@@ -1704,40 +1743,160 @@ export class CharacterSheetPage implements OnInit {
 
   // Opens an alert to update the number of spent hit dice
   async updateHitDiceAlert() {
-    const alert = await this.alertController.create({
-      header: 'Actualizar Dados de Golpe',
-      cssClass: 'heal-alert',
-      message: `Total de dados: ${this.pj.hitDiceTotal}d${this.pj.hitDieType}`,
-      inputs: [
-        {
-          name: 'remainingAmount',
-          type: 'number',
-          placeholder: 'Dados disponibles',
-          value: this.pj.hitDiceTotal - this.pj.hitDiceSpent,
-          min: 0,
-          max: this.pj.hitDiceTotal
-        }
-      ],
-      buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Guardar',
-          handler: (data) => {
-            const val = parseInt(data.remainingAmount, 10);
-            if (!isNaN(val) && val >= 0 && val <= this.pj.hitDiceTotal) {
-              this.pj.hitDiceSpent = this.pj.hitDiceTotal - val;
-              this.updateHitDiceOnBackend();
+    if (this.hitDicePools && this.hitDicePools.length > 1) {
+      const inputs = this.hitDicePools.map((pool, idx) => ({
+        name: `pool_${idx}`,
+        type: 'number' as const,
+        placeholder: `Disponibles (${pool.className})`,
+        value: pool.total - pool.spent,
+        min: 0,
+        max: pool.total,
+        label: `${pool.className} (d${pool.dieType})`
+      }));
+
+      // Generate buttons: standard buttons + optional roll buttons for each pool
+      const buttons: any[] = [
+        { text: 'Cancelar', role: 'cancel' }
+      ];
+
+      this.hitDicePools.forEach((pool) => {
+        if (pool.total - pool.spent > 0) {
+          buttons.push({
+            text: `🎲 Tirar d${pool.dieType} (${pool.className})`,
+            handler: () => {
+              this.rollHitDieHealing(pool);
+              alert.dismiss();
+              setTimeout(() => {
+                this.updateHitDiceAlert();
+              }, 150);
+              return false;
             }
+          });
+        }
+      });
+
+      buttons.push({
+        text: 'Guardar',
+        handler: (data: any) => {
+          this.hitDicePools.forEach((pool, idx) => {
+            const val = parseInt(data[`pool_${idx}`], 10);
+            if (!isNaN(val) && val >= 0 && val <= pool.total) {
+              pool.spent = pool.total - val;
+            }
+          });
+          
+          this.pj.hitDiceSpent = this.hitDicePools.reduce((sum, p) => sum + p.spent, 0);
+          this.updateHitDiceOnBackend();
+        }
+      });
+
+      const alert = await this.alertController.create({
+        header: 'Actualizar Dados de Golpe',
+        cssClass: 'heal-alert',
+        message: 'Introduce los dados disponibles o tira para curarte (d+CON):',
+        inputs: inputs,
+        buttons: buttons
+      });
+      await alert.present();
+    } else {
+      const remaining = this.pj.hitDiceTotal - this.pj.hitDiceSpent;
+      const buttons: any[] = [
+        { text: 'Cancelar', role: 'cancel' }
+      ];
+
+      if (remaining > 0) {
+        buttons.push({
+          text: `🎲 Tirar d${this.pj.hitDieType}`,
+          handler: () => {
+            const pool = this.hitDicePools && this.hitDicePools[0] ? this.hitDicePools[0] : {
+              className: this.rawCharacter.dndClass?.name || 'Clase',
+              dieType: this.pj.hitDieType,
+              total: this.pj.hitDiceTotal,
+              spent: this.pj.hitDiceSpent
+            };
+            this.rollHitDieHealing(pool);
+            alert.dismiss();
+            setTimeout(() => {
+              this.updateHitDiceAlert();
+            }, 150);
+            return false;
+          }
+        });
+      }
+
+      buttons.push({
+        text: 'Guardar',
+        handler: (data: any) => {
+          const val = parseInt(data.remainingAmount, 10);
+          if (!isNaN(val) && val >= 0 && val <= this.pj.hitDiceTotal) {
+            this.pj.hitDiceSpent = this.pj.hitDiceTotal - val;
+            if (this.hitDicePools && this.hitDicePools.length === 1) {
+              this.hitDicePools[0].spent = this.pj.hitDiceSpent;
+            }
+            this.updateHitDiceOnBackend();
           }
         }
-      ]
-    });
-    await alert.present();
+      });
+
+      const alert = await this.alertController.create({
+        header: 'Actualizar Dados de Golpe',
+        cssClass: 'heal-alert',
+        message: `Total de dados: ${this.pj.hitDiceTotal}d${this.pj.hitDieType}`,
+        inputs: [
+          {
+            name: 'remainingAmount',
+            type: 'number',
+            placeholder: 'Dados disponibles',
+            value: remaining,
+            min: 0,
+            max: this.pj.hitDiceTotal
+          }
+        ],
+        buttons: buttons
+      });
+      await alert.present();
+    }
+  }
+
+  // Helper method to roll hit die healing with CON modifier
+  rollHitDieHealing(pool: any) {
+    if (pool.spent >= pool.total) {
+      this.presentToast('No te quedan dados de golpe de esta clase.');
+      return;
+    }
+    if (this.pj.currentHp >= this.pj.maxHp) {
+      this.presentToast('Ya tienes los puntos de vida al máximo.');
+      return;
+    }
+
+    const roll = Math.floor(Math.random() * pool.dieType) + 1;
+    const conScore = this.pj.stats.con || 10;
+    const conMod = Math.floor((conScore - 10) / 2);
+    const heal = Math.max(1, roll + conMod);
+
+    const oldHp = this.pj.currentHp;
+    this.pj.currentHp = Math.min(this.pj.maxHp, this.pj.currentHp + heal);
+    const healedAmount = this.pj.currentHp - oldHp;
+
+    pool.spent++;
+    this.pj.hitDiceSpent = this.hitDicePools.reduce((sum, p) => sum + p.spent, 0);
+
+    this.presentToast(`🎲 Rolled d${pool.dieType}: ${roll} + ${conMod} (CON) = Curado ${healedAmount} HP!`);
+
+    this.updateCharacterHpOnBackend();
+    this.updateHitDiceOnBackend();
   }
 
   // Spends one hit die
   spendOneHitDie() {
-    if (this.pj.hitDiceSpent < this.pj.hitDiceTotal) {
+    if (this.hitDicePools && this.hitDicePools.length > 0) {
+      const pool = this.hitDicePools.find(p => p.spent < p.total);
+      if (pool) {
+        pool.spent++;
+        this.pj.hitDiceSpent = this.hitDicePools.reduce((sum, p) => sum + p.spent, 0);
+        this.updateHitDiceOnBackend();
+      }
+    } else if (this.pj.hitDiceSpent < this.pj.hitDiceTotal) {
       this.pj.hitDiceSpent++;
       this.updateHitDiceOnBackend();
     }
@@ -2207,14 +2366,23 @@ export class CharacterSheetPage implements OnInit {
   private updateHitDiceOnBackend() {
     if (!this.characterId) return;
 
-    const spentValue = Math.floor(Number(this.pj.hitDiceSpent));
-
-    this.apiService.updateHitDice(this.characterId!, spentValue).subscribe({
-      next: () => { },
-      error: (err) => {
-        console.error('Error actualizando dados de golpe:', err);
-      }
-    });
+    if (this.hitDicePools.length > 0) {
+      // Multiclass path: persist spent counts as resourceCounters keys
+      const counters: Record<string, number> = { ...(this.pj.resourceCounters || {}) };
+      this.hitDicePools.forEach(pool => {
+        counters[`hitDice_${pool.className}`] = pool.spent;
+      });
+      this.pj.resourceCounters = counters;
+      this.apiService.updateResourceCounters(this.characterId!, counters).subscribe({
+        error: (err) => console.error('Error actualizando dados de golpe:', err)
+      });
+    } else {
+      // Single-class fallback: use legacy hitDiceSpent field
+      const spentValue = Math.floor(Number(this.pj.hitDiceSpent));
+      this.apiService.updateHitDice(this.characterId!, spentValue).subscribe({
+        error: (err) => console.error('Error actualizando dados de golpe:', err)
+      });
+    }
   }
 
   async updateBonusMaxHpAlert() {
@@ -2264,14 +2432,14 @@ export class CharacterSheetPage implements OnInit {
       const itemsToScan = [feat, ...(feat.selectedOptions || [])];
       itemsToScan.forEach(obj => {
         let pool = this.detectResourceInFeature(obj);
-        if (pool) pools.push(pool);
+        if (pool && pool.name && pool.name.trim()) pools.push(pool);
       });
     });
 
     // 2. Scan Racial Traits
     this.pj.traits.forEach((trait: any) => {
       let pool = this.detectResourceInFeature(trait);
-      if (pool) pools.push(pool);
+      if (pool && pool.name && pool.name.trim()) pools.push(pool);
     });
 
     this.checkAndAddHardcodedPools(pools);

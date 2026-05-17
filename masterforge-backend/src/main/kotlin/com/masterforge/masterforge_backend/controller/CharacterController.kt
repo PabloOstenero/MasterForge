@@ -197,29 +197,46 @@ class CharacterController(
     @Transactional
     fun getAvailableSpells(
         @PathVariable id: UUID,
-        @RequestParam(required = false) level: Int?
+        @RequestParam(required = false) level: Int?,
+        @RequestParam(required = false) classId: Int?
     ): ResponseEntity<List<SpellDto>> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
         
-        val classFeatures = character.dndClass.classFeatures
-        val subclassFeatures = character.subclass?.subclassFeatures
+        // Resolve target class
+        val targetClass = if (classId != null) {
+            dndClassRepository.findById(classId)
+                .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Class not found") }
+        } else {
+            character.dndClass
+        }
+
+        val classFeatures = targetClass.classFeatures
+        
+        // Resolve subclass features: if it matches the character's primary class, use their subclass
+        val subclassFeatures = if (targetClass.id == character.dndClass.id) {
+            character.subclass?.subclassFeatures
+        } else {
+            // Check if character has a subclass for this multiclass
+            character.classLevels.find { it.dndClass.id == targetClass.id }?.subclass?.subclassFeatures
+        }
+
         val spellcasting = (subclassFeatures?.get("spellcasting") as? Map<*, *>) 
                           ?: (classFeatures?.get("spellcasting") as? Map<*, *>)
 
-        val className = character.dndClass.name
+        val className = targetClass.name
         val additionalClass = spellcasting?.get("additionalSpellClass") as? String
         val expandedSpellNames = (subclassFeatures?.get("expandedSpellList") as? List<*>)
                                 ?.filterIsInstance<Map<String, Any>>()
                                 ?.mapNotNull { it["name"] as? String } ?: emptyList()
 
         val knownSpellIds = characterSpellRepository.findByCharacterId(id).map { it.spell.id }.toSet()
-        val maxLevel = getMaxSpellLevel(character, level)
+        val maxLevel = getMaxSpellLevel(character, targetClass, level)
 
         // Use a set to avoid duplicates from multiple sources
         val allAvailable = mutableSetOf<Spell>()
         
-        // 1. Spells from the primary class
+        // 1. Spells from the target class
         allAvailable.addAll(spellRepository.findBySpellClassesContainingIgnoreCase(className))
         
         // 2. Spells from an additional class (e.g. Divine Soul Sorcerer getting Cleric spells)
@@ -387,17 +404,21 @@ class CharacterController(
         return spellcasting?.get("knowledgeStyle") as? String ?: "ALL_LIST"
     }
 
-    private fun getMaxSpellLevel(character: Character, requestedLevel: Int? = null): Int {
+    private fun getMaxSpellLevel(character: Character, targetClass: DndClass = character.dndClass, requestedLevel: Int? = null): Int {
         val effectiveLevel = requestedLevel ?: character.level
         var max = 0
         
-        val classFeatures = character.dndClass.classFeatures
-        val subclassFeatures = character.subclass?.subclassFeatures
+        val classFeatures = targetClass.classFeatures
+        val subclassFeatures = if (targetClass.id == character.dndClass.id) {
+            character.subclass?.subclassFeatures
+        } else {
+            character.classLevels.find { it.dndClass.id == targetClass.id }?.subclass?.subclassFeatures
+        }
         val spellcasting = (subclassFeatures?.get("spellcasting") as? Map<*, *>) 
                           ?: (classFeatures?.get("spellcasting") as? Map<*, *>)
 
-        // 1. Try to get from character's saved slots (only for current level)
-        if (requestedLevel == null || requestedLevel == character.level) {
+        // 1. Try to get from character's saved slots (only for current level and matching target class)
+        if ((requestedLevel == null || requestedLevel == character.level) && targetClass.id == character.dndClass.id) {
             for (i in 1..9) {
                 val key = "level_$i"
                 val raw = character.spellSlots?.get(key)
@@ -772,10 +793,7 @@ class CharacterController(
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
 
         // Recalcular HP efectiva (Base + Bono + Items + Retroactiva por CON)
-        println("DEBUG: Starting Long Rest for ${character.name}")
-        println("DEBUG: Inventory size: ${character.inventory.size}")
         val restoredHp = calculateEffectiveMaxHp(character)
-        println("DEBUG: Calculated restored HP: $restoredHp (Base: ${character.maxHp}, Buff: ${character.bonusMaxHp})")
         
         // 2. Restore Spell Slots
         val updatedSlots = character.spellSlots?.toMutableMap() ?: mutableMapOf()
@@ -788,17 +806,51 @@ class CharacterController(
             }
         }
         
-        // 3. Restore Hit Dice (Half of total, minimum 1)
-        val recoveryAmount = Math.max(1, character.hitDiceTotal / 2)
-        val updatedHitDiceSpent = Math.max(0, character.hitDiceSpent - recoveryAmount)
-        
+        // 3. Restore Hit Dice per pool (classLevels source of truth)
+        val updatedCounters = character.resourceCounters?.toMutableMap() ?: mutableMapOf()
+        if (character.classLevels.isNotEmpty()) {
+            // Multiclass: recover half of each pool separately (minimum 1 per pool)
+            character.classLevels.forEach { cl ->
+                val key = "hitDice_${cl.dndClass.name}"
+                val poolTotal = cl.level
+                val currentSpent = (updatedCounters[key] as? Number)?.toInt() ?: 0
+                val recovery = Math.max(1, poolTotal / 2)
+                updatedCounters[key] = Math.max(0, currentSpent - recovery)
+            }
+
+            // Also recover primary class pool
+            val multiclassLevelsSum = character.classLevels.sumOf { it.level }
+            val primaryClassLevel = character.level - multiclassLevelsSum
+            if (primaryClassLevel > 0) {
+                val key = "hitDice_${character.dndClass.name}"
+                val poolTotal = primaryClassLevel
+                val currentSpent = (updatedCounters[key] as? Number)?.toInt() ?: character.hitDiceSpent
+                val recovery = Math.max(1, poolTotal / 2)
+                updatedCounters[key] = Math.max(0, currentSpent - recovery)
+            }
+        } else {
+            // Single-class fallback: use legacy hitDiceSpent field
+            val recoveryAmount = Math.max(1, character.hitDiceTotal / 2)
+            val updatedHitDiceSpent = Math.max(0, character.hitDiceSpent - recoveryAmount)
+            val updatedCharacterSingle = character.copy(
+                currentHp = restoredHp,
+                spellSlots = updatedSlots,
+                hitDiceSpent = updatedHitDiceSpent,
+                resourceCounters = updatedCounters,
+                tempHp = 0
+            )
+            val saved = characterRepository.save(updatedCharacterSingle)
+            val spells = characterSpellRepository.findByCharacterId(id)
+            return ResponseEntity.ok(CharacterResponseDto.fromEntity(saved, spells))
+        }
+
         // 4. Reset Temp HP
         val updatedTempHp = 0
-        
+
         val updatedCharacter = character.copy(
             currentHp = restoredHp,
             spellSlots = updatedSlots,
-            hitDiceSpent = updatedHitDiceSpent,
+            resourceCounters = updatedCounters,
             tempHp = updatedTempHp
         )
         
@@ -825,11 +877,18 @@ class CharacterController(
         val targetSubclass = if (dto.subclassId != null) {
             dndSubclassRepository.findById(dto.subclassId).orElse(null)
         } else {
-            // Check if existing class level already has a subclass
-            character.classLevels.find { it.dndClass.id == targetClass?.id }?.subclass
+            if (targetClass?.id == character.dndClass.id) {
+                character.subclass
+            } else {
+                character.classLevels.find { it.dndClass.id == targetClass?.id }?.subclass
+            }
         }
 
-        val currentClassLevel = character.classLevels.find { it.dndClass.id == targetClass?.id }?.level ?: 0
+        val currentClassLevel = if (targetClass?.id == character.dndClass.id) {
+            character.level - character.classLevels.sumOf { it.level }
+        } else {
+            character.classLevels.find { it.dndClass.id == targetClass?.id }?.level ?: 0
+        }
         val newClassLevel = if (dto.multiclassId != null) 1 else currentClassLevel + 1
 
         val newFeatures = mutableListOf<ClassFeature>()
@@ -851,6 +910,7 @@ class CharacterController(
         val updatedCharacter = character.copy(
             level = character.level + 1,
             maxHp = character.maxHp + dto.hpBonus,
+            currentHp = character.currentHp + dto.hpBonus,
             baseStr = character.baseStr + (dto.statChanges["str"] ?: 0),
             baseDex = character.baseDex + (dto.statChanges["dex"] ?: 0),
             baseCon = character.baseCon + (dto.statChanges["con"] ?: 0),
@@ -883,26 +943,30 @@ class CharacterController(
                 level = 1
             ))
         } else if (dto.classToLevelId != null) {
-            val cl = saved.classLevels.find { it.dndClass.id == dto.classToLevelId }
-                ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "El personaje no tiene esta clase")
+            if (dto.classToLevelId == saved.dndClass.id) {
+                // Primary Class level-up: we already updated character.level at line 872
+                val subclass = if (dto.subclassId != null) {
+                    dndSubclassRepository.findById(dto.subclassId)
+                        .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Subclase no encontrada") }
+                } else saved.subclass
 
-            val subclass = if (dto.subclassId != null) {
-                dndSubclassRepository.findById(dto.subclassId)
-                    .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Subclase no encontrada") }
-            } else cl.subclass
+                if (subclass != saved.subclass) {
+                    characterRepository.save(saved.copy(subclass = subclass))
+                }
+            } else {
+                // Multiclass level-up
+                val cl = saved.classLevels.find { it.dndClass.id == dto.classToLevelId }
+                    ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "El personaje no tiene esta clase")
 
-            characterClassLevelRepository.save(cl.copy(level = cl.level + 1, subclass = subclass))
-            
-            // Sync with main character fields if it's the primary class
-            if (cl.dndClass.id == saved.dndClass.id && subclass != null) {
-                characterRepository.save(saved.copy(subclass = subclass))
+                val subclass = if (dto.subclassId != null) {
+                    dndSubclassRepository.findById(dto.subclassId)
+                        .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Subclase no encontrada") }
+                } else cl.subclass
+
+                characterClassLevelRepository.save(cl.copy(level = cl.level + 1, subclass = subclass))
             }
         } else {
-            // Default to primary class if nothing specified
-            val cl = saved.classLevels.find { it.dndClass.id == saved.dndClass.id }
-            if (cl != null) {
-                characterClassLevelRepository.save(cl.copy(level = cl.level + 1))
-            }
+            // Default: primary class level-up (already updated at line 872)
         }
 
         // Save new spells selected during level up
@@ -1051,8 +1115,6 @@ class CharacterController(
         var effectiveCon = character.baseCon + featureConBonus
         var itemFlatBonus = 0
 
-        println("DEBUG: Calculating effective HP. Base CON: ${character.baseCon}")
-
         character.inventory.forEach { slot ->
             val props = slot.item.properties
             val reqAtt = props?.get("requiresAttunement")
@@ -1077,7 +1139,6 @@ class CharacterController(
         val retroactiveHp = (conMod - baseConMod) * character.level
         
         val total = character.maxHp + character.bonusMaxHp + itemFlatBonus + retroactiveHp
-        println("DEBUG: Total calculated: $total (Retroactive: $retroactiveHp)")
         return total
     }
 }
