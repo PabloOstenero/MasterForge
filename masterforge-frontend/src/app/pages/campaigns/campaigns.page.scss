@@ -46,26 +46,84 @@
   font-size: 0.9rem;
 }
 
+// ── List Header & Banner ──────────────────────────────────────────────────────
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  .section-title {
+    margin: 0;
+    color: var(--ion-color-medium);
+    font-size: 1rem;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .limit-counter {
+    font-weight: 600;
+    color: var(--ion-color-medium);
+    &.warning {
+      color: $accent-gold;
+    }
+  }
+}
+
+.limit-banner {
+  background: rgba(var(--ion-color-warning-rgb), 0.1);
+  border: 1px solid rgba(var(--ion-color-warning-rgb), 0.4);
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .banner-text {
+    strong {
+      color: var(--ion-color-warning);
+      display: block;
+      margin-bottom: 2px;
+    }
+    span {
+      font-size: 0.85rem;
+      color: var(--ion-color-medium);
+    }
+  }
+}
+
 // ── Campaign list ─────────────────────────────────────────────────────────────
 .campaigns-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+  }
 }
 
 // ── Campaign card ─────────────────────────────────────────────────────────────
 .campaign-card {
-  background: $bg-surface;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-left: 3px solid $accent-gold;
-  border-radius: 10px;
-  padding: 14px 16px;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  background: rgba(30, 30, 30, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  cursor: pointer;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    border-color: rgba(var(--ion-color-warning-rgb), 0.3);
   }
 }
 
@@ -145,36 +203,73 @@
   }
 }
 
-// ── Empty state ───────────────────────────────────────────────────────────────
 .empty-container {
+  grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem 1rem;
+  padding: 60px 20px;
   text-align: center;
-  gap: 1rem;
-}
+  background: rgba(30, 30, 30, 0.4);
+  border-radius: 16px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
 
-.empty-icon {
-  font-size: 3rem;
-  color: $accent-gold;
-  opacity: 0.4;
-}
+  .empty-glow {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(var(--ion-color-warning-rgb), 0.15) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
 
-.empty-msg {
-  color: $text-muted;
-  font-size: 1rem;
-  margin: 0;
+  .empty-icon {
+    font-size: 64px;
+    color: $accent-gold;
+    margin-bottom: 16px;
+    filter: drop-shadow(0 0 10px rgba(var(--ion-color-warning-rgb), 0.3));
+    z-index: 1;
+  }
+
+  .empty-title {
+    color: #fff;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0 0 8px;
+    z-index: 1;
+  }
+
+  .empty-msg {
+    color: var(--ion-color-medium);
+    font-size: 1rem;
+    margin: 0 0 24px;
+    max-width: 400px;
+    line-height: 1.5;
+    z-index: 1;
+  }
+
+  .empty-cta {
+    z-index: 1;
+    --padding-start: 24px;
+    --padding-end: 24px;
+  }
 }
 
 // ── Form card ─────────────────────────────────────────────────────────────────
 .form-card {
-  background: $bg-surface;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 12px;
-  padding: 20px 16px;
-  margin-bottom: 16px;
+  background: rgba(30, 30, 30, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 24px;
+  margin: 0 auto 24px;
+  max-width: 580px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .form-card__header {

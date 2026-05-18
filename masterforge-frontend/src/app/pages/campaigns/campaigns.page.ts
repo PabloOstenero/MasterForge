@@ -9,7 +9,7 @@ import {
   IonIcon,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { mapOutline, addCircleOutline, closeOutline, peopleOutline } from 'ionicons/icons';
+import { mapOutline, addCircleOutline, closeOutline, peopleOutline, compassOutline } from 'ionicons/icons';
 import { ApiService } from '../../services/api';
 import { AuthService } from '../../services/auth.service';
 
@@ -54,7 +54,7 @@ export class CampaignsPage implements OnInit {
   };
 
   constructor(private api: ApiService, private authService: AuthService) {
-    addIcons({ mapOutline, addCircleOutline, closeOutline, peopleOutline });
+    addIcons({ mapOutline, addCircleOutline, closeOutline, peopleOutline, compassOutline });
   }
 
   ngOnInit() {

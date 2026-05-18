@@ -22,20 +22,22 @@
 
     <!-- ── Campaign list ── -->
     @if (!loadingCampaigns) {
-      <div class="list-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 class="section-title" style="margin: 0; color: #8C8C8C; font-size: 1rem; text-transform: uppercase;">Mis Campañas</h2>
-        <div class="limit-counter" [class.warning]="limitReached" style="font-weight: 600; color: #8C8C8C;">
+      <div class="list-header">
+        <h2 class="section-title">Mis Campañas</h2>
+        <div class="limit-counter" [class.warning]="limitReached">
           {{ campaigns.length }}{{ isPro ? '' : '/2' }} Campañas
         </div>
       </div>
 
-      <div class="limit-banner" *ngIf="limitReached" style="background: rgba(201, 168, 76, 0.1); border: 1px solid #C9A84C; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-        <div class="banner-text">
-          <strong style="color: #C9A84C; display: block;">Límite alcanzado</strong>
-          <span style="font-size: 0.85rem; color: #8C8C8C;">Libera espacio o pásate a PRO para dirigir más campañas.</span>
+      @if (limitReached) {
+        <div class="limit-banner">
+          <div class="banner-text">
+            <strong>Límite alcanzado</strong>
+            <span>Libera espacio o pásate a PRO para dirigir más campañas.</span>
+          </div>
+          <ion-button size="small" class="btn-warning" routerLink="/config">VER PLANES</ion-button>
         </div>
-        <ion-button size="small" color="warning" routerLink="/config">VER PLANES</ion-button>
-      </div>
+      }
 
       <div class="campaigns-list" data-testid="campaigns-section">
 
@@ -62,8 +64,17 @@
           </div>
         } @empty {
           <div class="empty-container" data-testid="empty-campaigns">
-            <ion-icon name="map-outline" class="empty-icon"></ion-icon>
-            <p class="empty-msg">Aún no has creado ninguna campaña.</p>
+            <div class="empty-glow"></div>
+            <ion-icon name="compass-outline" class="empty-icon"></ion-icon>
+            <h3 class="empty-title">Tu atlas está en blanco</h3>
+            <p class="empty-msg">El destino de tus aventureros está esperando ser escrito. Traza mapas, reúne a tu grupo y comienza a dirigir hoy mismo.</p>
+            
+            @if (!limitReached && !showNewCampaignForm) {
+              <ion-button class="btn-gold empty-cta" (click)="toggleCampaignForm()">
+                <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+                Forjar primera campaña
+              </ion-button>
+            }
           </div>
         }
 
@@ -71,7 +82,7 @@
     }
 
     <!-- ── New campaign button ── -->
-    @if (!showNewCampaignForm) {
+    @if (!showNewCampaignForm && campaigns.length > 0) {
       <ion-button
         expand="block"
         class="btn-gold"
