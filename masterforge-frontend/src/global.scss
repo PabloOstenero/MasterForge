@@ -50,3 +50,19 @@ html, body, app-root {
 html {
   font-size: calc(16px * var(--app-font-scale));
 }
+
+/* MasterForge Notification Popover custom styling */
+.notification-popover {
+  --width: 360px;
+  --max-width: 90vw;
+  --background: #1e1e1e;
+  --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  
+  /* Remove Ionic native border/outline side effects if any */
+  .popover-viewport {
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+}
+

@@ -1,5 +1,11 @@
 <div class="layout-wrapper">
-  <nav class="sidebar">
+
+  <!-- Mobile sidebar backdrop -->
+  @if (isSidebarOpen) {
+    <div class="sidebar-backdrop" (click)="closeSidebar()"></div>
+  }
+
+  <nav class="sidebar" [class.open]="isSidebarOpen">
     <div class="sidebar-top">
       <span class="sidebar-title">MasterForge</span>
     </div>
@@ -14,18 +20,27 @@
         </li>
       }
     </ul>
+
+    <div class="sidebar-footer">
+      <button class="role-toggle-sidebar" (click)="toggleRole()" type="button">
+        <ion-icon name="swap-horizontal-outline"></ion-icon>
+        <span>{{ (activeRole$ | async) === 'dm' ? 'Modo Jugador' : 'Modo Director' }}</span>
+      </button>
+    </div>
   </nav>
 
   <main class="main-content">
     <div class="topbar">
-      <div class="topbar-title">
-        <span>Dashboard de {{ username }}</span>
+      <div class="topbar-left">
+        <!-- Hamburger: only visible on mobile -->
+        <button class="hamburger-btn" (click)="toggleSidebar()" aria-label="Abrir menú" type="button">
+          <ion-icon name="menu-outline"></ion-icon>
+        </button>
+        <div class="topbar-title">
+          <span>Dashboard de {{ username }}</span>
+        </div>
       </div>
       <div class="topbar-actions">
-        <ion-button (click)="toggleRole()" fill="clear" color="warning" class="role-toggle-btn">
-          <ion-icon slot="start" name="swap-horizontal-outline"></ion-icon>
-          <span class="ion-hide-sm-down">{{ (activeRole$ | async) === 'dm' ? 'Modo Jugador' : 'Modo Director' }}</span>
-        </ion-button>
         <button class="notification-btn" (click)="toggleNotifications($event)" aria-label="Notificaciones" type="button">
           <ion-icon name="notifications-outline" class="action-icon"></ion-icon>
           @if ((unreadCount$ | async) || 0 > 0) {

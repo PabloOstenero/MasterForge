@@ -5,6 +5,7 @@
   background-color: var(--mf-bg-primary, #121212);
 }
 
+// ─── Notification button ───────────────────────────────────────────────────
 .notification-btn {
   background: transparent !important;
   border: none;
@@ -57,6 +58,7 @@
   z-index: 10;
 }
 
+// ─── Sidebar ───────────────────────────────────────────────────────────────
 .sidebar {
   width: 170px;
   min-width: 170px;
@@ -68,7 +70,7 @@
   top: 0;
   left: 0;
   height: 100%;
-  z-index: 100;
+  z-index: 300;
 }
 
 .sidebar-top {
@@ -116,7 +118,77 @@
   }
 }
 
+// ─── Backdrop (mobile only) ────────────────────────────────────────────────
+.sidebar-backdrop {
+  display: none;
+}
 
+// ─── Hamburger button ──────────────────────────────────────────────────────
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--mf-accent-gold, #c9a84c);
+  padding: 4px 8px 4px 0;
+  margin-right: 4px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+
+  ion-icon {
+    font-size: 1.8rem;
+    display: block;
+  }
+
+  &:hover {
+    opacity: 0.75;
+  }
+}
+
+// ─── Sidebar footer (role toggle) ────────────────────────────────────────
+.sidebar-footer {
+  flex-shrink: 0;
+  padding: 12px 0 8px;
+  border-top: 1px solid rgba(201, 168, 76, 0.12);
+  margin-top: auto;
+}
+
+.role-toggle-sidebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--mf-text-muted, #8c8c8c);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: color 0.2s, background-color 0.2s;
+  text-align: left;
+
+  ion-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    color: var(--mf-accent-gold, #c9a84c);
+  }
+
+  &:hover {
+    color: var(--mf-accent-gold, #c9a84c);
+    background-color: rgba(201, 168, 76, 0.08);
+  }
+
+  &:active {
+    background-color: rgba(201, 168, 76, 0.15);
+  }
+}
+
+// ─── Main content ──────────────────────────────────────────────────────────
 .main-content {
   margin-left: 170px;
   flex: 1;
@@ -128,6 +200,7 @@
   position: relative;
 }
 
+// ─── Topbar ────────────────────────────────────────────────────────────────
 .topbar {
   flex-shrink: 0;
   display: flex;
@@ -137,7 +210,13 @@
   border-bottom: 1px solid rgba(201, 168, 76, 0.1);
   background-color: var(--mf-bg-primary, #121212);
   position: relative;
-  z-index: 1000; /* King of the layout */
+  z-index: 1000;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  min-width: 0;
 }
 
 .page-body {
@@ -166,19 +245,16 @@
   font-weight: 700;
   color: var(--mf-accent-gold, #c9a84c);
   letter-spacing: 0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .topbar-actions {
   display: flex;
   flex-direction: row;
   align-items: center;
-}
-
-.role-toggle-btn {
-  --border-radius: 8px;
-  font-weight: bold;
-  font-size: 0.8rem;
-  text-transform: uppercase;
+  flex-shrink: 0;
 }
 
 .avatar-btn {
@@ -268,5 +344,50 @@
       background-color: rgba(192, 57, 43, 0.08);
       color: var(--mf-accent-crimson, #c0392b);
     }
+  }
+}
+
+// ─── Mobile responsive (< 768px) ──────────────────────────────────────────
+@media (max-width: 767px) {
+
+  // Sidebar: slide off-screen by default, animate in when .open
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &.open {
+      transform: translateX(0);
+    }
+  }
+
+  // Backdrop: visible only on mobile when sidebar is open
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 299;
+    backdrop-filter: blur(2px);
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  // Main content takes full width (no sidebar offset)
+  .main-content {
+    margin-left: 0;
+  }
+
+  // Hamburger button visible on mobile
+  .hamburger-btn {
+    display: flex;
+  }
+
+  // Slightly smaller topbar title on narrow screens
+  .topbar-title {
+    font-size: 1rem;
   }
 }

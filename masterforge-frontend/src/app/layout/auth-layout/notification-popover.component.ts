@@ -40,7 +40,7 @@ import { Router } from '@angular/router';
   `,
   styles: [`
     .popover-content {
-      width: 320px;
+      width: 100%;
       max-height: 400px;
       overflow-y: auto;
       background: #1e1e1e;

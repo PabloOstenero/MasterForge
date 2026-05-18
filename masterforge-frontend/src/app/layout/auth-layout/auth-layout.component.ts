@@ -1,5 +1,5 @@
 import { Component, inject, CUSTOM_ELEMENTS_SCHEMA, HostListener } from '@angular/core';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
 import { IonButton, IonIcon, PopoverController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -17,8 +17,10 @@ import {
   searchOutline,
   listOutline,
   personCircleOutline,
-  notificationsOutline
+  notificationsOutline,
+  menuOutline
 } from 'ionicons/icons';
+import { filter } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
 import { RoleService } from '../../services/role.service';
 import { PersistentNotificationService } from '../../services/persistent-notification.service';
@@ -46,12 +48,17 @@ export class AuthLayoutComponent {
       settingsOutline, logOutOutline, swapHorizontalOutline,
       homeOutline, peopleOutline, mapOutline, skullOutline,
       personAddOutline, bookOutline, colorWandOutline, searchOutline, listOutline,
-      personCircleOutline, notificationsOutline
+      personCircleOutline, notificationsOutline, menuOutline
     });
 
     this.roleService.activeRole$.subscribe(role => {
       // Update menu items based on role if needed
     });
+
+    // Auto-close sidebar on navigation (mobile drawer)
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => this.closeSidebar());
 
     this.notificationService.updateUnreadCount();
     this.fcmService.initPush();
@@ -63,6 +70,7 @@ export class AuthLayoutComponent {
 
   isDropdownOpen = false;
   isNotificationsOpen = false;
+  isSidebarOpen = false;
 
   get username(): string {
     return this.authService.getCurrentUser()?.name ?? 'Usuario';
@@ -72,6 +80,20 @@ export class AuthLayoutComponent {
     this.roleService.toggleRole();
   }
 
+  // --- Sidebar (mobile drawer) ---
+  openSidebar(): void {
+    this.isSidebarOpen = true;
+  }
+
+  closeSidebar(): void {
+    this.isSidebarOpen = false;
+  }
+
+  toggleSidebar(): void {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
+
+  // --- User dropdown ---
   openDropdown(): void {
     this.isDropdownOpen = true;
   }
@@ -105,6 +127,7 @@ export class AuthLayoutComponent {
   @HostListener('document:keydown.escape')
   onEscape(): void {
     this.closeDropdown();
+    this.closeSidebar();
   }
 
   logout(): void {
