@@ -9,5 +9,6 @@ data class DndRaceDto(
     val description: String? = null,
     val size: String? = null,
     val raceFeatures: Map<String, Any>? = null,
-    val authorId: UUID? = null
+    val authorId: UUID? = null,
+    val isOfficial: Boolean? = null
 )

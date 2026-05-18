@@ -12,5 +12,6 @@ data class DndClassDto(
     val savingThrows: Map<String, Any>,
     val classFeatures: Map<String, Any>? = null, // Deprecated, but keeping for compatibility
     val features: List<ClassFeatureDto>? = null,
-    val authorId: UUID? = null
+    val authorId: UUID? = null,
+    val isOfficial: Boolean? = null
 )

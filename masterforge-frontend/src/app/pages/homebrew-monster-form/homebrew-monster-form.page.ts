@@ -8,6 +8,7 @@ import {
 } from '@ionic/angular/standalone';
 
 import { HomebrewService } from '../../services/homebrew.service';
+import { AuthService } from '../../services/auth.service';
 import {
   SpeedObject,
   SenseObject,
@@ -242,11 +243,17 @@ export class HomebrewMonsterFormPage implements OnInit {
     cha: 'CAR',
   };
 
+  get isManagerOrAdmin(): boolean {
+    const user = this.authService.getCurrentUser();
+    return user?.role === 'MANAGER' || user?.role === 'ADMIN';
+  }
+
   constructor(
     private fb: FormBuilder,
     private homebrewService: HomebrewService,
     private router: Router,
     private route: ActivatedRoute,
+    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
@@ -266,6 +273,7 @@ export class HomebrewMonsterFormPage implements OnInit {
       alignment:       ['', Validators.required],
       armorClass:      [null, [Validators.required, Validators.min(1), Validators.max(30)]],
       hitPoints:       [null, [Validators.required, Validators.min(1)]],
+      isOfficial:      [true],
       speed:           ['', Validators.required],
       ...abilityControls,
       challengeRating: [null, [Validators.required, Validators.min(0)]],
@@ -337,6 +345,7 @@ export class HomebrewMonsterFormPage implements OnInit {
           challengeRating: monster.challengeRating,
           xp: monster.xp,
           description: cm.description ?? '',
+          isOfficial: monster.author === null || !monster.author,
         });
 
         // Patch senses & languages
@@ -595,6 +604,7 @@ export class HomebrewMonsterFormPage implements OnInit {
       xp: v.xp,
       authorId: '', // Placeholder — service will override with actual user ID
       combatMechanics,
+      isOfficial: !!v.isOfficial,
     };
 
     const request$ = this.editMode && this.editId

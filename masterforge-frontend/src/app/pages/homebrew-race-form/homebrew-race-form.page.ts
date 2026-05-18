@@ -10,6 +10,7 @@ import { forkJoin, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 import { HomebrewService, CreateRaceDto } from '../../services/homebrew.service';
+import { AuthService } from '../../services/auth.service';
 import { FeatureMechanicsComponent } from '../../components/feature-mechanics/feature-mechanics.component';
 import {
   SkillProficiencies,
@@ -311,11 +312,17 @@ export class HomebrewRaceFormPage implements OnInit {
   spellSearchQueries: Record<number, string> = {};
   spellDropdownOpen: Record<number, boolean> = {};
 
+  get isManagerOrAdmin(): boolean {
+    const user = this.authService.getCurrentUser();
+    return user?.role === 'MANAGER' || user?.role === 'ADMIN';
+  }
+
   constructor(
     private fb: FormBuilder,
     private homebrewService: HomebrewService,
     private router: Router,
     private route: ActivatedRoute,
+    private authService: AuthService,
   ) {}
 
   getSkillAbility(skill: string): string {
@@ -344,6 +351,7 @@ export class HomebrewRaceFormPage implements OnInit {
       description: [''],
       size:        ['', Validators.required],
       price:       [null, Validators.min(0)],
+      isOfficial:  [true],
 
       // Speed (nested FormGroup)
       speeds: this.fb.group({
@@ -460,6 +468,7 @@ export class HomebrewRaceFormPage implements OnInit {
           bonusInt:    (rf.bonusInt ?? race.bonusInt) ?? null,
           bonusWis:    (rf.bonusWis ?? race.bonusWis) ?? null,
           bonusCha:    (rf.bonusCha ?? race.bonusCha) ?? null,
+          isOfficial:  race.author === null || !race.author,
         });
 
         // Patch speeds
@@ -797,6 +806,7 @@ export class HomebrewRaceFormPage implements OnInit {
       bonusCha:    v.bonusCha ?? 0,
       raceFeatures,
       authorId: '',
+      isOfficial:  !!v.isOfficial,
     };
 
     const request$ = this.editMode && this.editId

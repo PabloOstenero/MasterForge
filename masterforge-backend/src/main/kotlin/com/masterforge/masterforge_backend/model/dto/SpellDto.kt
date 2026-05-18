@@ -23,4 +23,6 @@ data class SpellDto(
     val higherLevelDescription: String? = null,
     val description: String,
     val authorId: java.util.UUID? = null,
+    val isOfficial: Boolean? = null
+
 )

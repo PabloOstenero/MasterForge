@@ -85,6 +85,20 @@
             <p class="error-message" data-testid="price-error">El precio no puede ser negativo.</p>
           }
         </div>
+
+        @if (isManagerOrAdmin) {
+          <div class="field-group" style="margin-top: 1rem; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 1rem;">
+            <label class="field-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" formControlName="isOfficial" style="width: 18px; height: 18px;" data-testid="is-official-toggle">
+              <span style="font-weight: 600; color: #ff9f0a; display: flex; align-items: center; gap: 4px;">
+                ⭐ Contenido Oficial (System Core)
+              </span>
+            </label>
+            <p style="font-size: 0.85rem; color: #8a8a8f; margin: 4px 0 0 26px;">
+              Si se marca, este homebrew se publicará como contenido oficial del sistema sin autor asociado.
+            </p>
+          </div>
+        }
       </div>
 
       <!-- ══════════════════════════════════════════════════════════════════

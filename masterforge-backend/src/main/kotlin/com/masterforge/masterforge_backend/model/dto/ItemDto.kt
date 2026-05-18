@@ -9,5 +9,6 @@ data class ItemDto(
     val type: String,
     val weight: Double,
     val properties: Map<String, Any>? = null,
-    val authorId: java.util.UUID?
+    val authorId: java.util.UUID?,
+    val isOfficial: Boolean? = null
 )

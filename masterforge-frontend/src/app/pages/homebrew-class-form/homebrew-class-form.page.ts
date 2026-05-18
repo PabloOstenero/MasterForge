@@ -14,6 +14,7 @@ import {
 import { trigger, transition, style, animate } from '@angular/animations';
 
 import { HomebrewService, CreateClassDto } from '../../services/homebrew.service';
+import { AuthService } from '../../services/auth.service';
 import {
   SkillProficiencies,
   Spellcasting,
@@ -448,11 +449,17 @@ export class HomebrewClassFormPage implements OnInit {
   readonly spellLevelRange = Array.from({ length: 9 }, (_, i) => i + 1);
 
 
+  get isManagerOrAdmin(): boolean {
+    const user = this.authService.getCurrentUser();
+    return user?.role === 'MANAGER' || user?.role === 'ADMIN';
+  }
+
   constructor(
     private fb: FormBuilder,
     private homebrewService: HomebrewService,
     private router: Router,
     private route: ActivatedRoute,
+    private authService: AuthService,
   ) {
     addIcons({ 
       flash, shield, hammer, moon, add, trash, hammerOutline, sparkles, list, trendingUp, 
@@ -483,6 +490,7 @@ export class HomebrewClassFormPage implements OnInit {
       description: [''],
       price: [null, [Validators.required, Validators.min(0)]],
       hitDie: ['', Validators.required],
+      isOfficial: [true],
 
       // Saving throws
       savingThrows: savingThrowsGroup,
@@ -555,6 +563,7 @@ export class HomebrewClassFormPage implements OnInit {
           description: cls.description ?? '',
           price: cls.price ?? null,
           hitDie: hitDieStr,
+          isOfficial: cls.author === null || !cls.author,
         });
 
         // Patch saving throws — also sync the chip state array
@@ -1482,6 +1491,7 @@ export class HomebrewClassFormPage implements OnInit {
       savingThrows: savingThrowsRecord,
       classFeatures,
       authorId: '',
+      isOfficial: !!v.isOfficial,
     };
 
     const request$ = this.editMode && this.editId

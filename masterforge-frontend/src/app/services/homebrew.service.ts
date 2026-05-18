@@ -48,6 +48,7 @@ export interface CreateClassDto {
   price: number;
   classFeatures: ClassFeatures;
   authorId: string;
+  isOfficial?: boolean;
 }
 
 
@@ -58,6 +59,7 @@ export interface CreateSubclassDto {
   parentClassId: number;
   subclassFeatures: SubclassFeatures;
   authorId: string;  // injected by service, not set by form
+  isOfficial?: boolean;
 }
 
 
@@ -69,6 +71,7 @@ export interface CreateRaceDto {
   size: string;
   raceFeatures: RaceFeatures;
   authorId: string;
+  isOfficial?: boolean;
 }
 
 export interface CreateMonsterDto {
@@ -89,6 +92,7 @@ export interface CreateMonsterDto {
   xp: number;
   authorId: string;
   combatMechanics: CombatMechanics;
+  isOfficial?: boolean;
 }
 
 export interface CreateSpellDto {
@@ -110,6 +114,7 @@ export interface CreateSpellDto {
   higherLevelDescription: string;
   description: string;
   authorId: string | null;
+  isOfficial?: boolean;
 }
 
 export interface CreateItemDto {
@@ -118,6 +123,7 @@ export interface CreateItemDto {
   weight: number;
   properties?: Record<string, any>;
   authorId?: string;
+  isOfficial?: boolean;
 }
 
 // ---------------------------------------------------------------------------

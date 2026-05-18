@@ -20,5 +20,6 @@ data class MonsterDto(
     val challengeRating: Double,
     val xp: Int,
     val combatMechanics: Map<String, Any>,
-    val authorId: java.util.UUID? = null
+    val authorId: java.util.UUID? = null,
+    val isOfficial: Boolean? = null
 )

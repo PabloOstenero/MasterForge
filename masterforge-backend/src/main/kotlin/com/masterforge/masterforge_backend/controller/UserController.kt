@@ -134,7 +134,7 @@ class UserController(
                     id = user.id!!,
                     name = user.name,
                     email = user.email,
-                    subscriptionTier = user.subscriptionTier,
+                    subscriptionTier = if (user.role == "MANAGER" || user.role == "ADMIN") "PRO" else user.subscriptionTier,
                     characters = userCharacters.map { character ->
                         CharacterSimpleDto(
                             id = character.id!!,
@@ -173,6 +173,7 @@ class UserController(
             email = email,
             passwordHash = passwordEncoder.encode(password)!!,
             subscriptionTier = userDto.subscriptionTier ?: "FREE",
+            role = userDto.role ?: "USER",
             balance = userDto.balance ?: BigDecimal.ZERO,
             isActive = userDto.isActive ?: true
         )
@@ -222,6 +223,7 @@ class UserController(
         existingUser.email = userDto.email ?: existingUser.email
         existingUser.passwordHash = userDto.passwordHash?.let { passwordEncoder.encode(it) } ?: existingUser.passwordHash
         existingUser.subscriptionTier = userDto.subscriptionTier ?: existingUser.subscriptionTier
+        existingUser.role = userDto.role ?: existingUser.role
         existingUser.balance = userDto.balance ?: existingUser.balance
         existingUser.isActive = userDto.isActive ?: existingUser.isActive
         existingUser.sessionNotifications = userDto.sessionNotifications ?: existingUser.sessionNotifications
@@ -269,6 +271,7 @@ class UserController(
         existingUser.email = userDto.email ?: existingUser.email
         existingUser.passwordHash = userDto.passwordHash?.let { passwordEncoder.encode(it) } ?: existingUser.passwordHash
         existingUser.subscriptionTier = userDto.subscriptionTier ?: existingUser.subscriptionTier
+        existingUser.role = userDto.role ?: existingUser.role
         existingUser.balance = userDto.balance ?: existingUser.balance
         existingUser.isActive = userDto.isActive ?: existingUser.isActive
         existingUser.sessionNotifications = userDto.sessionNotifications ?: existingUser.sessionNotifications
@@ -306,6 +309,7 @@ class UserController(
         email = this.email,
         passwordHash = this.passwordHash,
         subscriptionTier = this.subscriptionTier,
+        role = this.role,
         balance = this.balance,
         isActive = this.isActive,
         sessionNotifications = this.sessionNotifications

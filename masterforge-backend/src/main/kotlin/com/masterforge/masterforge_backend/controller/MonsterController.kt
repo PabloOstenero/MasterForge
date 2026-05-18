@@ -27,14 +27,19 @@ class MonsterController(
 
     @PostMapping
     fun createMonster(@RequestBody dto: MonsterDto): Monster {
-        // The author is optional. If an authorId is provided, find the user.
-        // If not, the author will be null, marking it as a system-owned entity.
-        val author: User? = dto.authorId?.let {
-            val user = userRepository.findById(it)
-                .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Author not found with id $it") }
-            homebrewService.verifyCreationLimit(user)
-            homebrewService.verifyMonetization(user, dto.price ?: java.math.BigDecimal.ZERO)
-            user
+        val currentUserId = SecurityUtils.getCurrentUserId()
+        val currentUser = userRepository.findById(currentUserId)
+            .orElseThrow { ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authenticated user not found") }
+
+        val isManagerOrAdmin = currentUser.role == "MANAGER" || currentUser.role == "ADMIN"
+        val shouldBeOfficial = isManagerOrAdmin && dto.isOfficial == true
+
+        val author: User? = if (shouldBeOfficial) {
+            null
+        } else {
+            homebrewService.verifyCreationLimit(currentUser)
+            homebrewService.verifyMonetization(currentUser, dto.price ?: java.math.BigDecimal.ZERO)
+            currentUser
         }
 
         val monster = Monster(
@@ -74,11 +79,32 @@ class MonsterController(
         val existingMonster = monsterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Monster not found with id $id") }
 
-        val author: User? = dto.authorId?.let {
-            val user = userRepository.findById(it)
-                .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Author not found with id $it") }
-            homebrewService.verifyMonetization(user, dto.price ?: java.math.BigDecimal.ZERO)
-            user
+        val currentUserId = SecurityUtils.getCurrentUserId()
+        val currentUser = userRepository.findById(currentUserId)
+            .orElseThrow { ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authenticated user not found") }
+
+        val isManagerOrAdmin = currentUser.role == "MANAGER" || currentUser.role == "ADMIN"
+
+        // Verify update permission
+        val existingAuthorId = existingMonster.author?.id
+        if (existingAuthorId == null) {
+            // Official content
+            if (!isManagerOrAdmin) {
+                throw ResponseStatusException(HttpStatus.FORBIDDEN, "Only managers can update official content")
+            }
+        } else {
+            // Community content
+            if (existingAuthorId != currentUserId && !isManagerOrAdmin) {
+                throw ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this content")
+            }
+        }
+
+        val shouldBeOfficial = isManagerOrAdmin && dto.isOfficial == true
+        val author: User? = if (shouldBeOfficial) {
+            null
+        } else {
+            homebrewService.verifyMonetization(currentUser, dto.price ?: java.math.BigDecimal.ZERO)
+            currentUser
         }
 
         val updatedMonster = existingMonster.copy(
@@ -106,14 +132,25 @@ class MonsterController(
     @DeleteMapping("/{id}")
     fun deleteMonster(@PathVariable id: UUID): ResponseEntity<Void> {
         val currentUserId = SecurityUtils.getCurrentUserId()
+        val currentUser = userRepository.findById(currentUserId)
+            .orElseThrow { ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authenticated user not found") }
+
+        val isManagerOrAdmin = currentUser.role == "MANAGER" || currentUser.role == "ADMIN"
         val monster = monsterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Monster not found with id $id") }
 
-        // Official content (no author) and content owned by another user are both forbidden
-        val authorId = monster.author?.id
-            ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot delete official content")
-        if (authorId != currentUserId) {
-            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this content")
+        // Verify delete permission
+        val existingAuthorId = monster.author?.id
+        if (existingAuthorId == null) {
+            // Official content
+            if (!isManagerOrAdmin) {
+                throw ResponseStatusException(HttpStatus.FORBIDDEN, "Only managers can delete official content")
+            }
+        } else {
+            // Community content
+            if (existingAuthorId != currentUserId && !isManagerOrAdmin) {
+                throw ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this content")
+            }
         }
 
         monsterRepository.deleteById(id)

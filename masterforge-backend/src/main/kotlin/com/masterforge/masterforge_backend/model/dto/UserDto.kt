@@ -10,6 +10,7 @@ data class UserDto(
     val passwordHash: String? = null,
     val currentPassword: String? = null,
     val subscriptionTier: String? = null,
+    val role: String? = null,
     val balance: BigDecimal? = null,
     val isActive: Boolean? = null,
     val sessionNotifications: Boolean? = null,

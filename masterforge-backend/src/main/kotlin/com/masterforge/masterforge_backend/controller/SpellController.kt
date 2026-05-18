@@ -29,12 +29,19 @@ class SpellController(
     @PostMapping
     @Transactional
     fun createSpell(@RequestBody dto: SpellDto): Spell {
-        val author: User? = dto.authorId?.let {
-            val user = userRepository.findById(it)
-                .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Author not found with id $it") }
-            homebrewService.verifyCreationLimit(user)
-            homebrewService.verifyMonetization(user, dto.price ?: java.math.BigDecimal.ZERO)
-            user
+        val currentUserId = SecurityUtils.getCurrentUserId()
+        val currentUser = userRepository.findById(currentUserId)
+            .orElseThrow { ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authenticated user not found") }
+
+        val isManagerOrAdmin = currentUser.role == "MANAGER" || currentUser.role == "ADMIN"
+        val shouldBeOfficial = isManagerOrAdmin && dto.isOfficial == true
+
+        val author: User? = if (shouldBeOfficial) {
+            null
+        } else {
+            homebrewService.verifyCreationLimit(currentUser)
+            homebrewService.verifyMonetization(currentUser, dto.price ?: java.math.BigDecimal.ZERO)
+            currentUser
         }
 
         val spell = Spell(
@@ -76,11 +83,32 @@ class SpellController(
         val existingSpell = spellRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Spell not found with id $id") }
 
-        val author: User? = dto.authorId?.let {
-            val user = userRepository.findById(it)
-                .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "Author not found with id $it") }
-            homebrewService.verifyMonetization(user, dto.price ?: java.math.BigDecimal.ZERO)
-            user
+        val currentUserId = SecurityUtils.getCurrentUserId()
+        val currentUser = userRepository.findById(currentUserId)
+            .orElseThrow { ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authenticated user not found") }
+
+        val isManagerOrAdmin = currentUser.role == "MANAGER" || currentUser.role == "ADMIN"
+
+        // Verify update permission
+        val existingAuthorId = existingSpell.author?.id
+        if (existingAuthorId == null) {
+            // Official content
+            if (!isManagerOrAdmin) {
+                throw ResponseStatusException(HttpStatus.FORBIDDEN, "Only managers can update official content")
+            }
+        } else {
+            // Community content
+            if (existingAuthorId != currentUserId && !isManagerOrAdmin) {
+                throw ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this content")
+            }
+        }
+
+        val shouldBeOfficial = isManagerOrAdmin && dto.isOfficial == true
+        val author: User? = if (shouldBeOfficial) {
+            null
+        } else {
+            homebrewService.verifyMonetization(currentUser, dto.price ?: java.math.BigDecimal.ZERO)
+            currentUser
         }
 
         val updatedSpell = existingSpell.copy(
@@ -109,14 +137,25 @@ class SpellController(
     @DeleteMapping("/{id}")
     fun deleteSpell(@PathVariable id: UUID): ResponseEntity<Void> {
         val currentUserId = SecurityUtils.getCurrentUserId()
+        val currentUser = userRepository.findById(currentUserId)
+            .orElseThrow { ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authenticated user not found") }
+
+        val isManagerOrAdmin = currentUser.role == "MANAGER" || currentUser.role == "ADMIN"
         val spell = spellRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Spell not found with id $id") }
 
-        // Official content (no author) and content owned by another user are both forbidden
-        val authorId = spell.author?.id
-            ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot delete official content")
-        if (authorId != currentUserId) {
-            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this content")
+        // Verify delete permission
+        val existingAuthorId = spell.author?.id
+        if (existingAuthorId == null) {
+            // Official content
+            if (!isManagerOrAdmin) {
+                throw ResponseStatusException(HttpStatus.FORBIDDEN, "Only managers can delete official content")
+            }
+        } else {
+            // Community content
+            if (existingAuthorId != currentUserId && !isManagerOrAdmin) {
+                throw ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this content")
+            }
         }
 
         spellRepository.deleteById(id)

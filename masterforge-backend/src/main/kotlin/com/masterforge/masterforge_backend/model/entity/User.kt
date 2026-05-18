@@ -30,6 +30,9 @@ class User(
     @Column(name = "subscription_tier", nullable = false)
     var subscriptionTier: String = "FREE",
 
+    @Column(nullable = false, columnDefinition = "varchar(255) default 'USER'")
+    var role: String = "USER",
+
     @Column(name = "subscription_expires_at")
     var subscriptionExpiresAt: LocalDateTime? = null,
 
@@ -77,6 +80,7 @@ class User(
      * Returns true if tier is PRO and it hasn't expired yet.
      */
     fun isPro(): Boolean {
+        if (role == "MANAGER" || role == "ADMIN") return true
         if (subscriptionTier != "PRO") return false
         val expiry = subscriptionExpiresAt ?: return false
         return expiry.isAfter(LocalDateTime.now())

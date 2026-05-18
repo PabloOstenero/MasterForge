@@ -129,6 +129,11 @@ export class HomebrewSpellFormPage implements OnInit {
   dynamicSpellClasses: string[] = [];
   classesLoading = false;
 
+  get isManagerOrAdmin(): boolean {
+    const user = this.authService.getCurrentUser();
+    return user?.role === 'MANAGER' || user?.role === 'ADMIN';
+  }
+
   constructor(
     private fb: FormBuilder,
     private homebrewService: HomebrewService,
@@ -148,6 +153,7 @@ export class HomebrewSpellFormPage implements OnInit {
       range:       ['', Validators.required],
       duration:    ['', Validators.required],
       description: ['', Validators.required],
+      isOfficial:  [true],
 
       // Boolean toggles (default false)
       verbal:        [false],
@@ -248,6 +254,7 @@ export class HomebrewSpellFormPage implements OnInit {
           ritual:                 spell.ritual ?? false,
           savingThrow:            spell.savingThrow ?? 'None',
           higherLevelDescription: spell.higherLevelDescription ?? '',
+          isOfficial:             spell.author === null || !spell.author,
         });
 
         // Deserialize chip arrays from comma-separated strings
@@ -304,6 +311,7 @@ export class HomebrewSpellFormPage implements OnInit {
       spellClasses:           spellClassesStr,
       higherLevelDescription: v.higherLevelDescription ?? '',
       authorId:               null, // Service will override with getUserIdFromToken()
+      isOfficial:             !!v.isOfficial,
     };
 
     const request$ = this.editMode && this.editId

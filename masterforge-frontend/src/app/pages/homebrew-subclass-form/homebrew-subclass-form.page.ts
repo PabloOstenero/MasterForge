@@ -24,6 +24,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
 
 import { StartingEquipmentPickerComponent } from '../../components/starting-equipment-picker/starting-equipment-picker.component';
 import { HomebrewService, CreateSubclassDto } from '../../services/homebrew.service';
+import { AuthService } from '../../services/auth.service';
 import { FeatureMechanicsComponent } from '../../components/feature-mechanics/feature-mechanics.component';
 import { FeatureChoiceEditorComponent } from '../../components/feature-choice-editor/feature-choice-editor.component';
 import { FeatureEffectEditorComponent } from '../../components/feature-effect-editor/feature-effect-editor.component';
@@ -350,11 +351,17 @@ export class HomebrewSubclassFormPage implements OnInit {
   readonly spellLevelRange = Array.from({ length: 9 }, (_, i) => i + 1);
 
 
+  get isManagerOrAdmin(): boolean {
+    const user = this.authService.getCurrentUser();
+    return user?.role === 'MANAGER' || user?.role === 'ADMIN';
+  }
+
   constructor(
     private fb: FormBuilder,
     private homebrewService: HomebrewService,
     private router: Router,
     private route: ActivatedRoute,
+    private authService: AuthService,
   ) {
     addIcons({ 
       add, trash, sparklesOutline, shieldOutline, listOutline, 
@@ -379,6 +386,7 @@ export class HomebrewSubclassFormPage implements OnInit {
       name: ['', Validators.required],
       description: [''],
       parentClassId: [null, Validators.required],
+      isOfficial: [true],
 
 
       // Damage resistances / immunities / condition immunities
@@ -558,6 +566,7 @@ export class HomebrewSubclassFormPage implements OnInit {
           description: subclass.description ?? '',
           parentClassId: pId ? Number(pId) : null,
           additionalSpellClass: sf.additionalSpellClass ?? '',
+          isOfficial: subclass.author === null || !subclass.author,
         });
 
         // ---------------------------------------------------------------
@@ -1235,6 +1244,7 @@ export class HomebrewSubclassFormPage implements OnInit {
       description: this.form.get('description')?.value ?? '',
       parentClassId: this.form.get('parentClassId')?.value,
       subclassFeatures,
+      isOfficial: !!this.form.get('isOfficial')?.value,
     };
 
     // ---- Submit ----

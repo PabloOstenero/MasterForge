@@ -18,6 +18,7 @@ data class UserResponseDto(
     val name: String,
     val email: String,
     val subscriptionTier: String,
+    val role: String,
     val balance: BigDecimal,
     @get:JsonProperty("isActive")
     val isActive: Boolean,
@@ -38,7 +39,8 @@ data class UserResponseDto(
                 id = user.id!!,
                 name = user.name,
                 email = user.email,
-                subscriptionTier = user.subscriptionTier.toString(),
+                subscriptionTier = if (user.role == "MANAGER" || user.role == "ADMIN") "PRO" else user.subscriptionTier.toString(),
+                role = user.role,
                 balance = user.balance,
                 isActive = user.isActive,
                 is2faEnabled = user.is2faEnabled,

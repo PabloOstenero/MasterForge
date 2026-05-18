@@ -40,6 +40,12 @@ class AuthController(
                 .body(ErrorResponse("Invalid email or password"))
         }
 
+        if (!user.isActive) {
+            return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ErrorResponse("Account is deactivated. Please contact support."))
+        }
+
         if (user.is2faEnabled) {
             val mfaToken = jwtService.generateMfaToken(user.id!!)
             return ResponseEntity.ok(LoginResponse(requiresMfa = true, mfaToken = mfaToken))
@@ -56,6 +62,12 @@ class AuthController(
         
         val user = userRepository.findById(UUID.fromString(userIdStr))
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "User not found") }
+
+        if (!user.isActive) {
+            return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ErrorResponse("Account is deactivated. Please contact support."))
+        }
 
         val cleanCode = request.code.trim()
         

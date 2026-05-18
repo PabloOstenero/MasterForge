@@ -228,7 +228,7 @@ class CampaignController(
                 id = user.id!!,
                 name = user.name,
                 email = user.email,
-                subscriptionTier = user.subscriptionTier.toString(),
+                subscriptionTier = if (user.role == "MANAGER" || user.role == "ADMIN") "PRO" else user.subscriptionTier.toString(),
                 discordUsername = user.discordUsername,
                 characters = characters
             )

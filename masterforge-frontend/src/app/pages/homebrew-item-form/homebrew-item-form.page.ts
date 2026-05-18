@@ -8,6 +8,7 @@ import {
 } from '@ionic/angular/standalone';
 
 import { HomebrewService } from '../../services/homebrew.service';
+import { AuthService } from '../../services/auth.service';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -317,11 +318,17 @@ export class HomebrewItemFormPage implements OnInit {
   readonly abilityStats = ABILITY_STATS;
   readonly rechargeOptions = RECHARGE_OPTIONS;
 
+  get isManagerOrAdmin(): boolean {
+    const user = this.authService.getCurrentUser();
+    return user?.role === 'MANAGER' || user?.role === 'ADMIN';
+  }
+
   constructor(
     private fb: FormBuilder,
     private homebrewService: HomebrewService,
     private router: Router,
     private route: ActivatedRoute,
+    private authService: AuthService,
   ) {}
 
   // ---------------------------------------------------------------------------
@@ -451,6 +458,7 @@ export class HomebrewItemFormPage implements OnInit {
       valueGp:            [null, Validators.min(0)],
       description:        [''],
       requiresAttunement: [false],
+      isOfficial:         [true],
 
       // Weapon sub-group
       weapon: this.fb.group({
@@ -563,6 +571,7 @@ export class HomebrewItemFormPage implements OnInit {
           valueGp:            p.valueGp ?? null,
           description:        p.description ?? '',
           requiresAttunement: p.requiresAttunement ?? false,
+          isOfficial:         item.author === null || !item.author,
         });
 
         // Patch sub-groups from properties
@@ -709,6 +718,7 @@ export class HomebrewItemFormPage implements OnInit {
       type:       v.type,
       weight:     v.weight,
       properties,
+      isOfficial: !!v.isOfficial,
     };
 
     const request$ = this.editMode && this.editId
