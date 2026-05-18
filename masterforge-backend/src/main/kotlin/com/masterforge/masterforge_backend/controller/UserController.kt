@@ -22,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.server.ResponseStatusException
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -36,7 +37,8 @@ class UserController(
     private val campaignRepository: CampaignRepository,
     private val campaignEnrollmentRepository: CampaignEnrollmentRepository,
     private val sessionRepository: SessionRepository,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
+    @Value("\${masterforge.admin.email:}") private val initialAdminEmail: String
 ) {
 
     @GetMapping
@@ -168,12 +170,16 @@ class UserController(
             throw ResponseStatusException(HttpStatus.CONFLICT, "Email is already in use")
         }
 
+        val isInitialAdmin = initialAdminEmail.isNotBlank() && email.equals(initialAdminEmail, ignoreCase = true)
+        val targetRole = if (isInitialAdmin) "ADMIN" else (userDto.role ?: "USER")
+        val targetTier = if (isInitialAdmin) "PRO" else (userDto.subscriptionTier ?: "FREE")
+
         val user = User(
             name = name,
             email = email,
             passwordHash = passwordEncoder.encode(password)!!,
-            subscriptionTier = userDto.subscriptionTier ?: "FREE",
-            role = userDto.role ?: "USER",
+            subscriptionTier = targetTier,
+            role = targetRole,
             balance = userDto.balance ?: BigDecimal.ZERO,
             isActive = userDto.isActive ?: true
         )
