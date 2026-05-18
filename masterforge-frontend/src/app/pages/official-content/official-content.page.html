@@ -1,0 +1,224 @@
+<app-toast-notification></app-toast-notification>
+<div class="char-sheet-content">
+  <div class="dashboard-container ion-padding">
+
+    <!-- Header Section -->
+    <div class="official-header-section animate__animated animate__fadeIn">
+      <div class="official-header-badge">⭐ CONTENIDO OFICIAL</div>
+      <h1 class="official-main-title">Núcleo del Sistema (System Core)</h1>
+      <p class="official-subtitle">Explora y consulta las clases, razas, conjuros, monstruos y objetos oficiales del reglamento.</p>
+      @if (isManagerOrAdmin) {
+        <div class="admin-notice">
+          <ion-icon name="information-circle"></ion-icon>
+          <span>Estás conectado como <strong>Administrador/Manager</strong>. Tienes permisos para crear y modificar el contenido oficial del sistema.</span>
+        </div>
+      }
+    </div>
+
+    <!-- Loading state -->
+    @if (loading) {
+      <div class="loading-container">
+        <ion-spinner name="crescent" data-testid="official-spinner"></ion-spinner>
+      </div>
+    }
+
+    <!-- Error state -->
+    @if (error) {
+      <p class="text-muted" data-testid="official-error">{{ error }}</p>
+    }
+
+    <!-- Content (only shown when not loading) -->
+    @if (!loading) {
+
+      @for (key of ['classes', 'subclasses', 'races', 'monsters', 'spells', 'items']; track key) {
+        @let items = officialItems[key];
+        @let type = key === 'classes' ? 'CLASS' : (key === 'subclasses' ? 'SUBCLASS' : (key === 'races' ? 'RACE' : (key === 'monsters' ? 'MONSTER' : (key === 'spells' ? 'SPELL' : 'ITEM'))));
+
+        <div class="section-block" [attr.data-testid]="'section-' + type">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="gold-accent">⭐</span> {{ sectionNames[key] }}
+            </h2>
+            @if (isManagerOrAdmin) {
+              <ion-button fill="outline" size="small" (click)="navigateToCreate(type)" [attr.data-testid]="'create-' + type">
+                + Crear {{ sectionNames[key].slice(0, -1) }} Oficial
+              </ion-button>
+            }
+          </div>
+
+          @if (items.length === 0) {
+            <p class="text-muted" [attr.data-testid]="'empty-' + type">
+              No hay contenido oficial disponible en esta sección.
+            </p>
+          } @else {
+            <ion-list class="transparent-list">
+              @for (item of items; track item.id) {
+                <ion-item lines="full" class="skill-item list-item-interactive" data-testid="item-row" [attr.data-item-id]="item.id" [attr.data-item-type]="item.contentType">
+                  <ion-label>
+                    <h3 class="gold-title">{{ item.name }}</h3>
+                    <p class="author-tag">System Core</p>
+                  </ion-label>
+
+                  <ion-button slot="end" fill="clear" size="small" (click)="previewItem(item)">
+                    <ion-icon name="eye" slot="icon-only"></ion-icon>
+                  </ion-button>
+
+                  @if (isManagerOrAdmin) {
+                    <ion-button slot="end" fill="clear" size="small" (click)="navigateToEdit(type, item.id)" data-testid="edit-action">
+                      Editar
+                    </ion-button>
+                    <ion-button slot="end" fill="clear" color="danger" size="small" [disabled]="deletingId === item.id" (click)="confirmDelete(item)" data-testid="delete-action">
+                      @if (deletingId === item.id) {
+                        <ion-spinner name="crescent" slot="icon-only"></ion-spinner>
+                      } @else {
+                        Eliminar
+                      }
+                    </ion-button>
+                  }
+                </ion-item>
+              }
+            </ion-list>
+          }
+        </div>
+      }
+    }
+  </div>
+</div>
+
+<!-- Preview Modal -->
+<ion-modal [isOpen]="isPreviewModalOpen" (didDismiss)="closePreview()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar color="dark">
+        <ion-title>{{ selectedPreviewItem?.name }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closePreview()">
+            <ion-icon name="close" slot="icon-only"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding preview-modal-content">
+      @if (loadingPreview) {
+        <div class="loading-container">
+          <ion-spinner name="crescent"></ion-spinner>
+          <p>Cargando detalles...</p>
+        </div>
+      } @else if (previewDetails) {
+        <!-- Monster Stat Block -->
+        @if (selectedPreviewItem?.contentType === 'MONSTER') {
+          <div class="stat-block-preview">
+            <div class="stat-header">
+              <h2>{{ previewDetails.name }}</h2>
+              <p><i>{{ previewDetails.size }} {{ previewDetails.type }}, {{ previewDetails.alignment }}</i></p>
+            </div>
+
+            <div class="stat-divider"></div>
+
+            <div class="primary-stats">
+              <p><strong>Clase de Armadura:</strong> {{ previewDetails.armorClass }}</p>
+              <p><strong>Puntos de Golpe:</strong> {{ previewDetails.hitPoints }}</p>
+              <p><strong>Velocidad:</strong> {{ previewDetails.speed }}</p>
+            </div>
+
+            <div class="stat-divider"></div>
+
+            <ion-grid class="ability-grid">
+              <ion-row>
+                <ion-col><strong>FUE</strong><br>{{ previewDetails.str }} ({{ getModifier(previewDetails.str) }})</ion-col>
+                <ion-col><strong>DES</strong><br>{{ previewDetails.dex }} ({{ getModifier(previewDetails.dex) }})</ion-col>
+                <ion-col><strong>CON</strong><br>{{ previewDetails.con }} ({{ getModifier(previewDetails.con) }})</ion-col>
+                <ion-col><strong>INT</strong><br>{{ previewDetails.intStat }} ({{ getModifier(previewDetails.intStat) }})</ion-col>
+                <ion-col><strong>SAB</strong><br>{{ previewDetails.wis }} ({{ getModifier(previewDetails.wis) }})</ion-col>
+                <ion-col><strong>CAR</strong><br>{{ previewDetails.cha }} ({{ getModifier(previewDetails.cha) }})</ion-col>
+              </ion-row>
+            </ion-grid>
+
+            <div class="stat-divider"></div>
+
+            <div class="secondary-stats">
+              <p><strong>Desafío:</strong> {{ previewDetails.challengeRating }} ({{ previewDetails.xp }} XP)</p>
+            </div>
+
+            @if (getMechanics('traits').length > 0) {
+              <div class="stat-divider"></div>
+              @for (trait of getMechanics('traits'); track trait.name) {
+                <p class="feature-text"><strong>{{ trait.name }}.</strong> {{ trait.description || trait.desc }}</p>
+              }
+            }
+
+            @if (getMechanics('actions').length > 0) {
+              <h3 class="section-divider-title">Acciones</h3>
+              <div class="stat-divider"></div>
+              @for (action of getMechanics('actions'); track action.name) {
+                <p class="feature-text"><strong>{{ action.name }}.</strong> {{ action.description || action.desc }}</p>
+              }
+            }
+          </div>
+        }
+
+        <!-- Spell Preview -->
+        @if (selectedPreviewItem?.contentType === 'SPELL') {
+          <div class="stat-block-preview">
+            <div class="stat-header">
+              <h2>{{ previewDetails.name }}</h2>
+              <p><i>Nivel {{ previewDetails.level }}, {{ previewDetails.school }}</i></p>
+            </div>
+            <div class="stat-divider"></div>
+            <p><strong>Tiempo de lanzamiento:</strong> {{ previewDetails.castingTime }}</p>
+            <p><strong>Alcance:</strong> {{ previewDetails.range }}</p>
+            <p><strong>Componentes:</strong> 
+              {{ previewDetails.verbal ? 'V' : '' }}{{ previewDetails.somatic ? 'S' : '' }}{{ previewDetails.material ? 'M' : '' }}
+              @if (previewDetails.materialComponent) { ({{ previewDetails.materialComponent }}) }
+            </p>
+            <p><strong>Duración:</strong> {{ previewDetails.duration }}</p>
+            <div class="stat-divider"></div>
+            <div class="description-text">{{ previewDetails.description }}</div>
+          </div>
+        }
+
+        <!-- General Description for Class/Race/Item -->
+        @if (['CLASS', 'SUBCLASS', 'RACE', 'ITEM'].includes(selectedPreviewItem?.contentType || '')) {
+          <div class="stat-block-preview">
+            <div class="stat-header">
+              <h2>{{ previewDetails.name }}</h2>
+              @if (selectedPreviewItem?.contentType === 'CLASS') {
+                <p>Dado de Golpe: d{{ previewDetails.hitDie }}</p>
+              }
+              @if (selectedPreviewItem?.contentType === 'SUBCLASS') {
+                <p>Subclase de {{ previewDetails.parentClass?.name }}</p>
+                <p><strong>Atributo Principal:</strong> {{ previewDetails.parentClass?.classFeatures?.primaryAbility || '—' }}</p>
+              }
+            </div>
+            <div class="stat-divider"></div>
+            
+            @if (selectedPreviewItem?.contentType === 'CLASS') {
+              <p><strong>Atributo Principal:</strong> {{ previewDetails.classFeatures?.primaryAbility || '—' }}</p>
+              <p><strong>Salvaciones:</strong> {{ getSavingThrowsList() }}</p>
+              <div class="stat-divider"></div>
+            }
+
+            <div class="description-text">{{ previewDetails.description }}</div>
+            
+            @if (selectedPreviewItem?.contentType === 'ITEM') {
+              <p><strong>Tipo:</strong> {{ previewDetails.type }}</p>
+              <p><strong>Peso:</strong> {{ previewDetails.weight }} lb.</p>
+            }
+
+            @if (getClassFeatures().length > 0) {
+              <h3 class="section-divider-title">Rasgos</h3>
+              <div class="stat-divider"></div>
+              @for (feature of getClassFeatures(); track feature.name) {
+                <p class="feature-text">
+                  <strong>{{ feature.name }} (Nvl {{ feature.levelRequired }}).</strong> 
+                  {{ feature.description }}
+                </p>
+              }
+            }
+          </div>
+        }
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>

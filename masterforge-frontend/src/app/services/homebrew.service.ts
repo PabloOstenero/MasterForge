@@ -143,6 +143,10 @@ export class HomebrewService {
     return this.http.get<HomebrewSummary>('/api/homebrew/community');
   }
 
+  getOfficialHomebrew(): Observable<HomebrewSummary> {
+    return this.http.get<HomebrewSummary>('/api/homebrew/official');
+  }
+
   purchaseItem(contentType: ContentType, contentId: string): Observable<void> {
     return this.http.post<void>('/api/homebrew/purchase', { contentType, contentId });
   }

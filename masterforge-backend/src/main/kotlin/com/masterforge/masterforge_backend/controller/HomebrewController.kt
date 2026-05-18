@@ -88,6 +88,31 @@ class HomebrewController(
         )
     }
 
+    @GetMapping("/official")
+    @Transactional(readOnly = true)
+    fun getOfficialHomebrew(): HomebrewSummaryDto {
+        return HomebrewSummaryDto(
+            classes = dndClassRepository.findByAuthorIdIsNull().map {
+                HomebrewItemDto(it.id.toString(), it.name, "Oficial", "CLASS", it.price, true)
+            },
+            subclasses = dndSubclassRepository.findByAuthorIdIsNull().map {
+                HomebrewItemDto(it.id.toString(), it.name, "Oficial", "SUBCLASS", it.price, true)
+            },
+            races = dndRaceRepository.findByAuthorIdIsNull().map {
+                HomebrewItemDto(it.id.toString(), it.name, "Oficial", "RACE", it.price, true)
+            },
+            monsters = monsterRepository.findByAuthorIdIsNull().map {
+                HomebrewItemDto(it.id.toString(), it.name, "Oficial", "MONSTER", it.price, true)
+            },
+            spells = spellRepository.findByAuthorIdIsNull().map {
+                HomebrewItemDto(it.id.toString(), it.name, "Oficial", "SPELL", it.price, true)
+            },
+            items = itemRepository.findByAuthorIdIsNull().map {
+                HomebrewItemDto(it.id.toString(), it.name, "Oficial", "ITEM", it.price, true)
+            }
+        )
+    }
+
     @PostMapping("/purchase")
     @Transactional
     fun purchaseItem(@RequestBody request: PurchaseRequest) {

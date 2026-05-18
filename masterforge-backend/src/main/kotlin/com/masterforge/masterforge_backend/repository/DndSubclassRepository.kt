@@ -10,4 +10,5 @@ interface DndSubclassRepository : JpaRepository<DndSubclass, Int> {
     fun findByAuthorId(authorId: UUID): List<DndSubclass>
     fun findByAuthorIdNotAndAuthorIdIsNotNull(authorId: UUID): List<DndSubclass>
     fun findByParentClassId(parentClassId: Int): List<DndSubclass>
+    fun findByAuthorIdIsNull(): List<DndSubclass>
 }

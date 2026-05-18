@@ -728,7 +728,8 @@ export class HomebrewItemFormPage implements OnInit {
     request$.subscribe({
       next: () => {
         this.submitting = false;
-        this.router.navigate(['/homebrew']);
+        const returnUrl = this.route.snapshot.queryParamMap.get('from') === 'official' ? '/official-content' : '/homebrew';
+        this.router.navigate([returnUrl]);
       },
       error: (err: any) => {
         this.submitting = false;
@@ -743,6 +744,7 @@ export class HomebrewItemFormPage implements OnInit {
   }
 
   cancel(): void {
-    this.router.navigate(['/homebrew']);
+    const returnUrl = this.route.snapshot.queryParamMap.get('from') === 'official' ? '/official-content' : '/homebrew';
+    this.router.navigate([returnUrl]);
   }
 }

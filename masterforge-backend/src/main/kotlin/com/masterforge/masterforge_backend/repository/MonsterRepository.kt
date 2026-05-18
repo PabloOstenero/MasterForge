@@ -9,4 +9,5 @@ import java.util.UUID
 interface MonsterRepository : JpaRepository<Monster, UUID> {
     fun findByAuthorId(authorId: UUID): List<Monster>
     fun findByAuthorIdNotAndAuthorIdIsNotNull(authorId: UUID): List<Monster>
+    fun findByAuthorIdIsNull(): List<Monster>
 }

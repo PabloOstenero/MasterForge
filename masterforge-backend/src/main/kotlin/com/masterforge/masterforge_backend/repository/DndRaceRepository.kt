@@ -9,4 +9,5 @@ import java.util.UUID
 interface DndRaceRepository : JpaRepository<DndRace, Int> {
     fun findByAuthorId(authorId: UUID): List<DndRace>
     fun findByAuthorIdNotAndAuthorIdIsNotNull(authorId: UUID): List<DndRace>
+    fun findByAuthorIdIsNull(): List<DndRace>
 }

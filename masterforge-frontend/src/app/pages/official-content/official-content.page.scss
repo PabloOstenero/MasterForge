@@ -1,0 +1,229 @@
+@use 'src/theme/variables' as *;
+
+:host {
+  display: block;
+}
+
+.char-sheet-content {
+  background: #121212;
+}
+
+.dashboard-container {
+  width: 100%;
+}
+
+/* Premium Header Banner */
+.official-header-section {
+  background: linear-gradient(135deg, #1e1a10 0%, #121212 100%);
+  border: 1px solid rgba($accent-gold, 0.2);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.official-header-badge {
+  display: inline-block;
+  background: rgba($accent-gold, 0.15);
+  color: $accent-gold;
+  border: 1px solid $accent-gold;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.official-main-title {
+  color: #ffffff;
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+  letter-spacing: 0.5px;
+}
+
+.official-subtitle {
+  color: $text-muted;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.admin-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 196, 9, 0.1);
+  border: 1px dashed #ffc409;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 16px;
+  color: #ffc409;
+  font-size: 0.85rem;
+
+  ion-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+}
+
+/* Sections & Grid */
+.section-block {
+  margin-bottom: 32px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  color: $accent-gold;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba($accent-gold, 0.3);
+  padding-bottom: 8px;
+  margin: 0;
+  flex: 1;
+
+  .gold-accent {
+    margin-right: 4px;
+  }
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+.text-muted {
+  color: $text-muted;
+  font-size: 0.9rem;
+}
+
+.gold-title {
+  color: $accent-gold;
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin: 0 0 4px 0;
+}
+
+.author-tag {
+  font-size: 0.75rem;
+  color: $text-muted;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.transparent-list {
+  background: transparent !important;
+  --background: transparent !important;
+}
+
+.skill-item,
+.list-item-interactive {
+  --background: #1e1e1e !important;
+  --color: #ffffff;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  border: 1px solid rgba($text-muted, 0.1);
+  margin-bottom: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: rgba($accent-gold, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Preview Modal Styles */
+.preview-modal-content {
+  --background: #1e1e1e;
+  --color: #ffffff;
+}
+
+.stat-block-preview {
+  background: #fdf1dc; /* Parchment color */
+  color: #291209; /* Dark brown text */
+  padding: 16px;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  font-family: 'Bookman Old Style', 'Georgia', serif;
+  border-top: 4px solid #7a200d;
+  border-bottom: 4px solid #7a200d;
+  
+  h2 {
+    color: #7a200d;
+    font-size: 1.6rem;
+    margin: 0;
+    font-variant: small-caps;
+  }
+  
+  p {
+    margin: 4px 0;
+  }
+}
+
+.stat-divider {
+  height: 2px;
+  background: #7a200d;
+  margin: 8px 0;
+}
+
+.ability-grid {
+  ion-col {
+    text-align: center;
+    color: #7a200d;
+    font-size: 0.8rem;
+    
+    strong {
+      display: block;
+      margin-bottom: 2px;
+    }
+  }
+}
+
+.section-divider-title {
+  color: #7a200d;
+  font-size: 1.2rem;
+  margin-top: 16px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #7a200d;
+  font-variant: small-caps;
+}
+
+.feature-text {
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+  
+  strong {
+    font-style: italic;
+  }
+}
+
+.description-text {
+  white-space: pre-wrap;
+  line-height: 1.4;
+  font-style: italic;
+  color: #444;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #ffffff;
+}

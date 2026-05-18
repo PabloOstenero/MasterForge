@@ -11,4 +11,5 @@ interface SpellRepository : JpaRepository<Spell, UUID> {
     fun findByAuthorIdNotAndAuthorIdIsNotNull(authorId: UUID): List<Spell>
     fun findBySpellClassesContainingIgnoreCase(className: String): List<Spell>
     fun findByNameIgnoreCase(name: String): Spell?
+    fun findByAuthorIdIsNull(): List<Spell>
 }

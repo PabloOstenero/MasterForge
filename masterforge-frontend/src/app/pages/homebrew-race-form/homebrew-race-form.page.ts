@@ -816,10 +816,11 @@ export class HomebrewRaceFormPage implements OnInit {
     request$.subscribe({
       next: (result: any) => {
         const raceId = result?.id ?? (this.editMode ? Number(this.editId) : null);
+        const returnUrl = this.route.snapshot.queryParamMap.get('from') === 'official' ? '/official-content' : '/homebrew';
         if (raceId) {
           this.reconcileTraits(raceId).then(() => {
             this.submitting = false;
-            this.router.navigate(['/homebrew']);
+            this.router.navigate([returnUrl]);
           }).catch((err: any) => {
             this.submitting = false;
             this.error =
@@ -829,7 +830,7 @@ export class HomebrewRaceFormPage implements OnInit {
           });
         } else {
           this.submitting = false;
-          this.router.navigate(['/homebrew']);
+          this.router.navigate([returnUrl]);
         }
       },
       error: (err: any) => {
@@ -1238,6 +1239,7 @@ export class HomebrewRaceFormPage implements OnInit {
   // ---------------------------------------------------------------------------
 
   cancel(): void {
-    this.router.navigate(['/homebrew']);
+    const returnUrl = this.route.snapshot.queryParamMap.get('from') === 'official' ? '/official-content' : '/homebrew';
+    this.router.navigate([returnUrl]);
   }
 }
