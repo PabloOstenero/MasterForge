@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
+import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -17,7 +18,7 @@ export const routes: Routes = [
     children: [
       // Fix: Point to the refactored HomePage instead of InicioPage
       { path: 'home', loadComponent: () => import('./home/home.page').then(m => m.HomePage) },
-      { path: 'players', loadComponent: () => import('./pages/players/players.page').then(m => m.PlayersPage) },
+      { path: 'players', loadComponent: () => import('./pages/players/players.page').then(m => m.PlayersPage), canActivate: [adminGuard] },
       { path: 'campaigns', loadComponent: () => import('./pages/campaigns/campaigns.page').then(m => m.CampaignsPage) },
       { path: 'official-content', loadComponent: () => import('./pages/official-content/official-content.page').then(m => m.OfficialContentPage) },
       { path: 'bestiary', loadComponent: () => import('./pages/bestiary/bestiary.page').then(m => m.BestiaryPage) },

@@ -1,55 +1,143 @@
-<ion-content class="ion-padding">
+<ion-content class="ion-padding admin-content">
+
+  <div class="admin-header-title">
+    <h1>Panel de Administración</h1>
+    <p>Supervisión y control global de usuarios del sistema</p>
+  </div>
+
+  <!-- Overview Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <ion-icon name="people-outline"></ion-icon>
+      <div class="stat-info">
+        <h3>{{ totalUsers }}</h3>
+        <p>Total Usuarios</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <ion-icon name="checkmark-circle-outline"></ion-icon>
+      <div class="stat-info">
+        <h3>{{ activeUsers }}</h3>
+        <p>Activos</p>
+      </div>
+    </div>
+    <div class="stat-card stat-pro">
+      <ion-icon name="diamond-outline"></ion-icon>
+      <div class="stat-info">
+        <h3>{{ proUsers }}</h3>
+        <p>Cuentas PRO</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search & Filters -->
+  <div class="controls-container">
+    <ion-searchbar 
+      [(ngModel)]="searchTerm" 
+      (ngModelChange)="applyFilters()" 
+      placeholder="Buscar por nombre o email..." 
+      animated="true"
+      class="admin-searchbar">
+    </ion-searchbar>
+    
+    <ion-segment [(ngModel)]="filterStatus" (ionChange)="applyFilters()" mode="ios" class="admin-segment">
+      <ion-segment-button value="all">
+        <ion-label>Todos</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="active">
+        <ion-label>Activos</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="banned">
+        <ion-label>Baneados</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="pro">
+        <ion-label>PRO</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </div>
 
   @if (loading) {
-    <ion-spinner name="crescent" data-testid="spinner-jugadores"></ion-spinner>
+    <div class="loading-state">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando datos del sistema...</p>
+    </div>
   }
 
   @if (error) {
-    <p class="error-msg" data-testid="error-jugadores">{{ error }}</p>
+    <div class="error-msg">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+      <p>{{ error }}</p>
+    </div>
   }
 
-  <ion-list data-testid="users-list">
-    @for (user of users; track user.id) {
+  @if (!loading && filteredUsers.length === 0 && !error) {
+    <div class="empty-state">
+      <ion-icon name="search-outline"></ion-icon>
+      <p>No se encontraron usuarios con esos filtros.</p>
+    </div>
+  }
 
-      <ion-item class="user-row" data-testid="user-row">
-        <ion-avatar slot="start">
-          <img src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="avatar" />
-        </ion-avatar>
-        <ion-label>
-          <h2 class="user-name">{{ user.name }}</h2>
-          <p class="user-email">{{ user.email }}</p>
-        </ion-label>
-        <ion-badge
-          slot="end"
-          [class]="user.subscriptionTier === 'PRO' ? 'badge-pro' : 'badge-free'"
-          data-testid="subscription-badge">
-          {{ user.subscriptionTier }}
-        </ion-badge>
-      </ion-item>
-
-      @for (char of user.characters; track char.id) {
-        <ion-card
-          button
-          class="character-card"
-          data-testid="character-card"
-          (click)="goToSheet(char.id)">
-          <ion-card-content>
-            <strong class="char-name">{{ char.name }}</strong>
-            <p class="char-details">{{ char.dndClass }} — Nivel {{ char.level }}</p>
-          </ion-card-content>
-        </ion-card>
-      } @empty {
-        <p class="ion-padding-start text-muted" data-testid="sin-personajes">Sin personajes</p>
-      }
-
-    } @empty {
-      @if (!loading) {
-        <div class="empty-container" data-testid="empty-jugadores">
-          <ion-icon name="people-outline" class="empty-icon"></ion-icon>
-          <p class="empty-msg">No hay jugadores en tus campañas todavía.</p>
+  <div class="users-grid">
+    @for (user of filteredUsers; track user.id) {
+      <div class="user-card" [class.banned]="!user.isActive">
+        
+        <div class="card-header">
+          <div class="user-identity">
+            <ion-avatar>
+              <img src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="avatar" />
+            </ion-avatar>
+            <div class="user-info">
+              <h2>{{ user.name }}</h2>
+              <p>{{ user.email }}</p>
+            </div>
+          </div>
+          <div class="user-badges">
+            <ion-badge [class]="user.subscriptionTier === 'PRO' ? 'badge-pro' : 'badge-free'">
+              {{ user.subscriptionTier }}
+            </ion-badge>
+            <ion-badge color="dark" class="role-badge">{{ user.role }}</ion-badge>
+          </div>
         </div>
-      }
+
+        <div class="card-actions">
+          <ion-button 
+            fill="clear" 
+            size="small" 
+            [color]="user.isActive ? 'danger' : 'success'"
+            (click)="toggleActiveStatus(user)">
+            <ion-icon slot="start" [name]="user.isActive ? 'ban-outline' : 'checkmark-circle-outline'"></ion-icon>
+            {{ user.isActive ? 'Banear' : 'Activar' }}
+          </ion-button>
+
+          <ion-button 
+            fill="clear" 
+            size="small" 
+            color="warning"
+            (click)="toggleProStatus(user)">
+            <ion-icon slot="start" name="star-outline"></ion-icon>
+            Toggle PRO
+          </ion-button>
+
+          <ion-button 
+            fill="clear" 
+            size="small" 
+            color="medium"
+            (click)="changeRole(user)">
+            <ion-icon slot="start" name="shield-outline"></ion-icon>
+            Rol
+          </ion-button>
+
+          <ion-button 
+            fill="clear" 
+            size="small" 
+            color="danger"
+            class="delete-btn"
+            (click)="deleteUser(user)">
+            <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
     }
-  </ion-list>
+  </div>
 
 </ion-content>

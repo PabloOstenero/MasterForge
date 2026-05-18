@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { AuthService } from './auth.service';
 
 export interface MenuItem {
   title: string;
@@ -15,6 +16,8 @@ export interface MenuItem {
 export class RoleService {
   private _activeRole = new BehaviorSubject<'dm' | 'player'>('dm');
   activeRole$ = this._activeRole.asObservable();
+  
+  private authService = inject(AuthService);
 
   get activeRole(): 'dm' | 'player' {
     return this._activeRole.value;
@@ -22,7 +25,6 @@ export class RoleService {
 
   private dmMenu: MenuItem[] = [
     { title: 'Inicio', icon: 'home-outline', route: '/home' },
-    { title: 'Jugadores', icon: 'people-outline', route: '/players' },
     { title: 'Campañas', icon: 'map-outline', route: '/campaigns' },
     { title: 'Contenido Oficial', icon: 'book-outline', route: '/official-content' },
     { title: 'Bestiario', icon: 'skull-outline', route: '/bestiary' },
@@ -40,7 +42,16 @@ export class RoleService {
   ];
 
   menuItems$: Observable<MenuItem[]> = this.activeRole$.pipe(
-    map(role => role === 'dm' ? this.dmMenu : this.playerMenu)
+    map(role => {
+      let menu = role === 'dm' ? [...this.dmMenu] : [...this.playerMenu];
+      
+      const currentUser = this.authService.getCurrentUser();
+      if (currentUser && (currentUser.role === 'ADMIN' || currentUser.role === 'MANAGER')) {
+        menu.push({ title: 'Panel Admin', icon: 'shield-outline', route: '/players' });
+      }
+      
+      return menu;
+    })
   );
 
   toggleRole() {

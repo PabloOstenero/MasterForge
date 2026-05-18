@@ -18,7 +18,8 @@ import {
   listOutline,
   personCircleOutline,
   notificationsOutline,
-  menuOutline
+  menuOutline,
+  shieldOutline
 } from 'ionicons/icons';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
@@ -48,7 +49,7 @@ export class AuthLayoutComponent {
       settingsOutline, logOutOutline, swapHorizontalOutline,
       homeOutline, peopleOutline, mapOutline, skullOutline,
       personAddOutline, bookOutline, colorWandOutline, searchOutline, listOutline,
-      personCircleOutline, notificationsOutline, menuOutline
+      personCircleOutline, notificationsOutline, menuOutline, shieldOutline
     });
 
     this.roleService.activeRole$.subscribe(role => {

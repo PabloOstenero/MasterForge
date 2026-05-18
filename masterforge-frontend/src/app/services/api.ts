@@ -21,6 +21,16 @@ export class ApiService {
     return this.http.get(`${this.apiUrl}/users`);
   }
 
+  // Update a user (Admin/Manager only)
+  updateUserAdmin(id: string, userDto: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/users/${id}`, userDto);
+  }
+
+  // Delete a user (Admin only)
+  deleteUserAdmin(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/users/${id}`);
+  }
+
   // Function to create a new user in the database
   createUser(userData: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/users`, userData);
