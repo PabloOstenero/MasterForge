@@ -6,44 +6,68 @@
       <div data-testid="dm-dashboard">
         <ion-row class="summary-row">
           <ion-col size="12" size-md="4">
-            <div class="summary-card">
-              <div class="summary-label">Próxima Sesión</div>
-              <div class="summary-value">{{ nextSessionDate }}</div>
-              @if (dmNextSessionCampaignId) {
-                <a [routerLink]="['/campaigns', dmNextSessionCampaignId]" class="summary-link">Ver Detalles</a>
-              }
-            </div>
-          </ion-col>
-          <ion-col size="12" size-md="4">
-            <div class="summary-card">
-              <div class="summary-label">Clientes Totales</div>
-              <div class="summary-value">
-                @if (loadingPlayerCount) {
-                  ...
-                } @else if (errorPlayerCount) {
-                  Error
-                } @else {
-                  {{ playerCount }} jugadores
+            <div class="summary-card next-session-card">
+              <div class="card-icon-wrapper">
+                <ion-icon name="calendar-outline"></ion-icon>
+              </div>
+              <div class="card-info">
+                <div class="summary-label">Próxima Sesión</div>
+                <div class="summary-value">{{ nextSessionDate }}</div>
+                @if (dmNextSessionCampaignId) {
+                  <a [routerLink]="['/campaigns', dmNextSessionCampaignId]" class="summary-link">Ver Detalles</a>
                 }
               </div>
-              <a [routerLink]="['/players']" class="summary-link">Ver Lista</a>
             </div>
           </ion-col>
-          <ion-col size="12" size-md="4">
-            <div class="summary-card">
-              <div class="summary-label">Saldo</div>
-              <div class="summary-value">{{ balance.toFixed(2) }}€</div>
+          <ion-col size="6" size-md="4">
+            <div class="summary-card stats-card">
+              <div class="card-icon-wrapper">
+                <ion-icon name="people-outline"></ion-icon>
+              </div>
+              <div class="card-info">
+                <div class="summary-label">Clientes Totales</div>
+                <div class="summary-value">
+                  @if (loadingPlayerCount) {
+                    ...
+                  } @else if (errorPlayerCount) {
+                    Error
+                  } @else {
+                    {{ playerCount }}
+                  }
+                </div>
+                <a [routerLink]="['/players']" class="summary-link">Ver Lista</a>
+              </div>
+            </div>
+          </ion-col>
+          <ion-col size="6" size-md="4">
+            <div class="summary-card stats-card">
+              <div class="card-icon-wrapper">
+                <ion-icon name="wallet-outline"></ion-icon>
+              </div>
+              <div class="card-info">
+                <div class="summary-label">Saldo</div>
+                <div class="summary-value">{{ balance.toFixed(2) }}€</div>
+              </div>
             </div>
           </ion-col>
         </ion-row>
 
         <h2 class="section-title">Mis campañas</h2>
         @if (loadingCampaigns) {
-          <ion-spinner name="crescent"></ion-spinner>
+          <div class="loading-container">
+            <ion-spinner name="crescent"></ion-spinner>
+          </div>
         } @else if (errorCampaigns) {
           <p class="text-muted">{{ errorCampaigns }}</p>
         } @else if (campaigns.length === 0) {
-          <p class="text-muted">No has creado ninguna campaña aún.</p>
+          <div class="empty-state-container">
+            <ion-icon name="map-outline" class="empty-icon"></ion-icon>
+            <h3>Tus crónicas te esperan</h3>
+            <p>Aún no has forjado ninguna campaña como Director de Juego.</p>
+            <ion-button color="warning" fill="outline" class="empty-btn" [routerLink]="['/campaigns']">
+              Crear Campaña
+            </ion-button>
+          </div>
         } @else {
           <ion-list class="transparent-list">
             @for (campaign of campaigns; track campaign.id) {
@@ -66,50 +90,65 @@
       <div data-testid="player-dashboard">
         <ion-row class="summary-row" data-testid="player-summary-row">
           <ion-col size="12" size-md="4">
-            <div class="summary-card">
-              <div class="summary-label">Próxima Sesión</div>
-              <div class="summary-value">
-                @if (loadingPlayerSummary) {
-                  ...
-                } @else if (errorPlayerSummary) {
-                  Error
-                } @else {
-                  {{ nextPlayerSessionLabel }}
+            <div class="summary-card next-session-card">
+              <div class="card-icon-wrapper">
+                <ion-icon name="calendar-outline"></ion-icon>
+              </div>
+              <div class="card-info">
+                <div class="summary-label">Próxima Sesión</div>
+                <div class="summary-value">
+                  @if (loadingPlayerSummary) {
+                    ...
+                  } @else if (errorPlayerSummary) {
+                    Error
+                  } @else {
+                    {{ nextPlayerSessionLabel }}
+                  }
+                </div>
+                @if (nextSession?.campaignId) {
+                  <a [routerLink]="['/campaigns', nextSession?.campaignId]" class="summary-link">Ver Detalles</a>
                 }
               </div>
-              @if (nextSession?.campaignId) {
-                <a [routerLink]="['/campaigns', nextSession?.campaignId]" class="summary-link">Ver Detalles</a>
-              }
             </div>
           </ion-col>
-          <ion-col size="12" size-md="4">
-            <div class="summary-card">
-              <div class="summary-label">Campañas Activas</div>
-              <div class="summary-value">
-                @if (loadingPlayerSummary) {
-                  ...
-                } @else if (errorPlayerSummary) {
-                  Error
-                } @else {
-                  {{ activeCampaigns?.activeCampaigns }}
-                }
+          <ion-col size="6" size-md="4">
+            <div class="summary-card stats-card">
+              <div class="card-icon-wrapper">
+                <ion-icon name="map-outline"></ion-icon>
               </div>
-              <a [routerLink]="['/my-campaigns']" class="summary-link">Ver Lista</a>
+              <div class="card-info">
+                <div class="summary-label">Campañas Activas</div>
+                <div class="summary-value">
+                  @if (loadingPlayerSummary) {
+                    ...
+                  } @else if (errorPlayerSummary) {
+                    Error
+                  } @else {
+                    {{ activeCampaigns?.activeCampaigns }}
+                  }
+                </div>
+                <a [routerLink]="['/my-campaigns']" class="summary-link">Ver Lista</a>
+              </div>
             </div>
           </ion-col>
-          <ion-col size="12" size-md="4">
-            <div class="summary-card">
-              <div class="summary-label">Aventureros Activos</div>
-              <div class="summary-value">
-                @if (loadingPlayerSummary) {
-                  ...
-                } @else if (errorPlayerSummary) {
-                  Error
-                } @else {
-                  {{ activeCharacters?.activeCharacters }}
-                }
+          <ion-col size="6" size-md="4">
+            <div class="summary-card stats-card">
+              <div class="card-icon-wrapper">
+                <ion-icon name="accessibility-outline"></ion-icon>
               </div>
-              <a [routerLink]="['/my-characters']" class="summary-link">Ver Lista</a>
+              <div class="card-info">
+                <div class="summary-label">Aventureros Activos</div>
+                <div class="summary-value">
+                  @if (loadingPlayerSummary) {
+                    ...
+                  } @else if (errorPlayerSummary) {
+                    Error
+                  } @else {
+                    {{ activeCharacters?.activeCharacters }}
+                  }
+                </div>
+                <a [routerLink]="['/my-characters']" class="summary-link">Ver Lista</a>
+              </div>
             </div>
           </ion-col>
         </ion-row>
@@ -117,11 +156,20 @@
         <!-- Campaign_List: Mis Campañas Activas (Req 1.1, 1.2, 1.3, 1.4, 2.1–2.6, 4.1, 4.2) -->
         <h2 class="section-title">Mis Campañas Activas</h2>
         @if (loadingPlayerCampaigns) {
-          <ion-spinner name="crescent" data-testid="player-campaigns-spinner"></ion-spinner>
+          <div class="loading-container">
+            <ion-spinner name="crescent" data-testid="player-campaigns-spinner"></ion-spinner>
+          </div>
         } @else if (errorPlayerCampaigns) {
           <p class="text-muted" data-testid="player-campaigns-error">{{ errorPlayerCampaigns }}</p>
         } @else if (playerCampaigns.length === 0) {
-          <p class="text-muted" data-testid="player-campaigns-empty">No estás inscrito en ninguna campaña activa.</p>
+          <div class="empty-state-container" data-testid="player-campaigns-empty">
+            <ion-icon name="skull-outline" class="empty-icon"></ion-icon>
+            <h3>Listos para la aventura</h3>
+            <p>No estás inscrito en ninguna campaña activa en este momento.</p>
+            <ion-button color="warning" fill="outline" class="empty-btn" [routerLink]="['/search-campaigns']">
+              Buscar Campañas
+            </ion-button>
+          </div>
         } @else {
           <ion-list class="transparent-list">
             @for (campaign of playerCampaigns; track campaign.campaignId) {
@@ -130,11 +178,11 @@
                   <h3 class="gold-title">{{ campaign.campaignName }}</h3>
                   <p class="text-muted">{{ campaign.dmName }}</p>
                 </ion-label>
-                <div slot="end">
+                <div slot="end" class="item-session-info">
                   @if (campaign.nextSessionDate) {
-                    <span>{{ formatDate(campaign.nextSessionDate) }}</span>
+                    <span class="session-badge">{{ formatDate(campaign.nextSessionDate) }}</span>
                   } @else {
-                    <span class="text-muted">Sin sesiones</span>
+                    <span class="text-muted no-session">Sin sesiones</span>
                   }
                   <a class="view-link" [routerLink]="['/campaigns', campaign.campaignId]">[Ver]</a>
                 </div>

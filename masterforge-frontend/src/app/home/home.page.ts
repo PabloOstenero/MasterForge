@@ -16,7 +16,7 @@ import { AuthService } from '../services/auth.service';
 import { RoleService } from '../services/role.service';
 import { AsyncPipe } from '@angular/common';
 import { addIcons } from 'ionicons';
-import { add } from 'ionicons/icons';
+import { add, calendarOutline, peopleOutline, walletOutline, mapOutline, accessibilityOutline, skullOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-home',
@@ -93,7 +93,7 @@ export class HomePage implements OnInit {
     private roleService: RoleService,
     private authService: AuthService
   ) {
-    addIcons({ add });
+    addIcons({ add, calendarOutline, peopleOutline, walletOutline, mapOutline, accessibilityOutline, skullOutline });
   }
 
   ngOnInit() {

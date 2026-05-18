@@ -2,212 +2,365 @@
 
 :host {
   display: block;
+  background-color: var(--mf-bg-primary, #121212);
+  min-height: 100%;
 }
 
 .char-sheet-content {
-  background: #121212;
+  background: var(--mf-bg-primary, #121212);
+  min-height: 100%;
+  color: var(--mf-text-primary, #f0e6d3);
 }
 
-.dashboard-title {
-  font-size: 1.6rem;
-  text-transform: none;
-}
-
-.header-toolbar {
-  --background: #121212 !important;
-  border-bottom: 2px solid $accent-gold;
-}
-
-// Thematic titles from character sheet
+// ─── Visual Typography ──────────────────────────────────────────────────────
 .gold-title {
-  color: $accent-gold;
+  color: var(--mf-accent-gold, #c9a84c);
   font-weight: bold;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
+  font-size: 1.05rem;
 }
 
 .section-title {
-  color: $accent-gold;
-  font-size: 1.2rem;
+  color: var(--mf-accent-gold, #c9a84c);
+  font-size: 1.15rem;
+  font-weight: 700;
   text-transform: uppercase;
-  border-bottom: 1px solid rgba($accent-gold, 0.3);
-  padding-bottom: 6px;
-  margin-top: 24px;
-  margin-bottom: 16px;
-}
-
-
-ion-segment-button {
-  --color: #{$text-muted};
-  --color-checked: #{$accent-gold};
-  --indicator-color: #{$accent-gold};
-}
-
-// Summary Stat Cards (from Dashboard image)
-.summary-row {
+  letter-spacing: 1.5px;
+  border-bottom: 2px solid rgba(201, 168, 76, 0.15);
+  padding-bottom: 8px;
+  margin-top: 32px;
   margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 16px;
+    background-color: var(--mf-accent-gold, #c9a84c);
+    border-radius: 2px;
+  }
+}
+
+// ─── Summary Row and Cards Grid ────────────────────────────────────────────
+.summary-row {
+  margin-bottom: 24px;
+  --ion-grid-column-padding: 6px; // tighter spacing on cards
 }
 
 .summary-card {
-  // Anthracite grey surface (#1E1E1E)
-  --background: #1e1e1e !important;
-  background-color: #1e1e1e !important;
-  padding: 16px;
-  border-radius: 8px;
-  border-left: 4px solid $accent-gold;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  background: rgba(30, 30, 30, 0.6) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(201, 168, 76, 0.12);
+  border-left: 4px solid var(--mf-accent-gold, #c9a84c);
+  border-radius: 12px;
+  padding: 16px 20px;
   height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+              border-color 0.25s ease, 
+              box-shadow 0.25s ease;
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 80px;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(201, 168, 76, 0.02));
+    pointer-events: none;
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    border-color: rgba(201, 168, 76, 0.3);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 
+                0 0 15px rgba(201, 168, 76, 0.05);
+  }
+
+  // Curated layout with icons
+  .card-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: rgba(201, 168, 76, 0.08);
+    border: 1px solid rgba(201, 168, 76, 0.15);
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+
+    ion-icon {
+      font-size: 1.4rem;
+      color: var(--mf-accent-gold, #c9a84c);
+    }
+  }
+
+  &:hover .card-icon-wrapper {
+    transform: scale(1.1) rotate(5deg);
+    background: rgba(201, 168, 76, 0.12);
+  }
+
+  .card-info {
+    flex: 1;
+    min-width: 0; // prevent overflow
+    display: flex;
+    flex-direction: column;
+  }
 
   .summary-label {
-    color: $text-muted;
+    color: var(--mf-text-muted, #8c8c8c);
     font-size: 0.75rem;
-    text-transform: none;
-    letter-spacing: 0.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 4px;
   }
 
   .summary-value {
-    color: $text-primary;
-    font-size: 1.4rem;
-    font-weight: bold;
-    margin: 8px 0;
+    color: var(--mf-text-primary, #f0e6d3);
+    font-size: 1.35rem;
+    font-weight: 800;
     letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .summary-link {
-    color: $accent-gold;
-    font-size: 0.8rem;
+    color: var(--mf-accent-gold, #c9a84c);
+    font-size: 0.78rem;
+    font-weight: bold;
     text-decoration: none;
-    cursor: pointer;
-    &:hover { text-decoration: underline; }
+    margin-top: 6px;
+    display: inline-block;
+    align-self: flex-start;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #fff;
+      text-decoration: underline;
+    }
   }
 }
 
-// Custom List Item Style for Dashboard Look
-.skill-item, .list-item-interactive {
-  --background: #1e1e1e !important;
-  --color: #ffffff;
+// ─── Responsive Stats Cards Layout (Mobile sizing tweaks) ──────────────────
+@media (max-width: 767px) {
+  .summary-card {
+    padding: 12px 14px;
+    gap: 10px;
+
+    .card-icon-wrapper {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      
+      ion-icon {
+        font-size: 1.15rem;
+      }
+    }
+
+    .summary-value {
+      font-size: 1.1rem;
+    }
+
+    .summary-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.5px;
+    }
+  }
+  
+  .next-session-card {
+    .summary-value {
+      font-size: 1.25rem;
+    }
+  }
+}
+
+// ─── List and Items Styling ────────────────────────────────────────────────
+.transparent-list {
+  background: transparent !important;
+  --background: transparent !important;
+  padding: 0;
+}
+
+.skill-item {
+  --background: rgba(30, 30, 30, 0.45) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
+              border-color 0.2s ease;
+  overflow: hidden;
+  
+  &:hover {
+    --background: rgba(30, 30, 30, 0.7) !important;
+    border-color: rgba(201, 168, 76, 0.2);
+    transform: translateX(4px);
+  }
 }
 
 .list-item-interactive {
   --padding-start: 16px;
   --padding-end: 16px;
-  background: #1e1e1e !important;
-  --padding-top: 12px;
-  --padding-bottom: 12px;
-  margin-bottom: 2px;
-  
+  --padding-top: 10px;
+  --padding-bottom: 10px;
+
   .view-link {
-    color: $accent-gold;
+    color: var(--mf-accent-gold, #c9a84c);
     font-size: 0.85rem;
+    font-weight: 700;
     letter-spacing: 0.5px;
-    cursor: pointer;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: color 0.2s;
+    margin-left: 12px;
+
+    &:hover {
+      color: #fff;
+    }
   }
 }
 
-ion-card {
-  --background: #1e1e1e !important;
-  --color: #ffffff;
-  border-radius: 10px;
-  margin-inline: 0;
-
-  ion-card-title {
-    color: $accent-gold;
-    font-size: 1.1rem;
-  }
-}
-
-// Inline forms
-.inline-form {
-  padding: 16px;
-  background: #1e1e1e !important;
-  border: 1px solid rgba($accent-gold, 0.2);
-  border-radius: 8px;
-  margin: 10px 0;
+.item-session-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   
-  ion-input,
-  ion-select {
-    --background: #121212;
-    --color: #{$text-primary};
-    --placeholder-color: #{$text-muted};
-    margin-bottom: 12px;
+  .session-badge {
+    background: rgba(201, 168, 76, 0.1);
+    color: var(--mf-accent-gold, #c9a84c);
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+  
+  .no-session {
+    font-size: 0.78rem;
   }
 }
 
-// List styling similar to character sheet
-.transparent-list {
-  background: transparent !important;
-  --background: transparent !important;
+// ─── Modern Empty States ────────────────────────────────────────────────────
+.empty-state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px;
+  background: rgba(30, 30, 30, 0.3);
+  border: 1px dashed rgba(201, 168, 76, 0.2);
+  border-radius: 12px;
+  margin: 20px 0;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+
+  .empty-icon {
+    font-size: 3rem;
+    color: rgba(201, 168, 76, 0.4);
+    margin-bottom: 16px;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    animation: pulseIcon 3s infinite ease-in-out;
+  }
+
+  h3 {
+    color: var(--mf-text-primary, #f0e6d3);
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+  }
+
+  p {
+    color: var(--mf-text-muted, #8c8c8c);
+    font-size: 0.88rem;
+    max-width: 320px;
+    margin: 0 0 20px 0;
+    line-height: 1.4;
+  }
+
+  .empty-btn {
+    --border-radius: 8px;
+    --border-width: 1px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    letter-spacing: 0.8px;
+    margin: 0;
+  }
 }
 
-.skill-item {
-  --background: #1e1e1e !important;
-  --border-radius: 8px;
-  margin-bottom: 8px;
-  border: 1px solid rgba($text-muted, 0.1);
-  transition: transform 0.2s ease;
+@keyframes pulseIcon {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.05); opacity: 0.6; color: var(--mf-accent-gold, #c9a84c); }
 }
 
-// Error messages
-.error-msg {
-  color: $accent-crimson;
-  font-size: 0.875rem;
-  margin: 4px 0;
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+  
+  ion-spinner {
+    --color: var(--mf-accent-gold, #c9a84c);
+  }
 }
 
-// Subscription badges
-.badge-pro {
-  --background: #{$accent-gold};
-  --color: #{$bg-primary};
-}
-
-.badge-free {
-  --background: transparent;
-  --color: #{$text-muted};
-  border: 1px solid $text-muted;
-}
-
-// Muted helper text
-.text-muted {
-  color: $text-muted;
-}
-
-.session-count {
-  color: $accent-gold;
-  font-weight: 500;
-}
-
-.character-card {
-  border-right: 3px solid $accent-gold;
-}
-
-// FAB Styling
+// ─── FAB: Forjar ────────────────────────────────────────────────────────────
 .fab-container {
   position: fixed;
-  bottom: 24px;
-  right: 40px;
+  bottom: 28px;
+  right: 28px;
   display: flex;
   flex-direction: column;
   align-items: center;
   z-index: 50;
+  pointer-events: none; // prevent swallowing clicks around fab
 }
 
 .forge-fab {
-  --background: #{$accent-gold};
-  --color: #{$bg-primary};
-  --box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  pointer-events: auto;
+  --background: var(--mf-accent-gold, #c9a84c);
+  --color: var(--mf-bg-primary, #121212);
+  --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 
+                0 0 15px rgba(201, 168, 76, 0.2);
   width: 56px;
   height: 56px;
+  margin-bottom: 4px;
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  
+  &:hover {
+    transform: scale(1.1) rotate(90deg);
+  }
 }
 
 .fab-label {
-  color: $accent-gold;
-  font-size: 0.75rem;
-  font-weight: bold;
+  color: var(--mf-accent-gold, #c9a84c);
+  font-size: 0.7rem;
+  font-weight: 800;
   text-transform: uppercase;
-  margin-top: 4px;
+  letter-spacing: 1px;
   text-align: center;
-  width: 56px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  pointer-events: auto;
+}
+
+// ─── Miscellaneous Cleanups ─────────────────────────────────────────────────
+.text-muted {
+  color: var(--mf-text-muted, #8c8c8c);
 }
 
 .dashboard-container {
   width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
