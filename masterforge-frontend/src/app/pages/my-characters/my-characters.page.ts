@@ -4,12 +4,13 @@ import { Router, RouterLink } from '@angular/router';
 import {
   IonSpinner, IonCard, IonCardContent,
   IonButton, IonText, IonRow, IonCol, IonIcon,
+  IonContent,
   AlertController, ToastController
 } from '@ionic/angular/standalone';
 import { ApiService, CharacterSummary } from '../../services/api';
 import { AuthService } from '../../services/auth.service';
 import { addIcons } from 'ionicons';
-import { trashOutline, addOutline } from 'ionicons/icons';
+import { trashOutline, addOutline, shieldHalfOutline, sparklesOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-my-characters',
@@ -21,7 +22,8 @@ import { trashOutline, addOutline } from 'ionicons/icons';
     RouterLink,
     IonSpinner,
     IonCard, IonCardContent,
-    IonButton, IonText, IonRow, IonCol, IonIcon
+    IonButton, IonText, IonRow, IonCol, IonIcon,
+    IonContent
   ],
 })
 export class MyCharactersPage implements OnInit {
@@ -38,7 +40,7 @@ export class MyCharactersPage implements OnInit {
     private alertController: AlertController,
     private toastController: ToastController
   ) {
-    addIcons({ 'trash-outline': trashOutline, 'add-outline': addOutline });
+    addIcons({ trashOutline, addOutline, shieldHalfOutline, sparklesOutline });
   }
 
   ngOnInit(): void {

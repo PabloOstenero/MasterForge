@@ -1,73 +1,87 @@
 <div class="page-container ion-padding">
 
-  @if (loading) {
-    <div class="loading-container" data-testid="loading-container">
-      <ion-spinner name="crescent" data-testid="spinner"></ion-spinner>
-      <p class="loading-text">Cargando tus personajes...</p>
+  <!-- ── Page header ── -->
+  <div class="page-header">
+    <div class="header-title">
+      <ion-icon name="shield-half-outline" class="page-icon"></ion-icon>
+      <h1 class="page-title">Personajes</h1>
     </div>
-  }
+    @if (!loading && !error && characters.length > 0) {
+      <div class="limit-counter" [class.warning]="limitReached">
+        {{ characters.length }}{{ isPro ? '' : '/3' }} Personajes
+      </div>
+    }
+  </div>
 
+  <!-- ── Error ── -->
   @if (error && !loading) {
     <div class="error-container" data-testid="error-container">
-      <ion-text color="danger">
-        <p class="error-msg">{{ error }}</p>
-      </ion-text>
-      <ion-button expand="block" (click)="loadCharacters()" data-testid="retry-btn">
+      <p class="error-msg">{{ error }}</p>
+      <ion-button class="btn-gold" (click)="loadCharacters()" data-testid="retry-btn">
         Reintentar
       </ion-button>
     </div>
   }
 
-  @if (!loading && !error && characters.length === 0) {
-    <div class="empty-container" data-testid="empty-container">
-      <p class="empty-msg">Aún no has creado ningún personaje.</p>
-      <ion-button expand="block" routerLink="/forge-character" data-testid="create-char-btn">
-        Crear Personaje
-      </ion-button>
+  <!-- ── Loading ── -->
+  @if (loading) {
+    <div class="loading-container" data-testid="loading-container">
+      <ion-spinner name="crescent" data-testid="spinner"></ion-spinner>
+      <p class="loading-text">Reuniendo héroes...</p>
     </div>
   }
 
-  @if (!loading && !error && characters.length > 0) {
-    <div class="list-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h2 class="section-title" style="margin: 0;">Mis Personajes</h2>
-      <div class="limit-counter" [class.warning]="limitReached" style="font-weight: 600; color: #8C8C8C;">
-        {{ characters.length }}{{ isPro ? '' : '/3' }} Personajes
+  <!-- ── Content ── -->
+  @if (!loading && !error) {
+    
+    @if (limitReached) {
+      <div class="limit-banner">
+        <div class="banner-text">
+          <strong>Límite alcanzado</strong>
+          <span>Libera espacio o pásate a PRO para crear más personajes.</span>
+        </div>
+        <ion-button size="small" class="btn-warning" routerLink="/config">VER PLANES</ion-button>
       </div>
-    </div>
+    }
 
-    <div class="limit-banner" *ngIf="limitReached" style="background: rgba(201, 168, 76, 0.1); border: 1px solid #C9A84C; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-      <div class="banner-text">
-        <strong style="color: #C9A84C; display: block;">Límite alcanzado</strong>
-        <span style="font-size: 0.85rem; color: #8C8C8C;">Libera espacio o pásate a PRO para crear más personajes.</span>
-      </div>
-      <ion-button size="small" color="warning" routerLink="/config">VER PLANES</ion-button>
-    </div>
-
-    <ion-row data-testid="characters-list">
+    <div class="characters-list" data-testid="characters-list">
       @for (char of characters; track char.id) {
-        <ion-col size="12" size-md="6">
-          <ion-card class="character-card" data-testid="character-card" style="position: relative;">
-            <ion-card-content (click)="goToSheet(char.id)" style="cursor: pointer;">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <strong class="gold-title" style="font-size: 1.2rem;">{{ char.name }}</strong>
-                <ion-button fill="clear" color="danger" (click)="$event.stopPropagation(); confirmDelete(char)" style="margin: -10px -10px 0 0;">
-                   <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
-                </ion-button>
-              </div>
-              <p>{{ char.dndClass }}{{ char.subclass ? ' (' + char.subclass + ')' : '' }} — Nivel {{ char.level }}</p>
-              <p class="text-muted">{{ char.dndRace }}</p>
-            </ion-card-content>
-          </ion-card>
-        </ion-col>
+        <div class="character-card" data-testid="character-card" (click)="goToSheet(char.id)">
+          <div class="character-card__header">
+            <strong class="character-card__name">{{ char.name }}</strong>
+            <button class="btn-delete" (click)="$event.stopPropagation(); confirmDelete(char)" aria-label="Borrar personaje">
+              <ion-icon name="trash-outline"></ion-icon>
+            </button>
+          </div>
+          
+          <div class="character-card__badges">
+            <span class="badge badge--level">Niv. {{ char.level }}</span>
+            <span class="badge badge--class">{{ char.dndClass }}{{ char.subclass ? ' — ' + char.subclass : '' }}</span>
+            <span class="badge badge--race">{{ char.dndRace }}</span>
+          </div>
+        </div>
+      } @empty {
+        <div class="empty-container" data-testid="empty-container">
+          <div class="empty-glow"></div>
+          <ion-icon name="shield-half-outline" class="empty-icon"></ion-icon>
+          <h3 class="empty-title">Tu taberna está vacía</h3>
+          <p class="empty-msg">Tus héroes aún no se han reunido. Entra en la forja, esculpe sus rasgos, elige sus orígenes y da vida a tu primera leyenda.</p>
+          
+          <ion-button class="btn-gold empty-cta" routerLink="/forge-character" data-testid="create-char-btn">
+            <ion-icon name="sparkles-outline" slot="start"></ion-icon>
+            Forjar primera leyenda
+          </ion-button>
+        </div>
       }
 
-      <ion-col size="12" size-md="6" *ngIf="!limitReached">
-        <ion-card class="create-card" routerLink="/forge-character" style="border: 2px dashed #333; background: transparent; height: 100px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-          <ion-icon name="add-outline" style="font-size: 2rem; color: #333;"></ion-icon>
-          <span style="color: #333; font-weight: 600; margin-left: 10px;">Nuevo Personaje</span>
-        </ion-card>
-      </ion-col>
-    </ion-row>
+      @if (characters.length > 0 && !limitReached) {
+        <div class="create-card" routerLink="/forge-character">
+          <ion-icon name="add-outline" class="create-icon"></ion-icon>
+          <span class="create-text">Nuevo Personaje</span>
+        </div>
+      }
+    </div>
+
   }
 
 </div>
