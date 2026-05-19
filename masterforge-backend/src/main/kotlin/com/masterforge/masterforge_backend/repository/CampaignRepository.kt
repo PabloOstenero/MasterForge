@@ -60,6 +60,8 @@ interface CampaignRepository : JpaRepository<Campaign, UUID> {
         SELECT c.* FROM campaigns c
         INNER JOIN users u ON c.owner_id = u.id
         WHERE c.visibility = 'PUBLIC'
+        AND c.owner_id != CAST(:userId AS uuid)
+        AND c.id NOT IN (SELECT ce.campaign_id FROM campaign_enrollments ce WHERE ce.user_id = CAST(:userId AS uuid))
         AND (CAST(:searchText AS text) IS NULL OR 
              LOWER(c.name) LIKE LOWER(CONCAT('%', CAST(:searchText AS text), '%')) OR 
              LOWER(c.description) LIKE LOWER(CONCAT('%', CAST(:searchText AS text), '%')) OR
@@ -76,6 +78,8 @@ interface CampaignRepository : JpaRepository<Campaign, UUID> {
         SELECT COUNT(*) FROM campaigns c
         INNER JOIN users u ON c.owner_id = u.id
         WHERE c.visibility = 'PUBLIC'
+        AND c.owner_id != CAST(:userId AS uuid)
+        AND c.id NOT IN (SELECT ce.campaign_id FROM campaign_enrollments ce WHERE ce.user_id = CAST(:userId AS uuid))
         AND (CAST(:searchText AS text) IS NULL OR 
              LOWER(c.name) LIKE LOWER(CONCAT('%', CAST(:searchText AS text), '%')) OR 
              LOWER(c.description) LIKE LOWER(CONCAT('%', CAST(:searchText AS text), '%')) OR
@@ -96,6 +100,7 @@ interface CampaignRepository : JpaRepository<Campaign, UUID> {
         @Param("minPlayers") minPlayers: Int?,
         @Param("maxPlayers") maxPlayers: Int?,
         @Param("availableOnly") availableOnly: Boolean,
+        @Param("userId") userId: UUID,
         pageable: Pageable
     ): Page<Campaign>
     

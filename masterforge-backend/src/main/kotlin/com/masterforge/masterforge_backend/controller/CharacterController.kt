@@ -49,6 +49,19 @@ class CharacterController(
     private val characterClassLevelRepository: CharacterClassLevelRepository
 ) {
 
+    private fun validateOwnerOrDm(character: Character) {
+        val authName = SecurityContextHolder.getContext().authentication?.name
+            ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required")
+        val authenticatedUserId = UUID.fromString(authName)
+
+        val isOwner = character.user.id == authenticatedUserId
+        val isCampaignDm = character.campaign?.owner?.id == authenticatedUserId
+
+        if (!isOwner && !isCampaignDm) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to view or modify this character")
+        }
+    }
+
     @GetMapping
     @Transactional // Ensure lazy-loaded relationships are fetched for DTO mapping
     fun getAllCharacters(): List<CharacterResponseDto> {
@@ -187,6 +200,8 @@ class CharacterController(
             return ResponseEntity.notFound().build()
         }
         val character = characterOptional.get()
+        validateOwnerOrDm(character)
+
         val spells = characterSpellRepository.findByCharacterId(id)
         return ResponseEntity.ok(CharacterResponseDto.fromEntity(character, spells))
     }
@@ -202,6 +217,7 @@ class CharacterController(
     ): ResponseEntity<List<SpellDto>> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        validateOwnerOrDm(character)
         
         // Resolve target class
         val targetClass = if (classId != null) {
@@ -284,6 +300,7 @@ class CharacterController(
     fun addSpell(@PathVariable id: UUID, @RequestBody dto: AddSpellDto): ResponseEntity<CharacterResponseDto> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        validateOwnerOrDm(character)
         val spell = spellRepository.findById(dto.spellId)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Spell not found") }
         
@@ -322,6 +339,7 @@ class CharacterController(
     fun removeSpell(@PathVariable id: UUID, @PathVariable characterSpellId: Int): ResponseEntity<CharacterResponseDto> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        validateOwnerOrDm(character)
         
         val charSpell = characterSpellRepository.findById(characterSpellId).orElse(null)
         if (charSpell != null && getKnowledgeStyle(character) == "LEARNED") {
@@ -347,6 +365,7 @@ class CharacterController(
     fun removeUnpreparedSpells(@PathVariable id: UUID): ResponseEntity<CharacterResponseDto> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        validateOwnerOrDm(character)
 
         characterSpellRepository.deleteByCharacterIdAndIsPreparedFalse(id)
 
@@ -360,6 +379,7 @@ class CharacterController(
     fun toggleSpellPrepare(@PathVariable id: UUID, @PathVariable characterSpellId: Int): ResponseEntity<CharacterResponseDto> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        validateOwnerOrDm(character)
         val charSpell = characterSpellRepository.findById(characterSpellId)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character spell not found") }
         
@@ -376,6 +396,7 @@ class CharacterController(
     fun syncClassSpells(@PathVariable id: UUID): ResponseEntity<CharacterResponseDto> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        validateOwnerOrDm(character)
         val className = character.dndClass.name
         val knownSpellIds = characterSpellRepository.findByCharacterId(id).map { it.spell.id }.toSet()
         
@@ -531,11 +552,34 @@ class CharacterController(
         return ResponseEntity.ok(CharacterResponseDto.fromEntity(saved))
     }
 
+    @DeleteMapping("/{characterId}/campaign")
+    @Transactional
+    fun removeCharacterFromCampaign(
+        @PathVariable characterId: UUID
+    ): ResponseEntity<CharacterResponseDto> {
+        val authName = SecurityContextHolder.getContext().authentication?.name
+            ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required")
+        val authenticatedUserId = UUID.fromString(authName)
+
+        val character = characterRepository.findById(characterId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+
+        if (character.user.id != authenticatedUserId) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this character")
+        }
+
+        val updated = character.copy(campaign = null)
+        val saved = characterRepository.save(updated)
+        return ResponseEntity.ok(CharacterResponseDto.fromEntity(saved))
+    }
+
+
     @PutMapping("/{id}")
     @Transactional // Ensure lazy-loaded relationships are fetched for DTO mapping
     fun updateCharacter(@PathVariable id: UUID, @RequestBody dto: CharacterDto): CharacterResponseDto {
         val existingCharacter = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found with id $id") }
+        validateOwnerOrDm(existingCharacter)
 
         val user = userRepository.findById(dto.user.id)
             .orElseThrow { ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found with id ${dto.user.id}") }
@@ -616,6 +660,7 @@ class CharacterController(
     fun updateHp(@PathVariable id: UUID, @RequestBody dto: HpUpdateDto): ResponseEntity<Void> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found with id $id") }
+        validateOwnerOrDm(character)
 
         val updatedCharacter = character.copy(currentHp = dto.currentHp)
         characterRepository.save(updatedCharacter)
@@ -628,6 +673,7 @@ class CharacterController(
     fun updateTempHp(@PathVariable id: UUID, @RequestBody dto: TempHpUpdateDto): ResponseEntity<CharacterResponseDto> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        validateOwnerOrDm(character)
         val updated = character.copy(tempHp = dto.tempHp)
         return ResponseEntity.ok(CharacterResponseDto.fromEntity(characterRepository.save(updated)))
     }
@@ -637,6 +683,7 @@ class CharacterController(
     fun updateBonusMaxHp(@PathVariable id: UUID, @RequestBody dto: BonusMaxHpUpdateDto): ResponseEntity<CharacterResponseDto> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        validateOwnerOrDm(character)
         
         val oldMax = calculateEffectiveMaxHp(character)
         val updated = character.copy(bonusMaxHp = dto.bonusMaxHp)
@@ -654,6 +701,7 @@ class CharacterController(
     fun updateSpellSlots(@PathVariable id: UUID, @RequestBody dto: SpellSlotsUpdateDto): ResponseEntity<Void> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found with id $id") }
+        validateOwnerOrDm(character)
 
         val updatedCharacter = character.copy(spellSlots = dto.spellSlots)
         characterRepository.save(updatedCharacter)
@@ -666,6 +714,7 @@ class CharacterController(
     fun updateMoney(@PathVariable id: UUID, @RequestBody dto: MoneyUpdateDto): ResponseEntity<Void> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found with id $id") }
+        validateOwnerOrDm(character)
 
         val updatedCharacter = character.copy(
             cp = dto.cp,
@@ -684,6 +733,7 @@ class CharacterController(
     fun toggleEquip(@PathVariable id: UUID, @PathVariable slotId: Int): ResponseEntity<CharacterResponseDto> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        validateOwnerOrDm(character)
 
         val index = character.inventory.indexOfFirst { it.id == slotId }
         if (index == -1) {
@@ -712,6 +762,7 @@ class CharacterController(
     fun toggleAttune(@PathVariable id: UUID, @PathVariable slotId: Int): ResponseEntity<CharacterResponseDto> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        validateOwnerOrDm(character)
 
         val index = character.inventory.indexOfFirst { it.id == slotId }
         if (index == -1) {
@@ -747,6 +798,7 @@ class CharacterController(
     fun addItemToInventory(@PathVariable id: UUID, @PathVariable itemId: UUID): ResponseEntity<CharacterResponseDto> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        validateOwnerOrDm(character)
         val item = itemRepository.findById(itemId)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Item not found") }
 
@@ -774,6 +826,7 @@ class CharacterController(
     fun useItem(@PathVariable id: UUID, @PathVariable slotId: Int): ResponseEntity<CharacterResponseDto> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        validateOwnerOrDm(character)
         
         val index = character.inventory.indexOfFirst { it.id == slotId }
         if (index == -1) throw ResponseStatusException(HttpStatus.NOT_FOUND, "Slot not found")
@@ -795,6 +848,7 @@ class CharacterController(
     fun removeInventoryItem(@PathVariable id: UUID, @PathVariable slotId: Int): ResponseEntity<CharacterResponseDto> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        validateOwnerOrDm(character)
         
         val index = character.inventory.indexOfFirst { it.id == slotId }
         if (index == -1) throw ResponseStatusException(HttpStatus.NOT_FOUND, "Slot not found")
@@ -816,6 +870,7 @@ class CharacterController(
     fun updateHitDice(@PathVariable id: UUID, @RequestBody dto: HitDiceUpdateDto): ResponseEntity<Void> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found with id $id") }
+        validateOwnerOrDm(character)
 
         val updatedCharacter = character.copy(hitDiceSpent = dto.hitDiceSpent)
         characterRepository.save(updatedCharacter)
@@ -828,6 +883,7 @@ class CharacterController(
     fun performLongRest(@PathVariable id: UUID): ResponseEntity<CharacterResponseDto> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        validateOwnerOrDm(character)
 
         // Recalcular HP efectiva (Base + Bono + Items + Retroactiva por CON)
         val restoredHp = calculateEffectiveMaxHp(character)
@@ -901,6 +957,7 @@ class CharacterController(
     fun levelUp(@PathVariable id: UUID, @RequestBody dto: LevelUpDto): ResponseEntity<CharacterResponseDto> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        validateOwnerOrDm(character)
 
         // 1. Identify which class/subclass is being leveled and validate feature choices
         val targetClass = if (dto.multiclassId != null) {
@@ -1064,6 +1121,7 @@ class CharacterController(
     fun updateResourceCounters(@PathVariable id: UUID, @RequestBody dto: ResourceCountersUpdateDto): ResponseEntity<Void> {
         val character = characterRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found with id $id") }
+        validateOwnerOrDm(character)
         characterRepository.save(character.copy(resourceCounters = dto.resourceCounters))
         return ResponseEntity.ok().build()
     }
@@ -1071,9 +1129,9 @@ class CharacterController(
     @DeleteMapping("/{id}")
     @Transactional
     fun deleteCharacter(@PathVariable id: UUID): ResponseEntity<Void> {
-        if (!characterRepository.existsById(id)) {
-            return ResponseEntity.notFound().build()
-        }
+        val character = characterRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Character not found") }
+        validateOwnerOrDm(character)
         characterRepository.deleteById(id)
         return ResponseEntity.noContent().build()
     }

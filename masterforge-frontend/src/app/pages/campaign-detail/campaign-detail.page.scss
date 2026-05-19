@@ -611,3 +611,120 @@
     font-weight: 600;
   }
 }
+
+.btn-remove-char {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid rgba($accent-crimson, 0.25);
+  background: rgba($accent-crimson, 0.04);
+  color: #ff6b6b;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  margin-left: 10px;
+  flex-shrink: 0;
+
+  ion-icon {
+    font-size: 0.95rem;
+  }
+
+  &:hover:not(:disabled) {
+    background: rgba($accent-crimson, 0.18);
+    border-color: $accent-crimson;
+    box-shadow: 0 0 6px rgba($accent-crimson, 0.15);
+    transform: scale(1.08);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.92);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-spinner {
+    width: 14px;
+    height: 14px;
+    --color: #ff6b6b;
+  }
+}
+
+.btn-view-sheet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid rgba($accent-gold, 0.25);
+  background: rgba($accent-gold, 0.04);
+  color: $accent-gold;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  margin-left: 10px;
+  flex-shrink: 0;
+
+  ion-icon {
+    font-size: 0.95rem;
+  }
+
+  &:hover {
+    background: rgba($accent-gold, 0.18);
+    border-color: $accent-gold;
+    box-shadow: 0 0 6px rgba($accent-gold, 0.15);
+    transform: scale(1.08);
+  }
+
+  &:active {
+    transform: scale(0.92);
+  }
+}
+
+.btn-kick-player {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid rgba($accent-crimson, 0.25);
+  background: rgba($accent-crimson, 0.04);
+  color: #ff6b6b;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  margin-left: 10px;
+  flex-shrink: 0;
+
+  ion-icon {
+    font-size: 0.95rem;
+  }
+
+  &:hover:not(:disabled) {
+    background: rgba($accent-crimson, 0.18);
+    border-color: $accent-crimson;
+    box-shadow: 0 0 6px rgba($accent-crimson, 0.15);
+    transform: scale(1.08);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.92);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-spinner {
+    width: 14px;
+    height: 14px;
+    --color: #ff6b6b;
+  }
+}
+
+

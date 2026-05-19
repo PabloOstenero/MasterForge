@@ -73,7 +73,8 @@ class CampaignSearchController(
             page = page,
             size = size
         )
-        val result = campaignSearchService.searchCampaigns(criteria)
+        val userId = getCurrentUserId()
+        val result = campaignSearchService.searchCampaigns(criteria, userId)
         return ResponseEntity.ok(result)
     }
 

@@ -303,6 +303,21 @@ levelUpCharacter(characterId: string, data: { hpBonus: number, statChanges: any,
     );
   }
 
+  // Unassign a character from a campaign
+  unassignCharacterFromCampaign(characterId: string): Observable<CharacterResponseDto> {
+    return this.http.delete<CharacterResponseDto>(
+      `${this.apiUrl}/characters/${characterId}/campaign`
+    );
+  }
+
+  // Kick a player from a campaign
+  kickPlayerFromCampaign(campaignId: string, playerId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.apiUrl}/campaigns/${campaignId}/players/${playerId}`
+    );
+  }
+
+
   // Create a character spell association
   createCharacterSpell(dto: { characterId: string; spellId: string; isPrepared: boolean }): Observable<any> {
     return this.http.post(`${this.apiUrl}/character-spells`, dto);

@@ -11,12 +11,17 @@ import com.masterforge.masterforge_backend.repository.CampaignRepository
 import com.masterforge.masterforge_backend.repository.CharacterRepository
 import com.masterforge.masterforge_backend.repository.SessionRepository
 import com.masterforge.masterforge_backend.repository.UserRepository
+import com.masterforge.masterforge_backend.repository.PaymentTransactionRepository
+import com.masterforge.masterforge_backend.model.entity.PaymentStatus
+import com.masterforge.masterforge_backend.model.entity.PaymentTransaction
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
+import com.masterforge.masterforge_backend.service.NotificationService
+import com.masterforge.masterforge_backend.service.PushNotificationService
 import org.springframework.web.server.ResponseStatusException
 import java.math.BigDecimal
 import java.time.ZoneOffset
@@ -30,7 +35,10 @@ class CampaignController(
     private val userRepository: UserRepository,
     private val sessionRepository: SessionRepository,
     private val campaignEnrollmentRepository: CampaignEnrollmentRepository,
-    private val characterRepository: CharacterRepository
+    private val characterRepository: CharacterRepository,
+    private val notificationService: NotificationService,
+    private val pushNotificationService: PushNotificationService,
+    private val paymentTransactionRepository: PaymentTransactionRepository
 ) {
 
     @GetMapping
@@ -165,8 +173,55 @@ class CampaignController(
         val sessions = sessionRepository.findByCampaignIdOrderByScheduledDateAsc(id)
         sessionRepository.deleteAll(sessions)
 
-        // 4. Delete all enrollments belonging to this campaign
+        // 4. Delete all enrollments belonging to this campaign (with 14-day refund window)
         val enrollments = campaignEnrollmentRepository.findByCampaignId(id)
+        for (enrollment in enrollments) {
+            val isEligibleForRefund = enrollment.paymentTransactionId != null &&
+                    campaign.joinPrice > BigDecimal.ZERO &&
+                    enrollment.enrolledAt.isAfter(java.time.LocalDateTime.now().minusDays(14))
+
+            if (isEligibleForRefund) {
+                val player = enrollment.user
+                val dm = campaign.owner
+
+                // Process balance adjustments (guaranteed to succeed even if DM's balance goes negative)
+                dm.balance = dm.balance.subtract(campaign.joinPrice)
+                player.balance = player.balance.add(campaign.joinPrice)
+
+                userRepository.save(dm)
+                userRepository.save(player)
+
+                // Log debit for DM
+                paymentTransactionRepository.save(
+                    PaymentTransaction(
+                        userId = dm.id!!,
+                        relatedUserId = player.id!!,
+                        campaignId = id,
+                        amount = campaign.joinPrice,
+                        status = PaymentStatus.COMPLETED,
+                        transactionType = "CAMPAIGN_DELETE_REFUND",
+                        isCredit = false,
+                        processedAt = java.time.LocalDateTime.now(),
+                        mockCardLastFour = "WALLET"
+                    )
+                )
+
+                // Log credit for Player
+                paymentTransactionRepository.save(
+                    PaymentTransaction(
+                        userId = player.id!!,
+                        relatedUserId = dm.id!!,
+                        campaignId = id,
+                        amount = campaign.joinPrice,
+                        status = PaymentStatus.COMPLETED,
+                        transactionType = "CAMPAIGN_DELETE_REFUND",
+                        isCredit = true,
+                        processedAt = java.time.LocalDateTime.now(),
+                        mockCardLastFour = "WALLET"
+                    )
+                )
+            }
+        }
         campaignEnrollmentRepository.deleteAll(enrollments)
 
         // 4. Delete the campaign itself
@@ -282,5 +337,111 @@ class CampaignController(
             )
         }
         return ResponseEntity.ok(dtos)
+    }
+
+    @DeleteMapping("/{id}/players/{playerId}")
+    @Transactional
+    @CacheEvict(value = ["campaignSearch"], allEntries = true)
+    fun kickPlayer(
+        @PathVariable id: UUID,
+        @PathVariable playerId: UUID
+    ): ResponseEntity<Void> {
+        val campaign = campaignRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign not found") }
+
+        // Authorization check: Only the owner (DM) can kick players
+        val authentication = SecurityContextHolder.getContext().authentication
+            ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated")
+        val currentUserId = UUID.fromString(authentication.name)
+        if (campaign.owner.id != currentUserId) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Only the Game Master can kick players from this campaign")
+        }
+
+        // Find the enrollment
+        val enrollment = campaignEnrollmentRepository.findByCampaignId(id)
+            .find { it.user.id == playerId }
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Player is not enrolled in this campaign")
+
+        // 1. Unassign all characters owned by this player that are assigned to this campaign
+        val playerCharacters = characterRepository.findByCampaignIdAndUserId(id, playerId)
+        for (character in playerCharacters) {
+            val updatedChar = character.copy(campaign = null)
+            characterRepository.save(updatedChar)
+        }
+
+        // 1.5. Check refund eligibility (enrolled in last 14 days AND campaign has a joinPrice and transaction was paid)
+        val isEligibleForRefund = enrollment.paymentTransactionId != null &&
+                campaign.joinPrice > BigDecimal.ZERO &&
+                enrollment.enrolledAt.isAfter(java.time.LocalDateTime.now().minusDays(14))
+
+        if (isEligibleForRefund) {
+            val player = enrollment.user
+            val dm = campaign.owner
+
+            // Process balance adjustments (guaranteed to succeed even if DM's balance goes negative)
+            dm.balance = dm.balance.subtract(campaign.joinPrice)
+            player.balance = player.balance.add(campaign.joinPrice)
+
+            userRepository.save(dm)
+            userRepository.save(player)
+
+            // Log debit for DM
+            paymentTransactionRepository.save(
+                PaymentTransaction(
+                    userId = dm.id!!,
+                    relatedUserId = player.id!!,
+                    campaignId = id,
+                    amount = campaign.joinPrice,
+                    status = PaymentStatus.COMPLETED,
+                    transactionType = "CAMPAIGN_KICK_REFUND",
+                    isCredit = false,
+                    processedAt = java.time.LocalDateTime.now(),
+                    mockCardLastFour = "WALLET"
+                )
+            )
+
+            // Log credit for Player
+            paymentTransactionRepository.save(
+                PaymentTransaction(
+                    userId = player.id!!,
+                    relatedUserId = dm.id!!,
+                    campaignId = id,
+                    amount = campaign.joinPrice,
+                    status = PaymentStatus.COMPLETED,
+                    transactionType = "CAMPAIGN_KICK_REFUND",
+                    isCredit = true,
+                    processedAt = java.time.LocalDateTime.now(),
+                    mockCardLastFour = "WALLET"
+                )
+            )
+        }
+
+        // 2. Delete the enrollment
+        campaignEnrollmentRepository.delete(enrollment)
+
+        // 3. Notify the player that they were removed
+        val player = enrollment.user
+        val title = "Retirado de Campaña: ${campaign.name}"
+        val message = "El Director de Juego te ha retirado de la campaña '${campaign.name}'."
+        val link = "/my-campaigns"
+
+        try {
+            // Create in-app notification
+            notificationService.createNotification(player, title, message, link)
+
+            // Send push notification
+            if (player.sessionNotifications && player.fcmTokens.isNotEmpty()) {
+                pushNotificationService.sendPushNotification(
+                    player.fcmTokens,
+                    title,
+                    message,
+                    mapOf("campaignId" to id.toString(), "type" to "CAMPAIGN_KICK")
+                )
+            }
+        } catch (e: Exception) {
+            // Log/ignore notification failures so player removal still succeeds
+        }
+
+        return ResponseEntity.noContent().build()
     }
 }

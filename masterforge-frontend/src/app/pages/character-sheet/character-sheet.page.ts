@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonSegment, IonSegmentButton, IonLabel,
   IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
@@ -256,7 +256,9 @@ export class CharacterSheetPage implements OnInit {
     private alertController: AlertController,
     private actionSheetController: ActionSheetController,
     private modalController: ModalController,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private location: Location,
+    private router: Router
   ) {
     addIcons({
       'stats-chart': statsChart,
@@ -649,9 +651,23 @@ export class CharacterSheetPage implements OnInit {
         this.calculateResourcePools();
         this.calculateAutomatedEffects();
       },
-      error: (err) => {
+      error: async (err) => {
         console.error("Critical error loading character:", err);
-        alert("Could not connect to MasterForge database.");
+        if (err.status === 403) {
+          const accessAlert = await this.alertController.create({
+            header: 'Acceso Denegado',
+            message: 'No tienes permiso para ver esta hoja de personaje.',
+            buttons: [{
+              text: 'Aceptar',
+              handler: () => {
+                this.router.navigate(['/my-characters']);
+              }
+            }]
+          });
+          await accessAlert.present();
+        } else {
+          alert("Could not connect to MasterForge database.");
+        }
       }
     });
   }

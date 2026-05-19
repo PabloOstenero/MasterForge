@@ -281,6 +281,22 @@
                       </div>
                       <p class="player-email" data-testid="player-email">{{ player.email }}</p>
                     </ion-label>
+                    @if (isOwner) {
+                      <button
+                        class="btn-kick-player"
+                        (click)="kickPlayer(player.id, player.name)"
+                        [disabled]="kickingPlayerMap[player.id]"
+                        title="Expulsar jugador de la campaña"
+                        data-testid="btn-kick-player"
+                        slot="end"
+                      >
+                        @if (kickingPlayerMap[player.id]) {
+                          <ion-spinner name="crescent" class="btn-spinner"></ion-spinner>
+                        } @else {
+                          <ion-icon name="person-remove-outline"></ion-icon>
+                        }
+                      </button>
+                    }
                   </ion-item>
                 }
               </ion-list>
@@ -326,6 +342,31 @@
                                 Nivel <span data-testid="char-level">{{ char.level }}</span>
                               </span>
                             </ion-label>
+                            @if (canViewSheet(player.id)) {
+                              <button
+                                class="btn-view-sheet"
+                                (click)="goToSheet(char.id)"
+                                title="Ver Hoja de Personaje"
+                                data-testid="btn-view-sheet"
+                              >
+                                <ion-icon name="eye-outline"></ion-icon>
+                              </button>
+                            }
+                            @if (isCurrentUser(player.id)) {
+                              <button
+                                class="btn-remove-char"
+                                (click)="unassignCharacter(char.id)"
+                                [disabled]="unassigningCharacterMap[char.id]"
+                                title="Retirar de la campaña"
+                                data-testid="btn-remove-character"
+                              >
+                                @if (unassigningCharacterMap[char.id]) {
+                                  <ion-spinner name="crescent" class="btn-spinner"></ion-spinner>
+                                } @else {
+                                  <ion-icon name="trash-outline"></ion-icon>
+                                }
+                              </button>
+                            }
                           </ion-item>
                         }
                       </ion-list>
@@ -361,29 +402,35 @@
                 <a [routerLink]="['/forge-character']">Forjar Personaje</a>.
               </p>
             } @else {
-              <select
-                [(ngModel)]="selectedCharacterId"
-                class="form-input"
-                data-testid="select-character"
-              >
-                <option value="" disabled selected>Selecciona un personaje</option>
-                @for (char of playerCharacters; track char.id) {
-                  <option [value]="char.id">{{ char.name }} — {{ char.dndClass }} Nv.{{ char.level }}</option>
-                }
-              </select>
+              @if (unassignedPlayerCharacters.length === 0) {
+                <p class="empty-msg" data-testid="all-characters-assigned">
+                  Todos tus personajes ya están asignados a esta campaña.
+                </p>
+              } @else {
+                <select
+                  [(ngModel)]="selectedCharacterId"
+                  class="form-input"
+                  data-testid="select-character"
+                >
+                  <option value="" disabled selected>Selecciona un personaje</option>
+                  @for (char of unassignedPlayerCharacters; track char.id) {
+                    <option [value]="char.id">{{ char.name }} — {{ char.dndClass }} Nv.{{ char.level }}</option>
+                  }
+                </select>
 
-              <button
-                class="btn-primary"
-                (click)="assignCharacter()"
-                [disabled]="assigningCharacter || !selectedCharacterId"
-                data-testid="btn-assign-character"
-              >
-                @if (assigningCharacter) {
-                  <ion-spinner name="crescent" class="btn-spinner"></ion-spinner>
-                } @else {
-                  Asignar
-                }
-              </button>
+                <button
+                  class="btn-primary"
+                  (click)="assignCharacter()"
+                  [disabled]="assigningCharacter || !selectedCharacterId"
+                  data-testid="btn-assign-character"
+                >
+                  @if (assigningCharacter) {
+                    <ion-spinner name="crescent" class="btn-spinner"></ion-spinner>
+                  } @else {
+                    Asignar
+                  }
+                </button>
+              }
             }
           }
 

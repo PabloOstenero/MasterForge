@@ -14,7 +14,7 @@ import {
 } from '@ionic/angular/standalone';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
-import { arrowBackOutline, calendarOutline, cashOutline, peopleOutline, personOutline, addOutline, listOutline, checkmarkCircleOutline, skullOutline, logoDiscord, lockOpenOutline, lockClosedOutline, trashOutline, pencilOutline } from 'ionicons/icons';
+import { arrowBackOutline, calendarOutline, cashOutline, peopleOutline, personOutline, addOutline, listOutline, checkmarkCircleOutline, skullOutline, logoDiscord, lockOpenOutline, lockClosedOutline, trashOutline, pencilOutline, eyeOutline, personRemoveOutline } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
 import { catchError, of } from 'rxjs';
 import {
@@ -81,6 +81,8 @@ export class CampaignDetailPage implements OnInit {
   assigningCharacter = false;
   assignSuccess = false;
   errorAssign: string | null = null;
+  unassigningCharacterMap: { [key: string]: boolean } = {};
+  kickingPlayerMap: { [key: string]: boolean } = {};
 
   constructor(
     private route: ActivatedRoute,
@@ -91,7 +93,7 @@ export class CampaignDetailPage implements OnInit {
     private authService: AuthService,
     private router: Router,
   ) {
-    addIcons({ arrowBackOutline, calendarOutline, cashOutline, peopleOutline, personOutline, addOutline, listOutline, checkmarkCircleOutline, skullOutline, logoDiscord, lockOpenOutline, lockClosedOutline, trashOutline, pencilOutline });
+    addIcons({ arrowBackOutline, calendarOutline, cashOutline, peopleOutline, personOutline, addOutline, listOutline, checkmarkCircleOutline, skullOutline, logoDiscord, lockOpenOutline, lockClosedOutline, trashOutline, pencilOutline, eyeOutline, personRemoveOutline });
   }
 
   ngOnInit(): void {
@@ -396,6 +398,85 @@ export class CampaignDetailPage implements OnInit {
       error: (err) => {
         console.error('Error al eliminar la campaña:', err);
         alert(err?.error?.message ?? 'No se pudo eliminar la campaña.');
+      }
+    });
+  }
+
+  isCurrentUser(userId: string): boolean {
+    return this.authService.getUserIdFromToken() === userId;
+  }
+
+  canViewSheet(playerId: string): boolean {
+    return this.isOwner || this.isCurrentUser(playerId);
+  }
+
+  goToSheet(characterId: string): void {
+    this.router.navigate(['/character-sheet', characterId]);
+  }
+
+  get unassignedPlayerCharacters(): CharacterSummary[] {
+    const assignedIds = new Set(
+      this.players.flatMap(p => p.characters.map(c => c.id))
+    );
+    return this.playerCharacters.filter(c => !assignedIds.has(c.id));
+  }
+
+  unassignCharacter(characterId: string): void {
+    const confirmUnassign = window.confirm(
+      '¿Estás seguro de que deseas retirar este personaje de la campaña?'
+    );
+    if (!confirmUnassign) return;
+
+    const campaignId = this.route.snapshot.paramMap.get('id')!;
+    this.unassigningCharacterMap[characterId] = true;
+
+    this.api.unassignCharacterFromCampaign(characterId).pipe(
+      catchError((err) => {
+        alert(err?.error?.message ?? 'Error al retirar el personaje.');
+        this.unassigningCharacterMap[characterId] = false;
+        return of(null);
+      }),
+    ).subscribe((result) => {
+      this.unassigningCharacterMap[characterId] = false;
+      if (result !== null) {
+        if (this.selectedCharacterId === characterId) {
+          this.selectedCharacterId = '';
+        }
+        // Reload players list
+        this.api.getCampaignPlayers(campaignId).pipe(
+          catchError(() => of(null)),
+        ).subscribe((data) => {
+          if (data !== null) this.players = data;
+        });
+      }
+    });
+  }
+
+  kickPlayer(playerId: string, playerName: string): void {
+    const confirmKick = window.confirm(
+      `¿Estás seguro de que deseas expulsar a "${playerName}" de esta campaña? Todos sus personajes inscritos en la misma serán retirados.`
+    );
+    if (!confirmKick) return;
+
+    const campaignId = this.route.snapshot.paramMap.get('id')!;
+    this.kickingPlayerMap[playerId] = true;
+
+    this.api.kickPlayerFromCampaign(campaignId, playerId).pipe(
+      catchError((err) => {
+        alert(err?.error?.message ?? 'Error al expulsar al jugador.');
+        this.kickingPlayerMap[playerId] = false;
+        return of(null);
+      })
+    ).subscribe((result) => {
+      this.kickingPlayerMap[playerId] = false;
+      if (result !== null) {
+        alert('Jugador expulsado correctamente de la campaña.');
+        // Reload players list
+        this.api.getCampaignPlayers(campaignId).pipe(
+          catchError(() => of(null)),
+        ).subscribe((data) => {
+          if (data !== null) this.players = data;
+        });
       }
     });
   }
