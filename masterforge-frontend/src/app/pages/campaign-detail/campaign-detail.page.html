@@ -1,11 +1,38 @@
 <ion-content class="campaign-detail-content">
   <div class="page-container ion-padding">
 
-    <!-- ── Back navigation ── -->
-    <button class="back-btn" (click)="goBack()" data-testid="btn-back" aria-label="Volver">
-      <ion-icon name="arrow-back-outline"></ion-icon>
-      <span>Volver</span>
-    </button>
+    <div class="header-controls">
+      <!-- ── Back navigation ── -->
+      <button class="back-btn" (click)="goBack()" data-testid="btn-back" aria-label="Volver">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+        <span>Volver</span>
+      </button>
+
+      <!-- ── DM Settings ── -->
+      @if (isOwner) {
+        <div class="dm-actions">
+          <button 
+            [class]="campaign?.enrollmentClosed ? 'btn-settings btn-settings--closed' : 'btn-settings btn-settings--open'"
+            (click)="toggleEnrollment()" 
+            data-testid="btn-toggle-enrollment"
+            [title]="campaign?.enrollmentClosed ? 'Abrir inscripción para nuevos jugadores' : 'Cerrar inscripción (impedir nuevos jugadores)'"
+          >
+            <ion-icon [name]="campaign?.enrollmentClosed ? 'lock-closed-outline' : 'lock-open-outline'"></ion-icon>
+            <span>{{ campaign?.enrollmentClosed ? 'Inscripción Cerrada' : 'Inscripción Abierta' }}</span>
+          </button>
+          
+          <button 
+            class="btn-settings btn-settings--delete"
+            (click)="deleteCampaign()" 
+            data-testid="btn-delete-campaign"
+            title="Eliminar campaña permanentemente"
+          >
+            <ion-icon name="trash-outline"></ion-icon>
+            <span>Eliminar Campaña</span>
+          </button>
+        </div>
+      }
+    </div>
 
     <!-- ══════════════════════════════════════════════════════════════════════
          TOP SECTION — Campaign info (always visible)
@@ -47,6 +74,17 @@
             <ion-icon name="cash-outline"></ion-icon>
             {{ formatPrice(campaign.joinPrice) }}
           </span>
+          @if (campaign.enrollmentClosed) {
+            <span class="meta-item meta-item--closed">
+              <ion-icon name="lock-closed-outline"></ion-icon>
+              Inscripción Cerrada
+            </span>
+          } @else {
+            <span class="meta-item meta-item--open">
+              <ion-icon name="lock-open-outline"></ion-icon>
+              Inscripción Abierta
+            </span>
+          }
         </div>
       </div>
     }
@@ -83,6 +121,14 @@
         <!-- Session creation form (DM only) -->
         @if (!isPlayer && showSessionForm) {
           <form [formGroup]="sessionForm" (ngSubmit)="submitSession()" class="session-form" data-testid="session-creation-form">
+
+            <h4 class="form-title">
+              @if (editingSessionId) {
+                Editar Sesión
+              } @else {
+                Programar Nueva Sesión
+              }
+            </h4>
 
             <div class="form-field">
               <label class="form-label" for="session-name">Nombre de la sesión</label>
@@ -128,7 +174,11 @@
                 @if (submittingSession) {
                   <ion-spinner name="crescent" class="btn-spinner"></ion-spinner>
                 } @else {
-                  Crear
+                  @if (editingSessionId) {
+                    Guardar
+                  } @else {
+                    Crear
+                  }
                 }
               </button>
               <button
@@ -161,11 +211,20 @@
             <ion-list class="sessions-list" data-testid="sessions-list">
               @for (session of sessions; track session.id) {
                 <ion-item class="session-item" data-testid="session-item">
-                  <ion-label>
+                  <ion-label class="session-info">
                     <span class="session-name" data-testid="session-name">{{ session.name }}</span>
                     <span class="session-date" data-testid="session-date">{{ formatDate(session.scheduledDate) }}</span>
-                    <span class="session-price" data-testid="session-price">{{ formatPrice(session.price) }}</span>
                   </ion-label>
+                  @if (isOwner) {
+                    <div class="session-actions" slot="end">
+                      <button class="session-action-btn edit-btn" (click)="editSession(session)" aria-label="Editar sesión" data-testid="btn-editar-sesion">
+                        <ion-icon name="pencil-outline"></ion-icon>
+                      </button>
+                      <button class="session-action-btn delete-btn" (click)="deleteSession(session)" aria-label="Eliminar sesión" data-testid="btn-eliminar-sesion">
+                        <ion-icon name="trash-outline"></ion-icon>
+                      </button>
+                    </div>
+                  }
                 </ion-item>
               }
             </ion-list>

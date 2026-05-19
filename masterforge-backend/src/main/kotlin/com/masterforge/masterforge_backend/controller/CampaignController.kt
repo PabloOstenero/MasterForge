@@ -11,6 +11,7 @@ import com.masterforge.masterforge_backend.repository.CampaignRepository
 import com.masterforge.masterforge_backend.repository.CharacterRepository
 import com.masterforge.masterforge_backend.repository.SessionRepository
 import com.masterforge.masterforge_backend.repository.UserRepository
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
@@ -85,7 +86,8 @@ class CampaignController(
             owner = owner,
             maxPlayers = campaignDto.maxPlayers,
             joinPrice = campaignDto.joinPrice,
-            visibility = visibility
+            visibility = visibility,
+            enrollmentClosed = campaignDto.enrollmentClosed
         )
 
         return campaignRepository.save(campaign)
@@ -131,18 +133,65 @@ class CampaignController(
             owner = owner,
             maxPlayers = dto.maxPlayers,
             joinPrice = dto.joinPrice,
-            visibility = visibility
+            visibility = visibility,
+            enrollmentClosed = dto.enrollmentClosed
         )
         return campaignRepository.save(updatedCampaign)
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
+    @CacheEvict(value = ["campaignSearch"], allEntries = true)
     fun deleteCampaign(@PathVariable id: UUID): ResponseEntity<Void> {
-        if (!campaignRepository.existsById(id)) {
-            return ResponseEntity.notFound().build()
+        val campaign = campaignRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign not found") }
+        
+        // Authorization check: Only the owner (DM) can delete the campaign
+        val authentication = SecurityContextHolder.getContext().authentication
+            ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated")
+        val currentUserId = UUID.fromString(authentication.name)
+        if (campaign.owner.id != currentUserId) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Only the Game Master can delete this campaign")
         }
-        campaignRepository.deleteById(id)
+
+        // 1. Unassign all characters associated with this campaign
+        val characters = characterRepository.findByCampaignId(id)
+        for (character in characters) {
+            val updatedChar = character.copy(campaign = null)
+            characterRepository.save(updatedChar)
+        }
+
+        // 2. Delete all sessions belonging to this campaign
+        val sessions = sessionRepository.findByCampaignIdOrderByScheduledDateAsc(id)
+        sessionRepository.deleteAll(sessions)
+
+        // 4. Delete all enrollments belonging to this campaign
+        val enrollments = campaignEnrollmentRepository.findByCampaignId(id)
+        campaignEnrollmentRepository.deleteAll(enrollments)
+
+        // 4. Delete the campaign itself
+        campaignRepository.delete(campaign)
         return ResponseEntity.noContent().build()
+    }
+
+    @PutMapping("/{id}/toggle-enrollment")
+    @Transactional
+    @CacheEvict(value = ["campaignSearch"], allEntries = true)
+    fun toggleEnrollment(@PathVariable id: UUID): ResponseEntity<Campaign> {
+        val campaign = campaignRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign not found") }
+        
+        // Authorization check: Only the owner (DM) can toggle enrollment
+        val authentication = SecurityContextHolder.getContext().authentication
+            ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated")
+        val currentUserId = UUID.fromString(authentication.name)
+        if (campaign.owner.id != currentUserId) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Only the Game Master can toggle enrollment")
+        }
+
+        val updatedCampaign = campaign.copy(enrollmentClosed = !campaign.enrollmentClosed)
+        val saved = campaignRepository.save(updatedCampaign)
+        return ResponseEntity.ok(saved)
     }
 
     @PutMapping("/{id}/combat-state")
@@ -189,8 +238,7 @@ class CampaignController(
                 scheduledDate = session.scheduledDate
                     .toInstant()
                     .atOffset(ZoneOffset.UTC)
-                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-                price = session.price
+                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
             )
         }
         return ResponseEntity.ok(dtos)

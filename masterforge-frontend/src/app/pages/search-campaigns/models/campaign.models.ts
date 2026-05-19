@@ -107,6 +107,8 @@ export interface Campaign {
   joinPrice: number;
   /** Visibility level controlling who can discover this campaign. */
   visibility: CampaignVisibility;
+  /** Whether enrollment is closed for new players. */
+  enrollmentClosed?: boolean;
   /** Timestamp when the campaign was created. */
   createdAt: Date;
   /** Timestamp of the last campaign update. */

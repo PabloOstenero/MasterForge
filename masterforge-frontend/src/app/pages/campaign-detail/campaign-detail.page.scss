@@ -119,24 +119,67 @@
   margin-bottom: 6px;
 
   ion-label {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
     padding: 10px 0;
   }
 }
 
-.session-date {
-  color: $text-primary;
-  font-size: 0.9rem;
+.session-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.session-price {
-  color: $accent-gold;
-  font-weight: 600;
-  font-size: 0.88rem;
-  flex-shrink: 0;
+.session-date {
+  color: $text-muted;
+  font-size: 0.82rem;
+}
+
+.session-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 12px;
+}
+
+.session-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+
+  ion-icon {
+    font-size: 1.05rem;
+  }
+
+  &.edit-btn {
+    color: $accent-gold;
+    border-color: rgba($accent-gold, 0.25);
+    background: rgba($accent-gold, 0.04);
+
+    &:hover {
+      background: rgba($accent-gold, 0.16);
+      border-color: $accent-gold;
+      box-shadow: 0 0 8px rgba($accent-gold, 0.15);
+    }
+  }
+
+  &.delete-btn {
+    color: #ff6b6b;
+    border-color: rgba($accent-crimson, 0.25);
+    background: rgba($accent-crimson, 0.04);
+
+    &:hover {
+      background: rgba($accent-crimson, 0.18);
+      border-color: $accent-crimson;
+      box-shadow: 0 0 8px rgba($accent-crimson, 0.15);
+    }
+  }
 }
 
 // ── Segment ───────────────────────────────────────────────────────────────────
@@ -480,4 +523,91 @@
   font-size: 0.92rem;
   display: block;
   margin-bottom: 2px;
+}
+
+// ── DM Controls & Status Badges ───────────────────────────────────────────────
+.header-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  .back-btn {
+    margin-bottom: 0;
+  }
+}
+
+.dm-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-settings {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: 1px solid transparent;
+
+  ion-icon {
+    font-size: 1rem;
+  }
+
+  &--open {
+    background: rgba($accent-gold, 0.12);
+    border-color: rgba($accent-gold, 0.4);
+    color: $accent-gold;
+
+    &:hover {
+      background: rgba($accent-gold, 0.2);
+      border-color: $accent-gold;
+      box-shadow: 0 0 10px rgba($accent-gold, 0.15);
+    }
+  }
+
+  &--closed {
+    background: rgba(#e28743, 0.12);
+    border-color: rgba(#e28743, 0.4);
+    color: #e28743;
+
+    &:hover {
+      background: rgba(#e28743, 0.2);
+      border-color: #e28743;
+      box-shadow: 0 0 10px rgba(#e28743, 0.15);
+    }
+  }
+
+  &--delete {
+    background: rgba($accent-crimson, 0.12);
+    border-color: rgba($accent-crimson, 0.4);
+    color: #ff6b6b;
+
+    &:hover {
+      background: rgba($accent-crimson, 0.25);
+      border-color: $accent-crimson;
+      box-shadow: 0 0 10px rgba($accent-crimson, 0.2);
+    }
+  }
+}
+
+.meta-item {
+  &--open {
+    color: #63d471;
+    font-weight: 600;
+  }
+
+  &--closed {
+    color: #e28743;
+    font-weight: 600;
+  }
 }

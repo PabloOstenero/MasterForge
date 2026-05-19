@@ -14,9 +14,6 @@ import java.util.UUID
 @Repository
 interface CampaignRepository : JpaRepository<Campaign, UUID> {
 
-    @Query("SELECT COUNT(DISTINCT sa.session.campaign.id) FROM SessionAttendee sa WHERE sa.user.email = :email")
-    fun countDistinctCampaignsByUserEmail(@Param("email") email: String): Long
-
     fun findByOwnerId(ownerId: UUID): List<Campaign>
     
     /**
@@ -73,7 +70,7 @@ interface CampaignRepository : JpaRepository<Campaign, UUID> {
         AND (CAST(:minPlayers AS integer) IS NULL OR c.max_players >= CAST(:minPlayers AS integer))
         AND (CAST(:maxPlayers AS integer) IS NULL OR c.max_players <= CAST(:maxPlayers AS integer))
         AND (:availableOnly = false OR 
-             (SELECT COUNT(ce.id) FROM campaign_enrollments ce WHERE ce.campaign_id = c.id) < c.max_players)
+             (c.enrollment_closed = false AND (SELECT COUNT(ce.id) FROM campaign_enrollments ce WHERE ce.campaign_id = c.id) < c.max_players))
         ORDER BY c.id DESC
     """, countQuery = """
         SELECT COUNT(*) FROM campaigns c
@@ -89,7 +86,7 @@ interface CampaignRepository : JpaRepository<Campaign, UUID> {
         AND (CAST(:minPlayers AS integer) IS NULL OR c.max_players >= CAST(:minPlayers AS integer))
         AND (CAST(:maxPlayers AS integer) IS NULL OR c.max_players <= CAST(:maxPlayers AS integer))
         AND (:availableOnly = false OR 
-             (SELECT COUNT(ce.id) FROM campaign_enrollments ce WHERE ce.campaign_id = c.id) < c.max_players)
+             (c.enrollment_closed = false AND (SELECT COUNT(ce.id) FROM campaign_enrollments ce WHERE ce.campaign_id = c.id) < c.max_players))
     """, nativeQuery = true)
     fun searchCampaignsWithFilters(
         @Param("searchText") searchText: String?,

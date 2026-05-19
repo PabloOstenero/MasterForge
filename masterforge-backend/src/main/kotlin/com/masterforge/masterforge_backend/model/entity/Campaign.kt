@@ -40,6 +40,9 @@ data class Campaign(
     @Column(name = "visibility", nullable = false)
     val visibility: CampaignVisibility,
 
+    @Column(name = "enrollment_closed", nullable = false, columnDefinition = "boolean default false")
+    val enrollmentClosed: Boolean = false,
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "combat_state", columnDefinition = "jsonb")
     val combatState: Map<String, Any>? = null

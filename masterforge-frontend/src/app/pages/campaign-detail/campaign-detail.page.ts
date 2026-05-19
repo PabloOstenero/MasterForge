@@ -14,8 +14,8 @@ import {
 } from '@ionic/angular/standalone';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
+import { arrowBackOutline, calendarOutline, cashOutline, peopleOutline, personOutline, addOutline, listOutline, checkmarkCircleOutline, skullOutline, logoDiscord, lockOpenOutline, lockClosedOutline, trashOutline, pencilOutline } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
-import { arrowBackOutline, calendarOutline, cashOutline, peopleOutline, personOutline, addOutline, listOutline, checkmarkCircleOutline, skullOutline, logoDiscord } from 'ionicons/icons';
 import { catchError, of } from 'rxjs';
 import {
   ApiService,
@@ -69,6 +69,7 @@ export class CampaignDetailPage implements OnInit {
   sessionForm!: FormGroup;
   submittingSession = false;
   errorSession: string | null = null;
+  editingSessionId: string | null = null;
 
   // Role-aware state
   isPlayer = false;
@@ -90,7 +91,7 @@ export class CampaignDetailPage implements OnInit {
     private authService: AuthService,
     private router: Router,
   ) {
-    addIcons({ arrowBackOutline, calendarOutline, cashOutline, peopleOutline, personOutline, addOutline, listOutline, checkmarkCircleOutline, skullOutline, logoDiscord });
+    addIcons({ arrowBackOutline, calendarOutline, cashOutline, peopleOutline, personOutline, addOutline, listOutline, checkmarkCircleOutline, skullOutline, logoDiscord, lockOpenOutline, lockClosedOutline, trashOutline, pencilOutline });
   }
 
   ngOnInit(): void {
@@ -235,6 +236,7 @@ export class CampaignDetailPage implements OnInit {
     this.showSessionForm = false;
     this.sessionForm.reset();
     this.errorSession = null;
+    this.editingSessionId = null;
   }
 
   private reloadSessions(campaignId: string): void {
@@ -262,14 +264,15 @@ export class CampaignDetailPage implements OnInit {
     this.submittingSession = true;
     this.errorSession = null;
 
-    this.api.createSession({
-      name,
-      scheduledDate: new Date(scheduledDate).toISOString(),
-      price: 0,
-      campaignId,
-    }).pipe(
+    const dateISO = new Date(scheduledDate).toISOString();
+
+    const request$ = this.editingSessionId
+      ? this.api.updateSession(this.editingSessionId, { name, scheduledDate: dateISO, campaignId })
+      : this.api.createSession({ name, scheduledDate: dateISO, campaignId });
+
+    request$.pipe(
       catchError((err) => {
-        this.errorSession = err?.error?.message ?? 'Error al crear la sesión.';
+        this.errorSession = err?.error?.message ?? 'Error al guardar la sesión.';
         this.submittingSession = false;
         return of(null);
       }),
@@ -278,7 +281,41 @@ export class CampaignDetailPage implements OnInit {
         this.showSessionForm = false;
         this.sessionForm.reset();
         this.submittingSession = false;
+        this.editingSessionId = null;
         this.reloadSessions(campaignId);
+      }
+    });
+  }
+
+  editSession(session: SessionSummaryDto): void {
+    this.editingSessionId = session.id;
+    const rawDate = new Date(session.scheduledDate);
+    const tzOffset = rawDate.getTimezoneOffset() * 60000;
+    const localISOTime = (new Date(rawDate.getTime() - tzOffset)).toISOString().slice(0, 16);
+
+    this.sessionForm.patchValue({
+      name: session.name,
+      scheduledDate: localISOTime
+    });
+    this.showSessionForm = true;
+    this.errorSession = null;
+  }
+
+  deleteSession(session: SessionSummaryDto): void {
+    const confirmDelete = window.confirm(
+      `¿Estás seguro de que deseas eliminar la sesión "${session.name}" programada para el ${this.formatDate(session.scheduledDate)}? Esta acción es irreversible.`
+    );
+    if (!confirmDelete) return;
+
+    this.api.deleteSession(session.id).subscribe({
+      next: () => {
+        alert('Sesión eliminada correctamente.');
+        const campaignId = this.route.snapshot.paramMap.get('id')!;
+        this.reloadSessions(campaignId);
+      },
+      error: (err) => {
+        console.error('Error al eliminar la sesión:', err);
+        alert(err?.error?.message ?? 'No se pudo eliminar la sesión.');
       }
     });
   }
@@ -305,5 +342,44 @@ export class CampaignDetailPage implements OnInit {
 
   get hasAnyCharacters(): boolean {
     return this.players.some((p) => p.characters.length > 0);
+  }
+
+  get isOwner(): boolean {
+    if (!this.campaign) return false;
+    const currentUserId = this.authService.getUserIdFromToken();
+    return this.campaign.owner.id === currentUserId;
+  }
+
+  toggleEnrollment(): void {
+    if (!this.campaign) return;
+    const campaignId = this.campaign.id;
+    this.api.toggleEnrollment(campaignId).subscribe({
+      next: (updatedCampaign) => {
+        this.campaign = updatedCampaign;
+      },
+      error: (err) => {
+        console.error('Error al cambiar estado de inscripción:', err);
+        alert(err?.error?.message ?? 'No se pudo cambiar el estado de inscripción');
+      }
+    });
+  }
+
+  deleteCampaign(): void {
+    if (!this.campaign) return;
+    const confirmDelete = window.confirm(
+      `¿Estás seguro de que deseas eliminar la campaña "${this.campaign.name}"? Esta acción es irreversible y se perderán todos los datos y personajes asociados.`
+    );
+    if (!confirmDelete) return;
+
+    this.api.deleteCampaign(this.campaign.id).subscribe({
+      next: () => {
+        alert('Campaña eliminada correctamente.');
+        this.router.navigate(['/my-campaigns']);
+      },
+      error: (err) => {
+        console.error('Error al eliminar la campaña:', err);
+        alert(err?.error?.message ?? 'No se pudo eliminar la campaña.');
+      }
+    });
   }
 }

@@ -13,7 +13,6 @@ import com.masterforge.masterforge_backend.model.entity.User
 import com.masterforge.masterforge_backend.repository.CampaignEnrollmentRepository
 import com.masterforge.masterforge_backend.repository.CampaignRepository
 import com.masterforge.masterforge_backend.repository.CharacterRepository
-import com.masterforge.masterforge_backend.repository.SessionAttendeeRepository
 import com.masterforge.masterforge_backend.repository.SessionRepository
 import com.masterforge.masterforge_backend.repository.UserRepository
 import org.springframework.http.HttpStatus
@@ -33,7 +32,6 @@ import java.util.UUID
 class UserController(
     private val userRepository: UserRepository,
     private val characterRepository: CharacterRepository,
-    private val sessionAttendeeRepository: SessionAttendeeRepository,
     private val campaignRepository: CampaignRepository,
     private val campaignEnrollmentRepository: CampaignEnrollmentRepository,
     private val sessionRepository: SessionRepository,

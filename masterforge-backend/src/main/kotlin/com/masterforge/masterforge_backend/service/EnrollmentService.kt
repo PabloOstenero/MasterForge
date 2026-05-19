@@ -57,6 +57,14 @@ class EnrollmentService(
             )
         }
 
+        if (campaign.enrollmentClosed) {
+            return EligibilityResultDto(
+                eligible = false,
+                reason = "La inscripción para esta campaña está cerrada",
+                isFull = true
+            )
+        }
+
         val isAlreadyEnrolled = enrollmentRepository.existsByCampaignIdAndUserId(campaignId, userId)
         if (isAlreadyEnrolled) {
             return EligibilityResultDto(

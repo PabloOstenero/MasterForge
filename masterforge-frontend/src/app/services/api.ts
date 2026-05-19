@@ -182,8 +182,18 @@ levelUpCharacter(characterId: string, data: { hpBonus: number, statChanges: any,
   }
 
   // Create a new session
-  createSession(dto: { name: string; scheduledDate: string; price: number; campaignId: string }): Observable<any> {
+  createSession(dto: { name: string; scheduledDate: string; campaignId: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/sessions`, dto);
+  }
+
+  // Update a session (DM only)
+  updateSession(id: string, dto: { name: string; scheduledDate: string; campaignId: string }): Observable<any> {
+    return this.http.put(`${this.apiUrl}/sessions/${id}`, dto);
+  }
+
+  // Delete a session (DM only)
+  deleteSession(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/sessions/${id}`);
   }
 
   // Authenticate user and retrieve JWT token
@@ -303,6 +313,16 @@ levelUpCharacter(characterId: string, data: { hpBonus: number, statChanges: any,
     return this.http.put(`${this.apiUrl}/campaigns/${campaignId}/combat-state`, combatState);
   }
 
+  // Delete campaign (DM only)
+  deleteCampaign(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/campaigns/${id}`);
+  }
+
+  // Toggle enrollment availability (DM only)
+  toggleEnrollment(id: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/campaigns/${id}/toggle-enrollment`, {});
+  }
+
 }
 
 // Interfaces for player summary cards
@@ -398,6 +418,7 @@ export interface CampaignDetailDto {
   maxPlayers: number;
   joinPrice: number;
   visibility: string;
+  enrollmentClosed?: boolean;
   owner: {
     id: string;
     name: string;
@@ -413,7 +434,6 @@ export interface SessionSummaryDto {
   id: string;
   name: string;
   scheduledDate: string;
-  price: number;
 }
 
 // Interface for character assignment response (used in Campaign Detail Page)
