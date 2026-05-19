@@ -95,7 +95,7 @@ class CampaignController(
             maxPlayers = campaignDto.maxPlayers,
             joinPrice = campaignDto.joinPrice,
             visibility = visibility,
-            enrollmentClosed = campaignDto.enrollmentClosed
+            enrollmentClosed = campaignDto.enrollmentClosed ?: false
         )
 
         return campaignRepository.save(campaign)
@@ -142,7 +142,7 @@ class CampaignController(
             maxPlayers = dto.maxPlayers,
             joinPrice = dto.joinPrice,
             visibility = visibility,
-            enrollmentClosed = dto.enrollmentClosed
+            enrollmentClosed = dto.enrollmentClosed ?: false
         )
         return campaignRepository.save(updatedCampaign)
     }

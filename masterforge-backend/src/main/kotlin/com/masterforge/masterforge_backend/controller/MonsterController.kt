@@ -6,6 +6,7 @@ import com.masterforge.masterforge_backend.model.entity.Monster
 import com.masterforge.masterforge_backend.model.entity.User
 import com.masterforge.masterforge_backend.repository.MonsterRepository
 import com.masterforge.masterforge_backend.repository.UserRepository
+import com.masterforge.masterforge_backend.repository.HomebrewCollectionRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -17,13 +18,38 @@ import java.util.UUID
 class MonsterController(
     private val monsterRepository: MonsterRepository,
     private val userRepository: UserRepository,
-    private val homebrewService: com.masterforge.masterforge_backend.service.HomebrewService
+    private val homebrewService: com.masterforge.masterforge_backend.service.HomebrewService,
+    private val homebrewCollectionRepository: HomebrewCollectionRepository
 ) {
 
     @GetMapping
-    fun getAllMonsters(): List<Monster> {
-        return monsterRepository.findAll()
+    fun getAllMonsters(
+        @RequestParam(required = false) search: String?,
+        @RequestParam(required = false) type: String?,
+        @RequestParam(required = false) challengeRating: Double?,
+        @RequestParam(required = false) limit: Int?
+    ): List<Monster> {
+        val currentUserId = SecurityUtils.getCurrentUserId()
+        val matchedMonsters = monsterRepository.searchMonsters(search, type, challengeRating)
+        val ownedMonsterIds = homebrewCollectionRepository.findByUserId(currentUserId)
+            .filter { it.contentType == "MONSTER" }
+            .map { it.contentId }
+            .toSet()
+
+        val filtered = matchedMonsters.filter { monster ->
+            monster.author == null || 
+            monster.author?.id == currentUserId || 
+            ownedMonsterIds.contains(monster.id.toString())
+        }
+
+        val finalLimit = limit ?: 30
+        return if (filtered.size > finalLimit) {
+            filtered.take(finalLimit)
+        } else {
+            filtered
+        }
     }
+
 
     @PostMapping
     fun createMonster(@RequestBody dto: MonsterDto): Monster {

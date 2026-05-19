@@ -201,10 +201,18 @@ levelUpCharacter(characterId: string, data: { hpBonus: number, statChanges: any,
     return this.http.post<{ token: string }>(`${this.apiUrl}/auth/login`, { email, password });
   }
 
-  // Fetch all monsters
-  getMonsters(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/monsters`);
+  // Fetch all monsters with optional filters and limits
+  getMonsters(search?: string, type?: string, challengeRating?: number, limit?: number): Observable<any[]> {
+    let url = `${this.apiUrl}/monsters`;
+    const params: string[] = [];
+    if (search) params.push(`search=${encodeURIComponent(search)}`);
+    if (type) params.push(`type=${encodeURIComponent(type)}`);
+    if (challengeRating !== undefined && challengeRating !== null) params.push(`challengeRating=${challengeRating}`);
+    if (limit !== undefined && limit !== null) params.push(`limit=${limit}`);
+    if (params.length > 0) url += `?${params.join('&')}`;
+    return this.http.get<any[]>(url);
   }
+
 
   // Fetch the unique player count for the authenticated DM
   getPlayerCount(): Observable<{ playerCount: number }> {

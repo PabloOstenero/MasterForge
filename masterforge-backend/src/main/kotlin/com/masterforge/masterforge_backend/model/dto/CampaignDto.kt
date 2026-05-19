@@ -10,6 +10,6 @@ data class CampaignDto(
     val maxPlayers: Int,
     val joinPrice: BigDecimal,
     val visibility: String,
-    val enrollmentClosed: Boolean = false,
+    val enrollmentClosed: Boolean? = false,
     val combatState: Map<String, Any>? = null
 )

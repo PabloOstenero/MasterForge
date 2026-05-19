@@ -5,13 +5,15 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon, IonBadge,
   IonList, IonItem, IonLabel, IonNote, IonButtons, IonBackButton, IonInput,
-  IonModal, IonSearchbar, IonGrid, IonRow, IonCol, IonCard, IonCardContent
+  IonModal, IonSearchbar, IonGrid, IonRow, IonCol, IonCard, IonCardContent,
+  IonSelect, IonSelectOption
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { 
   add, remove, shield, heart, flash, arrowForward, refresh, 
   trash, close, informationCircleOutline, skull, statsChart,
-  addCircle, eyeOutline, handRightOutline, warningOutline, flashOutline
+  addCircle, eyeOutline, handRightOutline, warningOutline, flashOutline,
+  trashOutline
 } from 'ionicons/icons';
 import { ApiService, CampaignPlayerDto, CharacterSimpleDto } from '../../services/api';
 import { AuthService } from '../../services/auth.service';
@@ -30,6 +32,7 @@ interface Participant {
   isTurn: boolean;
   armorClass: number;
   description?: string;
+  hpChangeInput?: number;
 }
 
 @Component({
@@ -41,7 +44,7 @@ interface Participant {
     CommonModule, FormsModule, RouterLink, IonHeader, IonToolbar, IonTitle, IonContent,
     IonButton, IonIcon, IonBadge, IonList, IonItem, IonLabel, IonNote,
     IonButtons, IonBackButton, IonInput, IonModal, IonSearchbar, IonGrid,
-    IonRow, IonCol, IonCard, IonCardContent
+    IonRow, IonCol, IonCard, IonCardContent, IonSelect, IonSelectOption
   ]
 })
 export class CombatTrackerPage implements OnInit {
@@ -55,6 +58,7 @@ export class CombatTrackerPage implements OnInit {
   isMonsterModalOpen = false;
   allMonsters: any[] = [];
   filteredMonsters: any[] = [];
+  searchTerm = '';
   // Campaign Characters
   campaignCharacters: any[] = [];
   isCharacterModalOpen = false;
@@ -86,6 +90,11 @@ export class CombatTrackerPage implements OnInit {
     if (this.campaignId) {
       this.checkAccessAndLoad();
     }
+  }
+
+  openMonsterModal() {
+    this.isMonsterModalOpen = true;
+    this.searchTerm = '';
     this.loadMonsterLibrary();
   }
 
@@ -174,19 +183,17 @@ export class CombatTrackerPage implements OnInit {
   }
 
   loadMonsterLibrary() {
-    this.apiService.getMonsters().subscribe({
+    this.apiService.getMonsters(this.searchTerm || undefined, undefined, undefined, 30).subscribe({
       next: (monsters) => {
-        this.allMonsters = monsters;
         this.filteredMonsters = monsters;
       }
     });
   }
 
   filterMonsters(event: any) {
-    const query = event.detail.value.toLowerCase();
-    this.filteredMonsters = this.allMonsters.filter(m => 
-      m.name.toLowerCase().includes(query) || m.type.toLowerCase().includes(query)
-    );
+    const query = event?.detail?.value || '';
+    this.searchTerm = query;
+    this.loadMonsterLibrary();
   }
 
   addMonsterToCombat(monster: any) {
@@ -230,6 +237,13 @@ export class CombatTrackerPage implements OnInit {
   updateHp(p: Participant, amount: number) {
     p.currentHp = Math.max(0, Math.min(p.maxHp, p.currentHp + amount));
     this.saveCombatState();
+  }
+
+  applyHpChange(p: Participant, sign: number) {
+    const val = p.hpChangeInput;
+    const amount = (val !== undefined && val !== null && !isNaN(val) && val !== 0) ? Math.abs(val) : 1;
+    this.updateHp(p, sign * amount);
+    p.hpChangeInput = undefined;
   }
 
   updateInitiative(p: Participant, value: any) {

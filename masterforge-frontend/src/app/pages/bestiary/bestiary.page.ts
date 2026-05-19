@@ -5,13 +5,14 @@ import { RouterLink } from '@angular/router';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon, IonBadge,
   IonSearchbar, IonGrid, IonRow, IonCol, IonCard, IonCardContent, IonModal,
-  IonSpinner, IonList, IonItem, IonLabel, IonNote, IonButtons, IonFooter
+  IonSpinner, IonList, IonItem, IonLabel, IonNote, IonButtons, IonFooter,
+  IonSelect, IonSelectOption
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { 
   skull, heart, shield, addCircle, eye, search, 
   close, map, informationCircle, arrowForward,
-  star, flash, helpCircle
+  star, flash, helpCircle, trashOutline
 } from 'ionicons/icons';
 import { ApiService, CampaignDetailDto } from '../../services/api';
 import { AuthService } from '../../services/auth.service';
@@ -27,7 +28,7 @@ import { NotificationService } from '../../services/notification.service';
     CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent,
     IonButton, IonIcon, IonBadge, IonSearchbar, IonGrid, IonRow, IonCol,
     IonCard, IonCardContent, IonModal, IonSpinner, IonList, IonItem, 
-    IonLabel, IonNote, IonButtons, IonFooter, RouterLink
+    IonLabel, IonNote, IonButtons, IonFooter, IonSelect, IonSelectOption, RouterLink
   ],
 })
 export class BestiaryPage implements OnInit {
@@ -39,6 +40,50 @@ export class BestiaryPage implements OnInit {
   filteredMonsters: any[] = [];
   loading = true;
   searchTerm = '';
+
+  // Filter lists
+  monsterTypes = [
+    'aberration', 'beast', 'celestial', 'construct', 'dragon', 
+    'elemental', 'fey', 'fiend', 'giant', 'humanoid', 
+    'monstrosity', 'ooze', 'plant', 'undead'
+  ];
+
+  challengeRatings = [
+    { label: 'CR 0', value: 0 },
+    { label: 'CR 1/8', value: 0.125 },
+    { label: 'CR 1/4', value: 0.25 },
+    { label: 'CR 1/2', value: 0.5 },
+    { label: 'CR 1', value: 1 },
+    { label: 'CR 2', value: 2 },
+    { label: 'CR 3', value: 3 },
+    { label: 'CR 4', value: 4 },
+    { label: 'CR 5', value: 5 },
+    { label: 'CR 6', value: 6 },
+    { label: 'CR 7', value: 7 },
+    { label: 'CR 8', value: 8 },
+    { label: 'CR 9', value: 9 },
+    { label: 'CR 10', value: 10 },
+    { label: 'CR 11', value: 11 },
+    { label: 'CR 12', value: 12 },
+    { label: 'CR 13', value: 13 },
+    { label: 'CR 14', value: 14 },
+    { label: 'CR 15', value: 15 },
+    { label: 'CR 16', value: 16 },
+    { label: 'CR 17', value: 17 },
+    { label: 'CR 18', value: 18 },
+    { label: 'CR 19', value: 19 },
+    { label: 'CR 20', value: 20 },
+    { label: 'CR 21', value: 21 },
+    { label: 'CR 22', value: 22 },
+    { label: 'CR 23', value: 23 },
+    { label: 'CR 24', value: 24 },
+    { label: 'CR 30', value: 30 }
+  ];
+
+  selectedType = '';
+  selectedCR: number | null = null;
+  limit = 30;
+  hasMore = true;
 
   // Campaign Selection Modal
   isCampaignModalOpen = false;
@@ -54,7 +99,8 @@ export class BestiaryPage implements OnInit {
     addIcons({ 
       skull, heart, shield, 'add-circle': addCircle, eye, search, 
       close, map, 'information-circle': informationCircle, 
-      'arrow-forward': arrowForward, star, flash, 'help-circle': helpCircle
+      'arrow-forward': arrowForward, star, flash, 'help-circle': helpCircle,
+      'trash-outline': trashOutline
     });
   }
 
@@ -62,12 +108,17 @@ export class BestiaryPage implements OnInit {
     this.loadMonsters();
   }
 
-  loadMonsters() {
-    this.loading = true;
-    this.apiService.getMonsters().subscribe({
+  loadMonsters(append = false) {
+    this.loading = !append;
+    this.apiService.getMonsters(
+      this.searchTerm || undefined,
+      this.selectedType || undefined,
+      this.selectedCR !== null ? this.selectedCR : undefined,
+      this.limit
+    ).subscribe({
       next: (monsters) => {
-        this.allMonsters = monsters;
         this.filteredMonsters = monsters;
+        this.hasMore = monsters.length >= this.limit;
         this.loading = false;
       },
       error: (err) => {
@@ -79,13 +130,28 @@ export class BestiaryPage implements OnInit {
   }
 
   filterMonsters(event: any) {
-    const query = event.detail.value.toLowerCase();
+    const query = event?.detail?.value || '';
     this.searchTerm = query;
-    this.filteredMonsters = this.allMonsters.filter(m => 
-      m.name.toLowerCase().includes(query) || 
-      m.type.toLowerCase().includes(query) ||
-      m.challengeRating.toString().includes(query)
-    );
+    this.limit = 30;
+    this.loadMonsters();
+  }
+
+  onFilterChange() {
+    this.limit = 30;
+    this.loadMonsters();
+  }
+
+  loadMore() {
+    this.limit += 30;
+    this.loadMonsters(true);
+  }
+
+  clearFilters() {
+    this.searchTerm = '';
+    this.selectedType = '';
+    this.selectedCR = null;
+    this.limit = 30;
+    this.loadMonsters();
   }
 
   openDetails(monster: any) {

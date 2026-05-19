@@ -3,19 +3,63 @@
     <ion-title>Bestiario</ion-title>
     <ion-buttons slot="end">
       <ion-badge color="primary" class="ion-margin-end">
-        {{ filteredMonsters.length }} Monstruos
+        {{ filteredMonsters.length }}{{ hasMore ? '+' : '' }} Monstruos
       </ion-badge>
     </ion-buttons>
   </ion-toolbar>
   
   <ion-toolbar color="dark">
     <div class="search-section">
-      <ion-searchbar 
-        placeholder="Buscar por nombre, tipo o CR..." 
-        (ionInput)="filterMonsters($event)" 
-        debounce="300"
-        class="custom-search">
-      </ion-searchbar>
+      <div class="search-bar-row">
+        <ion-searchbar 
+          placeholder="Buscar por nombre..." 
+          [(ngModel)]="searchTerm"
+          (ionInput)="filterMonsters($event)" 
+          debounce="300"
+          class="custom-search">
+        </ion-searchbar>
+      </div>
+      
+      <div class="filters-row">
+        <!-- Type Filter -->
+        <div class="filter-wrapper">
+          <label class="filter-label">Tipo</label>
+          <ion-select 
+            placeholder="Todos" 
+            [(ngModel)]="selectedType" 
+            (ionChange)="onFilterChange()"
+            interface="popover"
+            class="custom-select">
+            <ion-select-option value="">Todos los tipos</ion-select-option>
+            <ion-select-option *ngFor="let type of monsterTypes" [value]="type">
+              {{ type | titlecase }}
+            </ion-select-option>
+          </ion-select>
+        </div>
+
+        <!-- CR Filter -->
+        <div class="filter-wrapper">
+          <label class="filter-label">Desafío (CR)</label>
+          <ion-select 
+            placeholder="Cualquiera" 
+            [(ngModel)]="selectedCR" 
+            (ionChange)="onFilterChange()"
+            interface="popover"
+            class="custom-select">
+            <ion-select-option [value]="null">Cualquier CR</ion-select-option>
+            <ion-select-option *ngFor="let cr of challengeRatings" [value]="cr.value">
+              {{ cr.label }}
+            </ion-select-option>
+          </ion-select>
+        </div>
+
+        <!-- Clear Button -->
+        <div class="clear-button-wrapper" *ngIf="searchTerm || selectedType || selectedCR !== null">
+          <ion-button fill="clear" color="danger" (click)="clearFilters()" class="clear-btn" title="Limpiar Filtros">
+            <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
     </div>
   </ion-toolbar>
 </ion-header>
@@ -41,7 +85,10 @@
       <div class="monster-card" *ngFor="let m of filteredMonsters">
         <div class="card-clickable-area" (click)="openDetails(m)">
           <div class="card-header">
-            <h2>{{ m.name }}</h2>
+            <h2>
+              {{ m.name }}
+              <span class="homebrew-badge" *ngIf="m.author">Homebrew</span>
+            </h2>
             <div class="cr-badge">CR {{ m.challengeRating }}</div>
           </div>
 
@@ -76,6 +123,13 @@
           </ion-button>
         </div>
       </div>
+    </div>
+
+    <!-- Load More Pagination -->
+    <div class="pagination-container ion-text-center" *ngIf="!loading && filteredMonsters.length > 0 && hasMore">
+      <ion-button fill="outline" color="primary" (click)="loadMore()" class="load-more-btn">
+        Cargar más criaturas
+      </ion-button>
     </div>
   </div>
 

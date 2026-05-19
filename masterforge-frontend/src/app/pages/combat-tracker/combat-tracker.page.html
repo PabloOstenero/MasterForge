@@ -1,182 +1,205 @@
-<ion-header class="ion-no-border">
-  <ion-toolbar color="dark">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Rastreador de Combate</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="isCharacterModalOpen = true">
-        <ion-icon name="add-circle" slot="start"></ion-icon>
-        Añadir Personaje
-      </ion-button>
-      <ion-button (click)="isMonsterModalOpen = true">
-        <ion-icon name="skull" slot="start"></ion-icon>
-        Añadir Monstruo
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-
-  <ion-toolbar color="dark" class="tracker-controls">
-    <ion-grid>
-      <ion-row class="ion-align-items-center">
-        <ion-col size="auto">
-          <ion-button color="success" (click)="startCombat()" [disabled]="isCombatActive || participants.length === 0">
-            <ion-icon name="flash" slot="start"></ion-icon>
-            Iniciar
-          </ion-button>
-        </ion-col>
-        <ion-col size="auto">
-          <ion-button color="primary" (click)="nextTurn()" [disabled]="!isCombatActive">
-            <ion-icon name="arrow-forward" slot="start"></ion-icon>
-            Siguiente Turno
-          </ion-button>
-        </ion-col>
-        <ion-col size="auto">
-          <ion-button color="warning" (click)="resetCombat()" [disabled]="!isCombatActive">
-            <ion-icon name="refresh" slot="start"></ion-icon>
-            Reiniciar
-          </ion-button>
-        </ion-col>
-        <ion-col class="ion-text-end">
-          <ion-badge color="tertiary" *ngIf="isCombatActive">
-            Asalto: {{ round }}
-          </ion-badge>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content class="combat-bg">
-  <div class="tracker-container" *ngIf="!accessDenied">
-    <div class="empty-state" *ngIf="participants.length === 0">
-      <ion-icon name="skull"></ion-icon>
-      <h2>El campo de batalla está vacío</h2>
-      <p>Añade monstruos o espera a que se unan los jugadores de la campaña.</p>
-      <ion-button fill="outline" color="light" (click)="isMonsterModalOpen = true">
-        Abrir Bestiario
-      </ion-button>
-    </div>
-
-    <ion-list lines="none" class="participant-list">
-      <div class="participant-card" *ngFor="let p of participants" 
-           [class.active-turn]="p.isTurn" [class.monster-type]="p.type === 'MONSTER'"
-           [class.dead]="p.currentHp <= 0"
-           (click)="p.type === 'MONSTER' ? openMonsterDetails(p) : null">
-        
-        <div class="init-section" (click)="$event.stopPropagation()">
-          <input type="number" [(ngModel)]="p.initiative" (change)="sortParticipants()" 
-                 placeholder="0" class="init-input">
-          <label>INIC</label>
-        </div>
-
-        <div class="info-section">
-          <div class="name-row">
-            <h3>{{ p.name }}</h3>
-            <ion-badge [color]="p.type === 'PLAYER' ? 'primary' : 'danger'" class="type-badge">
-              {{ p.type === 'PLAYER' ? 'P' : 'M' }}
-            </ion-badge>
-            <ion-icon name="eye-outline" *ngIf="p.type === 'MONSTER'" class="view-icon"></ion-icon>
-          </div>
-          <p class="subtitle" *ngIf="p.description">{{ p.description }}</p>
+  @if (!accessDenied) {
+    <div class="tracker-container">
+      
+      <!-- Sticky Control Panel Dock -->
+      <div class="control-panel">
+        <div class="control-grid">
           
-          <div class="stats-row">
-            <div class="stat">
-              <ion-icon name="shield"></ion-icon>
-              <span>{{ p.armorClass }}</span>
-            </div>
-            <div class="stat" *ngIf="p.type === 'MONSTER'">
-              <ion-icon name="stats-chart"></ion-icon>
-              <span>DEX {{ (p.dexMod >= 0 ? '+' : '') + p.dexMod }}</span>
-            </div>
+          <div class="combat-controls">
+            <button class="combat-btn btn-success" (click)="startCombat()" [disabled]="isCombatActive || participants.length === 0">
+              <ion-icon name="flash"></ion-icon>
+              <span>Iniciar</span>
+            </button>
+            <button class="combat-btn btn-primary" (click)="nextTurn()" [disabled]="!isCombatActive">
+              <ion-icon name="arrow-forward"></ion-icon>
+              <span>Siguiente Turno</span>
+            </button>
+            <button class="combat-btn btn-warning" (click)="resetCombat()" [disabled]="!isCombatActive">
+              <ion-icon name="refresh"></ion-icon>
+              <span>Reiniciar</span>
+            </button>
           </div>
-        </div>
 
-        <div class="hp-section" *ngIf="p.type === 'MONSTER'" (click)="$event.stopPropagation()">
-          <div class="hp-controls">
-            <ion-button fill="clear" color="danger" (click)="updateHp(p, -1)">
-              <ion-icon name="remove"></ion-icon>
-            </ion-button>
-            <div class="hp-display">
-              <span class="hp-values">{{ p.currentHp }} / {{ p.maxHp }}</span>
-              <div class="hp-bar">
-                <div class="hp-fill" [style.width.%]="(p.currentHp / p.maxHp) * 100"></div>
-              </div>
-            </div>
-            <ion-button fill="clear" color="success" (click)="updateHp(p, 1)">
-              <ion-icon name="add"></ion-icon>
-            </ion-button>
+          <div class="panel-divider"></div>
+
+          <div class="add-controls">
+            <button class="combat-btn btn-gold" (click)="isCharacterModalOpen = true">
+              <ion-icon name="add-circle"></ion-icon>
+              <span>Añadir Héroe</span>
+            </button>
+            <button class="combat-btn btn-gold" (click)="openMonsterModal()">
+              <ion-icon name="skull"></ion-icon>
+              <span>Añadir Monstruo</span>
+            </button>
           </div>
-        </div>
 
-        <div class="action-section" (click)="$event.stopPropagation()">
-          <ion-button fill="clear" color="medium" (click)="removeParticipant(p.instanceId)">
-            <ion-icon name="trash"></ion-icon>
-          </ion-button>
-        </div>
-
-        <div class="turn-marker" *ngIf="p.isTurn">
-          <ion-icon name="flash"></ion-icon>
+          @if (isCombatActive) {
+            <div class="round-indicator">
+              <span class="round-label">Asalto</span>
+              <span class="round-value">{{ round }}</span>
+            </div>
+          }
         </div>
       </div>
-    </ion-list>
-  </div>
 
-  <!-- Access Denied View -->
-  <div class="access-denied-container" *ngIf="accessDenied">
-    <ion-icon name="warning-outline"></ion-icon>
-    <h2>Acceso Denegado</h2>
-    <p>Solo el Director de Juego de esta campaña puede acceder al Rastreador de Combate.</p>
-    <ion-button fill="outline" color="light" routerLink="/home">
-      Volver al Inicio
-    </ion-button>
-  </div>
+      <!-- Main Battlefield Participant List -->
+      @if (participants.length === 0) {
+        <div class="empty-state">
+          <ion-icon name="skull"></ion-icon>
+          <h2>El campo de batalla está vacío</h2>
+          <p>Convoca héroes de la campaña o abre el bestiario para añadir monstruos al combate.</p>
+          <button class="combat-btn btn-gold-outline" (click)="openMonsterModal()">
+            <ion-icon name="skull"></ion-icon>
+            <span>Abrir Bestiario</span>
+          </button>
+        </div>
+      } @else {
+        <ion-list lines="none" class="participant-list">
+          @for (p of participants; track p.instanceId) {
+            <div class="participant-card" 
+                 [class.active-turn]="p.isTurn" 
+                 [class.monster-type]="p.type === 'MONSTER'"
+                 [class.dead]="p.currentHp <= 0"
+                 (click)="p.type === 'MONSTER' ? openMonsterDetails(p) : null">
+              
+              <!-- Initiative Parchment Plate -->
+              <div class="init-section" (click)="$event.stopPropagation()">
+                <input type="number" [(ngModel)]="p.initiative" (change)="sortParticipants()" 
+                       placeholder="0" class="init-input">
+                <label>INIC</label>
+              </div>
+
+              <!-- Participant Identity & Stats -->
+              <div class="info-section">
+                <div class="name-row">
+                  <h3>{{ p.name }}</h3>
+                  <span class="type-badge" [class.badge-player]="p.type === 'PLAYER'" [class.badge-monster]="p.type === 'MONSTER'">
+                    {{ p.type === 'PLAYER' ? 'Héroe' : 'Monstruo' }}
+                  </span>
+                  @if (p.type === 'MONSTER') {
+                    <ion-icon name="eye-outline" class="view-icon"></ion-icon>
+                  }
+                </div>
+                @if (p.description) {
+                  <p class="subtitle">{{ p.description }}</p>
+                }
+                
+                <div class="stats-row">
+                  <div class="stat">
+                    <ion-icon name="shield"></ion-icon>
+                    <span>CA {{ p.armorClass }}</span>
+                  </div>
+                  @if (p.type === 'MONSTER') {
+                    <div class="stat">
+                      <ion-icon name="stats-chart"></ion-icon>
+                      <span>DES {{ (p.dexMod >= 0 ? '+' : '') + p.dexMod }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Monster HP Controls -->
+              @if (p.type === 'MONSTER') {
+                <div class="hp-section" (click)="$event.stopPropagation()">
+                  <div class="hp-controls">
+                    <button class="hp-action-btn hp-minus" (click)="applyHpChange(p, -1)" aria-label="Disminuir Vida">
+                      <ion-icon name="remove"></ion-icon>
+                    </button>
+                    <div class="hp-display">
+                      <span class="hp-values">{{ p.currentHp }} / {{ p.maxHp }} PV</span>
+                      <div class="hp-bar">
+                        <div class="hp-fill" [style.width.%]="(p.currentHp / p.maxHp) * 100"></div>
+                      </div>
+                    </div>
+                    <button class="hp-action-btn hp-plus" (click)="applyHpChange(p, 1)" aria-label="Aumentar Vida">
+                      <ion-icon name="add"></ion-icon>
+                    </button>
+                    <input type="number" [(ngModel)]="p.hpChangeInput" placeholder="Cant." class="hp-change-input" (click)="$event.stopPropagation()">
+                  </div>
+                </div>
+              }
+
+              <!-- Action Menu (Remove) -->
+              <div class="action-section" (click)="$event.stopPropagation()">
+                <button class="btn-delete" (click)="removeParticipant(p.instanceId)" aria-label="Eliminar Participante">
+                  <ion-icon name="trash"></ion-icon>
+                </button>
+              </div>
+
+              <!-- Active Turn Pulse Glow & Marker -->
+              @if (p.isTurn) {
+                <div class="turn-marker">
+                  <ion-icon name="flash"></ion-icon>
+                </div>
+              }
+            </div>
+          }
+        </ion-list>
+      }
+    </div>
+  } @else {
+    <!-- Access Denied View -->
+    <div class="access-denied-container">
+      <ion-icon name="warning-outline" class="denied-icon"></ion-icon>
+      <h2>Acceso Restringido</h2>
+      <p>Solo el Director de Juego de esta campaña dispone del poder para dirigir la iniciativa en el Rastreador de Combate.</p>
+      <button class="combat-btn btn-gold-outline" routerLink="/home">
+        <ion-icon name="refresh"></ion-icon>
+        <span>Volver a mis Reinos</span>
+      </button>
+    </div>
+  }
 
   <!-- Campaign Characters Modal -->
   <ion-modal [isOpen]="isCharacterModalOpen" (didDismiss)="isCharacterModalOpen = false" class="forge-modal">
     <ng-template>
       <ion-header class="ion-no-border">
-        <ion-toolbar color="dark">
-          <ion-title>Personajes de la Campaña</ion-title>
+        <ion-toolbar class="modal-header-toolbar">
+          <ion-title>Héroes de la Campaña</ion-title>
           <ion-buttons slot="end">
-            <ion-button (click)="isCharacterModalOpen = false">
+            <button class="btn-close-modal" (click)="isCharacterModalOpen = false">
               <ion-icon name="close"></ion-icon>
-            </ion-button>
+            </button>
           </ion-buttons>
         </ion-toolbar>
       </ion-header>
       
-      <ion-content class="combat-bg">
+      <ion-content class="modal-bg-content">
         <div class="modal-container ion-padding">
-          <div class="empty-state" *ngIf="campaignCharacters.length === 0">
-            <ion-icon name="warning-outline"></ion-icon>
-            <p>No hay personajes registrados en esta campaña.</p>
-          </div>
-
-          <ion-list lines="none" class="monster-list">
-            <div class="monster-item clickable" *ngFor="let char of campaignCharacters" (click)="loadFullCharacter(char.id); isCharacterModalOpen = false">
-              <div class="monster-info">
-                <h3 class="monster-name">{{ char.name }}</h3>
-                <p class="monster-meta">Nivel {{ char.level }} {{ char.dndClass }} ({{ char.playerName }})</p>
-              </div>
-              <ion-icon name="add-circle" color="primary"></ion-icon>
+          @if (campaignCharacters.length === 0) {
+            <div class="empty-state-modal">
+              <ion-icon name="warning-outline"></ion-icon>
+              <p>No hay héroes registrados o listos en esta campaña.</p>
             </div>
-          </ion-list>
+          } @else {
+            <ion-list lines="none" class="monster-list">
+              @for (char of campaignCharacters; track char.id) {
+                <div class="monster-item clickable" (click)="loadFullCharacter(char.id); isCharacterModalOpen = false">
+                  <div class="monster-info">
+                    <h3 class="monster-name">{{ char.name }}</h3>
+                    <p class="monster-meta">Nivel {{ char.level }} {{ char.dndClass }} ({{ char.playerName }})</p>
+                  </div>
+                  <ion-icon name="add-circle" class="add-icon-accent"></ion-icon>
+                </div>
+              }
+            </ion-list>
+          }
         </div>
       </ion-content>
     </ng-template>
   </ion-modal>
 
-  <!-- Monster Details Modal -->
+  <!-- Monster Details RPG Sheet Modal -->
   <ion-modal [isOpen]="isDetailsModalOpen" (didDismiss)="isDetailsModalOpen = false" class="details-modal">
     <ng-template>
       <ion-header class="ion-no-border">
         <ion-toolbar class="detail-header-toolbar">
           <ion-title>{{ selectedMonster?.name }}</ion-title>
           <ion-buttons slot="end">
-            <ion-button (click)="isDetailsModalOpen = false">
+            <button class="btn-close-modal" (click)="isDetailsModalOpen = false">
               <ion-icon name="close"></ion-icon>
-            </ion-button>
+            </button>
           </ion-buttons>
         </ion-toolbar>
       </ion-header>
@@ -244,74 +267,118 @@
         </div>
 
         <div class="traits-summary-box">
-          <p *ngIf="getListMechanic('vulnerabilities') !== '—'">
-            <span class="label">Vulnerabilidades:</span> {{ getListMechanic('vulnerabilities') }}
-          </p>
-          <p *ngIf="getListMechanic('resistances') !== '—'">
-            <span class="label">Resistencias:</span> {{ getListMechanic('resistances') }}
-          </p>
-          <p *ngIf="getListMechanic('immunities') !== '—'">
-            <span class="label">Inmunidades (Daño):</span> {{ getListMechanic('immunities') }}
-          </p>
-          <p *ngIf="getListMechanic('conditionImmunities') !== '—'">
-            <span class="label">Inmunidades (Estado):</span> {{ getListMechanic('conditionImmunities') }}
-          </p>
+          @if (getListMechanic('vulnerabilities') !== '—') {
+            <p>
+              <span class="label">Vulnerabilidades:</span> {{ getListMechanic('vulnerabilities') }}
+            </p>
+          }
+          @if (getListMechanic('resistances') !== '—') {
+            <p>
+              <span class="label">Resistencias:</span> {{ getListMechanic('resistances') }}
+            </p>
+          }
+          @if (getListMechanic('immunities') !== '—') {
+            <p>
+              <span class="label">Inmunidades (Daño):</span> {{ getListMechanic('immunities') }}
+            </p>
+          }
+          @if (getListMechanic('conditionImmunities') !== '—') {
+            <p>
+              <span class="label">Inmunidades (Estado):</span> {{ getListMechanic('conditionImmunities') }}
+            </p>
+          }
           <p><span class="label">Senses:</span> {{ formatSenses() }}</p>
           <p><span class="label">Habilidades:</span> {{ getSkills() }}</p>
           <p><span class="label">Idiomas:</span> {{ getListMechanic('languages') }}</p>
         </div>
 
-        <div class="mechanics-group" *ngIf="getMechanics('traits').length > 0">
-          <h3 class="group-title">Rasgos</h3>
-          <div class="mechanic-block" *ngFor="let t of getMechanics('traits')">
-            <div class="mechanic-header">
-              <span class="mechanic-name">{{ t.name }}</span>
-            </div>
-            <div class="mechanic-desc">{{ t.desc }}</div>
-          </div>
-        </div>
-
-        <div class="mechanics-group" *ngIf="getMechanics('actions').length > 0">
-          <h3 class="group-title">Acciones</h3>
-          <div class="mechanic-block" *ngFor="let a of getMechanics('actions')">
-            <div class="mechanic-header">
-              <span class="mechanic-name">{{ a.name }}</span>
-              <div class="attack-badges" *ngIf="a.attackData">
-                <span class="atk-badge bonus" *ngIf="a.attackData.bonus">{{ a.attackData.bonus }}</span>
-                <span class="atk-badge damage" *ngIf="a.attackData.damage">{{ a.attackData.damage }}</span>
-                <span class="atk-badge type" *ngIf="a.attackData.type">{{ a.attackData.type }}</span>
-                <span class="atk-badge reach" *ngIf="a.attackData.reach">{{ a.attackData.reach }}</span>
+        @if (getMechanics('traits').length > 0) {
+          <div class="mechanics-group">
+            <h3 class="group-title">Rasgos</h3>
+            @for (t of getMechanics('traits'); track t.name) {
+              <div class="mechanic-block">
+                <div class="mechanic-header">
+                  <span class="mechanic-name">{{ t.name }}</span>
+                </div>
+                <div class="mechanic-desc">{{ t.desc }}</div>
               </div>
-            </div>
-            <div class="mechanic-desc" *ngIf="a.desc">{{ a.desc }}</div>
+            }
           </div>
-        </div>
+        }
 
-        <div class="mechanics-group" *ngIf="getMechanics('reactions').length > 0">
-          <h3 class="group-title">Reacciones</h3>
-          <div class="mechanic-block" *ngFor="let r of getMechanics('reactions')">
-            <div class="mechanic-header">
-              <span class="mechanic-name">{{ r.name }}</span>
-            </div>
-            <div class="mechanic-desc">{{ r.desc }}</div>
-          </div>
-        </div>
-
-        <div class="mechanics-group" *ngIf="getMechanics('legendaryActions').length > 0">
-          <h3 class="group-title">Acciones Legendarias</h3>
-          <p class="intro-text">El monstruo puede realizar 3 acciones legendarias, eligiendo entre las opciones siguientes...</p>
-          <div class="mechanic-block" *ngFor="let l of getMechanics('legendaryActions')">
-            <div class="mechanic-header">
-              <span class="mechanic-name">{{ l.name }}</span>
-              <div class="attack-badges" *ngIf="l.attackData">
-                <span class="atk-badge bonus" *ngIf="l.attackData.bonus">{{ l.attackData.bonus }}</span>
-                <span class="atk-badge damage" *ngIf="l.attackData.damage">{{ l.attackData.damage }}</span>
-                <span class="atk-badge type" *ngIf="l.attackData.type">{{ l.attackData.type }}</span>
+        @if (getMechanics('actions').length > 0) {
+          <div class="mechanics-group">
+            <h3 class="group-title">Acciones</h3>
+            @for (a of getMechanics('actions'); track a.name) {
+              <div class="mechanic-block">
+                <div class="mechanic-header">
+                  <span class="mechanic-name">{{ a.name }}</span>
+                  @if (a.attackData) {
+                    <div class="attack-badges">
+                      @if (a.attackData.bonus) {
+                        <span class="atk-badge bonus">{{ a.attackData.bonus }}</span>
+                      }
+                      @if (a.attackData.damage) {
+                        <span class="atk-badge damage">{{ a.attackData.damage }}</span>
+                      }
+                      @if (a.attackData.type) {
+                        <span class="atk-badge type">{{ a.attackData.type }}</span>
+                      }
+                      @if (a.attackData.reach) {
+                        <span class="atk-badge reach">{{ a.attackData.reach }}</span>
+                      }
+                    </div>
+                  }
+                </div>
+                @if (a.desc) {
+                  <div class="mechanic-desc">{{ a.desc }}</div>
+                }
               </div>
-            </div>
-            <div class="mechanic-desc">{{ l.desc }}</div>
+            }
           </div>
-        </div>
+        }
+
+        @if (getMechanics('reactions').length > 0) {
+          <div class="mechanics-group">
+            <h3 class="group-title">Reacciones</h3>
+            @for (r of getMechanics('reactions'); track r.name) {
+              <div class="mechanic-block">
+                <div class="mechanic-header">
+                  <span class="mechanic-name">{{ r.name }}</span>
+                </div>
+                <div class="mechanic-desc">{{ r.desc }}</div>
+              </div>
+            }
+          </div>
+        }
+
+        @if (getMechanics('legendaryActions').length > 0) {
+          <div class="mechanics-group">
+            <h3 class="group-title">Acciones Legendarias</h3>
+            <p class="intro-text">El monstruo puede realizar 3 acciones legendarias, eligiendo entre las opciones siguientes...</p>
+            @for (l of getMechanics('legendaryActions'); track l.name) {
+              <div class="mechanic-block">
+                <div class="mechanic-header">
+                  <span class="mechanic-name">{{ l.name }}</span>
+                  @if (l.attackData) {
+                    <div class="attack-badges">
+                      @if (l.attackData.bonus) {
+                        <span class="atk-badge bonus">{{ l.attackData.bonus }}</span>
+                      }
+                      @if (l.attackData.damage) {
+                        <span class="atk-badge damage">{{ l.attackData.damage }}</span>
+                      }
+                      @if (l.attackData.type) {
+                        <span class="atk-badge type">{{ l.attackData.type }}</span>
+                      }
+                    </div>
+                  }
+                </div>
+                <div class="mechanic-desc">{{ l.desc }}</div>
+              </div>
+            }
+          </div>
+        }
       </ion-content>
     </ng-template>
   </ion-modal>
@@ -319,37 +386,53 @@
   <!-- Monster Browser Modal -->
   <ion-modal [isOpen]="isMonsterModalOpen" (didDismiss)="isMonsterModalOpen = false" class="monster-modal">
     <ng-template>
-      <ion-header>
-        <ion-toolbar color="dark">
-          <ion-title>Biblioteca de Monstruos</ion-title>
+      <ion-header class="ion-no-border">
+        <ion-toolbar class="modal-header-toolbar">
+          <ion-title>Biblioteca de Bestias</ion-title>
           <ion-buttons slot="end">
-            <ion-button (click)="isMonsterModalOpen = false">Cerrar</ion-button>
+            <button class="btn-close-modal" (click)="isMonsterModalOpen = false">
+              <ion-icon name="close"></ion-icon>
+            </button>
           </ion-buttons>
         </ion-toolbar>
-        <ion-toolbar color="dark">
+        <ion-toolbar class="search-toolbar">
           <ion-searchbar placeholder="Buscar por nombre o tipo..." 
                          (ionInput)="filterMonsters($event)" 
-                         debounce="300"></ion-searchbar>
+                         debounce="300"
+                         class="premium-searchbar"></ion-searchbar>
         </ion-toolbar>
       </ion-header>
-      <ion-content color="dark">
+      
+      <ion-content class="modal-bg-content">
         <ion-grid>
           <ion-row>
-            <ion-col size="12" size-md="6" size-lg="4" *ngFor="let m of filteredMonsters">
-              <ion-card class="monster-card" (click)="addMonsterToCombat(m)">
-                <ion-card-content>
-                  <div class="monster-card-header">
-                    <h2>{{ m.name }}</h2>
-                    <ion-badge color="tertiary">CR {{ m.challengeRating }}</ion-badge>
-                  </div>
-                  <p>{{ m.size }} {{ m.type }}</p>
-                  <div class="monster-card-stats">
-                    <span><ion-icon name="heart"></ion-icon> {{ m.hitPoints }} PV</span>
-                    <span><ion-icon name="shield"></ion-icon> CA {{ m.armorClass }}</span>
-                  </div>
-                </ion-card-content>
-              </ion-card>
-            </ion-col>
+            @for (m of filteredMonsters; track m.id) {
+              <ion-col size="12" size-md="6" size-lg="4">
+                <ion-card class="monster-card" (click)="addMonsterToCombat(m)">
+                  <ion-card-content>
+                    <div class="monster-card-header">
+                      <h2>
+                        {{ m.name }}
+                        @if (m.author) {
+                          <span class="homebrew-badge">Homebrew</span>
+                        }
+                      </h2>
+                      <span class="badge-cr">CR {{ m.challengeRating }}</span>
+                    </div>
+                    <p class="monster-type-desc">{{ m.size }} {{ m.type }}</p>
+                    <div class="monster-card-stats">
+                      <span><ion-icon name="heart"></ion-icon> {{ m.hitPoints }} PV</span>
+                      <span><ion-icon name="shield"></ion-icon> CA {{ m.armorClass }}</span>
+                    </div>
+                  </ion-card-content>
+                </ion-card>
+              </ion-col>
+            } @empty {
+              <ion-col size="12" class="ion-text-center ion-padding empty-search">
+                <ion-icon name="skull" class="empty-icon"></ion-icon>
+                <p>No se hallaron criaturas que correspondan a tu búsqueda.</p>
+              </ion-col>
+            }
           </ion-row>
         </ion-grid>
       </ion-content>
