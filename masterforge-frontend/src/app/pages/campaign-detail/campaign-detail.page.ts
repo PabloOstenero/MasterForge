@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, Location } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   IonContent,
@@ -14,7 +14,7 @@ import {
 } from '@ionic/angular/standalone';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
-import { arrowBackOutline, calendarOutline, cashOutline, peopleOutline, personOutline, addOutline, listOutline, checkmarkCircleOutline, skullOutline, logoDiscord, lockOpenOutline, lockClosedOutline, trashOutline, pencilOutline, eyeOutline, personRemoveOutline } from 'ionicons/icons';
+import { calendarOutline, cashOutline, peopleOutline, personOutline, addOutline, listOutline, checkmarkCircleOutline, skullOutline, logoDiscord, lockOpenOutline, lockClosedOutline, trashOutline, pencilOutline, eyeOutline, personRemoveOutline, shieldCheckmarkOutline, timeOutline, sparklesOutline, playOutline, chevronDownOutline, chevronUpOutline, exitOutline } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
 import { catchError, of } from 'rxjs';
 import {
@@ -64,6 +64,11 @@ export class CampaignDetailPage implements OnInit {
   errorPlayers: string | null = null;
 
   activeSegment = 'jugadores';
+  expandedPlayerIds: { [key: string]: boolean } = {};
+
+  togglePlayerExpanded(playerId: string): void {
+    this.expandedPlayerIds[playerId] = !this.expandedPlayerIds[playerId];
+  }
 
   showSessionForm = false;
   sessionForm!: FormGroup;
@@ -83,17 +88,17 @@ export class CampaignDetailPage implements OnInit {
   errorAssign: string | null = null;
   unassigningCharacterMap: { [key: string]: boolean } = {};
   kickingPlayerMap: { [key: string]: boolean } = {};
+  leavingCampaign = false;
 
   constructor(
     private route: ActivatedRoute,
-    private location: Location,
     private api: ApiService,
     private fb: FormBuilder,
     private roleService: RoleService,
     private authService: AuthService,
     private router: Router,
   ) {
-    addIcons({ arrowBackOutline, calendarOutline, cashOutline, peopleOutline, personOutline, addOutline, listOutline, checkmarkCircleOutline, skullOutline, logoDiscord, lockOpenOutline, lockClosedOutline, trashOutline, pencilOutline, eyeOutline, personRemoveOutline });
+    addIcons({ calendarOutline, cashOutline, peopleOutline, personOutline, addOutline, listOutline, checkmarkCircleOutline, skullOutline, logoDiscord, lockOpenOutline, lockClosedOutline, trashOutline, pencilOutline, eyeOutline, personRemoveOutline, shieldCheckmarkOutline, timeOutline, sparklesOutline, playOutline, chevronDownOutline, chevronUpOutline, exitOutline });
   }
 
   ngOnInit(): void {
@@ -195,6 +200,10 @@ export class CampaignDetailPage implements OnInit {
     ).subscribe((data) => {
       if (data !== null) {
         this.players = data;
+        const currentUserId = this.authService.getUserIdFromToken();
+        if (currentUserId) {
+          this.expandedPlayerIds[currentUserId] = true;
+        }
       }
       this.loadingPlayers = false;
     });
@@ -236,14 +245,16 @@ export class CampaignDetailPage implements OnInit {
         this.api.getCampaignPlayers(campaignId).pipe(
           catchError(() => of(null)),
         ).subscribe((data) => {
-          if (data !== null) this.players = data;
+          if (data !== null) {
+            this.players = data;
+            const currentUserId = this.authService.getUserIdFromToken();
+            if (currentUserId) {
+              this.expandedPlayerIds[currentUserId] = true;
+            }
+          }
         });
       }
     });
-  }
-
-  goBack(): void {
-    this.location.back();
   }
 
   openSessionForm(): void {
@@ -355,6 +366,19 @@ export class CampaignDetailPage implements OnInit {
     return `${price} €`;
   }
 
+  getMonth(ts: string): string {
+    if (!ts) return 'ENE';
+    const date = new Date(ts);
+    const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+    return months[date.getMonth()];
+  }
+
+  getDay(ts: string): string {
+    if (!ts) return '01';
+    const date = new Date(ts);
+    return date.getDate().toString().padStart(2, '0');
+  }
+
   segmentChanged(event: any): void {
     this.activeSegment = event.detail.value;
   }
@@ -446,7 +470,13 @@ export class CampaignDetailPage implements OnInit {
         this.api.getCampaignPlayers(campaignId).pipe(
           catchError(() => of(null)),
         ).subscribe((data) => {
-          if (data !== null) this.players = data;
+          if (data !== null) {
+            this.players = data;
+            const currentUserId = this.authService.getUserIdFromToken();
+            if (currentUserId) {
+              this.expandedPlayerIds[currentUserId] = true;
+            }
+          }
         });
       }
     });
@@ -461,15 +491,9 @@ export class CampaignDetailPage implements OnInit {
     const campaignId = this.route.snapshot.paramMap.get('id')!;
     this.kickingPlayerMap[playerId] = true;
 
-    this.api.kickPlayerFromCampaign(campaignId, playerId).pipe(
-      catchError((err) => {
-        alert(err?.error?.message ?? 'Error al expulsar al jugador.');
+    this.api.kickPlayerFromCampaign(campaignId, playerId).subscribe({
+      next: () => {
         this.kickingPlayerMap[playerId] = false;
-        return of(null);
-      })
-    ).subscribe((result) => {
-      this.kickingPlayerMap[playerId] = false;
-      if (result !== null) {
         alert('Jugador expulsado correctamente de la campaña.');
         // Reload players list
         this.api.getCampaignPlayers(campaignId).pipe(
@@ -477,6 +501,32 @@ export class CampaignDetailPage implements OnInit {
         ).subscribe((data) => {
           if (data !== null) this.players = data;
         });
+      },
+      error: (err) => {
+        this.kickingPlayerMap[playerId] = false;
+        alert(err?.error?.message ?? 'Error al expulsar al jugador.');
+      }
+    });
+  }
+
+  leaveCampaign(): void {
+    const confirmLeave = window.confirm(
+      '¿Estás seguro de que deseas abandonar esta campaña? Todos tus personajes inscritos en la misma serán retirados.'
+    );
+    if (!confirmLeave) return;
+
+    const campaignId = this.route.snapshot.paramMap.get('id')!;
+    this.leavingCampaign = true;
+
+    this.api.leaveCampaign(campaignId).subscribe({
+      next: () => {
+        this.leavingCampaign = false;
+        alert('Has abandonado la campaña correctamente.');
+        this.router.navigate(['/my-campaigns']);
+      },
+      error: (err) => {
+        this.leavingCampaign = false;
+        alert(err?.error?.message ?? 'Error al abandonar la campaña.');
       }
     });
   }

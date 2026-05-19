@@ -444,4 +444,110 @@ class CampaignController(
 
         return ResponseEntity.noContent().build()
     }
+
+    @DeleteMapping("/{id}/leave")
+    @Transactional
+    @CacheEvict(value = ["campaignSearch"], allEntries = true)
+    fun leaveCampaign(
+        @PathVariable id: UUID
+    ): ResponseEntity<Void> {
+        val campaign = campaignRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign not found") }
+
+        val authentication = SecurityContextHolder.getContext().authentication
+            ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated")
+        val currentUserId = UUID.fromString(authentication.name)
+
+        // Make sure the Game Master cannot leave their own campaign this way (they must delete it)
+        if (campaign.owner.id == currentUserId) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Game Master cannot leave their own campaign. Delete it instead.")
+        }
+
+        // Find the enrollment for currentUserId
+        val enrollment = campaignEnrollmentRepository.findByCampaignId(id)
+            .find { it.user.id == currentUserId }
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "You are not enrolled in this campaign")
+
+        // 1. Unassign all characters owned by this player that are assigned to this campaign
+        val playerCharacters = characterRepository.findByCampaignIdAndUserId(id, currentUserId)
+        for (character in playerCharacters) {
+            val updatedChar = character.copy(campaign = null)
+            characterRepository.save(updatedChar)
+        }
+
+        // 1.5. Check refund eligibility (enrolled in last 14 days AND campaign has a joinPrice and transaction was paid)
+        val isEligibleForRefund = enrollment.paymentTransactionId != null &&
+                campaign.joinPrice > BigDecimal.ZERO &&
+                enrollment.enrolledAt.isAfter(java.time.LocalDateTime.now().minusDays(14))
+
+        if (isEligibleForRefund) {
+            val player = enrollment.user
+            val dm = campaign.owner
+
+            // Process balance adjustments
+            dm.balance = dm.balance.subtract(campaign.joinPrice)
+            player.balance = player.balance.add(campaign.joinPrice)
+
+            userRepository.save(dm)
+            userRepository.save(player)
+
+            // Log debit for DM
+            paymentTransactionRepository.save(
+                PaymentTransaction(
+                    userId = dm.id!!,
+                    relatedUserId = player.id!!,
+                    campaignId = id,
+                    amount = campaign.joinPrice,
+                    status = PaymentStatus.COMPLETED,
+                    transactionType = "CAMPAIGN_LEAVE_REFUND",
+                    isCredit = false,
+                    processedAt = java.time.LocalDateTime.now(),
+                    mockCardLastFour = "WALLET"
+                )
+            )
+
+            // Log credit for Player
+            paymentTransactionRepository.save(
+                PaymentTransaction(
+                    userId = player.id!!,
+                    relatedUserId = dm.id!!,
+                    campaignId = id,
+                    amount = campaign.joinPrice,
+                    status = PaymentStatus.COMPLETED,
+                    transactionType = "CAMPAIGN_LEAVE_REFUND",
+                    isCredit = true,
+                    processedAt = java.time.LocalDateTime.now(),
+                    mockCardLastFour = "WALLET"
+                )
+            )
+        }
+
+        // 2. Delete the enrollment
+        campaignEnrollmentRepository.delete(enrollment)
+
+        // 3. Notify the DM that the player left
+        val title = "Jugador ha salido: ${campaign.name}"
+        val message = "${enrollment.user.name} ha salido de la campaña '${campaign.name}'."
+        val link = "/campaigns/${campaign.id}"
+
+        try {
+            // Create in-app notification for the DM
+            notificationService.createNotification(campaign.owner, title, message, link)
+
+            // Send push notification to the DM
+            if (campaign.owner.sessionNotifications && campaign.owner.fcmTokens.isNotEmpty()) {
+                pushNotificationService.sendPushNotification(
+                    campaign.owner.fcmTokens,
+                    title,
+                    message,
+                    mapOf("campaignId" to id.toString(), "type" to "CAMPAIGN_LEAVE")
+                )
+            }
+        } catch (e: Exception) {
+            // Log/ignore notification failures
+        }
+
+        return ResponseEntity.noContent().build()
+    }
 }
+

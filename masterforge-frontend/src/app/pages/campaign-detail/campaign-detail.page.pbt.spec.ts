@@ -217,10 +217,8 @@ describe('CampaignDetailPage PBT — 13.3 Property 8: Characters view rendering 
    * **Validates: Requirements 4.7**
    *
    * For any list of CampaignPlayerDto objects where each player has 1–5
-   * characters, when the Characters segment is active, the rendered template
-   * SHALL contain each character's `name`, `level`, `dndClass`, and `dndRace`,
-   * and each character SHALL appear under its owning player's name as a section
-   * header.
+   * characters, the rendered template SHALL contain each character's
+   * `name`, `level`, `dndClass`, and `dndRace` inside the player's expanded card.
    */
   it('Property 8: rendered HTML contains all character details under the correct player header', async () => {
     const { fixture, component } = await createFixture();
@@ -234,7 +232,9 @@ describe('CampaignDetailPage PBT — 13.3 Property 8: Characters view rendering 
         component.loadingPlayers = false;
         component.errorPlayers = null;
         component.players = players;
-        component.activeSegment = 'personajes';
+        for (const player of players) {
+          component.expandedPlayerIds[player.id] = true;
+        }
         fixture.detectChanges();
 
         const html: string = fixture.nativeElement.innerHTML;
@@ -249,22 +249,19 @@ describe('CampaignDetailPage PBT — 13.3 Property 8: Characters view rendering 
           }
         }
 
-        // Assert: each character appears under its player's group header
-        // We verify DOM order: the player-group-header for a player comes
-        // before all character items belonging to that player.
+        // Assert: each character appears under its player's header inside the player-item card
         const nativeEl: HTMLElement = fixture.nativeElement;
-        const playerGroups = Array.from(
-          nativeEl.querySelectorAll<HTMLElement>('[data-testid="player-group"]'),
+        const playerItems = Array.from(
+          nativeEl.querySelectorAll<HTMLElement>('[data-testid="player-item"]'),
         );
 
-        // There should be one group per player (all players have ≥1 character)
-        expect(playerGroups.length).toBe(players.length);
+        expect(playerItems.length).toBe(players.length);
 
-        playerGroups.forEach((group, idx) => {
+        playerItems.forEach((group, idx) => {
           const player = players[idx];
-          const header = group.querySelector<HTMLElement>('[data-testid="player-group-header"]');
-          expect(header).toBeTruthy();
-          expect(header!.textContent).toContain(player.name);
+          const nameEl = group.querySelector<HTMLElement>('[data-testid="player-name"]');
+          expect(nameEl).toBeTruthy();
+          expect(nameEl!.textContent).toContain(player.name);
 
           const charItems = Array.from(
             group.querySelectorAll<HTMLElement>('[data-testid="character-item"]'),

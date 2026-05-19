@@ -27,8 +27,16 @@ export class PersistentNotificationService {
   }
 
   updateUnreadCount(): void {
+    const token = localStorage.getItem('mf_token');
+    if (!token) {
+      this.unreadCountSubject.next(0);
+      return;
+    }
     this.http.get<{count: number}>(`${environment.apiBaseUrl}/api/notifications/me/unread-count`)
-      .subscribe(res => this.unreadCountSubject.next(res.count));
+      .subscribe({
+        next: (res) => this.unreadCountSubject.next(res.count),
+        error: () => this.unreadCountSubject.next(0)
+      });
   }
 
   markAsRead(id: string): Observable<void> {

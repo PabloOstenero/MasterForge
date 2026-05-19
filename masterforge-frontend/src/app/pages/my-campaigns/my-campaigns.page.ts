@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   IonSpinner,
   IonCard, IonCardContent,
@@ -17,6 +17,7 @@ import { bookOutline, mapOutline, peopleOutline, calendarOutline } from 'ionicon
   standalone: true,
   imports: [
     CommonModule,
+    RouterLink,
     IonSpinner,
     IonCard, IonCardContent,
     IonButton, IonText, IonRow, IonCol, IonIcon,

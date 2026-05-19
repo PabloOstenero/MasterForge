@@ -317,6 +317,14 @@ levelUpCharacter(characterId: string, data: { hpBonus: number, statChanges: any,
     );
   }
 
+  // Leave a campaign
+  leaveCampaign(campaignId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.apiUrl}/campaigns/${campaignId}/leave`
+    );
+  }
+
+
 
   // Create a character spell association
   createCharacterSpell(dto: { characterId: string; spellId: string; isPrepared: boolean }): Observable<any> {

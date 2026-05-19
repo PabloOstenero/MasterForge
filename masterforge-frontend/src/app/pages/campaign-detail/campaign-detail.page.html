@@ -1,14 +1,9 @@
 <ion-content class="campaign-detail-content">
   <div class="page-container ion-padding">
 
+    <!-- ── NAVIGATION & TOP BAR ── -->
     <div class="header-controls">
-      <!-- ── Back navigation ── -->
-      <button class="back-btn" (click)="goBack()" data-testid="btn-back" aria-label="Volver">
-        <ion-icon name="arrow-back-outline"></ion-icon>
-        <span>Volver</span>
-      </button>
-
-      <!-- ── DM Settings ── -->
+      <!-- DM Campaign Controls -->
       @if (isOwner) {
         <div class="dm-actions">
           <button 
@@ -34,420 +29,494 @@
       }
     </div>
 
-    <!-- ══════════════════════════════════════════════════════════════════════
-         TOP SECTION — Campaign info (always visible)
-    ══════════════════════════════════════════════════════════════════════ -->
-
-    <!-- Campaign loading -->
+    <!-- Loading state -->
     @if (loadingCampaign) {
       <div class="loading-container" data-testid="spinner-campaign">
         <ion-spinner name="crescent"></ion-spinner>
       </div>
     }
 
-    <!-- Campaign error -->
+    <!-- Error state -->
     @if (errorCampaign) {
-      <p class="error-msg" data-testid="error-campaign">{{ errorCampaign }}</p>
+      <div class="error-container">
+        <p class="error-msg" data-testid="error-campaign">{{ errorCampaign }}</p>
+      </div>
     }
 
-    <!-- Campaign info -->
+    <!-- Campaign Banner Info -->
     @if (!loadingCampaign && campaign) {
-      <div class="campaign-header" data-testid="campaign-header">
-        <h1 class="campaign-title" data-testid="campaign-name">{{ campaign.name }}</h1>
-        @if (campaign.description) {
-          <p class="campaign-description" data-testid="campaign-description">{{ campaign.description }}</p>
-        }
-        <div class="campaign-meta">
-          <span class="meta-item">
-            <ion-icon name="person-outline"></ion-icon>
-            DM: {{ campaign.owner.name }}
-            <span class="discord-tag" *ngIf="campaign.owner.discordUsername">
-              <ion-icon name="logo-discord"></ion-icon>
-              {{ campaign.owner.discordUsername }}
+      <div class="campaign-banner" data-testid="campaign-header">
+        <div class="banner-overlay"></div>
+        <div class="banner-content">
+          <div class="badge-wrapper">
+            <span class="gold-badge">
+              <ion-icon name="sparkles-outline"></ion-icon> D&D 5E CAMPAIGN
             </span>
-          </span>
-          <span class="meta-item">
-            <ion-icon name="people-outline"></ion-icon>
-            {{ campaign.maxPlayers }} jugadores máx.
-          </span>
-          <span class="meta-item meta-item--gold">
-            <ion-icon name="cash-outline"></ion-icon>
-            {{ formatPrice(campaign.joinPrice) }}
-          </span>
-          @if (campaign.enrollmentClosed) {
-            <span class="meta-item meta-item--closed">
-              <ion-icon name="lock-closed-outline"></ion-icon>
-              Inscripción Cerrada
-            </span>
-          } @else {
-            <span class="meta-item meta-item--open">
-              <ion-icon name="lock-open-outline"></ion-icon>
-              Inscripción Abierta
-            </span>
-          }
-        </div>
-      </div>
-    }
-
-    <!-- ── Access denied block ── -->
-    @if (accessDenied) {
-      <p class="error-msg" data-testid="access-denied">No tienes acceso a esta campaña.</p>
-    }
-
-    <!-- ── Main content (hidden when access denied) ── -->
-    @if (!accessDenied) {
-
-      <!-- ── Sessions section ── -->
-      <div class="section" data-testid="sessions-section">
-        <div class="section-header">
-          <h2 class="section-title">
-            <ion-icon name="calendar-outline"></ion-icon>
-            Sesiones
-          </h2>
-          @if (isOwner) {
-            <div class="header-actions">
-              <button class="tracker-btn" [routerLink]="['/campaigns', campaign?.id, 'combat-tracker']">
-                <ion-icon name="skull-outline"></ion-icon>
-                Tracker de Combate
-              </button>
-              <button class="add-btn" (click)="openSessionForm()" data-testid="btn-nueva-sesion" aria-label="Nueva sesión">
-                <ion-icon name="add-outline"></ion-icon>
-                Nueva Sesión
-              </button>
-            </div>
-          }
-        </div>
-
-        <!-- Session creation form (DM only) -->
-        @if (isOwner && showSessionForm) {
-          <form [formGroup]="sessionForm" (ngSubmit)="submitSession()" class="session-form" data-testid="session-creation-form">
-
-            <h4 class="form-title">
-              @if (editingSessionId) {
-                Editar Sesión
-              } @else {
-                Programar Nueva Sesión
-              }
-            </h4>
-
-            <div class="form-field">
-              <label class="form-label" for="session-name">Nombre de la sesión</label>
-              <input
-                id="session-name"
-                type="text"
-                formControlName="name"
-                class="form-input"
-                placeholder="Ej: La Cripta Olvidada"
-                data-testid="input-session-name"
-                autocomplete="off"
-              />
-              @if (sessionForm.get('name')?.invalid && sessionForm.get('name')?.touched) {
-                <span class="field-error" data-testid="error-session-name">El nombre es obligatorio.</span>
-              }
-            </div>
-
-            <div class="form-field">
-              <label class="form-label" for="session-date">Fecha y hora</label>
-              <input
-                id="session-date"
-                type="datetime-local"
-                formControlName="scheduledDate"
-                class="form-input"
-                data-testid="input-session-date"
-              />
-              @if (sessionForm.get('scheduledDate')?.invalid && sessionForm.get('scheduledDate')?.touched) {
-                <span class="field-error" data-testid="error-session-date">La fecha es obligatoria.</span>
-              }
-            </div>
-
-            @if (errorSession) {
-              <p class="error-msg" data-testid="error-session-submit">{{ errorSession }}</p>
-            }
-
-            <div class="form-actions">
-              <button
-                type="submit"
-                class="btn-primary"
-                [disabled]="sessionForm.invalid || submittingSession"
-                data-testid="btn-crear-sesion"
-              >
-                @if (submittingSession) {
-                  <ion-spinner name="crescent" class="btn-spinner"></ion-spinner>
-                } @else {
-                  @if (editingSessionId) {
-                    Guardar
-                  } @else {
-                    Crear
-                  }
-                }
-              </button>
-              <button
-                type="button"
-                class="btn-secondary"
-                (click)="cancelSessionForm()"
-                data-testid="btn-cancelar-sesion"
-              >
-                Cancelar
-              </button>
-            </div>
-
-          </form>
-        }
-
-        @if (loadingSessions) {
-          <div class="loading-container" data-testid="spinner-sessions">
-            <ion-spinner name="crescent"></ion-spinner>
           </div>
-        }
-
-        @if (errorSessions) {
-          <p class="error-msg" data-testid="error-sessions">{{ errorSessions }}</p>
-        }
-
-        @if (!loadingSessions && !errorSessions) {
-          @if (sessions.length === 0) {
-            <p class="empty-msg" data-testid="empty-sessions">No hay sesiones programadas para esta campaña.</p>
-          } @else {
-            <ion-list class="sessions-list" data-testid="sessions-list">
-              @for (session of sessions; track session.id) {
-                <ion-item class="session-item" data-testid="session-item">
-                  <ion-label class="session-info">
-                    <span class="session-name" data-testid="session-name">{{ session.name }}</span>
-                    <span class="session-date" data-testid="session-date">{{ formatDate(session.scheduledDate) }}</span>
-                  </ion-label>
-                  @if (isOwner) {
-                    <div class="session-actions" slot="end">
-                      <button class="session-action-btn edit-btn" (click)="editSession(session)" aria-label="Editar sesión" data-testid="btn-editar-sesion">
-                        <ion-icon name="pencil-outline"></ion-icon>
-                      </button>
-                      <button class="session-action-btn delete-btn" (click)="deleteSession(session)" aria-label="Eliminar sesión" data-testid="btn-eliminar-sesion">
-                        <ion-icon name="trash-outline"></ion-icon>
-                      </button>
-                    </div>
-                  }
-                </ion-item>
-              }
-            </ion-list>
+          <h1 class="campaign-title" data-testid="campaign-name">{{ campaign.name }}</h1>
+          @if (campaign.description) {
+            <p class="campaign-description" data-testid="campaign-description">{{ campaign.description }}</p>
           }
-        }
-      </div>
-
-      <!-- ══════════════════════════════════════════════════════════════════════
-           SEGMENTED SECTION — Players / Characters
-      ══════════════════════════════════════════════════════════════════════ -->
-
-      <ion-segment
-        [value]="activeSegment"
-        (ionChange)="segmentChanged($event)"
-        class="detail-segment"
-        data-testid="detail-segment">
-        <ion-segment-button value="jugadores" data-testid="segment-btn-jugadores">
-          <ion-label>Jugadores</ion-label>
-        </ion-segment-button>
-        <ion-segment-button value="personajes" data-testid="segment-btn-personajes">
-          <ion-label>Personajes</ion-label>
-        </ion-segment-button>
-      </ion-segment>
-
-      <!-- ── Players segment ── -->
-      @if (activeSegment === 'jugadores') {
-        <div class="segment-panel" data-testid="panel-jugadores">
-
-          @if (loadingPlayers) {
-            <div class="loading-container" data-testid="spinner-players">
-              <ion-spinner name="crescent"></ion-spinner>
+          
+          <!-- Modern Glowing Chips Grid -->
+          <div class="campaign-meta-grid">
+            <div class="meta-card">
+              <div class="meta-card-icon">
+                <ion-icon name="shield-checkmark-outline"></ion-icon>
+              </div>
+              <div class="meta-card-details">
+                <span class="label">DUNGEON MASTER</span>
+                <span class="value">
+                  {{ campaign.owner.name }}
+                  <span class="discord-chip" *ngIf="campaign.owner.discordUsername">
+                    <ion-icon name="logo-discord"></ion-icon>
+                    {{ campaign.owner.discordUsername }}
+                  </span>
+                </span>
+              </div>
             </div>
-          }
 
-          @if (errorPlayers) {
-            <p class="error-msg" data-testid="error-players">{{ errorPlayers }}</p>
-          }
+            <div class="meta-card">
+              <div class="meta-card-icon">
+                <ion-icon name="people-outline"></ion-icon>
+              </div>
+              <div class="meta-card-details">
+                <span class="label">CAPACIDAD</span>
+                <span class="value">{{ campaign.maxPlayers }} jugadores máx.</span>
+              </div>
+            </div>
 
-          @if (!loadingPlayers && !errorPlayers) {
-            @if (players.length === 0) {
-              <p class="empty-msg" data-testid="empty-players">No hay jugadores inscritos en esta campaña.</p>
-            } @else {
-              <ion-list class="players-list" data-testid="players-list">
-                @for (player of players; track player.id) {
-                  <ion-item class="player-item" data-testid="player-item">
-                    <ion-icon name="person-outline" slot="start" class="player-icon"></ion-icon>
-                    <ion-label>
-                      <div class="player-header">
-                        <h3 class="player-name" data-testid="player-name">{{ player.name }}</h3>
-                        <span class="discord-tag" *ngIf="player.discordUsername">
-                          <ion-icon name="logo-discord"></ion-icon>
-                          {{ player.discordUsername }}
-                        </span>
-                      </div>
-                      <p class="player-email" data-testid="player-email">{{ player.email }}</p>
-                    </ion-label>
-                    @if (isOwner) {
-                      <button
-                        class="btn-kick-player"
-                        (click)="kickPlayer(player.id, player.name)"
-                        [disabled]="kickingPlayerMap[player.id]"
-                        title="Expulsar jugador de la campaña"
-                        data-testid="btn-kick-player"
-                        slot="end"
-                      >
-                        @if (kickingPlayerMap[player.id]) {
-                          <ion-spinner name="crescent" class="btn-spinner"></ion-spinner>
-                        } @else {
-                          <ion-icon name="person-remove-outline"></ion-icon>
-                        }
-                      </button>
-                    }
-                  </ion-item>
-                }
-              </ion-list>
-            }
-          }
+            <div class="meta-card meta-card--gold">
+              <div class="meta-card-icon">
+                <ion-icon name="cash-outline"></ion-icon>
+              </div>
+              <div class="meta-card-details">
+                <span class="label">PRECIO DE ENTRADA</span>
+                <span class="value">{{ formatPrice(campaign.joinPrice) }}</span>
+              </div>
+            </div>
 
+            <div class="meta-card" [class.meta-card--closed]="campaign.enrollmentClosed" [class.meta-card--open]="!campaign.enrollmentClosed">
+              <div class="meta-card-icon">
+                <ion-icon [name]="campaign.enrollmentClosed ? 'lock-closed-outline' : 'lock-open-outline'"></ion-icon>
+              </div>
+              <div class="meta-card-details">
+                <span class="label">ESTADO INSCRIPCIÓN</span>
+                <span class="value">{{ campaign.enrollmentClosed ? 'Cerrada' : 'Abierta' }}</span>
+              </div>
+            </div>
+          </div>
         </div>
-      }
+      </div>
+    }
 
-      <!-- ── Characters segment ── -->
-      @if (activeSegment === 'personajes') {
-        <div class="segment-panel" data-testid="panel-personajes">
+    <!-- Access denied block -->
+    @if (accessDenied) {
+      <div class="error-container">
+        <p class="error-msg" data-testid="access-denied">No tienes acceso a esta campaña.</p>
+      </div>
+    }
 
-          @if (loadingPlayers) {
-            <div class="loading-container" data-testid="spinner-characters">
-              <ion-spinner name="crescent"></ion-spinner>
-            </div>
-          }
+    <!-- ── MAIN RESPONSIVE CONTENT ── -->
+    @if (!accessDenied) {
+      <div class="campaign-grid">
 
-          @if (errorPlayers) {
-            <p class="error-msg" data-testid="error-characters">{{ errorPlayers }}</p>
-          }
-
-          @if (!loadingPlayers && !errorPlayers) {
-            @if (!hasAnyCharacters) {
-              <p class="empty-msg" data-testid="empty-characters">No hay personajes registrados para esta campaña.</p>
-            } @else {
-              <div class="characters-grouped" data-testid="characters-grouped">
-                @for (player of players; track player.id) {
-                  @if (player.characters.length > 0) {
-                    <div class="player-group" data-testid="player-group">
-                      <h3 class="player-group-header" data-testid="player-group-header">{{ player.name }}</h3>
-                      <ion-list class="characters-list">
-                        @for (char of player.characters; track char.id) {
-                          <ion-item class="character-item" data-testid="character-item">
-                            <ion-label>
-                              <span class="char-name" data-testid="char-name">{{ char.name }}</span>
-                              <span class="char-details">
-                                <span data-testid="char-class">{{ char.dndClass }}</span>
-                                &nbsp;·&nbsp;
-                                <span data-testid="char-race">{{ char.dndRace }}</span>
-                                &nbsp;·&nbsp;
-                                Nivel <span data-testid="char-level">{{ char.level }}</span>
-                              </span>
-                            </ion-label>
-                            @if (canViewSheet(player.id)) {
-                              <button
-                                class="btn-view-sheet"
-                                (click)="goToSheet(char.id)"
-                                title="Ver Hoja de Personaje"
-                                data-testid="btn-view-sheet"
-                              >
-                                <ion-icon name="eye-outline"></ion-icon>
-                              </button>
-                            }
-                            @if (isCurrentUser(player.id)) {
-                              <button
-                                class="btn-remove-char"
-                                (click)="unassignCharacter(char.id)"
-                                [disabled]="unassigningCharacterMap[char.id]"
-                                title="Retirar de la campaña"
-                                data-testid="btn-remove-character"
-                              >
-                                @if (unassigningCharacterMap[char.id]) {
-                                  <ion-spinner name="crescent" class="btn-spinner"></ion-spinner>
-                                } @else {
-                                  <ion-icon name="trash-outline"></ion-icon>
-                                }
-                              </button>
-                            }
-                          </ion-item>
-                        }
-                      </ion-list>
-                    </div>
-                  }
+        <!-- LEFT COLUMN: Sessions list & management -->
+        <div class="main-column">
+          <div class="section" data-testid="sessions-section">
+            <div class="section-header">
+              <h2 class="section-title">
+                <ion-icon name="calendar-outline"></ion-icon>
+                <span>Sesiones de Juego</span>
+              </h2>
+              <div class="header-actions">
+                @if (isOwner) {
+                  <button class="tracker-btn" [routerLink]="['/campaigns', campaign?.id, 'combat-tracker']">
+                    <ion-icon name="skull-outline"></ion-icon>
+                    <span>Tracker de Combate</span>
+                  </button>
+                  <button class="add-btn" (click)="openSessionForm()" data-testid="btn-nueva-sesion" aria-label="Nueva sesión">
+                    <ion-icon name="add-outline"></ion-icon>
+                    <span>Nueva Sesión</span>
+                  </button>
                 }
               </div>
-            }
-          }
-
-        </div>
-      }
-
-      <!-- ── Assign Character section (player only) ── -->
-      @if (!isOwner) {
-        <div class="section" data-testid="section-assign-character">
-          <h2 class="section-title">Asignar Personaje</h2>
-
-          @if (loadingCharacters) {
-            <div class="loading-container" data-testid="spinner-characters-assign">
-              <ion-spinner name="crescent"></ion-spinner>
             </div>
-          }
 
-          @if (errorCharacters) {
-            <p class="error-msg" data-testid="error-characters-assign">{{ errorCharacters }}</p>
-          }
+            <!-- Session Form Modal / Card (DM Only) -->
+            @if (isOwner && showSessionForm) {
+              <form [formGroup]="sessionForm" (ngSubmit)="submitSession()" class="session-form" data-testid="session-creation-form">
+                <h4 class="form-title">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  {{ editingSessionId ? 'Editar Sesión' : 'Programar Nueva Sesión' }}
+                </h4>
 
-          @if (!loadingCharacters && !errorCharacters) {
-            @if (playerCharacters.length === 0) {
-              <p class="empty-msg" data-testid="empty-characters-assign">
-                No tienes personajes. Crea uno en
-                <a [routerLink]="['/forge-character']">Forjar Personaje</a>.
-              </p>
-            } @else {
-              @if (unassignedPlayerCharacters.length === 0) {
-                <p class="empty-msg" data-testid="all-characters-assigned">
-                  Todos tus personajes ya están asignados a esta campaña.
-                </p>
+                <div class="form-grid">
+                  <div class="form-field">
+                    <label class="form-label" for="session-name">Nombre de la sesión</label>
+                    <input
+                      id="session-name"
+                      type="text"
+                      formControlName="name"
+                      class="form-input"
+                      placeholder="Ej: La Cripta Olvidada"
+                      data-testid="input-session-name"
+                      autocomplete="off"
+                    />
+                    @if (sessionForm.get('name')?.invalid && sessionForm.get('name')?.touched) {
+                      <span class="field-error" data-testid="error-session-name">El nombre es obligatorio.</span>
+                    }
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label" for="session-date">Fecha y hora</label>
+                    <input
+                      id="session-date"
+                      type="datetime-local"
+                      formControlName="scheduledDate"
+                      class="form-input"
+                      data-testid="input-session-date"
+                    />
+                    @if (sessionForm.get('scheduledDate')?.invalid && sessionForm.get('scheduledDate')?.touched) {
+                      <span class="field-error" data-testid="error-session-date">La fecha es obligatoria.</span>
+                    }
+                  </div>
+                </div>
+
+                @if (errorSession) {
+                  <p class="error-msg" data-testid="error-session-submit">{{ errorSession }}</p>
+                }
+
+                <div class="form-actions">
+                  <button
+                    type="submit"
+                    class="btn-primary btn-submit-session"
+                    [disabled]="sessionForm.invalid || submittingSession"
+                    data-testid="btn-crear-sesion"
+                  >
+                    @if (submittingSession) {
+                      <ion-spinner name="crescent" class="btn-spinner"></ion-spinner>
+                    } @else {
+                      <span>{{ editingSessionId ? 'Guardar Cambios' : 'Programar' }}</span>
+                    }
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-secondary"
+                    (click)="cancelSessionForm()"
+                    data-testid="btn-cancelar-sesion"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            }
+
+            <!-- Sessions list loaders and states -->
+            @if (loadingSessions) {
+              <div class="loading-container" data-testid="spinner-sessions">
+                <ion-spinner name="crescent"></ion-spinner>
+              </div>
+            }
+
+            @if (errorSessions) {
+              <p class="error-msg" data-testid="error-sessions">{{ errorSessions }}</p>
+            }
+
+            @if (!loadingSessions && !errorSessions) {
+              @if (sessions.length === 0) {
+                <div class="empty-state-card" data-testid="empty-sessions">
+                  <ion-icon name="calendar-outline" class="empty-icon"></ion-icon>
+                  <p class="empty-msg">No hay sesiones programadas para esta campaña.</p>
+                </div>
               } @else {
-                <select
-                  [(ngModel)]="selectedCharacterId"
-                  class="form-input"
-                  data-testid="select-character"
-                >
-                  <option value="" disabled selected>Selecciona un personaje</option>
-                  @for (char of unassignedPlayerCharacters; track char.id) {
-                    <option [value]="char.id">{{ char.name }} — {{ char.dndClass }} Nv.{{ char.level }}</option>
-                  }
-                </select>
+                <div class="sessions-grid" data-testid="sessions-list">
+                  @for (session of sessions; track session.id) {
+                    <div class="session-card" data-testid="session-item">
+                      
+                      <!-- Premium Mini Calendar Badge -->
+                      <div class="calendar-badge">
+                        <div class="calendar-badge-header">{{ getMonth(session.scheduledDate) }}</div>
+                        <div class="calendar-badge-day">{{ getDay(session.scheduledDate) }}</div>
+                      </div>
 
-                <button
-                  class="btn-primary"
-                  (click)="assignCharacter()"
-                  [disabled]="assigningCharacter || !selectedCharacterId"
-                  data-testid="btn-assign-character"
-                >
-                  @if (assigningCharacter) {
-                    <ion-spinner name="crescent" class="btn-spinner"></ion-spinner>
-                  } @else {
-                    Asignar
+                      <div class="session-details">
+                        <span class="session-name" data-testid="session-name">{{ session.name }}</span>
+                        <div class="session-time-row">
+                          <ion-icon name="time-outline"></ion-icon>
+                          <span class="session-date" data-testid="session-date">{{ formatDate(session.scheduledDate) }}</span>
+                        </div>
+                      </div>
+
+                      <!-- Action Buttons -->
+                      @if (isOwner) {
+                        <div class="session-actions">
+                          <button class="session-action-btn edit-btn" (click)="editSession(session)" aria-label="Editar sesión" data-testid="btn-editar-sesion" title="Editar Sesión">
+                            <ion-icon name="pencil-outline"></ion-icon>
+                          </button>
+                          <button class="session-action-btn delete-btn" (click)="deleteSession(session)" aria-label="Eliminar sesión" data-testid="btn-eliminar-sesion" title="Eliminar Sesión">
+                            <ion-icon name="trash-outline"></ion-icon>
+                          </button>
+                        </div>
+                      }
+                    </div>
                   }
-                </button>
+                </div>
               }
             }
-          }
-
-          @if (assignSuccess) {
-            <p class="success-msg" data-testid="assign-success">
-              <ion-icon name="checkmark-circle-outline"></ion-icon>
-              Personaje asignado correctamente.
-            </p>
-          }
-
-          @if (errorAssign) {
-            <p class="error-msg" data-testid="error-assign">{{ errorAssign }}</p>
-          }
+          </div>
         </div>
-      }
 
-    } <!-- end @if (!accessDenied) -->
+        <!-- RIGHT COLUMN: Players, characters & assignments -->
+        <div class="sidebar-column">
+          
+          <!-- ── Unified Players & Characters Panel ── -->
+          <div class="sidebar-card-unified" data-testid="unified-participants-card">
+            <div class="sidebar-card-header">
+              <ion-icon name="people-outline"></ion-icon>
+              <div class="header-titles">
+                <h2 class="sidebar-card-title">Jugadores y Personajes</h2>
+                <p class="sidebar-card-subtitle">Gestiona los miembros de la campaña y sus personajes.</p>
+              </div>
+            </div>
+
+            @if (loadingPlayers) {
+              <div class="loading-container" data-testid="spinner-players">
+                <ion-spinner name="crescent"></ion-spinner>
+              </div>
+            }
+
+            @if (errorPlayers) {
+              <p class="error-msg" data-testid="error-players">{{ errorPlayers }}</p>
+            }
+
+            @if (!loadingPlayers && !errorPlayers) {
+              @if (players.length === 0) {
+                <div class="empty-state-card" data-testid="empty-players">
+                  <ion-icon name="people-outline" class="empty-icon"></ion-icon>
+                  <p class="empty-msg">No hay jugadores inscritos en esta campaña.</p>
+                </div>
+              } @else {
+                <div class="participants-list" data-testid="players-list">
+                  @for (player of players; track player.id) {
+                    <div class="participant-card-unified" [class.expanded]="expandedPlayerIds[player.id]" data-testid="player-item">
+                      
+                      <!-- Main row: Player details -->
+                      <div class="participant-card-main-row" (click)="togglePlayerExpanded(player.id)">
+                        <div class="participant-avatar">
+                          <ion-icon name="person-outline"></ion-icon>
+                        </div>
+                        
+                        <div class="participant-info">
+                          <div class="participant-header-row">
+                            <h3 class="player-name" data-testid="player-name">{{ player.name }}</h3>
+                            <span class="discord-tag" *ngIf="player.discordUsername">
+                              <ion-icon name="logo-discord"></ion-icon>
+                              {{ player.discordUsername }}
+                            </span>
+                          </div>
+                          <p class="player-email" data-testid="player-email">{{ player.email }}</p>
+                        </div>
+
+                        <div class="participant-meta-controls" (click)="$event.stopPropagation()">
+                          <!-- Kick button -->
+                          @if (isOwner) {
+                            <button
+                              class="btn-kick-player"
+                              (click)="kickPlayer(player.id, player.name); $event.stopPropagation()"
+                              [disabled]="kickingPlayerMap[player.id]"
+                              title="Expulsar jugador de la campaña"
+                              data-testid="btn-kick-player"
+                            >
+                              @if (kickingPlayerMap[player.id]) {
+                                <ion-spinner name="crescent" class="btn-spinner"></ion-spinner>
+                              } @else {
+                                <ion-icon name="person-remove-outline"></ion-icon>
+                              }
+                            </button>
+                          }
+
+                          <!-- Leave button -->
+                          @if (isCurrentUser(player.id) && !isOwner) {
+                            <button
+                              class="btn-leave-campaign"
+                              (click)="leaveCampaign(); $event.stopPropagation()"
+                              [disabled]="leavingCampaign"
+                              title="Abandonar campaña"
+                              data-testid="btn-leave-campaign"
+                            >
+                              @if (leavingCampaign) {
+                                <ion-spinner name="crescent" class="btn-spinner"></ion-spinner>
+                              } @else {
+                                <ion-icon name="exit-outline"></ion-icon>
+                              }
+                            </button>
+                          }
+
+                          
+                          <!-- Toggle Button & Badge -->
+                          <div class="toggle-control-wrapper">
+                            <span class="char-count-badge" [class.char-count-badge--empty]="player.characters.length === 0">
+                              {{ player.characters.length }} {{ player.characters.length === 1 ? 'PJ' : 'PJs' }}
+                            </span>
+                            <button
+                              class="btn-toggle-chars"
+                              (click)="togglePlayerExpanded(player.id); $event.stopPropagation()"
+                              [title]="expandedPlayerIds[player.id] ? 'Ocultar personajes' : 'Ver personajes'"
+                            >
+                              <ion-icon [name]="expandedPlayerIds[player.id] ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Expanded content: Characters and character assignment -->
+                      @if (expandedPlayerIds[player.id]) {
+                        <div class="participant-card-expanded-content">
+                          
+                          <!-- Character List -->
+                          <div class="assigned-characters-section">
+                            <h4 class="sub-section-title">Personajes en Campaña:</h4>
+                            
+                            @if (player.characters.length === 0) {
+                              <div class="mini-empty-state">
+                                <p>Sin personajes asignados.</p>
+                              </div>
+                            } @else {
+                              <div class="compact-characters-list">
+                                @for (char of player.characters; track char.id) {
+                                  <div class="compact-char-card" data-testid="character-item">
+                                    <div class="char-details">
+                                      <span class="char-name" data-testid="char-name">{{ char.name }}</span>
+                                      <div class="char-meta">
+                                        <span class="badge-class" data-testid="char-class">{{ char.dndClass }}</span>
+                                        <span class="bullet">·</span>
+                                        <span class="badge-race" data-testid="char-race">{{ char.dndRace }}</span>
+                                        <span class="bullet">·</span>
+                                        <span class="badge-level">Nv. <span data-testid="char-level">{{ char.level }}</span></span>
+                                      </div>
+                                    </div>
+
+                                    <div class="char-actions">
+                                      @if (canViewSheet(player.id)) {
+                                        <button
+                                          class="btn-view-sheet-compact"
+                                          (click)="goToSheet(char.id)"
+                                          title="Ver Hoja de Personaje"
+                                          data-testid="btn-view-sheet"
+                                        >
+                                          <ion-icon name="eye-outline"></ion-icon>
+                                        </button>
+                                      }
+                                      @if (isCurrentUser(player.id)) {
+                                        <button
+                                          class="btn-remove-char-compact"
+                                          (click)="unassignCharacter(char.id)"
+                                          [disabled]="unassigningCharacterMap[char.id]"
+                                          title="Retirar de la campaña"
+                                          data-testid="btn-remove-character"
+                                        >
+                                          @if (unassigningCharacterMap[char.id]) {
+                                            <ion-spinner name="crescent" class="btn-spinner"></ion-spinner>
+                                          } @else {
+                                            <ion-icon name="trash-outline"></ion-icon>
+                                          }
+                                        </button>
+                                      }
+                                    </div>
+                                  </div>
+                                }
+                              </div>
+                            }
+                          </div>
+
+                          <!-- Assign character row (only for the logged-in user in their card) -->
+                          @if (isCurrentUser(player.id)) {
+                            <div class="assign-character-sub-section" data-testid="section-assign-character">
+                              <h4 class="sub-section-title">
+                                <ion-icon name="add-outline"></ion-icon>
+                                <span>Asignar Personaje a la Campaña</span>
+                              </h4>
+
+                              @if (loadingCharacters) {
+                                <div class="loading-container-mini">
+                                  <ion-spinner name="crescent"></ion-spinner>
+                                </div>
+                              }
+
+                              @if (errorCharacters) {
+                                <p class="error-msg-mini">{{ errorCharacters }}</p>
+                              }
+
+                              @if (!loadingCharacters && !errorCharacters) {
+                                @if (playerCharacters.length === 0) {
+                                  <p class="empty-msg-mini">
+                                    No tienes personajes creados. Créalo en
+                                    <a [routerLink]="['/forge-character']" class="forge-link">Forjar Personaje</a>.
+                                  </p>
+                                } @else {
+                                  @if (unassignedPlayerCharacters.length === 0) {
+                                    <p class="empty-msg-mini success-msg-mini">
+                                      <ion-icon name="checkmark-circle-outline"></ion-icon>
+                                      Todos tus personajes ya están asignados.
+                                    </p>
+                                  } @else {
+                                    <div class="assign-form-group-compact">
+                                      <select
+                                        [(ngModel)]="selectedCharacterId"
+                                        class="form-input custom-select select-compact"
+                                        data-testid="select-character"
+                                      >
+                                        <option value="" disabled selected>Selecciona un personaje...</option>
+                                        @for (char of unassignedPlayerCharacters; track char.id) {
+                                          <option [value]="char.id">{{ char.name }} ({{ char.dndClass }} Nv.{{ char.level }})</option>
+                                        }
+                                      </select>
+
+                                      <button
+                                        class="btn-primary btn-assign-char-compact"
+                                        (click)="assignCharacter()"
+                                        [disabled]="assigningCharacter || !selectedCharacterId"
+                                        data-testid="btn-assign-character"
+                                      >
+                                        @if (assigningCharacter) {
+                                          <ion-spinner name="crescent" class="btn-spinner"></ion-spinner>
+                                        } @else {
+                                          <span>Asignar</span>
+                                        }
+                                      </button>
+                                    </div>
+                                  }
+                                }
+                              }
+
+                              @if (assignSuccess) {
+                                <div class="success-alert success-alert-mini" data-testid="assign-success">
+                                  <ion-icon name="checkmark-circle-outline"></ion-icon>
+                                  <span>Personaje asignado correctamente.</span>
+                                </div>
+                              }
+
+                              @if (errorAssign) {
+                                <p class="error-msg-mini ion-margin-top" data-testid="error-assign">{{ errorAssign }}</p>
+                              }
+                            </div>
+                          }
+
+                        </div>
+                      }
+
+                    </div>
+                  }
+                </div>
+              }
+            }
+          </div>
+
+        </div> <!-- end sidebar-column -->
+
+      </div> <!-- end campaign-grid -->
+    }
 
   </div>
 </ion-content>

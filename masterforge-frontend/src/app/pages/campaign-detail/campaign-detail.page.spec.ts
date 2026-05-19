@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { Location } from '@angular/common';
 import { of, throwError } from 'rxjs';
 
 import { CampaignDetailPage } from './campaign-detail.page';
@@ -112,7 +111,6 @@ describe('CampaignDetailPage — 12.1 Initialization and API calls', () => {
         { provide: ActivatedRoute, useValue: buildActivatedRouteStub() },
         { provide: RoleService, useValue: buildMockRoleService('dm') },
         { provide: AuthService, useValue: buildMockAuthService() },
-        Location,
       ],
     }).compileComponents();
 
@@ -173,7 +171,6 @@ describe('CampaignDetailPage — 12.2 Loading spinners and empty states', () => 
         { provide: ActivatedRoute, useValue: buildActivatedRouteStub() },
         { provide: RoleService, useValue: buildMockRoleService('dm') },
         { provide: AuthService, useValue: buildMockAuthService() },
-        Location,
       ],
     }).compileComponents();
 
@@ -312,12 +309,11 @@ describe('CampaignDetailPage — 12.2 Loading spinners and empty states', () => 
 // Validates: Requirements 4.5, 4.12
 // ---------------------------------------------------------------------------
 
-describe('CampaignDetailPage — 12.3 Back navigation and segment switching', () => {
+describe('CampaignDetailPage — 12.3 Unified Accordion Toggling', () => {
 
   let fixture: ComponentFixture<CampaignDetailPage>;
   let component: CampaignDetailPage;
   let apiSpy: jasmine.SpyObj<ApiService>;
-  let location: Location;
 
   beforeEach(async () => {
     apiSpy = buildApiSpy();
@@ -329,96 +325,41 @@ describe('CampaignDetailPage — 12.3 Back navigation and segment switching', ()
         { provide: ActivatedRoute, useValue: buildActivatedRouteStub() },
         { provide: RoleService, useValue: buildMockRoleService('dm') },
         { provide: AuthService, useValue: buildMockAuthService() },
-        Location,
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CampaignDetailPage);
     component = fixture.componentInstance;
-    location = TestBed.inject(Location);
     fixture.detectChanges();
   });
 
-  describe('goBack', () => {
-    it('should call Location.back() when back button is clicked', () => {
-      const backSpy = spyOn(location, 'back');
+  describe('togglePlayerExpanded', () => {
+    it('should toggle expanded status of player correctly', () => {
+      expect(component.expandedPlayerIds['player-1']).toBeFalsy();
 
-      const backBtn: HTMLElement = fixture.nativeElement.querySelector('[data-testid="btn-back"]');
-      expect(backBtn).toBeTruthy();
-      backBtn.click();
+      component.togglePlayerExpanded('player-1');
+      expect(component.expandedPlayerIds['player-1']).toBeTrue();
 
-      expect(backSpy).toHaveBeenCalledTimes(1);
+      component.togglePlayerExpanded('player-1');
+      expect(component.expandedPlayerIds['player-1']).toBeFalse();
     });
 
-    it('should call Location.back() when goBack() is called directly', () => {
-      const backSpy = spyOn(location, 'back');
-      component.goBack();
-      expect(backSpy).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('segmentChanged', () => {
-    it('should update activeSegment to "personajes" when segment changes', () => {
-      expect(component.activeSegment).toBe('jugadores'); // default
-
-      component.segmentChanged({ detail: { value: 'personajes' } });
-
-      expect(component.activeSegment).toBe('personajes');
-    });
-
-    it('should update activeSegment back to "jugadores" when segment changes to jugadores', () => {
-      component.activeSegment = 'personajes';
-
-      component.segmentChanged({ detail: { value: 'jugadores' } });
-
-      expect(component.activeSegment).toBe('jugadores');
-    });
-
-    it('should show characters view (panel-personajes) when activeSegment is "personajes"', () => {
-      component.activeSegment = 'personajes';
+    it('should expand/collapse accordion in template when toggled', () => {
       component.loadingPlayers = false;
       component.errorPlayers = null;
       component.players = mockPlayers;
       fixture.detectChanges();
 
-      const panel = fixture.nativeElement.querySelector('[data-testid="panel-personajes"]');
-      expect(panel).toBeTruthy();
+      // Initially player-1's accordion is collapsed (not in DOM)
+      let expandedContent = fixture.nativeElement.querySelector('.participant-card-expanded-content');
+      expect(expandedContent).toBeNull();
 
-      const jugadoresPanel = fixture.nativeElement.querySelector('[data-testid="panel-jugadores"]');
-      expect(jugadoresPanel).toBeNull();
-    });
-
-    it('should show players view (panel-jugadores) when activeSegment is "jugadores"', () => {
-      component.activeSegment = 'jugadores';
-      component.loadingPlayers = false;
-      component.errorPlayers = null;
-      component.players = mockPlayers;
+      // Expand player-1
+      component.togglePlayerExpanded(mockPlayers[0].id);
       fixture.detectChanges();
 
-      const panel = fixture.nativeElement.querySelector('[data-testid="panel-jugadores"]');
-      expect(panel).toBeTruthy();
-
-      const personajesPanel = fixture.nativeElement.querySelector('[data-testid="panel-personajes"]');
-      expect(personajesPanel).toBeNull();
-    });
-
-    it('should switch from jugadores to personajes view after segmentChanged event', () => {
-      // Start on jugadores
-      component.activeSegment = 'jugadores';
-      component.loadingPlayers = false;
-      component.errorPlayers = null;
-      component.players = mockPlayers;
-      fixture.detectChanges();
-
-      expect(fixture.nativeElement.querySelector('[data-testid="panel-jugadores"]')).toBeTruthy();
-      expect(fixture.nativeElement.querySelector('[data-testid="panel-personajes"]')).toBeNull();
-
-      // Switch to personajes
-      component.segmentChanged({ detail: { value: 'personajes' } });
-      fixture.detectChanges();
-
-      expect(fixture.nativeElement.querySelector('[data-testid="panel-personajes"]')).toBeTruthy();
-      expect(fixture.nativeElement.querySelector('[data-testid="panel-jugadores"]')).toBeNull();
+      expandedContent = fixture.nativeElement.querySelector('.participant-card-expanded-content');
+      expect(expandedContent).toBeTruthy();
     });
   });
 });
@@ -452,7 +393,6 @@ describe('CampaignDetailPage — Session creation form', () => {
         { provide: ActivatedRoute, useValue: buildActivatedRouteStub() },
         { provide: RoleService, useValue: buildMockRoleService('dm') },
         { provide: AuthService, useValue: buildMockAuthService() },
-        Location,
       ],
     }).compileComponents();
 
@@ -550,3 +490,64 @@ describe('CampaignDetailPage — Session creation form', () => {
     expect(component.submittingSession).toBeFalse();
   });
 });
+
+describe('CampaignDetailPage — Player self-leave and DM kick actions', () => {
+
+  let fixture: ComponentFixture<CampaignDetailPage>;
+  let component: CampaignDetailPage;
+  let apiSpy: jasmine.SpyObj<ApiService>;
+  let routerSpy: jasmine.SpyObj<Router>;
+
+  beforeEach(async () => {
+    apiSpy = jasmine.createSpyObj<ApiService>('ApiService', [
+      'getCampaignById',
+      'getCampaignSessions',
+      'getCampaignPlayers',
+      'leaveCampaign',
+      'kickPlayerFromCampaign',
+    ]);
+    apiSpy.getCampaignById.and.returnValue(of(mockCampaign));
+    apiSpy.getCampaignSessions.and.returnValue(of(mockSessions));
+    apiSpy.getCampaignPlayers.and.returnValue(of(mockPlayers));
+    apiSpy.leaveCampaign.and.returnValue(of(undefined));
+    apiSpy.kickPlayerFromCampaign.and.returnValue(of(undefined));
+
+    routerSpy = jasmine.createSpyObj<Router>('Router', ['navigate']);
+
+    await TestBed.configureTestingModule({
+      imports: [CampaignDetailPage],
+      providers: [
+        { provide: ApiService, useValue: apiSpy },
+        { provide: ActivatedRoute, useValue: buildActivatedRouteStub() },
+        { provide: RoleService, useValue: buildMockRoleService('player') },
+        { provide: AuthService, useValue: { getUserIdFromToken: () => 'player-1' } },
+        { provide: Router, useValue: routerSpy },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(CampaignDetailPage);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should call leaveCampaign on ApiService and navigate to my-campaigns on confirmation', () => {
+    spyOn(window, 'confirm').and.returnValue(true);
+    spyOn(window, 'alert');
+
+    component.leaveCampaign();
+
+    expect(apiSpy.leaveCampaign).toHaveBeenCalledWith(CAMPAIGN_ID);
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/my-campaigns']);
+  });
+
+  it('should call kickPlayerFromCampaign on ApiService and reload players list on confirmation', () => {
+    spyOn(window, 'confirm').and.returnValue(true);
+    spyOn(window, 'alert');
+
+    component.kickPlayer('player-2', 'Player Two');
+
+    expect(apiSpy.kickPlayerFromCampaign).toHaveBeenCalledWith(CAMPAIGN_ID, 'player-2');
+    expect(apiSpy.getCampaignPlayers).toHaveBeenCalled();
+  });
+});
+
