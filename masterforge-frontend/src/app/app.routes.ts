@@ -22,8 +22,8 @@ export const routes: Routes = [
       { path: 'campaigns', loadComponent: () => import('./pages/campaigns/campaigns.page').then(m => m.CampaignsPage), data: { pageTitle: 'Campañas', pageIcon: 'map-outline' } },
       { path: 'official-content', loadComponent: () => import('./pages/official-content/official-content.page').then(m => m.OfficialContentPage), data: { pageTitle: 'Contenido Oficial', pageIcon: 'color-wand-outline' } },
       { path: 'bestiary', loadComponent: () => import('./pages/bestiary/bestiary.page').then(m => m.BestiaryPage), data: { pageTitle: 'Bestiario', pageIcon: 'skull-outline' } },
-      { path: 'campaigns/:id', loadComponent: () => import('./pages/campaign-detail/campaign-detail.page').then(m => m.CampaignDetailPage) },
-      { path: 'campaigns/:id/combat-tracker', loadComponent: () => import('./pages/combat-tracker/combat-tracker.page').then(m => m.CombatTrackerPage) },
+      { path: 'campaigns/:id', loadComponent: () => import('./pages/campaign-detail/campaign-detail.page').then(m => m.CampaignDetailPage), data: { pageTitle: 'Detalle de Campaña', pageIcon: 'map-outline' } },
+      { path: 'campaigns/:id/combat-tracker', loadComponent: () => import('./pages/combat-tracker/combat-tracker.page').then(m => m.CombatTrackerPage), data: { pageTitle: 'Iniciativa de Combate', pageIcon: 'play-outline' } },
       { path: 'config', loadComponent: () => import('./pages/config/config.page').then(m => m.ConfigPage), data: { pageTitle: 'Configuración', pageIcon: 'settings-outline' } },
       // New routes for Player features (Assuming components will be generated)
       { path: 'forge-character', loadComponent: () => import('./pages/forge-character/forge-character.page').then(m => m.ForgeCharacterPage) },
