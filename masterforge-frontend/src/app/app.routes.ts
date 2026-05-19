@@ -40,7 +40,7 @@ export const routes: Routes = [
       { path: 'homebrew/spell/:id/edit', loadComponent: () => import('./pages/homebrew-spell-form/homebrew-spell-form.page').then(m => m.HomebrewSpellFormPage) },
       { path: 'homebrew/item/new', loadComponent: () => import('./pages/homebrew-item-form/homebrew-item-form.page').then(m => m.HomebrewItemFormPage) },
       { path: 'homebrew/item/:id/edit', loadComponent: () => import('./pages/homebrew-item-form/homebrew-item-form.page').then(m => m.HomebrewItemFormPage) },
-      { path: 'search-campaigns', loadComponent: () => import('./pages/search-campaigns/search-campaigns.page').then(m => m.SearchCampaignsPage) },
+      { path: 'search-campaigns', loadComponent: () => import('./pages/search-campaigns/search-campaigns.page').then(m => m.SearchCampaignsPage), data: { pageTitle: 'Gremio de Campañas', pageIcon: 'search-outline' } },
       { path: 'my-characters', loadComponent: () => import('./pages/my-characters/my-characters.page').then(m => m.MyCharactersPage), data: { pageTitle: 'Mis Personajes', pageIcon: 'shield-half-outline' } },
       { path: 'my-campaigns', loadComponent: () => import('./pages/my-campaigns/my-campaigns.page').then(m => m.MyCampaignsPage), data: { pageTitle: 'Mis Campañas', pageIcon: 'book-outline' } },
       { path: 'discord-callback', loadComponent: () => import('./pages/discord-callback/discord-callback.page').then(m => m.DiscordCallbackPage) },

@@ -2,15 +2,12 @@
 
 // ── List container ────────────────────────────────────────────────────────────
 .campaign-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
 }
 
 // ── Scrollable modifier (CSS virtual scrolling via containment) ───────────────
-// Req 8.1, 8.3, 8.4: Fixed-height scrollable container with CSS containment
-// reduces layout recalculations for large campaign lists without requiring
-// additional dependencies.
 .campaign-list--scrollable {
   max-height: 70vh;
   overflow-y: auto;
@@ -25,138 +22,184 @@
     background: transparent;
   }
   &::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(201, 168, 76, 0.15);
     border-radius: 3px;
   }
 }
 
 // ── Empty state ───────────────────────────────────────────────────────────────
 .empty-container {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem 1rem;
+  padding: 60px 24px;
   text-align: center;
-  gap: 8px;
-}
+  background: rgba(30, 30, 30, 0.4);
+  border: 1px dashed rgba(201, 168, 76, 0.2);
+  border-radius: 16px;
+  backdrop-filter: blur(8px);
+  overflow: hidden;
+  margin-top: 20px;
+  grid-column: 1 / -1; /* spans full grid width */
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
 
-.empty-icon {
-  font-size: 3rem;
-  color: $accent-gold;
-  opacity: 0.35;
-}
+  .empty-glow {
+    position: absolute;
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, rgba(201, 168, 76, 0.08) 0%, transparent 70%);
+    z-index: 0;
+    pointer-events: none;
+  }
 
-.empty-title {
-  color: $text-primary;
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 0;
-}
+  .empty-icon {
+    font-size: 4rem;
+    color: var(--mf-accent-gold, #c9a84c);
+    filter: drop-shadow(0 0 12px rgba(201, 168, 76, 0.4));
+    margin-bottom: 16px;
+    z-index: 1;
+  }
 
-.empty-subtitle {
-  color: $text-muted;
-  font-size: 0.85rem;
-  margin: 0;
+  .empty-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 8px;
+    z-index: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .empty-subtitle {
+    font-size: 0.9rem;
+    color: var(--mf-text-muted, #8c8c8c);
+    max-width: 440px;
+    margin: 0;
+    line-height: 1.5;
+    z-index: 1;
+  }
 }
 
 // ── Campaign card ─────────────────────────────────────────────────────────────
 .campaign-card {
-  background: $bg-surface;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-left: 3px solid $accent-gold;
-  border-radius: 10px;
-  padding: 14px 16px;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  // Req 8.3: Defer rendering of off-screen cards to reduce initial render time.
-  // The browser skips layout/paint for cards outside the viewport.
+  position: relative;
+  background: rgba(30, 30, 30, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(201, 168, 76, 0.12);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   content-visibility: auto;
-  // Estimated card height so the browser can reserve space and avoid layout shifts.
-  contain-intrinsic-size: 0 120px;
+  contain-intrinsic-size: 0 160px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    transform: translateY(-4px);
+    border-color: rgba(201, 168, 76, 0.45);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(201, 168, 76, 0.15);
   }
 
   &--full {
-    border-left-color: $text-muted;
-    opacity: 0.75;
+    opacity: 0.65;
+    border-color: rgba(255, 255, 255, 0.05);
 
     &:hover {
       transform: none;
-      box-shadow: none;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      border-color: rgba(255, 255, 255, 0.05);
     }
   }
 }
 
 // ── Card header ───────────────────────────────────────────────────────────────
 .campaign-card__header {
-  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .campaign-card__title-row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 4px;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .campaign-card__name {
-  color: $accent-gold;
-  font-weight: 700;
-  font-size: 1.05rem;
-  letter-spacing: 0.02em;
-  flex: 1;
-  min-width: 0;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.campaign-card__owner {
+.campaign-card__badges {
   display: flex;
-  align-items: center;
-  gap: 4px;
-  color: $text-muted;
-  font-size: 0.8rem;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 // ── Badges ────────────────────────────────────────────────────────────────────
 .campaign-card__badge {
-  font-size: 0.68rem;
-  font-weight: 700;
+  font-size: 0.65rem;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  padding: 2px 8px;
+  padding: 3px 8px;
   border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   flex-shrink: 0;
 
   &--available {
-    background: rgba(46, 160, 67, 0.15);
-    color: #2ea043;
-    border: 1px solid rgba(46, 160, 67, 0.4);
+    background: rgba(46, 160, 67, 0.12);
+    color: #4cd964;
+    border: 1px solid rgba(46, 160, 67, 0.25);
   }
 
   &--full {
-    background: rgba($text-muted, 0.12);
-    color: $text-muted;
-    border: 1px solid rgba($text-muted, 0.3);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--mf-text-muted, #8c8c8c);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  &--dm {
+    background: rgba(84, 160, 255, 0.12);
+    color: #54a0ff;
+    border: 1px solid rgba(84, 160, 255, 0.25);
+
+    .meta-icon {
+      font-size: 0.75rem;
+      margin: 0;
+    }
   }
 }
 
 // ── Description ───────────────────────────────────────────────────────────────
 .campaign-card__description {
-  color: $text-primary;
-  font-size: 0.88rem;
-  margin: 0 0 10px;
-  opacity: 0.85;
-  line-height: 1.4;
+  color: var(--mf-text-muted, #8c8c8c);
+  font-size: 0.86rem;
+  line-height: 1.5;
+  margin: 0;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 // ── Footer ────────────────────────────────────────────────────────────────────
@@ -165,31 +208,34 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  flex-wrap: wrap;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 12px;
+  margin-top: auto; /* pushes footer to bottom in card flex */
 }
 
 .campaign-card__meta {
   display: flex;
   align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .meta-item {
   display: flex;
   align-items: center;
   gap: 4px;
-  color: $text-muted;
-  font-size: 0.82rem;
+  color: var(--mf-text-muted, #8c8c8c);
+  font-size: 0.8rem;
+  font-weight: 500;
 
   &--price {
-    color: $accent-gold;
-    font-weight: 600;
+    color: var(--mf-accent-gold, #c9a84c);
+    font-weight: 700;
+    text-shadow: 0 0 8px rgba(201, 168, 76, 0.2);
   }
 }
 
 .meta-icon {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 // ── Join button ───────────────────────────────────────────────────────────────
@@ -197,33 +243,36 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  background: rgba($accent-gold, 0.15);
-  border: 1px solid rgba($accent-gold, 0.5);
-  color: $accent-gold;
-  font-size: 0.82rem;
-  font-weight: 700;
+  background: rgba(201, 168, 76, 0.12);
+  border: 1px solid rgba(201, 168, 76, 0.4);
+  color: var(--mf-accent-gold, #c9a84c);
+  font-size: 0.8rem;
+  font-weight: 800;
   padding: 6px 14px;
   border-radius: 20px;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 
   ion-icon {
     font-size: 0.95rem;
   }
 
   &:hover:not(:disabled) {
-    background: rgba($accent-gold, 0.25);
-    border-color: rgba($accent-gold, 0.8);
+    background: rgba(201, 168, 76, 0.25);
+    border-color: var(--mf-accent-gold, #c9a84c);
+    box-shadow: 0 0 10px rgba(201, 168, 76, 0.25);
   }
 
   &--disabled,
   &:disabled {
-    background: rgba($text-muted, 0.08);
-    border-color: rgba($text-muted, 0.25);
-    color: $text-muted;
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: var(--mf-text-muted, #8c8c8c);
     cursor: not-allowed;
-    opacity: 0.7;
+    box-shadow: none !important;
   }
 }
 
@@ -231,30 +280,34 @@
 .load-more-container {
   display: flex;
   justify-content: center;
-  padding: 8px 0 4px;
+  padding: 12px 0 4px;
+  grid-column: 1 / -1; /* Spans full grid width! */
 }
 
 .btn-load-more {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: $text-muted;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--mf-text-muted, #8c8c8c);
   font-size: 0.82rem;
-  padding: 7px 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 20px;
   border-radius: 20px;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
   ion-icon {
     font-size: 0.9rem;
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.2);
-    color: $text-primary;
+    background: rgba(201, 168, 76, 0.05);
+    border-color: rgba(201, 168, 76, 0.3);
+    color: #ffffff;
   }
 }
 
@@ -265,25 +318,27 @@
   justify-content: center;
   gap: 10px;
   padding: 16px;
+  grid-column: 1 / -1;
 }
 
 .loading-spinner {
-  --color: #{$accent-gold};
+  --color: var(--mf-accent-gold, #c9a84c);
   width: 20px;
   height: 20px;
 }
 
 .loading-more-text {
-  color: $text-muted;
+  color: var(--mf-text-muted, #8c8c8c);
   font-size: 0.82rem;
+  font-weight: 600;
 }
 
 // ── Search highlight ──────────────────────────────────────────────────────────
-// Req 2.5: Highlight matching text in search results
 :host ::ng-deep .search-highlight {
-  background: rgba($accent-gold, 0.25);
-  color: $accent-gold;
+  background: rgba(201, 168, 76, 0.25);
+  color: var(--mf-accent-gold, #c9a84c);
   border-radius: 2px;
-  padding: 0 1px;
-  font-weight: 700;
+  padding: 0 2px;
+  font-weight: 800;
+  text-shadow: 0 0 5px rgba(201, 168, 76, 0.25);
 }

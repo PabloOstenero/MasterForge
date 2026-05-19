@@ -10,77 +10,20 @@
   min-height: 100%;
 }
 
-// ── Page header ───────────────────────────────────────────────────────────────
-.page-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 24px;
-}
-
-.page-icon {
-  font-size: 1.8rem;
-  color: $accent-gold;
-}
-
-.page-title {
-  color: $accent-gold;
-  font-size: 1.6rem;
-  font-weight: 700;
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
 // ── Search bar ────────────────────────────────────────────────────────────────
 .search-bar-wrapper {
-  margin-bottom: 16px;
-}
-
-.search-form {
-  width: 100%;
-}
-
-.search-input-container {
-  display: flex;
-  align-items: center;
-  background: $bg-surface;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  padding: 10px 14px;
-  gap: 10px;
-  transition: border-color 0.2s;
-
-  &:focus-within {
-    border-color: rgba($accent-gold, 0.5);
-  }
-}
-
-.search-icon {
-  color: $text-muted;
-  font-size: 1.1rem;
-  flex-shrink: 0;
-}
-
-.search-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: $text-primary;
-  font-size: 0.95rem;
-
-  &::placeholder {
-    color: $text-muted;
-  }
+  margin-bottom: 20px;
 }
 
 // ── Results count ─────────────────────────────────────────────────────────────
 .results-count {
-  color: $text-muted;
-  font-size: 0.82rem;
-  margin-bottom: 12px;
-  padding: 0 2px;
+  color: var(--mf-text-muted, #8c8c8c);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  padding: 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 // ── Loading ───────────────────────────────────────────────────────────────────
@@ -88,13 +31,25 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 40px 20px;
-  gap: 12px;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 16px;
+  background: rgba(30, 30, 30, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+
+  ion-spinner {
+    --color: var(--mf-accent-gold, #c9a84c);
+    width: 32px;
+    height: 32px;
+  }
 }
 
 .loading-text {
-  color: $text-muted;
+  color: var(--mf-text-muted, #8c8c8c);
   font-size: 0.9rem;
+  font-weight: 600;
 }
 
 // ── Error ─────────────────────────────────────────────────────────────────────
@@ -102,90 +57,105 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 32px 20px;
-  gap: 12px;
+  padding: 40px 20px;
+  gap: 16px;
   text-align: center;
+  background: rgba(124, 92, 0, 0.05);
+  border: 1px solid rgba($accent-crimson, 0.25);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
 }
 
 .error-icon {
-  font-size: 2.5rem;
+  font-size: 3rem;
   color: $accent-crimson;
-  opacity: 0.8;
+  filter: drop-shadow(0 0 10px rgba($accent-crimson, 0.3));
 }
 
 .error-msg {
   color: $accent-crimson;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 600;
   margin: 0;
 }
 
 .btn-retry {
-  --color: #{$accent-gold};
-  --border-color: #{$accent-gold};
-  margin-top: 4px;
+  --color: var(--mf-accent-gold, #c9a84c);
+  --border-color: rgba(201, 168, 76, 0.5);
+  --background-hover: rgba(201, 168, 76, 0.1);
+  margin-top: 8px;
 }
 
 // ── Payment modal overlay (Req 4.2) ───────────────────────────────────────────
 .payment-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.75);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10000;
-  padding: 16px;
-  backdrop-filter: blur(4px);
+  padding: 20px;
+  backdrop-filter: blur(8px);
 }
 
 .payment-modal {
-  background: $bg-surface;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
+  background: rgba(30, 30, 30, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(201, 168, 76, 0.2);
+  border-radius: 16px;
   width: 100%;
   max-width: 480px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 30px rgba(201, 168, 76, 0.1);
 }
 
 .payment-modal__header {
-  padding: 16px 16px 0;
+  padding: 20px 20px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 12px;
+  margin-bottom: 12px;
 }
 
 .payment-modal__title {
-  color: $accent-gold;
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin: 0 0 12px;
+  color: var(--mf-accent-gold, #c9a84c);
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: 0;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 10px rgba(201, 168, 76, 0.2);
 }
 
 // ── Refresh prompt (Req 10.4) ─────────────────────────────────────────────
 .refresh-prompt {
   position: sticky;
-  top: 0;
+  top: 10px;
   z-index: 100;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: #7c5c00;
-  border: 1px solid #c9a84c;
-  border-radius: 8px;
-  margin-bottom: 12px;
+  gap: 12px;
+  padding: 10px 16px;
+  background: rgba(124, 92, 0, 0.2);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--mf-accent-gold, #c9a84c);
+  border-radius: 10px;
+  margin-bottom: 16px;
   color: #f0e6d3;
   font-size: 0.88rem;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 10px rgba(201, 168, 76, 0.1);
 
   span {
     flex: 1;
   }
 
   ion-button {
-    --color: #{$accent-gold};
-    --padding-start: 8px;
-    --padding-end: 8px;
+    --color: var(--mf-accent-gold, #c9a84c);
+    --padding-start: 10px;
+    --padding-end: 10px;
+    font-weight: 700;
     font-size: 0.82rem;
   }
 }
@@ -195,18 +165,19 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 0.78rem;
-  margin-bottom: 8px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 12px;
 
   ion-icon {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
   }
 
   &.polling {
-    background: rgba(255, 255, 255, 0.06);
-    color: $text-muted;
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--mf-text-muted, #8c8c8c);
     border: 1px solid rgba(255, 255, 255, 0.08);
   }
 }

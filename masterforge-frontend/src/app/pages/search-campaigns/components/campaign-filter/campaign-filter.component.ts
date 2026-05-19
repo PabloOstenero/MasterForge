@@ -118,7 +118,8 @@ export class CampaignFilterComponent implements OnInit, OnDestroy {
       customPriceMin: [null],
       customPriceMax: [null],
       capacity: [CapacityFilterType.ANY],
-      availability: [AvailabilityFilterType.ALL],
+      availability: [AvailabilityFilterType.AVAILABLE_ONLY],
+      dmName: [''],
     });
   }
 
@@ -171,7 +172,8 @@ export class CampaignFilterComponent implements OnInit, OnDestroy {
       customPriceMin: null,
       customPriceMax: null,
       capacity: CapacityFilterType.ANY,
-      availability: AvailabilityFilterType.ALL,
+      availability: AvailabilityFilterType.AVAILABLE_ONLY,
+      dmName: '',
     }, { emitEvent: false });
     this.showCustomPriceRange = false;
     this.emitFilters();
@@ -183,7 +185,8 @@ export class CampaignFilterComponent implements OnInit, OnDestroy {
     return (
       v.pricePreset !== null ||
       v.capacity !== CapacityFilterType.ANY ||
-      v.availability !== AvailabilityFilterType.ALL
+      v.availability !== AvailabilityFilterType.AVAILABLE_ONLY ||
+      (v.dmName && v.dmName.trim().length > 0)
     );
   }
 
@@ -232,6 +235,11 @@ export class CampaignFilterComponent implements OnInit, OnDestroy {
     if (v.availability && v.availability !== AvailabilityFilterType.ALL) {
       const availabilityFilter: AvailabilityFilter = { type: v.availability };
       filters.availabilityFilter = availabilityFilter;
+    }
+
+    // Dungeon Master name filter
+    if (v.dmName && v.dmName.trim().length > 0) {
+      filters.dmName = v.dmName.trim();
     }
 
     this.filtersChanged.emit(filters);

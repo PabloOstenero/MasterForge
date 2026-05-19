@@ -126,7 +126,9 @@ export class SearchCampaignsPage implements OnInit, OnDestroy {
   // ── Internal subjects ──────────────────────────────────────────────────────
 
   private destroy$ = new Subject<void>();
-  private filters$ = new BehaviorSubject<CampaignFilters>({});
+  private filters$ = new BehaviorSubject<CampaignFilters>({
+    availabilityFilter: { type: AvailabilityFilterType.AVAILABLE_ONLY }
+  });
 
   /** Tracks last user interaction time for inactivity detection (Req 10.4). */
   private lastInteractionTime = Date.now();
@@ -193,6 +195,11 @@ export class SearchCampaignsPage implements OnInit, OnDestroy {
   }
 
   // ── Public methods ─────────────────────────────────────────────────────────
+
+  /** Returns the ID of the currently logged-in user. */
+  get currentUserId(): string {
+    return this.authService.getUserIdFromToken() || '';
+  }
 
   /**
    * Resets the inactivity timer on user interaction (Req 10.4).
@@ -460,6 +467,7 @@ export class SearchCampaignsPage implements OnInit, OnDestroy {
   ): SearchCriteria {
     return {
       searchText: searchText?.trim() || undefined,
+      dmName: filters.dmName || undefined,
       priceRange: filters.priceRange,
       capacityFilter: filters.capacityFilter,
       availabilityFilter: filters.availabilityFilter ?? { type: AvailabilityFilterType.ALL },

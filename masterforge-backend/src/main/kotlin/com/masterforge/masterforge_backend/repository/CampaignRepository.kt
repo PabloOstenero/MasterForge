@@ -60,11 +60,14 @@ interface CampaignRepository : JpaRepository<Campaign, UUID> {
      * The CAST ensures PostgreSQL always receives a typed value.
      */
     @Query(value = """
-        SELECT * FROM campaigns c
+        SELECT c.* FROM campaigns c
+        INNER JOIN users u ON c.owner_id = u.id
         WHERE c.visibility = 'PUBLIC'
         AND (CAST(:searchText AS text) IS NULL OR 
              LOWER(c.name) LIKE LOWER(CONCAT('%', CAST(:searchText AS text), '%')) OR 
-             LOWER(c.description) LIKE LOWER(CONCAT('%', CAST(:searchText AS text), '%')))
+             LOWER(c.description) LIKE LOWER(CONCAT('%', CAST(:searchText AS text), '%')) OR
+             LOWER(u.name) LIKE LOWER(CONCAT('%', CAST(:searchText AS text), '%')))
+        AND (CAST(:dmName AS text) IS NULL OR LOWER(u.name) LIKE LOWER(CONCAT('%', CAST(:dmName AS text), '%')))
         AND (CAST(:minPrice AS numeric) IS NULL OR c.join_price >= CAST(:minPrice AS numeric))
         AND (CAST(:maxPrice AS numeric) IS NULL OR c.join_price <= CAST(:maxPrice AS numeric))
         AND (CAST(:minPlayers AS integer) IS NULL OR c.max_players >= CAST(:minPlayers AS integer))
@@ -74,10 +77,13 @@ interface CampaignRepository : JpaRepository<Campaign, UUID> {
         ORDER BY c.id DESC
     """, countQuery = """
         SELECT COUNT(*) FROM campaigns c
+        INNER JOIN users u ON c.owner_id = u.id
         WHERE c.visibility = 'PUBLIC'
         AND (CAST(:searchText AS text) IS NULL OR 
              LOWER(c.name) LIKE LOWER(CONCAT('%', CAST(:searchText AS text), '%')) OR 
-             LOWER(c.description) LIKE LOWER(CONCAT('%', CAST(:searchText AS text), '%')))
+             LOWER(c.description) LIKE LOWER(CONCAT('%', CAST(:searchText AS text), '%')) OR
+             LOWER(u.name) LIKE LOWER(CONCAT('%', CAST(:searchText AS text), '%')))
+        AND (CAST(:dmName AS text) IS NULL OR LOWER(u.name) LIKE LOWER(CONCAT('%', CAST(:dmName AS text), '%')))
         AND (CAST(:minPrice AS numeric) IS NULL OR c.join_price >= CAST(:minPrice AS numeric))
         AND (CAST(:maxPrice AS numeric) IS NULL OR c.join_price <= CAST(:maxPrice AS numeric))
         AND (CAST(:minPlayers AS integer) IS NULL OR c.max_players >= CAST(:minPlayers AS integer))
@@ -87,6 +93,7 @@ interface CampaignRepository : JpaRepository<Campaign, UUID> {
     """, nativeQuery = true)
     fun searchCampaignsWithFilters(
         @Param("searchText") searchText: String?,
+        @Param("dmName") dmName: String?,
         @Param("minPrice") minPrice: BigDecimal?,
         @Param("maxPrice") maxPrice: BigDecimal?,
         @Param("minPlayers") minPlayers: Int?,

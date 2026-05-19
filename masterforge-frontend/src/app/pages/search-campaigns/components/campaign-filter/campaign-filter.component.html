@@ -121,6 +121,27 @@
         </div>
       </div>
 
+      <!-- ── Dungeon Master filter ── -->
+      <div class="filter-section">
+        <label class="filter-section-label">
+          Dungeon Master
+          <app-help-tooltip text="Filtra campañas dirigidas por un Dungeon Master específico."></app-help-tooltip>
+        </label>
+        <div class="dm-input-container">
+          <input
+            type="text"
+            class="dm-input"
+            formControlName="dmName"
+            placeholder="Escribe el nombre del DM..."
+            data-testid="filter-dm-name"
+            aria-label="Nombre del Dungeon Master"
+            autocomplete="off"
+            autocorrect="off"
+            spellcheck="false"
+          />
+        </div>
+      </div>
+
     </div>
   }
 

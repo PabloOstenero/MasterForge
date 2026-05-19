@@ -27,6 +27,7 @@ data class CampaignSearchDto(
  */
 data class SearchCriteriaDto(
     val searchText: String? = null,
+    val dmName: String? = null,
     val minPrice: BigDecimal? = null,
     val maxPrice: BigDecimal? = null,
     val minPlayers: Int? = null,

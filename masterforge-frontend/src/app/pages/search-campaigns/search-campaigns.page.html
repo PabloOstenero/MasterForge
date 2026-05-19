@@ -7,13 +7,6 @@
   (keydown)="onUserInteraction()">
   <div class="page-container ion-padding">
 
-    <!-- ── Page header ── -->
-    <div class="page-header">
-      <ion-icon name="search-outline" class="page-icon"></ion-icon>
-      <h1 class="page-title">Buscar Campañas</h1>
-      <app-help-tooltip text="Explora las campañas disponibles, filtra por precio o capacidad y únete con un solo clic."></app-help-tooltip>
-    </div>
-
     <!-- ── Inactivity refresh prompt (Req 10.4) ── -->
     @if (showRefreshPrompt) {
       <div class="refresh-prompt" data-testid="refresh-prompt">
@@ -94,6 +87,8 @@
         [campaigns]="campaigns"
         [loading]="loadingMore"
         [searchText]="currentSearchText"
+        [currentUserId]="currentUserId"
+        [hasMore]="hasNext"
         (joinCampaign)="onJoinCampaign($event)"
         (loadMore)="onLoadMore()"
         data-testid="campaign-list">

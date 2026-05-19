@@ -162,6 +162,8 @@ export interface CampaignFilters {
   capacityFilter?: CapacityFilter;
   /** Optional availability filter. */
   availabilityFilter?: AvailabilityFilter;
+  /** Optional Dungeon Master name filter. */
+  dmName?: string;
 }
 
 /**
@@ -171,6 +173,8 @@ export interface CampaignFilters {
 export interface SearchCriteria {
   /** Free-text query matched against campaign name and description. */
   searchText?: string;
+  /** Optional Dungeon Master name filter. */
+  dmName?: string;
   /** Optional price-range filter. */
   priceRange?: PriceRange;
   /** Optional capacity filter. */

@@ -53,6 +53,7 @@ class CampaignSearchController(
     @GetMapping("/search")
     fun searchCampaigns(
         @RequestParam(required = false) searchText: String?,
+        @RequestParam(required = false) dmName: String?,
         @RequestParam(required = false) minPrice: BigDecimal?,
         @RequestParam(required = false) maxPrice: BigDecimal?,
         @RequestParam(required = false) minPlayers: Int?,
@@ -63,6 +64,7 @@ class CampaignSearchController(
     ): ResponseEntity<CampaignSearchResponseDto> {
         val criteria = SearchCriteriaDto(
             searchText = searchText,
+            dmName = dmName,
             minPrice = minPrice,
             maxPrice = maxPrice,
             minPlayers = minPlayers,

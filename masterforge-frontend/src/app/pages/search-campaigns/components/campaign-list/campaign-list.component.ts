@@ -32,6 +32,7 @@ import {
   lockClosedOutline,
   addCircleOutline,
   chevronDownOutline,
+  compassOutline,
 } from 'ionicons/icons';
 
 import { Campaign } from '../../models/campaign.models';
@@ -53,6 +54,9 @@ export class CampaignListComponent {
   /** Whether more campaigns are being loaded (shows spinner at bottom). */
   @Input() loading = false;
 
+  /** Whether there are more campaigns to load (determines if "Load more" button shows). */
+  @Input() hasMore = false;
+
   /**
    * The current search text used to highlight matching terms in results.
    * Req 2.5: Highlight matching text in search results.
@@ -72,6 +76,9 @@ export class CampaignListComponent {
   /** Emits when the user requests more campaigns (load more / infinite scroll). */
   @Output() loadMore = new EventEmitter<void>();
 
+  /** ID of the currently logged-in user to hide the join button on owned campaigns. */
+  @Input() currentUserId: string = '';
+
   constructor() {
     addIcons({
       peopleOutline,
@@ -80,6 +87,7 @@ export class CampaignListComponent {
       lockClosedOutline,
       addCircleOutline,
       chevronDownOutline,
+      compassOutline,
     });
   }
 
@@ -109,6 +117,12 @@ export class CampaignListComponent {
    */
   trackByCampaignId(_index: number, campaign: Campaign): string {
     return campaign.id;
+  }
+
+  /** Returns true if the authenticated user is the owner of this campaign. */
+  isOwner(campaign: Campaign): boolean {
+    if (!campaign.owner || !this.currentUserId) return false;
+    return campaign.owner.id === this.currentUserId;
   }
 
   /**

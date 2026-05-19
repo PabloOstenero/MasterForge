@@ -261,6 +261,7 @@ export class CampaignSearchService {
   private buildCacheKey(criteria: SearchCriteria): string {
     return JSON.stringify({
       searchText: criteria.searchText ?? '',
+      dmName: criteria.dmName ?? '',
       pricePreset: criteria.priceRange?.preset ?? '',
       priceMin: criteria.priceRange?.min ?? '',
       priceMax: criteria.priceRange?.max ?? '',
@@ -281,6 +282,10 @@ export class CampaignSearchService {
 
     if (criteria.searchText && criteria.searchText.trim().length > 0) {
       params = params.set('searchText', criteria.searchText.trim());
+    }
+
+    if (criteria.dmName && criteria.dmName.trim().length > 0) {
+      params = params.set('dmName', criteria.dmName.trim());
     }
 
     // Price range

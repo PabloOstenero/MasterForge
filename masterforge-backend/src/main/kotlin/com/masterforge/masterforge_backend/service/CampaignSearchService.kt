@@ -47,7 +47,7 @@ class CampaignSearchService(
      */
     @Cacheable(
         value = ["campaignSearch"],
-        key = "#criteria.searchText + '_' + #criteria.minPrice + '_' + #criteria.maxPrice + '_' + #criteria.minPlayers + '_' + #criteria.maxPlayers + '_' + #criteria.availableOnly + '_' + #criteria.page + '_' + #criteria.size"
+        key = "#criteria.searchText + '_' + #criteria.dmName + '_' + #criteria.minPrice + '_' + #criteria.maxPrice + '_' + #criteria.minPlayers + '_' + #criteria.maxPlayers + '_' + #criteria.availableOnly + '_' + #criteria.page + '_' + #criteria.size"
     )
     fun searchCampaigns(criteria: SearchCriteriaDto): CampaignSearchResponseDto {
         val pageable = PageRequest.of(
@@ -60,6 +60,7 @@ class CampaignSearchService(
 
         val page = campaignRepository.searchCampaignsWithFilters(
             searchText = criteria.searchText?.takeIf { it.isNotBlank() },
+            dmName = criteria.dmName?.takeIf { it.isNotBlank() },
             minPrice = criteria.minPrice,
             maxPrice = criteria.maxPrice,
             minPlayers = criteria.minPlayers,
