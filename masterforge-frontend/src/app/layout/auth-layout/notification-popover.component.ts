@@ -1,8 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonList, IonItem, IonLabel, IonNote, IonButton, IonIcon, IonText } from '@ionic/angular/standalone';
+import { IonList, IonItem, IonLabel, IonNote, IonButton, IonIcon, IonText, PopoverController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { notificationsOffOutline } from 'ionicons/icons';
+import { notificationsOffOutline, trashOutline } from 'ionicons/icons';
 import { PersistentNotificationService, Notification } from '../../services/persistent-notification.service';
 import { Router } from '@angular/router';
 
@@ -24,7 +24,7 @@ import { Router } from '@angular/router';
         <ion-list lines="full">
           @for (notif of notifications; track notif.id) {
             <ion-item (click)="handleNotifClick(notif)" [class.unread]="!notif.isRead">
-              <ion-label>
+              <ion-label style="flex: 1; min-width: 0;">
                 <div class="notif-title">
                   <span class="dot" *ngIf="!notif.isRead"></span>
                   {{ notif.title }}
@@ -32,6 +32,9 @@ import { Router } from '@angular/router';
                 <p>{{ notif.message }}</p>
                 <ion-note>{{ notif.createdAt | date:'short' }}</ion-note>
               </ion-label>
+              <button class="delete-btn" (click)="deleteNotif(notif, $event)" aria-label="Eliminar notificación">
+                <ion-icon name="trash-outline"></ion-icon>
+              </button>
             </ion-item>
           }
         </ion-list>
@@ -87,6 +90,34 @@ import { Router } from '@angular/router';
       }
     }
     p { font-size: 0.85rem; color: #8e8e93; margin: 4px 0; }
+    .delete-btn {
+      background: none;
+      border: none;
+      color: #8e8e93;
+      padding: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s, transform 0.2s, background-color 0.2s;
+      border-radius: 50%;
+      margin-left: 8px;
+      flex-shrink: 0;
+
+      &:hover {
+        color: var(--mf-accent-crimson, #c0392b);
+        background: rgba(192, 57, 43, 0.15);
+        transform: scale(1.18);
+      }
+
+      &:active {
+        transform: scale(0.9);
+      }
+
+      ion-icon {
+        font-size: 18px;
+      }
+    }
   `],
   standalone: true,
   imports: [CommonModule, IonList, IonItem, IonLabel, IonNote, IonButton, IonIcon, IonText]
@@ -94,11 +125,11 @@ import { Router } from '@angular/router';
 export class NotificationPopoverComponent implements OnInit {
   private notifService = inject(PersistentNotificationService);
   private router = inject(Router);
-  
+
   notifications: Notification[] = [];
 
   constructor() {
-    addIcons({ notificationsOffOutline });
+    addIcons({ notificationsOffOutline, trashOutline });
   }
 
   ngOnInit() {
@@ -119,10 +150,18 @@ export class NotificationPopoverComponent implements OnInit {
 
   handleNotifClick(notif: Notification) {
     if (!notif.isRead) {
+      notif.isRead = true;
       this.notifService.markAsRead(notif.id).subscribe();
     }
     if (notif.link) {
       this.router.navigateByUrl(notif.link);
     }
+  }
+
+  deleteNotif(notif: Notification, event: Event) {
+    event.stopPropagation();
+    this.notifService.deleteNotification(notif.id).subscribe(() => {
+      this.notifications = this.notifications.filter(n => n.id !== notif.id);
+    });
   }
 }

@@ -42,9 +42,9 @@
         </div>
       </div>
       <div class="topbar-actions">
-        <button class="notification-btn" (click)="toggleNotifications($event)" aria-label="Notificaciones" type="button">
-          <ion-icon name="notifications-outline" class="action-icon"></ion-icon>
-          @if ((unreadCount$ | async) || 0 > 0) {
+        <button class="notification-btn" [class.has-unread]="((unreadCount$ | async) || 0) > 0" (click)="toggleNotifications($event)" aria-label="Notificaciones" type="button">
+          <ion-icon [name]="((unreadCount$ | async) || 0) > 0 ? 'notifications' : 'notifications-outline'" class="action-icon"></ion-icon>
+          @if (((unreadCount$ | async) || 0) > 0) {
             <span class="notification-badge">{{ unreadCount$ | async }}</span>
           }
         </button>

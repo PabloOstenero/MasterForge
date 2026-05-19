@@ -42,4 +42,12 @@ class NotificationController(
         notificationService.markAllAsRead(UUID.fromString(userId))
         return ResponseEntity.ok().build()
     }
+
+    @DeleteMapping("/{id}")
+    fun deleteNotification(@PathVariable id: UUID): ResponseEntity<Void> {
+        val userId = SecurityContextHolder.getContext().authentication?.name
+            ?: throw RuntimeException("Unauthorized")
+        notificationService.deleteNotification(id, UUID.fromString(userId))
+        return ResponseEntity.noContent().build()
+    }
 }

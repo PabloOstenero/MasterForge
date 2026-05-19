@@ -1,5 +1,6 @@
 package com.masterforge.masterforge_backend.model.entity
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.persistence.*
 import java.time.Instant
 import java.util.UUID
@@ -25,6 +26,7 @@ data class Notification(
     val createdAt: Instant = Instant.now(),
 
     @Column(name = "is_read", nullable = false)
+    @get:JsonProperty("isRead")
     var isRead: Boolean = false,
 
     @Column(nullable = true)

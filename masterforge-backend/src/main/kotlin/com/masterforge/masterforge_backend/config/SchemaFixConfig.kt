@@ -46,6 +46,14 @@ class SchemaFixConfig {
                 // We log it as a warning but don't stop the application.
                 logger.warn("Could not adjust payment_transactions schema: ${e.message}")
             }
+
+            try {
+                logger.info("Checking sessions schema to drop retired price column...")
+                jdbcTemplate.execute("ALTER TABLE sessions DROP COLUMN IF EXISTS price")
+                logger.info("Successfully dropped price column from sessions table.")
+            } catch (e: Exception) {
+                logger.warn("Could not drop price column from sessions table: ${e.message}")
+            }
         }
     }
 }

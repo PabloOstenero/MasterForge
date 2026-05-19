@@ -106,33 +106,50 @@ export class CampaignDetailPage implements OnInit {
       return;
     }
 
-    this.isPlayer = this.roleService.activeRole === 'player';
+    // Load campaign first to check ownership
+    this.loadingCampaign = true;
+    this.api.getCampaignById(id).pipe(
+      catchError((err) => {
+        this.errorCampaign = err?.message ?? 'Error al cargar la campaña.';
+        this.loadingCampaign = false;
+        return of(null);
+      })
+    ).subscribe((campaign) => {
+      if (!campaign) {
+        this.loadingCampaign = false;
+        return;
+      }
+      this.campaign = campaign;
+      this.loadingCampaign = false;
 
-    if (this.isPlayer) {
-      this.api.getPlayerCampaigns().pipe(
-        catchError(() => {
-          this.accessDenied = true;
-          return of(null);
-        }),
-      ).subscribe((campaigns) => {
-        if (campaigns === null) return;
+      const currentUserId = this.authService.getUserIdFromToken() ?? '';
+      const isOwner = campaign.owner.id === currentUserId;
 
-        const enrolled = campaigns.some((item) => item.campaignId === id);
-        if (!enrolled) {
-          this.accessDenied = true;
-          return;
-        }
-
-        // Enrolled — proceed with normal loading
+      if (isOwner) {
+        // Owner DM path
+        this.isPlayer = false;
         this.loadCampaignData(id);
+      } else {
+        // Player path: Verify enrollment
+        this.api.getPlayerCampaigns().pipe(
+          catchError(() => {
+            this.accessDenied = true;
+            return of([]);
+          })
+        ).subscribe((campaigns) => {
+          const enrolled = campaigns.some((item) => item.campaignId === id);
+          if (!enrolled) {
+            this.accessDenied = true;
+            return;
+          }
 
-        const userId = this.authService.getUserIdFromToken() ?? '';
-        this.loadPlayerCharacters(userId);
-      });
-    } else {
-      // DM path — existing behaviour unchanged
-      this.loadCampaignData(id);
-    }
+          // Enrolled Player path
+          this.isPlayer = true;
+          this.loadCampaignData(id);
+          this.loadPlayerCharacters(currentUserId);
+        });
+      }
+    });
   }
 
   private loadCampaignData(id: string): void {

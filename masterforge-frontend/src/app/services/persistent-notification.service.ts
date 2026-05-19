@@ -42,4 +42,10 @@ export class PersistentNotificationService {
       tap(() => this.unreadCountSubject.next(0))
     );
   }
+
+  deleteNotification(id: string): Observable<void> {
+    return this.http.delete<void>(`${environment.apiBaseUrl}/api/notifications/${id}`).pipe(
+      tap(() => this.updateUnreadCount())
+    );
+  }
 }

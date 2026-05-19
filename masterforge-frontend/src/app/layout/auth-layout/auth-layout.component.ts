@@ -1,4 +1,4 @@
-import { Component, inject, CUSTOM_ELEMENTS_SCHEMA, HostListener } from '@angular/core';
+import { Component, inject, CUSTOM_ELEMENTS_SCHEMA, HostListener, OnDestroy } from '@angular/core';
 import { RouterModule, Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
 import { IonButton, IonIcon, PopoverController } from '@ionic/angular/standalone';
@@ -18,6 +18,7 @@ import {
   listOutline,
   personCircleOutline,
   notificationsOutline,
+  notifications,
   menuOutline,
   shieldOutline,
   shieldHalfOutline
@@ -37,7 +38,7 @@ import { NotificationPopoverComponent } from './notification-popover.component';
   templateUrl: './auth-layout.component.html',
   styleUrls: ['./auth-layout.component.scss'],
 })
-export class AuthLayoutComponent {
+export class AuthLayoutComponent implements OnDestroy {
   private authService = inject(AuthService);
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
@@ -48,13 +49,14 @@ export class AuthLayoutComponent {
 
   pageTitle = 'Dashboard';
   pageIcon = 'shield-outline';
+  private pollingIntervalId: any = null;
 
   constructor() {
     addIcons({
       settingsOutline, logOutOutline, swapHorizontalOutline,
       homeOutline, peopleOutline, mapOutline, skullOutline,
       personAddOutline, bookOutline, colorWandOutline, searchOutline, listOutline,
-      personCircleOutline, notificationsOutline, menuOutline, shieldOutline, shieldHalfOutline
+      personCircleOutline, notificationsOutline, notifications, menuOutline, shieldOutline, shieldHalfOutline
     });
 
     this.roleService.activeRole$.subscribe(role => {
@@ -72,6 +74,19 @@ export class AuthLayoutComponent {
     this.updatePageTitle();
     this.notificationService.updateUnreadCount();
     this.fcmService.initPush();
+
+    // Poll for unread notifications count every 10 seconds
+    if (typeof window !== 'undefined') {
+      this.pollingIntervalId = setInterval(() => {
+        this.notificationService.updateUnreadCount();
+      }, 10000);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.pollingIntervalId) {
+      clearInterval(this.pollingIntervalId);
+    }
   }
 
   private updatePageTitle(): void {

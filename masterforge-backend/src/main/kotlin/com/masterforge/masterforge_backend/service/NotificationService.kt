@@ -52,4 +52,13 @@ class NotificationService(
         notifications.forEach { if (!it.isRead) it.isRead = true }
         notificationRepository.saveAll(notifications)
     }
+
+    @Transactional
+    fun deleteNotification(notificationId: UUID, userId: UUID) {
+        notificationRepository.findById(notificationId).ifPresent {
+            if (it.user.id == userId) {
+                notificationRepository.delete(it)
+            }
+        }
+    }
 }
