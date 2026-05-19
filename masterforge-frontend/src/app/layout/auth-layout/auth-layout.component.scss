@@ -241,13 +241,25 @@
 }
 
 .topbar-title {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--mf-accent-gold, #c9a84c);
-  letter-spacing: 0.3px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--mf-accent-gold, #c9a84c) 30%, #ffffff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  
+  .page-icon {
+    font-size: 1.6rem;
+    color: var(--mf-accent-gold, #c9a84c);
+    -webkit-text-fill-color: initial;
+    filter: drop-shadow(0 0 6px rgba(201, 168, 76, 0.3));
+    flex-shrink: 0;
+  }
 }
 
 .topbar-actions {
@@ -389,5 +401,9 @@
   // Slightly smaller topbar title on narrow screens
   .topbar-title {
     font-size: 1rem;
+    
+    .page-icon {
+      font-size: 1.1rem;
+    }
   }
 }

@@ -1,18 +1,5 @@
 <div class="page-container ion-padding">
 
-  <!-- ── Page header ── -->
-  <div class="page-header">
-    <div class="header-title">
-      <ion-icon name="shield-half-outline" class="page-icon"></ion-icon>
-      <h1 class="page-title">Personajes</h1>
-    </div>
-    @if (!loading && !error && characters.length > 0) {
-      <div class="limit-counter" [class.warning]="limitReached">
-        {{ characters.length }}{{ isPro ? '' : '/3' }} Personajes
-      </div>
-    }
-  </div>
-
   <!-- ── Error ── -->
   @if (error && !loading) {
     <div class="error-container" data-testid="error-container">

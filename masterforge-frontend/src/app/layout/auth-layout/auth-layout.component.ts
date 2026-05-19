@@ -1,5 +1,5 @@
 import { Component, inject, CUSTOM_ELEMENTS_SCHEMA, HostListener } from '@angular/core';
-import { RouterModule, Router, NavigationEnd } from '@angular/router';
+import { RouterModule, Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
 import { IonButton, IonIcon, PopoverController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -19,7 +19,8 @@ import {
   personCircleOutline,
   notificationsOutline,
   menuOutline,
-  shieldOutline
+  shieldOutline,
+  shieldHalfOutline
 } from 'ionicons/icons';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
@@ -39,30 +40,72 @@ import { NotificationPopoverComponent } from './notification-popover.component';
 export class AuthLayoutComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private activatedRoute = inject(ActivatedRoute);
   private roleService = inject(RoleService);
   private notificationService = inject(PersistentNotificationService);
   private fcmService = inject(FCMService);
   private popoverCtrl = inject(PopoverController);
+
+  pageTitle = 'Dashboard';
+  pageIcon = 'shield-outline';
 
   constructor() {
     addIcons({
       settingsOutline, logOutOutline, swapHorizontalOutline,
       homeOutline, peopleOutline, mapOutline, skullOutline,
       personAddOutline, bookOutline, colorWandOutline, searchOutline, listOutline,
-      personCircleOutline, notificationsOutline, menuOutline, shieldOutline
+      personCircleOutline, notificationsOutline, menuOutline, shieldOutline, shieldHalfOutline
     });
 
     this.roleService.activeRole$.subscribe(role => {
       // Update menu items based on role if needed
     });
 
-    // Auto-close sidebar on navigation (mobile drawer)
+    // Auto-close sidebar on navigation (mobile drawer) and update page title
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe(() => this.closeSidebar());
+      .subscribe(() => {
+        this.closeSidebar();
+        this.updatePageTitle();
+      });
 
+    this.updatePageTitle();
     this.notificationService.updateUnreadCount();
     this.fcmService.initPush();
+  }
+
+  private updatePageTitle(): void {
+    try {
+      const root = this.router?.routerState?.root;
+      if (!root) {
+        this.pageTitle = 'Dashboard';
+        this.pageIcon = 'shield-outline';
+        return;
+      }
+      let route = root;
+      while (route.firstChild) {
+        route = route.firstChild;
+      }
+      const dataTitle = route.snapshot?.data?.['pageTitle'];
+      const dataIcon = route.snapshot?.data?.['pageIcon'];
+      
+      this.pageIcon = dataIcon || 'shield-outline';
+      
+      if (dataTitle === 'home') {
+        const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+        this.pageTitle = isMobile ? 'Dashboard' : `Dashboard de ${this.username}`;
+      } else {
+        this.pageTitle = dataTitle || 'Dashboard';
+      }
+    } catch (e) {
+      this.pageTitle = 'Dashboard';
+      this.pageIcon = 'shield-outline';
+    }
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.updatePageTitle();
   }
 
   menuItems$ = this.roleService.menuItems$;

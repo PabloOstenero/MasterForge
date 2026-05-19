@@ -4,9 +4,11 @@ import { Router } from '@angular/router';
 import {
   IonSpinner,
   IonCard, IonCardContent,
-  IonButton, IonText, IonRow, IonCol,
+  IonButton, IonText, IonRow, IonCol, IonIcon,
 } from '@ionic/angular/standalone';
 import { ApiService, PlayerCampaignSummary } from '../../services/api';
+import { addIcons } from 'ionicons';
+import { bookOutline, mapOutline, peopleOutline, calendarOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-my-campaigns',
@@ -17,7 +19,7 @@ import { ApiService, PlayerCampaignSummary } from '../../services/api';
     CommonModule,
     IonSpinner,
     IonCard, IonCardContent,
-    IonButton, IonText, IonRow, IonCol,
+    IonButton, IonText, IonRow, IonCol, IonIcon,
   ],
 })
 export class MyCampaignsPage implements OnInit {
@@ -29,7 +31,9 @@ export class MyCampaignsPage implements OnInit {
   constructor(
     private apiService: ApiService,
     private router: Router
-  ) {}
+  ) {
+    addIcons({ bookOutline, mapOutline, peopleOutline, calendarOutline });
+  }
 
   ngOnInit(): void {
     this.loadCampaigns();
