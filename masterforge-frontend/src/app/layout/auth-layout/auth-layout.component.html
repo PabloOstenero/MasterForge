@@ -55,6 +55,10 @@
       @if (isDropdownOpen) {
         <div class="dropdown-overlay" (click)="closeDropdown()"></div>
         <div class="dropdown-menu">
+          <div class="dropdown-user-header">
+            <span class="user-welcome">Hola,</span>
+            <strong class="user-name">{{ username }}</strong>
+          </div>
           <button class="dropdown-item" type="button" (click)="navigateToSettings()">
             <ion-icon name="settings-outline"></ion-icon>
             <span>Configuración</span>
