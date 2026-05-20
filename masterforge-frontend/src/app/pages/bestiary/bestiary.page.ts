@@ -12,7 +12,7 @@ import { addIcons } from 'ionicons';
 import { 
   skull, heart, shield, addCircle, eye, search, 
   close, map, informationCircle, arrowForward,
-  star, flash, helpCircle, trashOutline
+  star, flash, helpCircle, trashOutline, optionsOutline
 } from 'ionicons/icons';
 import { ApiService, CampaignDetailDto } from '../../services/api';
 import { AuthService } from '../../services/auth.service';
@@ -84,6 +84,7 @@ export class BestiaryPage implements OnInit {
   selectedCR: number | null = null;
   limit = 30;
   hasMore = true;
+  showFilters = false;
 
   // Campaign Selection Modal
   isCampaignModalOpen = false;
@@ -100,8 +101,12 @@ export class BestiaryPage implements OnInit {
       skull, heart, shield, 'add-circle': addCircle, eye, search, 
       close, map, 'information-circle': informationCircle, 
       'arrow-forward': arrowForward, star, flash, 'help-circle': helpCircle,
-      'trash-outline': trashOutline
+      'trash-outline': trashOutline, 'options-outline': optionsOutline
     });
+  }
+
+  toggleFilters() {
+    this.showFilters = !this.showFilters;
   }
 
   ngOnInit() {
@@ -362,5 +367,92 @@ export class BestiaryPage implements OnInit {
         } : null
       };
     });
+  }
+
+  getSavingThrowsString(): string {
+    const attrMap: { [key: string]: string } = {
+      'str': 'Fue', 'strength': 'Fue',
+      'dex': 'Des', 'dexterity': 'Des',
+      'con': 'Con', 'constitution': 'Con',
+      'int': 'Int', 'intelligence': 'Int',
+      'wis': 'Sab', 'wisdom': 'Sab',
+      'cha': 'Car', 'charisma': 'Car'
+    };
+    
+    const attrOrder = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
+    
+    const mechanics = this.selectedMonster?.combatMechanics;
+    if (!mechanics) return '';
+    
+    const saves = mechanics.savingThrows || mechanics.saves || mechanics.saving_throws;
+    if (!saves || typeof saves !== 'object') return '';
+    
+    const entries = Object.entries(saves);
+    if (entries.length === 0) return '';
+    
+    const formatted = entries
+      .map(([key, bonus]: [string, any]) => {
+        const shortKey = key.toLowerCase().substring(0, 3);
+        const displayName = attrMap[key.toLowerCase()] || attrMap[shortKey] || key;
+        const b = typeof bonus === 'number' ? bonus : parseInt(bonus);
+        if (isNaN(b)) return null;
+        return {
+          key: shortKey,
+          display: `${displayName} ${b >= 0 ? '+' : ''}${b}`
+        };
+      })
+      .filter((item): item is { key: string, display: string } => item !== null);
+      
+    formatted.sort((a, b) => {
+      const idxA = attrOrder.indexOf(a.key);
+      const idxB = attrOrder.indexOf(b.key);
+      return (idxA !== -1 ? idxA : 99) - (idxB !== -1 ? idxB : 99);
+    });
+    
+    return formatted.map(f => f.display).join(', ');
+  }
+
+  getChallengeXp(cr: any): string {
+    if (cr === undefined || cr === null) return '0';
+    const numericCr = typeof cr === 'string' ? parseFloat(cr) : cr;
+    
+    const xpMap: { [key: number]: string } = {
+      0: '10',
+      0.125: '25',
+      0.25: '50',
+      0.5: '100',
+      1: '200',
+      2: '450',
+      3: '700',
+      4: '1,100',
+      5: '1,800',
+      6: '2,300',
+      7: '2,900',
+      8: '3,900',
+      9: '5,000',
+      10: '5,900',
+      11: '7,200',
+      12: '8,400',
+      13: '10,000',
+      14: '11,500',
+      15: '13,000',
+      16: '15,000',
+      17: '18,000',
+      18: '20,000',
+      19: '22,000',
+      20: '25,000',
+      21: '33,000',
+      22: '41,000',
+      23: '50,000',
+      24: '62,000',
+      25: '75,000',
+      26: '90,000',
+      27: '105,000',
+      28: '120,000',
+      29: '135,000',
+      30: '155,000'
+    };
+
+    return xpMap[numericCr] || '—';
   }
 }

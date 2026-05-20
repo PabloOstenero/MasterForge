@@ -191,194 +191,208 @@
   </ion-modal>
 
   <!-- Monster Details RPG Sheet Modal -->
+  <!-- Monster Details Modal -->
   <ion-modal [isOpen]="isDetailsModalOpen" (didDismiss)="isDetailsModalOpen = false" class="details-modal">
     <ng-template>
-      <ion-header class="ion-no-border">
-        <ion-toolbar class="detail-header-toolbar">
-          <ion-title>{{ selectedMonster?.name }}</ion-title>
-          <ion-buttons slot="end">
-            <button class="btn-close-modal" (click)="isDetailsModalOpen = false">
-              <ion-icon name="close"></ion-icon>
-            </button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
-      
       <ion-content class="detail-content ion-padding">
-        <div class="monster-summary">
-          <p class="type-subtitle">{{ selectedMonster?.size }} {{ selectedMonster?.type }}, {{ selectedMonster?.alignment }}</p>
-          <div class="quick-combat-stats">
-            <div class="combat-stat-box">
-              <span class="label">CA</span>
-              <span class="value">{{ selectedMonster?.armorClass }}</span>
-            </div>
-            <div class="combat-stat-box">
-              <span class="label">PV</span>
-              <span class="value">{{ selectedMonster?.hitPoints }}</span>
-            </div>
-            <div class="combat-stat-box">
-              <span class="label">Vel</span>
-              <span class="value">{{ selectedMonster?.speed }}</span>
-            </div>
-            <div class="combat-stat-box">
-              <span class="label">CR</span>
-              <span class="value">{{ selectedMonster?.challengeRating }}</span>
-            </div>
-          </div>
-        </div>
+        <!-- Floating Close Button -->
+        <button class="stat-block-close-btn" (click)="isDetailsModalOpen = false">
+          <ion-icon name="close"></ion-icon>
+        </button>
 
-        <div class="abilities-grid-premium">
-          <div class="ability-card">
-            <label>FUER</label>
-            <div class="val">{{ selectedMonster?.str }}</div>
-            <div class="mod">({{ getModifier(selectedMonster?.str) }})</div>
-            <div class="save">Sal: {{ getSavingThrow('str', selectedMonster?.str) }}</div>
-          </div>
-          <div class="ability-card">
-            <label>DEST</label>
-            <div class="val">{{ selectedMonster?.dex }}</div>
-            <div class="mod">({{ getModifier(selectedMonster?.dex) }})</div>
-            <div class="save">Sal: {{ getSavingThrow('dex', selectedMonster?.dex) }}</div>
-          </div>
-          <div class="ability-card">
-            <label>CONS</label>
-            <div class="val">{{ selectedMonster?.con }}</div>
-            <div class="mod">({{ getModifier(selectedMonster?.con) }})</div>
-            <div class="save">Sal: {{ getSavingThrow('con', selectedMonster?.con) }}</div>
-          </div>
-          <div class="ability-card">
-            <label>INTE</label>
-            <div class="val">{{ selectedMonster?.intStat }}</div>
-            <div class="mod">({{ getModifier(selectedMonster?.intStat) }})</div>
-            <div class="save">Sal: {{ getSavingThrow('int', selectedMonster?.intStat) }}</div>
-          </div>
-          <div class="ability-card">
-            <label>SABI</label>
-            <div class="val">{{ selectedMonster?.wis }}</div>
-            <div class="mod">({{ getModifier(selectedMonster?.wis) }})</div>
-            <div class="save">Sal: {{ getSavingThrow('wis', selectedMonster?.wis) }}</div>
-          </div>
-          <div class="ability-card">
-            <label>CARA</label>
-            <div class="val">{{ selectedMonster?.cha }}</div>
-            <div class="mod">({{ getModifier(selectedMonster?.cha) }})</div>
-            <div class="save">Sal: {{ getSavingThrow('cha', selectedMonster?.cha) }}</div>
-          </div>
-        </div>
-
-        <div class="traits-summary-box">
-          @if (getListMechanic('vulnerabilities') !== '—') {
-            <p>
-              <span class="label">Vulnerabilidades:</span> {{ getListMechanic('vulnerabilities') }}
-            </p>
-          }
-          @if (getListMechanic('resistances') !== '—') {
-            <p>
-              <span class="label">Resistencias:</span> {{ getListMechanic('resistances') }}
-            </p>
-          }
-          @if (getListMechanic('immunities') !== '—') {
-            <p>
-              <span class="label">Inmunidades (Daño):</span> {{ getListMechanic('immunities') }}
-            </p>
-          }
-          @if (getListMechanic('conditionImmunities') !== '—') {
-            <p>
-              <span class="label">Inmunidades (Estado):</span> {{ getListMechanic('conditionImmunities') }}
-            </p>
-          }
-          <p><span class="label">Senses:</span> {{ formatSenses() }}</p>
-          <p><span class="label">Habilidades:</span> {{ getSkills() }}</p>
-          <p><span class="label">Idiomas:</span> {{ getListMechanic('languages') }}</p>
-        </div>
-
-        @if (getMechanics('traits').length > 0) {
-          <div class="mechanics-group">
-            <h3 class="group-title">Rasgos</h3>
-            @for (t of getMechanics('traits'); track t.name) {
-              <div class="mechanic-block">
-                <div class="mechanic-header">
-                  <span class="mechanic-name">{{ t.name }}</span>
-                </div>
-                <div class="mechanic-desc">{{ t.desc }}</div>
-              </div>
+        <div class="stat-block-book">
+          <!-- Monster Name -->
+          <h1 class="stat-block-name">{{ selectedMonster?.name }}</h1>
+          
+          <!-- Size, Type, Alignment -->
+          <p class="stat-block-meta">{{ selectedMonster?.size }} {{ selectedMonster?.type }}, {{ selectedMonster?.alignment }}</p>
+          
+          <!-- Tapered Divider -->
+          <div class="stat-block-divider"></div>
+          
+          <!-- AC, HP, Speed -->
+          <p class="stat-block-attribute">
+            <strong>Clase de Armadura</strong> <span class="attribute-value">{{ selectedMonster?.armorClass }}</span>
+          </p>
+          
+          <p class="stat-block-attribute">
+            <strong>Puntos de Vida</strong> <span class="attribute-value">{{ selectedMonster?.hitPoints }}</span>
+          </p>
+          
+          <p class="stat-block-attribute">
+            <strong>Velocidad</strong> <span class="attribute-value">{{ selectedMonster?.speed }}</span>
+          </p>
+          
+          <!-- Tapered Divider -->
+          <div class="stat-block-divider"></div>
+          
+          <!-- Ability Table -->
+          <table class="stat-block-ability-table">
+            <thead>
+              <tr>
+                <th>FUE</th>
+                <th>DES</th>
+                <th>CON</th>
+                <th>INT</th>
+                <th>SAB</th>
+                <th>CAR</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="ability-val">{{ selectedMonster?.str }}</div>
+                  <div class="ability-mod">({{ getModifier(selectedMonster?.str) }})</div>
+                </td>
+                <td>
+                  <div class="ability-val">{{ selectedMonster?.dex }}</div>
+                  <div class="ability-mod">({{ getModifier(selectedMonster?.dex) }})</div>
+                </td>
+                <td>
+                  <div class="ability-val">{{ selectedMonster?.con }}</div>
+                  <div class="ability-mod">({{ getModifier(selectedMonster?.con) }})</div>
+                </td>
+                <td>
+                  <div class="ability-val">{{ selectedMonster?.intStat }}</div>
+                  <div class="ability-mod">({{ getModifier(selectedMonster?.intStat) }})</div>
+                </td>
+                <td>
+                  <div class="ability-val">{{ selectedMonster?.wis }}</div>
+                  <div class="ability-mod">({{ getModifier(selectedMonster?.wis) }})</div>
+                </td>
+                <td>
+                  <div class="ability-val">{{ selectedMonster?.cha }}</div>
+                  <div class="ability-mod">({{ getModifier(selectedMonster?.cha) }})</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <!-- Tapered Divider -->
+          <div class="stat-block-divider"></div>
+          
+          <!-- Auxiliary Stats Section (Saving Throws, Skills, Senses, Languages, Challenge) -->
+          <div class="stat-block-auxiliary">
+            @if (getSavingThrowsString()) {
+              <p>
+                <strong>Tiradas de salvación:</strong> <span class="attribute-val">{{ getSavingThrowsString() }}</span>
+              </p>
             }
+            @if (getSkills() !== '—') {
+              <p>
+                <strong>Habilidades:</strong> <span class="attribute-val">{{ getSkills() }}</span>
+              </p>
+            }
+            @if (getListMechanic('vulnerabilities') !== '—') {
+              <p>
+                <strong>Vulnerabilidades al daño:</strong> <span class="attribute-val">{{ getListMechanic('vulnerabilities') }}</span>
+              </p>
+            }
+            @if (getListMechanic('resistances') !== '—') {
+              <p>
+                <strong>Resistencias al daño:</strong> <span class="attribute-val">{{ getListMechanic('resistances') }}</span>
+              </p>
+            }
+            @if (getListMechanic('immunities') !== '—') {
+              <p>
+                <strong>Inmunidades al daño:</strong> <span class="attribute-val">{{ getListMechanic('immunities') }}</span>
+              </p>
+            }
+            @if (getListMechanic('conditionImmunities') !== '—') {
+              <p>
+                <strong>Inmunidades a estados:</strong> <span class="attribute-val">{{ getListMechanic('conditionImmunities') }}</span>
+              </p>
+            }
+            @if (formatSenses() !== '—') {
+              <p>
+                <strong>Sentidos:</strong> <span class="attribute-val">{{ formatSenses() }}</span>
+              </p>
+            }
+            @if (getListMechanic('languages') !== '—') {
+              <p>
+                <strong>Idiomas:</strong> <span class="attribute-val">{{ getListMechanic('languages') }}</span>
+              </p>
+            }
+            <p>
+              <strong>Desafío:</strong> <span class="attribute-val">{{ selectedMonster?.challengeRating }} ({{ getChallengeXp(selectedMonster?.challengeRating) }} PE)</span>
+            </p>
           </div>
-        }
-
-        @if (getMechanics('actions').length > 0) {
-          <div class="mechanics-group">
-            <h3 class="group-title">Acciones</h3>
-            @for (a of getMechanics('actions'); track a.name) {
-              <div class="mechanic-block">
-                <div class="mechanic-header">
-                  <span class="mechanic-name">{{ a.name }}</span>
+          
+          <!-- Tapered Divider -->
+          <div class="stat-block-divider"></div>
+          
+          <!-- Combat Mechanics Description (Description/Flavor Text) -->
+          @if (selectedMonster?.combatMechanics?.description) {
+            <div class="stat-block-description">
+              {{ selectedMonster.combatMechanics.description }}
+            </div>
+          }
+          
+          <!-- Special Traits -->
+          @if (getMechanics('traits').length > 0) {
+            <div class="stat-block-section">
+              @for (t of getMechanics('traits'); track t.name) {
+                <p class="stat-block-inline-trait">
+                  <strong><em>{{ t.name }}.</em></strong> {{ t.desc }}
+                </p>
+              }
+            </div>
+          }
+          
+          <!-- Actions Header -->
+          @if (getMechanics('actions').length > 0) {
+            <div class="stat-block-section-header">Acciones</div>
+            <div class="stat-block-section">
+              @for (a of getMechanics('actions'); track a.name) {
+                <p class="stat-block-inline-action">
+                  <strong><em>{{ a.name }}.</em></strong>
                   @if (a.attackData) {
-                    <div class="attack-badges">
-                      @if (a.attackData.bonus) {
-                        <span class="atk-badge bonus">{{ a.attackData.bonus }}</span>
-                      }
-                      @if (a.attackData.damage) {
-                        <span class="atk-badge damage">{{ a.attackData.damage }}</span>
-                      }
-                      @if (a.attackData.type) {
-                        <span class="atk-badge type">{{ a.attackData.type }}</span>
-                      }
-                      @if (a.attackData.reach) {
-                        <span class="atk-badge reach">{{ a.attackData.reach }}</span>
-                      }
-                    </div>
+                    <span class="attack-badges-inline">
+                      @if (a.attackData.bonus) { <span class="atk-badge bonus">{{ a.attackData.bonus }}</span> }
+                      @if (a.attackData.damage) { <span class="atk-badge damage">{{ a.attackData.damage }}</span> }
+                      @if (a.attackData.type) { <span class="atk-badge type">{{ a.attackData.type }}</span> }
+                      @if (a.attackData.reach) { <span class="atk-badge reach">{{ a.attackData.reach }}</span> }
+                    </span>
                   }
-                </div>
-                @if (a.desc) {
-                  <div class="mechanic-desc">{{ a.desc }}</div>
-                }
-              </div>
-            }
-          </div>
-        }
-
-        @if (getMechanics('reactions').length > 0) {
-          <div class="mechanics-group">
-            <h3 class="group-title">Reacciones</h3>
-            @for (r of getMechanics('reactions'); track r.name) {
-              <div class="mechanic-block">
-                <div class="mechanic-header">
-                  <span class="mechanic-name">{{ r.name }}</span>
-                </div>
-                <div class="mechanic-desc">{{ r.desc }}</div>
-              </div>
-            }
-          </div>
-        }
-
-        @if (getMechanics('legendaryActions').length > 0) {
-          <div class="mechanics-group">
-            <h3 class="group-title">Acciones Legendarias</h3>
-            <p class="intro-text">El monstruo puede realizar 3 acciones legendarias, eligiendo entre las opciones siguientes...</p>
-            @for (l of getMechanics('legendaryActions'); track l.name) {
-              <div class="mechanic-block">
-                <div class="mechanic-header">
-                  <span class="mechanic-name">{{ l.name }}</span>
+                  {{ a.desc }}
+                </p>
+              }
+            </div>
+          }
+          
+          <!-- Reactions Header -->
+          @if (getMechanics('reactions').length > 0) {
+            <div class="stat-block-section-header">Reacciones</div>
+            <div class="stat-block-section">
+              @for (r of getMechanics('reactions'); track r.name) {
+                <p class="stat-block-inline-action">
+                  <strong><em>{{ r.name }}.</em></strong> {{ r.desc }}
+                </p>
+              }
+            </div>
+          }
+          
+          <!-- Legendary Actions Header -->
+          @if (getMechanics('legendaryActions').length > 0) {
+            <div class="stat-block-section-header">Acciones Legendarias</div>
+            <div class="stat-block-section">
+              @for (l of getMechanics('legendaryActions'); track l.name) {
+                <p class="stat-block-inline-action">
+                  <strong><em>{{ l.name }}.</em></strong>
                   @if (l.attackData) {
-                    <div class="attack-badges">
-                      @if (l.attackData.bonus) {
-                        <span class="atk-badge bonus">{{ l.attackData.bonus }}</span>
-                      }
-                      @if (l.attackData.damage) {
-                        <span class="atk-badge damage">{{ l.attackData.damage }}</span>
-                      }
-                      @if (l.attackData.type) {
-                        <span class="atk-badge type">{{ l.attackData.type }}</span>
-                      }
-                    </div>
+                    <span class="attack-badges-inline">
+                      @if (l.attackData.bonus) { <span class="atk-badge bonus">{{ l.attackData.bonus }}</span> }
+                      @if (l.attackData.damage) { <span class="atk-badge damage">{{ l.attackData.damage }}</span> }
+                      @if (l.attackData.type) { <span class="atk-badge type">{{ l.attackData.type }}</span> }
+                    </span>
                   }
-                </div>
-                <div class="mechanic-desc">{{ l.desc }}</div>
-              </div>
-            }
-          </div>
-        }
+                  {{ l.desc }}
+                </p>
+              }
+            </div>
+          }
+          
+        </div>
       </ion-content>
     </ng-template>
   </ion-modal>

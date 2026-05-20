@@ -74,6 +74,13 @@
   padding: 16px 20px;
   margin-bottom: 28px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+  @media (max-width: 768px) {
+    top: 8px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    border-radius: 12px;
+  }
 }
 
 .control-grid {
@@ -84,8 +91,10 @@
   gap: 16px;
   
   @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
   }
 }
 
@@ -95,7 +104,8 @@
   flex-wrap: wrap;
   
   @media (max-width: 768px) {
-    justify-content: center;
+    gap: 6px;
+    justify-content: flex-start;
   }
 }
 
@@ -105,9 +115,7 @@
   background: rgba(255, 255, 255, 0.08);
   
   @media (max-width: 768px) {
-    width: 100%;
-    height: 1px;
-    margin: 4px 0;
+    display: none;
   }
 }
 
@@ -130,6 +138,27 @@
   
   ion-icon {
     font-size: 16px;
+  }
+
+  @media (max-width: 768px) {
+    padding: 8px 12px;
+    font-size: 13px;
+    gap: 6px;
+    
+    ion-icon {
+      font-size: 14px;
+    }
+  }
+
+  @media (max-width: 520px) {
+    padding: 8px;
+    min-width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    
+    span {
+      display: none;
+    }
   }
   
   &:hover:not(:disabled) {
@@ -214,6 +243,14 @@
   padding: 6px 14px;
   border-radius: 20px;
   animation: pulse-gold 3s infinite;
+
+  @media (max-width: 768px) {
+    padding: 4px 10px;
+  }
+
+  @media (max-width: 520px) {
+    padding: 4px 8px;
+  }
   
   .round-label {
     font-size: 10px;
@@ -221,12 +258,34 @@
     text-transform: uppercase;
     color: #C9A84C;
     letter-spacing: 0.1em;
+
+    @media (max-width: 768px) {
+      font-size: 9px;
+    }
+
+    @media (max-width: 520px) {
+      display: none;
+    }
   }
   
   .round-value {
     font-size: 16px;
     font-weight: 800;
     color: #fff;
+
+    @media (max-width: 768px) {
+      font-size: 14px;
+    }
+
+    @media (max-width: 520px) {
+      font-size: 14px;
+      &::before {
+        content: "A: ";
+        font-size: 10px;
+        color: #C9A84C;
+        font-weight: 700;
+      }
+    }
   }
 }
 
@@ -629,12 +688,26 @@
 }
 
 /* Modals Base Styling */
-.forge-modal, .monster-modal, .details-modal {
+.forge-modal, .monster-modal {
   --background: #121212;
   --height: 85%;
   --border-radius: 20px 20px 0 0;
   --box-shadow: 0 -10px 40px rgba(0,0,0,0.6);
   border-top: 2px solid #C9A84C;
+}
+
+/* Detail Modal Premium Styles */
+.details-modal {
+  --height: 90%;
+  --width: 90%;
+  --max-width: 900px;
+  --border-radius: 12px;
+  
+  &::part(content) {
+    background: #fdf1dc;
+    border: 3px solid #7a200d;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+  }
 }
 
 .modal-header-toolbar, .detail-header-toolbar {
@@ -889,242 +962,180 @@
 
 /* Detail Content (Monster RPG Stat Block) */
 .detail-content {
-  --background: #121212;
-  color: #F0E6D3;
-  font-family: 'Outfit', 'Georgia', serif;
+  --background: #fdf1dc;
+  color: #291209;
+  font-family: 'Bookman Old Style', 'Georgia', serif;
+  position: relative;
 }
 
-.monster-summary {
-  text-align: center;
-  margin-bottom: 24px;
-  border-bottom: 1.5px solid rgba(201, 168, 76, 0.25);
-  padding-bottom: 20px;
+/* Stat Block printed book layout styles */
+.stat-block-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  --color: #7a200d;
+  margin: 0;
+  z-index: 10;
+  
+  ion-icon {
+    font-size: 1.6rem;
+  }
+}
 
-  .type-subtitle {
-    color: #8C8C8C;
+.stat-block-book {
+  margin: 0 auto;
+  max-width: 800px;
+  padding: 10px 15px;
+  color: #291209;
+  
+  .stat-block-name {
+    font-family: 'Cinzel', 'Bookman Old Style', serif;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #7a200d;
+    margin: 0 0 4px;
+    letter-spacing: 0.5px;
+  }
+  
+  .stat-block-meta {
     font-style: italic;
-    font-size: 13px;
-    margin-bottom: 16px;
+    color: #5c4033;
+    font-size: 0.95rem;
+    margin: 0 0 10px;
   }
-}
-
-.quick-combat-stats {
-  display: flex;
-  justify-content: center;
-  gap: 14px;
-
-  .combat-stat-box {
-    background: rgba(30, 30, 30, 0.85);
-    border: 1px solid rgba(201, 168, 76, 0.2);
-    border-radius: 8px;
-    padding: 10px 14px;
-    min-width: 76px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-
-    .label {
-      color: #C9A84C;
-      font-size: 10px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 4px;
-    }
-
-    .value {
-      color: #fff;
-      font-size: 20px;
-      font-weight: 800;
-    }
+  
+  .stat-block-divider {
+    height: 5px;
+    background: linear-gradient(to right, #7a200d 0%, #c9a84c 50%, #7a200d 100%);
+    clip-path: polygon(0 50%, 20% 10%, 80% 10%, 100% 50%, 80% 90%, 20% 90%);
+    margin: 12px 0;
   }
-}
-
-.abilities-grid-premium {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
-
-  .ability-card {
-    background: rgba(30, 30, 30, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    border-radius: 10px;
-    padding: 12px 6px;
-    text-align: center;
-    transition: border-color 0.2s;
-
-    &:hover {
-      border-color: rgba(201, 168, 76, 0.2);
-    }
-
-    label {
-      display: block;
-      color: #8C8C8C;
-      font-size: 10px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 4px;
-    }
-
-    .val {
-      color: #fff;
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    .mod {
-      color: #C9A84C;
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .save {
-      color: #2ecc71;
-      font-size: 10px;
-      font-weight: 700;
-    }
-  }
-
-  @media (max-width: 480px) {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+  
+  .stat-block-attribute {
+    margin: 5px 0;
+    font-size: 0.95rem;
+    line-height: 1.4;
     
-    .ability-card {
-      padding: 8px 4px;
+    strong {
+      color: #7a200d;
+      font-weight: 800;
+    }
+    
+    .attribute-value {
+      color: #291209;
+    }
+  }
+  
+  .stat-block-ability-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    
+    th {
+      color: #7a200d;
+      font-weight: bold;
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 4px;
+      letter-spacing: 0.5px;
+    }
+    
+    td {
+      text-align: center;
+      color: #291209;
+      padding: 6px 4px;
       
-      .val {
-        font-size: 16px;
-      }
-      .mod {
-        font-size: 13px;
-      }
-    }
-  }
-}
-
-.traits-summary-box {
-  background: rgba(30, 30, 30, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  border-left: 3px solid #C9A84C;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 24px;
-
-  p {
-    margin: 8px 0;
-    font-size: 13.5px;
-    color: #F0E6D3;
-    line-height: 1.5;
-
-    &:first-child { margin-top: 0; }
-    &:last-child { margin-bottom: 0; }
-
-    .label {
-      color: #C9A84C;
-      font-weight: 700;
-      margin-right: 6px;
-    }
-  }
-}
-
-.mechanics-group {
-  margin-bottom: 28px;
-
-  .group-title {
-    color: #C9A84C;
-    font-size: 16px;
-    font-weight: 700;
-    font-family: 'Cinzel', serif;
-    border-bottom: 1.5px solid rgba(201, 168, 76, 0.25);
-    padding-bottom: 6px;
-    margin-bottom: 16px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-
-  .mechanic-block {
-    margin-bottom: 18px;
-    background: rgba(30, 30, 30, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.02);
-    border-radius: 8px;
-    padding: 12px;
-    
-    &:last-child {
-      margin-bottom: 0;
-    }
-
-    .mechanic-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .mechanic-name {
-      color: #C9A84C;
-      font-weight: 700;
-      font-family: 'Cinzel', 'Georgia', serif;
-      font-size: 15px;
-      letter-spacing: 0.02em;
-    }
-
-    .attack-badges {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-
-      .atk-badge {
-        font-size: 10px;
+      .ability-val {
+        font-size: 1.15rem;
         font-weight: 800;
-        padding: 3px 8px;
-        border-radius: 4px;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-
-        &.bonus {
-          background: rgba(201, 168, 76, 0.15);
-          color: #C9A84C;
-          border: 1px solid rgba(201, 168, 76, 0.3);
-        }
-
-        &.damage {
-          background: rgba(192, 57, 43, 0.15);
-          color: #ef5350;
-          border: 1px solid rgba(192, 57, 43, 0.3);
-        }
-
-        &.type {
-          background: rgba(255, 255, 255, 0.05);
-          color: #8C8C8C;
-          border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        &.reach {
-          background: rgba(52, 152, 219, 0.1);
-          color: #3498db;
-          border: 1px solid rgba(52, 152, 219, 0.2);
-        }
+        margin-bottom: 2px;
+      }
+      
+      .ability-mod {
+        font-size: 0.85rem;
+        color: #5c4033;
+        font-weight: 600;
       }
     }
-
-    .mechanic-desc {
-      color: #F0E6D3;
-      font-size: 13.5px;
-      line-height: 1.6;
-      opacity: 0.85;
+  }
+  
+  .stat-block-auxiliary {
+    margin: 12px 0;
+    
+    p {
+      margin: 5px 0;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      color: #291209;
+      
+      strong {
+        color: #7a200d;
+        font-weight: 800;
+      }
+      
+      .attribute-val {
+        color: #291209;
+      }
     }
   }
-
-  .intro-text {
-    color: #8C8C8C;
+  
+  .stat-block-description {
     font-style: italic;
-    font-size: 12px;
-    margin-bottom: 12px;
+    line-height: 1.5;
+    color: #4a3621;
+    margin: 12px 0 16px;
+    font-size: 0.95rem;
+    border-left: 3px solid rgba(122, 32, 13, 0.2);
+    padding-left: 10px;
+  }
+  
+  .stat-block-section-header {
+    font-family: 'Cinzel', 'Bookman Old Style', serif;
+    font-size: 1.3rem;
+    color: #7a200d;
+    border-bottom: 2px solid #7a200d;
+    padding-bottom: 3px;
+    margin: 22px 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 800;
+  }
+  
+  .stat-block-inline-trait, .stat-block-inline-action {
+    margin: 8px 0;
+    line-height: 1.55;
+    font-size: 0.95rem;
+    color: #291209;
+    
+    strong {
+      color: #291209;
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+    
+    em {
+      font-style: italic;
+    }
+    
+    .attack-badges-inline {
+      display: inline-flex;
+      gap: 4px;
+      vertical-align: middle;
+      margin: 0 6px;
+      
+      .atk-badge {
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        font-family: 'Outfit', sans-serif;
+        text-transform: capitalize;
+        
+        &.bonus { background: #e2f0d9; color: #385723; border: 1px solid rgba(56, 87, 35, 0.4); }
+        &.damage { background: #fce4d6; color: #c65911; border: 1px solid rgba(198, 89, 17, 0.4); }
+        &.type { background: #fff2cc; color: #7f6000; border: 1px solid rgba(127, 96, 0, 0.4); }
+        &.reach { background: #e8d9ff; color: #5856d6; border: 1px solid rgba(88, 86, 214, 0.4); }
+      }
+    }
   }
 }

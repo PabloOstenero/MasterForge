@@ -1,14 +1,6 @@
-<ion-header class="ion-no-border">
-  <ion-toolbar color="dark">
-    <ion-title>Bestiario</ion-title>
-    <ion-buttons slot="end">
-      <ion-badge color="primary" class="ion-margin-end">
-        {{ filteredMonsters.length }}{{ hasMore ? '+' : '' }} Monstruos
-      </ion-badge>
-    </ion-buttons>
-  </ion-toolbar>
-  
-  <ion-toolbar color="dark">
+<ion-content class="bestiary-content">
+  <div class="bestiary-container ion-padding">
+    
     <div class="search-section">
       <div class="search-bar-row">
         <ion-searchbar 
@@ -18,9 +10,19 @@
           debounce="300"
           class="custom-search">
         </ion-searchbar>
+        
+        <ion-button 
+          fill="clear" 
+          class="filter-toggle-btn"
+          [class.active]="showFilters"
+          (click)="toggleFilters()"
+          title="Filtros">
+          <ion-icon name="options-outline" slot="icon-only"></ion-icon>
+          <span class="active-filters-dot" *ngIf="selectedType || selectedCR !== null"></span>
+        </ion-button>
       </div>
       
-      <div class="filters-row">
+      <div class="filters-row" [class.show]="showFilters">
         <!-- Type Filter -->
         <div class="filter-wrapper">
           <label class="filter-label">Tipo</label>
@@ -61,11 +63,6 @@
         </div>
       </div>
     </div>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content color="dark">
-  <div class="bestiary-container ion-padding">
     
     <!-- Loading State -->
     <div *ngIf="loading" class="ion-text-center ion-padding-top">
@@ -113,11 +110,10 @@
         </div>
 
         <div class="card-actions">
-          <ion-button fill="outline" color="light" (click)="openDetails(m)">
-            <ion-icon name="eye" slot="start"></ion-icon>
-            Ficha
+          <ion-button fill="clear" class="details-btn" (click)="openDetails(m)" title="Ver Ficha">
+            <ion-icon name="eye" slot="icon-only"></ion-icon>
           </ion-button>
-          <ion-button fill="solid" color="primary" (click)="openCampaignSelection(m)">
+          <ion-button fill="solid" class="add-btn" (click)="openCampaignSelection(m)">
             <ion-icon name="add-circle" slot="start"></ion-icon>
             Añadir
           </ion-button>
@@ -136,151 +132,172 @@
   <!-- Monster Details Modal -->
   <ion-modal [isOpen]="isDetailsModalOpen" (didDismiss)="isDetailsModalOpen = false" class="details-modal">
     <ng-template>
-      <ion-header class="ion-no-border">
-        <ion-toolbar class="detail-header-toolbar">
-          <ion-title>{{ selectedMonster?.name }}</ion-title>
-          <ion-buttons slot="end">
-            <ion-button (click)="isDetailsModalOpen = false">
-              <ion-icon name="close"></ion-icon>
-            </ion-button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
-      
       <ion-content class="detail-content ion-padding">
-        <div class="monster-summary">
-          <p class="type-subtitle">{{ selectedMonster?.size }} {{ selectedMonster?.type }}, {{ selectedMonster?.alignment }}</p>
+        <!-- Floating Close Button -->
+        <ion-button (click)="isDetailsModalOpen = false" class="stat-block-close-btn" fill="clear">
+          <ion-icon name="close"></ion-icon>
+        </ion-button>
+
+        <div class="stat-block-book">
+          <!-- Monster Name -->
+          <h1 class="stat-block-name">{{ selectedMonster?.name }}</h1>
           
-          <div class="monster-description" *ngIf="selectedMonster?.combatMechanics?.description">
+          <!-- Size, Type, Alignment -->
+          <p class="stat-block-meta">{{ selectedMonster?.size }} {{ selectedMonster?.type }}, {{ selectedMonster?.alignment }}</p>
+          
+          <!-- Tapered Divider -->
+          <div class="stat-block-divider"></div>
+          
+          <!-- AC, HP, Speed -->
+          <p class="stat-block-attribute">
+            <strong>Clase de Armadura</strong> <span class="attribute-value">{{ selectedMonster?.armorClass }}</span>
+          </p>
+          
+          <p class="stat-block-attribute">
+            <strong>Puntos de Vida</strong> <span class="attribute-value">{{ selectedMonster?.hitPoints }}</span>
+          </p>
+          
+          <p class="stat-block-attribute">
+            <strong>Velocidad</strong> <span class="attribute-value">{{ selectedMonster?.speed }}</span>
+          </p>
+          
+          <!-- Tapered Divider -->
+          <div class="stat-block-divider"></div>
+          
+          <!-- Ability Table -->
+          <table class="stat-block-ability-table">
+            <thead>
+              <tr>
+                <th>FUE</th>
+                <th>DES</th>
+                <th>CON</th>
+                <th>INT</th>
+                <th>SAB</th>
+                <th>CAR</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="ability-val">{{ selectedMonster?.str }}</div>
+                  <div class="ability-mod">({{ getModifier(selectedMonster?.str) }})</div>
+                </td>
+                <td>
+                  <div class="ability-val">{{ selectedMonster?.dex }}</div>
+                  <div class="ability-mod">({{ getModifier(selectedMonster?.dex) }})</div>
+                </td>
+                <td>
+                  <div class="ability-val">{{ selectedMonster?.con }}</div>
+                  <div class="ability-mod">({{ getModifier(selectedMonster?.con) }})</div>
+                </td>
+                <td>
+                  <div class="ability-val">{{ selectedMonster?.intStat }}</div>
+                  <div class="ability-mod">({{ getModifier(selectedMonster?.intStat) }})</div>
+                </td>
+                <td>
+                  <div class="ability-val">{{ selectedMonster?.wis }}</div>
+                  <div class="ability-mod">({{ getModifier(selectedMonster?.wis) }})</div>
+                </td>
+                <td>
+                  <div class="ability-val">{{ selectedMonster?.cha }}</div>
+                  <div class="ability-mod">({{ getModifier(selectedMonster?.cha) }})</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <!-- Tapered Divider -->
+          <div class="stat-block-divider"></div>
+          
+          <!-- Auxiliary Stats Section (Saving Throws, Skills, Senses, Languages, Challenge) -->
+          <div class="stat-block-auxiliary">
+            <p *ngIf="getSavingThrowsString()">
+              <strong>Tiradas de salvación:</strong> <span class="attribute-val">{{ getSavingThrowsString() }}</span>
+            </p>
+            <p *ngIf="getSkills() !== '—'">
+              <strong>Habilidades:</strong> <span class="attribute-val">{{ getSkills() }}</span>
+            </p>
+            <p *ngIf="getListMechanic('vulnerabilities') !== '—'">
+              <strong>Vulnerabilidades al daño:</strong> <span class="attribute-val">{{ getListMechanic('vulnerabilities') }}</span>
+            </p>
+            <p *ngIf="getListMechanic('resistances') !== '—'">
+              <strong>Resistencias al daño:</strong> <span class="attribute-val">{{ getListMechanic('resistances') }}</span>
+            </p>
+            <p *ngIf="getListMechanic('immunities') !== '—'">
+              <strong>Inmunidades al daño:</strong> <span class="attribute-val">{{ getListMechanic('immunities') }}</span>
+            </p>
+            <p *ngIf="getListMechanic('conditionImmunities') !== '—'">
+              <strong>Inmunidades a estados:</strong> <span class="attribute-val">{{ getListMechanic('conditionImmunities') }}</span>
+            </p>
+            <p *ngIf="formatSenses() !== '—'">
+              <strong>Sentidos:</strong> <span class="attribute-val">{{ formatSenses() }}</span>
+            </p>
+            <p *ngIf="getListMechanic('languages') !== '—'">
+              <strong>Idiomas:</strong> <span class="attribute-val">{{ getListMechanic('languages') }}</span>
+            </p>
+            <p>
+              <strong>Desafío:</strong> <span class="attribute-val">{{ selectedMonster?.challengeRating }} ({{ getChallengeXp(selectedMonster?.challengeRating) }} PE)</span>
+            </p>
+          </div>
+          
+          <!-- Tapered Divider -->
+          <div class="stat-block-divider"></div>
+          
+          <!-- Combat Mechanics Description (Description/Flavor Text) -->
+          <div class="stat-block-description" *ngIf="selectedMonster?.combatMechanics?.description">
             {{ selectedMonster.combatMechanics.description }}
           </div>
-
-          <div class="quick-combat-stats">
-            <div class="combat-stat-box">
-              <span class="label">CA</span>
-              <span class="value">{{ selectedMonster?.armorClass }}</span>
-            </div>
-            <div class="combat-stat-box">
-              <span class="label">PV</span>
-              <span class="value">{{ selectedMonster?.hitPoints }}</span>
-            </div>
-            <div class="combat-stat-box">
-              <span class="label">Vel</span>
-              <span class="value">{{ selectedMonster?.speed }}</span>
-            </div>
-            <div class="combat-stat-box">
-              <span class="label">CR</span>
-              <span class="value">{{ selectedMonster?.challengeRating }}</span>
-            </div>
+          
+          <!-- Special Traits -->
+          <div class="stat-block-section" *ngIf="getMechanics('traits').length > 0">
+            <p class="stat-block-inline-trait" *ngFor="let t of getMechanics('traits')">
+              <strong><em>{{ t.name }}.</em></strong> {{ t.desc }}
+            </p>
           </div>
-        </div>
-
-        <div class="abilities-grid-premium">
-          <div class="ability-card">
-            <label>FUER</label>
-            <div class="val">{{ selectedMonster?.str }}</div>
-            <div class="mod">({{ getModifier(selectedMonster?.str) }})</div>
-            <div class="save">Sal: {{ getSavingThrow('str', selectedMonster?.str) }}</div>
-          </div>
-          <div class="ability-card">
-            <label>DEST</label>
-            <div class="val">{{ selectedMonster?.dex }}</div>
-            <div class="mod">({{ getModifier(selectedMonster?.dex) }})</div>
-            <div class="save">Sal: {{ getSavingThrow('dex', selectedMonster?.dex) }}</div>
-          </div>
-          <div class="ability-card">
-            <label>CONS</label>
-            <div class="val">{{ selectedMonster?.con }}</div>
-            <div class="mod">({{ getModifier(selectedMonster?.con) }})</div>
-            <div class="save">Sal: {{ getSavingThrow('con', selectedMonster?.con) }}</div>
-          </div>
-          <div class="ability-card">
-            <label>INTE</label>
-            <div class="val">{{ selectedMonster?.intStat }}</div>
-            <div class="mod">({{ getModifier(selectedMonster?.intStat) }})</div>
-            <div class="save">Sal: {{ getSavingThrow('int', selectedMonster?.intStat) }}</div>
-          </div>
-          <div class="ability-card">
-            <label>SABI</label>
-            <div class="val">{{ selectedMonster?.wis }}</div>
-            <div class="mod">({{ getModifier(selectedMonster?.wis) }})</div>
-            <div class="save">Sal: {{ getSavingThrow('wis', selectedMonster?.wis) }}</div>
-          </div>
-          <div class="ability-card">
-            <label>CARA</label>
-            <div class="val">{{ selectedMonster?.cha }}</div>
-            <div class="mod">({{ getModifier(selectedMonster?.cha) }})</div>
-            <div class="save">Sal: {{ getSavingThrow('cha', selectedMonster?.cha) }}</div>
-          </div>
-        </div>
-
-        <div class="traits-summary-box">
-          <p *ngIf="getListMechanic('vulnerabilities') !== '—'">
-            <span class="label">Vulnerabilidades:</span> {{ getListMechanic('vulnerabilities') }}
-          </p>
-          <p *ngIf="getListMechanic('resistances') !== '—'">
-            <span class="label">Resistencias:</span> {{ getListMechanic('resistances') }}
-          </p>
-          <p *ngIf="getListMechanic('immunities') !== '—'">
-            <span class="label">Inmunidades (Daño):</span> {{ getListMechanic('immunities') }}
-          </p>
-          <p *ngIf="getListMechanic('conditionImmunities') !== '—'">
-            <span class="label">Inmunidades (Estado):</span> {{ getListMechanic('conditionImmunities') }}
-          </p>
-          <p><span class="label">Senses:</span> {{ formatSenses() }}</p>
-          <p><span class="label">Habilidades:</span> {{ getSkills() }}</p>
-          <p><span class="label">Idiomas:</span> {{ getListMechanic('languages') }}</p>
-        </div>
-
-        <div class="mechanics-group" *ngIf="getMechanics('traits').length > 0">
-          <h3 class="group-title">Rasgos</h3>
-          <div class="mechanic-block" *ngFor="let t of getMechanics('traits')">
-            <div class="mechanic-header">
-              <span class="mechanic-name">{{ t.name }}</span>
-            </div>
-            <div class="mechanic-desc">{{ t.desc }}</div>
-          </div>
-        </div>
-
-        <div class="mechanics-group" *ngIf="getMechanics('actions').length > 0">
-          <h3 class="group-title">Acciones</h3>
-          <div class="mechanic-block" *ngFor="let a of getMechanics('actions')">
-            <div class="mechanic-header">
-              <span class="mechanic-name">{{ a.name }}</span>
-              <div class="attack-badges" *ngIf="a.attackData">
+          
+          <!-- Actions Header -->
+          <div class="stat-block-section-header" *ngIf="getMechanics('actions').length > 0">Acciones</div>
+          
+          <!-- Actions List -->
+          <div class="stat-block-section" *ngIf="getMechanics('actions').length > 0">
+            <p class="stat-block-inline-action" *ngFor="let a of getMechanics('actions')">
+              <strong><em>{{ a.name }}.</em></strong>
+              <span class="attack-badges-inline" *ngIf="a.attackData">
                 <span class="atk-badge bonus" *ngIf="a.attackData.bonus">{{ a.attackData.bonus }}</span>
                 <span class="atk-badge damage" *ngIf="a.attackData.damage">{{ a.attackData.damage }}</span>
                 <span class="atk-badge type" *ngIf="a.attackData.type">{{ a.attackData.type }}</span>
                 <span class="atk-badge reach" *ngIf="a.attackData.reach">{{ a.attackData.reach }}</span>
-              </div>
-            </div>
-            <div class="mechanic-desc" *ngIf="a.desc">{{ a.desc }}</div>
+              </span>
+              {{ a.desc }}
+            </p>
           </div>
-        </div>
-
-        <div class="mechanics-group" *ngIf="getMechanics('reactions').length > 0">
-          <h3 class="group-title">Reacciones</h3>
-          <div class="mechanic-block" *ngFor="let r of getMechanics('reactions')">
-            <div class="mechanic-header">
-              <span class="mechanic-name">{{ r.name }}</span>
-            </div>
-            <div class="mechanic-desc">{{ r.desc }}</div>
+          
+          <!-- Reactions Header -->
+          <div class="stat-block-section-header" *ngIf="getMechanics('reactions').length > 0">Reacciones</div>
+          
+          <!-- Reactions List -->
+          <div class="stat-block-section" *ngIf="getMechanics('reactions').length > 0">
+            <p class="stat-block-inline-action" *ngFor="let r of getMechanics('reactions')">
+              <strong><em>{{ r.name }}.</em></strong> {{ r.desc }}
+            </p>
           </div>
-        </div>
-
-        <div class="mechanics-group" *ngIf="getMechanics('legendaryActions').length > 0">
-          <h3 class="group-title">Acciones Legendarias</h3>
-          <div class="mechanic-block" *ngFor="let l of getMechanics('legendaryActions')">
-            <div class="mechanic-header">
-              <span class="mechanic-name">{{ l.name }}</span>
-              <div class="attack-badges" *ngIf="l.attackData">
+          
+          <!-- Legendary Actions Header -->
+          <div class="stat-block-section-header" *ngIf="getMechanics('legendaryActions').length > 0">Acciones Legendarias</div>
+          
+          <!-- Legendary Actions List -->
+          <div class="stat-block-section" *ngIf="getMechanics('legendaryActions').length > 0">
+            <p class="stat-block-inline-action" *ngFor="let l of getMechanics('legendaryActions')">
+              <strong><em>{{ l.name }}.</em></strong>
+              <span class="attack-badges-inline" *ngIf="l.attackData">
                 <span class="atk-badge bonus" *ngIf="l.attackData.bonus">{{ l.attackData.bonus }}</span>
                 <span class="atk-badge damage" *ngIf="l.attackData.damage">{{ l.attackData.damage }}</span>
                 <span class="atk-badge type" *ngIf="l.attackData.type">{{ l.attackData.type }}</span>
-              </div>
-            </div>
-            <div class="mechanic-desc">{{ l.desc }}</div>
+              </span>
+              {{ l.desc }}
+            </p>
           </div>
+          
         </div>
       </ion-content>
     </ng-template>
