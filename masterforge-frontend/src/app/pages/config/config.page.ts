@@ -100,6 +100,9 @@ export class ConfigPage implements OnInit {
   showConfirmPassword = false;
   sessionNotifications = true;
   
+  // Tab Navigation State
+  activeTab: 'profile' | 'security' | 'settings' | 'billing' | 'danger' = 'profile';
+
   // 2FA variables
   is2faSetup = false;
   qrCodeDataUrl = '';
@@ -149,6 +152,10 @@ export class ConfigPage implements OnInit {
   ngOnInit() {
     this.loadUserData();
     this.loadFontScale();
+  }
+
+  setActiveTab(tab: 'profile' | 'security' | 'settings' | 'billing' | 'danger') {
+    this.activeTab = tab;
   }
 
   ionViewDidEnter() {

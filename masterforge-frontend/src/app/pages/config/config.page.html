@@ -1,281 +1,365 @@
 <div class="config-page-wrapper ion-padding">
   <div class="config-container">
-    <h1 class="main-title">Configuración del Maestro</h1>
 
-    <div *ngIf="isLoading" class="loader-container">
-      <ion-spinner name="crescent" color="warning"></ion-spinner>
-      <p>Cargando pergaminos...</p>
-    </div>
-
-    <div *ngIf="!isLoading" class="config-sections animate__animated animate__fadeIn">
-
-      <!-- Personal Information -->
-      <section class="parchment-card">
-        <div class="card-header">
-          <ion-icon name="person-outline" color="warning"></ion-icon>
-          <h2>Información Personal</h2>
-        </div>
-        <form [formGroup]="userForm" (ngSubmit)="updatePersonalData()">
-          <div class="form-group">
-            <label>Nombre de Usuario</label>
-            <input type="text" formControlName="name" class="dnd-input">
-          </div>
-          <div class="form-group">
-            <label>Correo Electrónico</label>
-            <input type="email" formControlName="email" class="dnd-input">
-          </div>
-          <button type="submit" class="dnd-button primary" [disabled]="userForm.invalid">
-            Guardar Cambios
-          </button>
-        </form>
-      </section>
-
-      <!-- Security -->
-      <section class="parchment-card">
-        <div class="card-header">
-          <ion-icon name="lock-closed-outline" color="warning"></ion-icon>
-          <h2>Seguridad</h2>
-        </div>
-
-        <form [formGroup]="passwordForm" (ngSubmit)="updatePassword()">
-          <div class="form-group">
-            <label>Contraseña Actual</label>
-            <div class="password-wrapper">
-              <input [type]="showCurrentPassword ? 'text' : 'password'" formControlName="currentPassword" class="dnd-input">
-              <ion-icon [name]="showCurrentPassword ? 'eye-off-outline' : 'eye-outline'" (click)="toggleCurrentPasswordVisibility()"
-                class="password-toggle">
-              </ion-icon>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Nueva Contraseña</label>
-            <div class="password-wrapper">
-              <input [type]="showNewPassword ? 'text' : 'password'" formControlName="newPassword" class="dnd-input">
-              <ion-icon [name]="showNewPassword ? 'eye-off-outline' : 'eye-outline'" (click)="toggleNewPasswordVisibility()"
-                class="password-toggle">
-              </ion-icon>
-            </div>
-            <p *ngIf="passwordForm.get('newPassword')?.errors?.['minlength'] && passwordForm.get('newPassword')?.touched"
-              class="error-hint">
-              Mínimo 6 caracteres.
-            </p>
-          </div>
-          <div class="form-group">
-            <label>Confirmar Contraseña</label>
-            <div class="password-wrapper">
-              <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword" class="dnd-input">
-              <ion-icon [name]="showConfirmPassword ? 'eye-off-outline' : 'eye-outline'" (click)="toggleConfirmPasswordVisibility()"
-                class="password-toggle">
-              </ion-icon>
-            </div>
-            <p *ngIf="passwordForm.errors?.['mismatch'] && passwordForm.get('confirmPassword')?.touched"
-              class="error-hint">
-              Las contraseñas no coinciden.
-            </p>
-          </div>
-          <button type="submit" class="dnd-button gold" [disabled]="passwordForm.invalid">
-            Actualizar Contraseña
-          </button>
-        </form>
-
-        <div class="placeholder-section mt-4">
-          <h3>Autenticación en Dos Pasos (2FA)</h3>
-
-          @if (!currentUser?.is2faEnabled && !is2faSetup) {
-          <p class="status-badge disabled">Desactivado</p>
-          <p class="hint-text">Añade una capa extra de protección a tu cuenta.</p>
-          <button class="dnd-button gold" (click)='start2faSetup()'>Configurar 2FA</button>
-          }
-
-          @if (is2faSetup) {
-          <div class="mfa-setup-container animate__animated animate__fadeIn">
-            <p class="hint-text">Escanea este código con Google Authenticator o Authy:</p>
-            <div class="qr-container">
-              <img [src]="qrCodeDataUrl" alt="QR 2FA" *ngIf="qrCodeDataUrl">
-            </div>
-            <div class="form-group">
-              <label>Código de Verificación</label>
-              <input type="text" [(ngModel)]="twoFactorCode" placeholder="000000" class="dnd-input text-center">
-            </div>
-            <div class="setup-actions">
-              <button class="dnd-button primary" (click)="verifyAndEnable2fa()">Verificar y Activar</button>
-              <button class="dnd-button ghost" (click)="cancel2faSetup()">Cancelar</button>
-            </div>
-          </div>
-          }
-
-          @if (currentUser?.is2faEnabled) {
-          <p class="status-badge success">Activado</p>
-          <p class="hint-text">Tu cuenta está protegida por un segundo factor.</p>
-          <button class="dnd-button danger-outline" (click)="disable2fa()">Desactivar 2FA</button>
-          }
-        </div>
-      </section>
-
-      <!-- App Preferences -->
-      <section class="parchment-card">
-        <div class="card-header">
-          <ion-icon name="settings-outline" color="warning"></ion-icon>
-          <h2>Preferencias de la App</h2>
-        </div>
-        <div class="setting-item">
-          <div class="font-slider-container">
-            <ion-icon name="text-outline" style="font-size: 14px;"></ion-icon>
-            <ion-range min="0.8" max="1.5" step="0.05" [value]="fontScale" (ionInput)="onScaleInput($event)"
-              color="warning" style="pointer-events: auto; position: relative; z-index: 10;">
-            </ion-range>
-            <ion-icon name="text-outline" style="font-size: 24px;"></ion-icon>
-          </div>
-          <div class="font-preview">
-            Escala actual: {{ (fontScale * 100).toFixed(0) }}%
-          </div>
-          <p class="hint-text">Ajusta el tamaño del texto para leer mejor los bloques de estadísticas.</p>
-        </div>
-      </section>
-
-      <!-- Notifications -->
-      <section class="parchment-card">
-        <div class="card-header">
-          <ion-icon name="notifications-outline" color="warning"></ion-icon>
-          <h2>Notificaciones</h2>
-        </div>
-        <div class="toggle-row">
-          <span>Alertas de Sesión</span>
-          <ion-toggle color="warning" 
-                      [(ngModel)]="sessionNotifications"
-                      (ionChange)="updateNotifications()">
-          </ion-toggle>
-        </div>
-        <p class="hint-text">Gestiona cómo quieres que te avisemos de las novedades.</p>
-      </section>
-
-      <!-- Plan & Billing -->
-      <section class="parchment-card">
-        <div class="card-header">
-          <ion-icon name="diamond-outline" color="warning"></ion-icon>
-          <h2>Plan y Tesorería</h2>
-        </div>
-
-        <div class="plan-status-container">
-          <div class="plan-details">
-            <div class="tier-info">
-              <span class="label">Tu Nivel:</span>
-              <span class="value" [class.pro-text]="isPro">
-                {{ currentUser?.subscriptionTier }}
-                <ion-icon name="star-outline" *ngIf="isPro"></ion-icon>
-              </span>
-            </div>
-            
-            <div class="expiry-info" *ngIf="isPro">
-              <ion-icon name="calendar-outline"></ion-icon>
-              <span>Vence el: <strong>{{ subscriptionExpiryDate }}</strong></span>
-            </div>
-
-            <div class="benefits-preview" *ngIf="!isPro">
-              <p>Los aventureros Pro disfrutan de:</p>
-              <ul>
-                <li>Personajes Ilimitados</li>
-                <li>Campañas Ilimitadas</li>
-                <li>Homebrew Ilimitado</li>
-                <li>Derechos de Monetización</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="plan-actions">
-            <div class="balance-display">
-              <span class="label">Tesorería:</span>
-              <span class="value">{{ (currentUser?.balance | number:'1.2-2') }}€</span>
-              <button class="dnd-button ghost small top-up-btn" (click)="onTopUpClick()">
-                <ion-icon name="add-circle-outline"></ion-icon> Cargar
-              </button>
-            </div>
-            
-            <button class="dnd-button gold" *ngIf="!isPro" (click)="upgradeToPro()">
-              Subir a PRO (9.99€/mes)
-            </button>
-            <button class="dnd-button ghost" *ngIf="isPro" (click)="upgradeToPro()">
-              Renovar Suscripción
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <!-- Social -->
-      <section class="parchment-card">
-        <div class="card-header">
-          <ion-icon name="people-outline" color="warning"></ion-icon>
-          <h2>Conexiones Sociales</h2>
-        </div>
-        <div class="social-connections">
-          <div class="social-item discord">
-            <div class="social-info">
-              <ion-icon name="logo-discord"></ion-icon>
-              <div class="text-group">
-                <span class="label">Discord</span>
-                <span class="value" *ngIf="currentUser?.discordUsername">
-                  Conectado como: <strong>{{ currentUser.discordUsername }}</strong>
-                </span>
-                <span class="value" *ngIf="!currentUser?.discordUsername">
-                  Sin vincular
-                </span>
-              </div>
-            </div>
-            <button class="dnd-button ghost small" *ngIf="currentUser?.discordUsername" (click)="unlinkDiscord()">
-              Desvincular
-            </button>
-            <button class="dnd-button gold small" *ngIf="!currentUser?.discordUsername" (click)="linkDiscord()">
-              Vincular
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <!-- Danger Zone -->
-      <section class="parchment-card danger-zone">
-        <div class="card-header">
-          <ion-icon name="skull-outline" color="danger"></ion-icon>
-          <h2>Zona de Peligro</h2>
-        </div>
-        <p>Una vez eliminada la cuenta, no hay vuelta atrás. Todos tus datos se perderán en el abismo.</p>
-        <button class="dnd-button danger" (click)="confirmDeleteAccount()">
-          Eliminar Cuenta Permanentemente
+    @if (isLoading) {
+      <div class="loader-container">
+        <ion-spinner name="crescent" color="warning"></ion-spinner>
+        <p>Cargando pergaminos...</p>
+      </div>
+    } @else {
+      <!-- Elegant Horizontal Navigation Ribbon -->
+      <div class="config-tabs-ribbon">
+        <button class="tab-btn" [class.active]="activeTab === 'profile'" (click)="setActiveTab('profile')">
+          <ion-icon name="person-outline"></ion-icon>
+          <span>Perfil</span>
         </button>
-      </section>
+        <button class="tab-btn" [class.active]="activeTab === 'security'" (click)="setActiveTab('security')">
+          <ion-icon name="lock-closed-outline"></ion-icon>
+          <span>Seguridad</span>
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'settings'" (click)="setActiveTab('settings')">
+          <ion-icon name="settings-outline"></ion-icon>
+          <span>Ajustes</span>
+        </button>
+        <button class="tab-btn" [class.pro-glow]="isPro" [class.active]="activeTab === 'billing'" (click)="setActiveTab('billing')">
+          <ion-icon name="diamond-outline"></ion-icon>
+          <span>Tesorería</span>
+        </button>
+        <button class="tab-btn danger-tab" [class.active]="activeTab === 'danger'" (click)="setActiveTab('danger')">
+          <ion-icon name="skull-outline"></ion-icon>
+          <span>Abismo</span>
+        </button>
+      </div>
 
-    </div>
+      <div class="config-content-area animate__animated animate__fadeIn">
+        <!-- Profile Tab -->
+        @if (activeTab === 'profile') {
+          <div class="tab-panel animate__animated animate__fadeIn">
+            <!-- Personal Information -->
+            <section class="parchment-card">
+              <div class="card-header">
+                <ion-icon name="person-outline" color="warning"></ion-icon>
+                <h2>Información Personal</h2>
+              </div>
+              <form [formGroup]="userForm" (ngSubmit)="updatePersonalData()">
+                <div class="form-group">
+                  <label>Nombre de Usuario</label>
+                  <input type="text" formControlName="name" class="dnd-input">
+                </div>
+                <div class="form-group">
+                  <label>Correo Electrónico</label>
+                  <input type="email" formControlName="email" class="dnd-input">
+                </div>
+                <button type="submit" class="dnd-button primary" [disabled]="userForm.invalid">
+                  Guardar Cambios
+                </button>
+              </form>
+            </section>
+
+            <!-- Social Connections -->
+            <section class="parchment-card">
+              <div class="card-header">
+                <ion-icon name="people-outline" color="warning"></ion-icon>
+                <h2>Conexiones Sociales</h2>
+              </div>
+              <div class="social-connections">
+                <div class="social-item discord">
+                  <div class="social-info">
+                    <ion-icon name="logo-discord"></ion-icon>
+                    <div class="text-group">
+                      <span class="label">Discord</span>
+                      @if (currentUser?.discordUsername) {
+                        <span class="value">
+                          Conectado como: <strong>{{ currentUser.discordUsername }}</strong>
+                        </span>
+                      } @else {
+                        <span class="value">
+                          Sin vincular
+                        </span>
+                      }
+                    </div>
+                  </div>
+                  @if (currentUser?.discordUsername) {
+                    <button class="dnd-button ghost small" (click)="unlinkDiscord()">
+                      Desvincular
+                    </button>
+                  } @else {
+                    <button class="dnd-button gold small" (click)="linkDiscord()">
+                      Vincular
+                    </button>
+                  }
+                </div>
+              </div>
+            </section>
+          </div>
+        }
+
+        <!-- Security Tab -->
+        @if (activeTab === 'security') {
+          <div class="tab-panel animate__animated animate__fadeIn">
+            <!-- Password Form -->
+            <section class="parchment-card">
+              <div class="card-header">
+                <ion-icon name="lock-closed-outline" color="warning"></ion-icon>
+                <h2>Seguridad y Contraseña</h2>
+              </div>
+
+              <form [formGroup]="passwordForm" (ngSubmit)="updatePassword()">
+                <div class="form-group">
+                  <label>Contraseña Actual</label>
+                  <div class="password-wrapper">
+                    <input [type]="showCurrentPassword ? 'text' : 'password'" formControlName="currentPassword" class="dnd-input">
+                    <ion-icon [name]="showCurrentPassword ? 'eye-off-outline' : 'eye-outline'" (click)="toggleCurrentPasswordVisibility()"
+                      class="password-toggle">
+                    </ion-icon>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Nueva Contraseña</label>
+                  <div class="password-wrapper">
+                    <input [type]="showNewPassword ? 'text' : 'password'" formControlName="newPassword" class="dnd-input">
+                    <ion-icon [name]="showNewPassword ? 'eye-off-outline' : 'eye-outline'" (click)="toggleNewPasswordVisibility()"
+                      class="password-toggle">
+                    </ion-icon>
+                  </div>
+                  @if (passwordForm.get('newPassword')?.errors?.['minlength'] && passwordForm.get('newPassword')?.touched) {
+                    <p class="error-hint">
+                      Mínimo 6 caracteres.
+                    </p>
+                  }
+                </div>
+                <div class="form-group">
+                  <label>Confirmar Contraseña</label>
+                  <div class="password-wrapper">
+                    <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword" class="dnd-input">
+                    <ion-icon [name]="showConfirmPassword ? 'eye-off-outline' : 'eye-outline'" (click)="toggleConfirmPasswordVisibility()"
+                      class="password-toggle">
+                    </ion-icon>
+                  </div>
+                  @if (passwordForm.errors?.['mismatch'] && passwordForm.get('confirmPassword')?.touched) {
+                    <p class="error-hint">
+                      Las contraseñas no coinciden.
+                    </p>
+                  }
+                </div>
+                <button type="submit" class="dnd-button gold" [disabled]="passwordForm.invalid">
+                  Actualizar Contraseña
+                </button>
+              </form>
+
+              <div class="placeholder-section mt-4">
+                <h3>Autenticación en Dos Pasos (2FA)</h3>
+
+                @if (!currentUser?.is2faEnabled && !is2faSetup) {
+                  <p class="status-badge disabled">Desactivado</p>
+                  <p class="hint-text">Añade una capa extra de protección a tu cuenta.</p>
+                  <button class="dnd-button gold" (click)='start2faSetup()'>Configurar 2FA</button>
+                }
+
+                @if (is2faSetup) {
+                  <div class="mfa-setup-container animate__animated animate__fadeIn">
+                    <p class="hint-text">Escanea este código con Google Authenticator o Authy:</p>
+                    <div class="qr-container">
+                      @if (qrCodeDataUrl) {
+                        <img [src]="qrCodeDataUrl" alt="QR 2FA">
+                      }
+                    </div>
+                    <div class="form-group">
+                      <label>Código de Verificación</label>
+                      <input type="text" [(ngModel)]="twoFactorCode" placeholder="000000" class="dnd-input text-center">
+                    </div>
+                    <div class="setup-actions">
+                      <button class="dnd-button primary" (click)="verifyAndEnable2fa()">Verificar y Activar</button>
+                      <button class="dnd-button ghost" (click)="cancel2faSetup()">Cancelar</button>
+                    </div>
+                  </div>
+                }
+
+                @if (currentUser?.is2faEnabled) {
+                  <p class="status-badge success">Activado</p>
+                  <p class="hint-text">Tu cuenta está protegida por un segundo factor.</p>
+                  <button class="dnd-button danger-outline" (click)="disable2fa()">Desactivar 2FA</button>
+                }
+              </div>
+            </section>
+          </div>
+        }
+
+        <!-- Settings Tab -->
+        @if (activeTab === 'settings') {
+          <div class="tab-panel animate__animated animate__fadeIn">
+            <!-- App Preferences -->
+            <section class="parchment-card">
+              <div class="card-header">
+                <ion-icon name="settings-outline" color="warning"></ion-icon>
+                <h2>Preferencias de la Interfaz</h2>
+              </div>
+              <div class="setting-item">
+                <label class="setting-title">Escala de Texto</label>
+                <div class="font-slider-container">
+                  <ion-icon name="text-outline" style="font-size: 14px;"></ion-icon>
+                  <ion-range min="0.8" max="1.5" step="0.05" [value]="fontScale" (ionInput)="onScaleInput($event)"
+                    color="warning" style="pointer-events: auto; position: relative; z-index: 10;">
+                  </ion-range>
+                  <ion-icon name="text-outline" style="font-size: 24px;"></ion-icon>
+                </div>
+                <div class="font-preview">
+                  Escala actual: {{ (fontScale * 100).toFixed(0) }}%
+                </div>
+                <p class="hint-text">Ajusta el tamaño del texto para leer mejor los bloques de estadísticas.</p>
+              </div>
+            </section>
+
+            <!-- Notifications -->
+            <section class="parchment-card">
+              <div class="card-header">
+                <ion-icon name="notifications-outline" color="warning"></ion-icon>
+                <h2>Notificaciones de Campaña</h2>
+              </div>
+              <div class="toggle-row">
+                <span>Alertas de Sesión Activa</span>
+                <ion-toggle color="warning" 
+                            [(ngModel)]="sessionNotifications"
+                            (ionChange)="updateNotifications()">
+                </ion-toggle>
+              </div>
+              <p class="hint-text">Gestiona cómo quieres que te avisemos sobre las novedades y turnos de tus campañas.</p>
+            </section>
+          </div>
+        }
+
+        <!-- Billing/Treasury Tab -->
+        @if (activeTab === 'billing') {
+          <div class="tab-panel animate__animated animate__fadeIn">
+            <!-- Plan & Treasury -->
+            <section class="parchment-scroll-card">
+              <div class="scroll-ribbon-top"></div>
+              
+              <div class="scroll-content">
+                <div class="card-header">
+                  <ion-icon name="diamond-outline" color="warning"></ion-icon>
+                  <h2>Bolsa de Tesorería & Suscripción</h2>
+                </div>
+
+                <div class="plan-status-container">
+                  <div class="plan-details">
+                    <div class="tier-info">
+                      <span class="label">Nivel de Forja:</span>
+                      <span class="value" [class.pro-text]="isPro">
+                        {{ currentUser?.subscriptionTier }}
+                        @if (isPro) {
+                          <ion-icon name="star-outline"></ion-icon>
+                        }
+                      </span>
+                    </div>
+                    
+                    @if (isPro) {
+                      <div class="expiry-info">
+                        <ion-icon name="calendar-outline"></ion-icon>
+                        <span>Expira el: <strong>{{ subscriptionExpiryDate }}</strong></span>
+                      </div>
+                    }
+
+                    <div class="benefits-preview">
+                      <p class="benefits-title">Privilegios de Aventurero PRO:</p>
+                      <ul class="benefits-list">
+                        <li><span class="bullet">✦</span> Personajes Ilimitados</li>
+                        <li><span class="bullet">✦</span> Campañas Ilimitadas</li>
+                        <li><span class="bullet">✦</span> Homebrew Ilimitado</li>
+                        <li><span class="bullet">✦</span> Derechos de Monetización</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div class="plan-actions">
+                    <div class="balance-display">
+                      <div class="balance-details">
+                        <span class="label">Oro en Bolsa:</span>
+                        <span class="value">{{ (currentUser?.balance | number:'1.2-2') }}€</span>
+                      </div>
+                      <button class="dnd-button gold small top-up-btn" (click)="onTopUpClick()">
+                        <ion-icon name="add-circle-outline"></ion-icon> Recargar Bolsa
+                      </button>
+                    </div>
+                    
+                    @if (!isPro) {
+                      <button class="dnd-button primary upgrade-pro-btn" (click)="upgradeToPro()">
+                        Desbloquear PRO (9.99€/mes)
+                      </button>
+                    } @else {
+                      <button class="dnd-button gold upgrade-pro-btn" (click)="upgradeToPro()">
+                        Renovar Pacto PRO
+                      </button>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <div class="scroll-ribbon-bottom"></div>
+            </section>
+          </div>
+        }
+
+        <!-- Danger Tab -->
+        @if (activeTab === 'danger') {
+          <div class="tab-panel animate__animated animate__fadeIn">
+            <!-- Danger Zone -->
+            <section class="parchment-card danger-zone">
+              <div class="card-header">
+                <ion-icon name="skull-outline" color="danger"></ion-icon>
+                <h2>El Abismo (Zona de Peligro)</h2>
+              </div>
+              <p class="danger-warning-text">¡CUIDADO! Una vez que decidas desterrar tu cuenta en el Abismo, no habrá magia capaz de revertirlo. Perderás todos tus personajes forjados, campañas activas, y tesoros acumulados para siempre.</p>
+              
+              <div class="danger-action-container">
+                <button class="dnd-button danger" (click)="confirmDeleteAccount()">
+                  Desterrar Cuenta del Tablero
+                </button>
+              </div>
+            </section>
+          </div>
+        }
+      </div>
+    }
 
     <!-- Recovery Codes Modal/Overlay -->
     @if (showRecoveryCodes) {
-    <div class="recovery-codes-overlay animate__animated animate__fadeIn">
-      <div class="recovery-card parchment-card">
-        <div class="card-header">
-          <ion-icon name="shield-checkmark-outline" color="warning"></ion-icon>
-          <h3>Códigos de Recuperación</h3>
-        </div>
-        <p class="warning-text">¡IMPORTANTE! Guarda estos códigos en un lugar seguro. Son la única forma de acceder a tu
-          cuenta si pierdes tu dispositivo 2FA.</p>
-        <div class="codes-grid">
-          @for (code of recoveryCodes; track code) {
-          <div class="recovery-code">{{ code }}</div>
-          }
-        </div>
+      <div class="recovery-codes-overlay animate__animated animate__fadeIn">
+        <div class="recovery-card parchment-scroll-card pt-6">
+          <div class="scroll-ribbon-top"></div>
+          <div class="scroll-content">
+            <div class="card-header justify-center">
+              <ion-icon name="shield-checkmark-outline" color="warning"></ion-icon>
+              <h3>Códigos de Rescate</h3>
+            </div>
+            <p class="warning-text text-center">
+              <strong>¡SALVA estos códigos en un cofre seguro!</strong> Es la única llave de emergencia si pierdes tu dispositivo de autenticación.
+            </p>
+            <div class="codes-grid">
+              @for (code of recoveryCodes; track code) {
+                <div class="recovery-code">{{ code }}</div>
+              }
+            </div>
 
-        <div class="recovery-actions">
-          <button class="dnd-button outline" (click)="copyRecoveryCodes()">
-            <ion-icon name="copy-outline"></ion-icon> Copiar
-          </button>
-          <button class="dnd-button outline" (click)="downloadRecoveryCodes()">
-            <ion-icon name="download-outline"></ion-icon> Exportar (.txt)
-          </button>
-        </div>
+            <div class="recovery-actions">
+              <button class="dnd-button outline" (click)="copyRecoveryCodes()">
+                <ion-icon name="copy-outline"></ion-icon> Copiar Códigos
+              </button>
+              <button class="dnd-button outline" (click)="downloadRecoveryCodes()">
+                <ion-icon name="download-outline"></ion-icon> Descargar (.txt)
+              </button>
+            </div>
 
-        <button class="dnd-button primary full-width" (click)="closeRecoveryCodes()">He Guardado los Códigos</button>
+            <button class="dnd-button primary full-width mt-4" (click)="closeRecoveryCodes()">
+              Los he copiado y guardado
+            </button>
+          </div>
+          <div class="scroll-ribbon-bottom"></div>
+        </div>
       </div>
-    </div>
     }
 
-    <!-- ── Payment processor modal (Req 4.2, 5.1, 5.2, 5.7, 5.8) ── -->
+    <!-- Payment processor modal -->
     @if (paymentItem) {
       <div class="payment-modal-overlay" data-testid="payment-modal-overlay" (click)="onPaymentCancelled()">
         <div class="payment-modal" data-testid="payment-modal" (click)="$event.stopPropagation()">
