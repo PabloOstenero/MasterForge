@@ -6,6 +6,7 @@ import com.masterforge.masterforge_backend.model.entity.Item
 import com.masterforge.masterforge_backend.model.entity.User
 import com.masterforge.masterforge_backend.repository.ItemRepository
 import com.masterforge.masterforge_backend.repository.UserRepository
+import com.masterforge.masterforge_backend.repository.HomebrewCollectionRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -17,12 +18,24 @@ import java.util.UUID
 class ItemController(
     private val itemRepository: ItemRepository,
     private val userRepository: UserRepository,
-    private val homebrewService: com.masterforge.masterforge_backend.service.HomebrewService
+    private val homebrewService: com.masterforge.masterforge_backend.service.HomebrewService,
+    private val homebrewCollectionRepository: HomebrewCollectionRepository
 ) {
 
     @GetMapping
     fun getAllItems(): List<Item> {
-        return itemRepository.findAll()
+        val currentUserId = SecurityUtils.getCurrentUserId()
+        val allItems = itemRepository.findAll()
+        val ownedIds = homebrewCollectionRepository.findByUserId(currentUserId)
+            .filter { it.contentType == "ITEM" }
+            .map { it.contentId }
+            .toSet()
+
+        return allItems.filter { item ->
+            item.author == null || 
+            item.author?.id == currentUserId || 
+            ownedIds.contains(item.id.toString())
+        }
     }
 
     @PostMapping

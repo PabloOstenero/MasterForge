@@ -6,6 +6,7 @@ import com.masterforge.masterforge_backend.model.entity.DndClass
 import com.masterforge.masterforge_backend.model.entity.User
 import com.masterforge.masterforge_backend.repository.DndClassRepository
 import com.masterforge.masterforge_backend.repository.UserRepository
+import com.masterforge.masterforge_backend.repository.HomebrewCollectionRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -17,12 +18,24 @@ import org.springframework.transaction.annotation.Transactional
 class DndClassController(
     private val dndClassRepository: DndClassRepository,
     private val userRepository: UserRepository,
-    private val homebrewService: com.masterforge.masterforge_backend.service.HomebrewService
+    private val homebrewService: com.masterforge.masterforge_backend.service.HomebrewService,
+    private val homebrewCollectionRepository: HomebrewCollectionRepository
 ) {
 
     @GetMapping
     fun getAllDndClasses(): List<DndClass> {
-        return dndClassRepository.findAll()
+        val currentUserId = SecurityUtils.getCurrentUserId()
+        val allCls = dndClassRepository.findAll()
+        val ownedIds = homebrewCollectionRepository.findByUserId(currentUserId)
+            .filter { it.contentType == "CLASS" }
+            .map { it.contentId }
+            .toSet()
+
+        return allCls.filter { cls ->
+            cls.author == null || 
+            cls.author?.id == currentUserId || 
+            ownedIds.contains(cls.id.toString())
+        }
     }
 
     @PostMapping

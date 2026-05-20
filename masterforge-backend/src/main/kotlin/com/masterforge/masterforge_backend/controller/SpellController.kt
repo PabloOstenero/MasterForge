@@ -6,6 +6,7 @@ import com.masterforge.masterforge_backend.model.entity.Spell
 import com.masterforge.masterforge_backend.model.entity.User
 import com.masterforge.masterforge_backend.repository.SpellRepository
 import com.masterforge.masterforge_backend.repository.UserRepository
+import com.masterforge.masterforge_backend.repository.HomebrewCollectionRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -18,12 +19,24 @@ import java.util.UUID
 class SpellController(
     private val spellRepository: SpellRepository,
     private val userRepository: UserRepository,
-    private val homebrewService: com.masterforge.masterforge_backend.service.HomebrewService
+    private val homebrewService: com.masterforge.masterforge_backend.service.HomebrewService,
+    private val homebrewCollectionRepository: HomebrewCollectionRepository
 ) {
 
     @GetMapping
     fun getAllSpells(): List<Spell> {
-        return spellRepository.findAll()
+        val currentUserId = SecurityUtils.getCurrentUserId()
+        val allSpells = spellRepository.findAll()
+        val ownedIds = homebrewCollectionRepository.findByUserId(currentUserId)
+            .filter { it.contentType == "SPELL" }
+            .map { it.contentId }
+            .toSet()
+
+        return allSpells.filter { spell ->
+            spell.author == null || 
+            spell.author?.id == currentUserId || 
+            ownedIds.contains(spell.id.toString())
+        }
     }
 
     @PostMapping

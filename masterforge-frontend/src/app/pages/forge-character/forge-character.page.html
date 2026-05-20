@@ -138,7 +138,12 @@
                     [class.selected]="formData.selectedRace?.id === race.id"
                     (click)="selectRace(race)">
                     <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
-                      {{ race.name }}
+                      <span>
+                        {{ race.name }}
+                        @if (race.author) {
+                          <span class="homebrew-badge">Homebrew</span>
+                        }
+                      </span>
                       <ion-icon name="information-circle-outline" 
                         style="color: #C5A059; cursor: pointer; font-size: 1.2rem;"
                         (click)="openDetail($event, race, 'RACE')"></ion-icon>
@@ -222,7 +227,12 @@
                     [class.selected]="formData.selectedClass?.id === cls.id"
                     (click)="selectClass(cls)">
                     <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
-                      {{ cls.name }}
+                      <span>
+                        {{ cls.name }}
+                        @if (cls.author) {
+                          <span class="homebrew-badge">Homebrew</span>
+                        }
+                      </span>
                       <ion-icon name="information-circle-outline" 
                         style="color: #C5A059; cursor: pointer; font-size: 1.2rem;"
                         (click)="openDetail($event, cls, 'CLASS')"></ion-icon>
@@ -272,7 +282,12 @@
                       [class.selected]="formData.selectedSubclass?.id === sc.id"
                       (click)="selectSubclass(sc)">
                       <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
-                        {{ sc.name }}
+                        <span>
+                          {{ sc.name }}
+                          @if (sc.author) {
+                            <span class="homebrew-badge">Homebrew</span>
+                          }
+                        </span>
                         <ion-icon name="information-circle-outline" 
                           style="color: #C5A059; cursor: pointer; font-size: 1.2rem;"
                           (click)="openDetail($event, sc, 'SUBCLASS')"></ion-icon>
@@ -546,7 +561,12 @@
             <!-- Primary Class -->
             <div class="mc-item mc-item--primary">
               <div class="mc-info">
-                <span class="mc-name">{{ formData.selectedClass?.name }}</span>
+                <span class="mc-name">
+                  {{ formData.selectedClass?.name }}
+                  @if (formData.selectedClass?.author) {
+                    <span class="homebrew-badge">Homebrew</span>
+                  }
+                </span>
                 <span class="mc-tag">Primaria</span>
               </div>
               <div class="mc-controls">
@@ -558,7 +578,12 @@
             @for (mc of formData.multiclasses; track $index; let idx = $index) {
               <div class="mc-item">
                 <div class="mc-info">
-                  <span class="mc-name">{{ mc.dndClass.name }}</span>
+                  <span class="mc-name">
+                    {{ mc.dndClass.name }}
+                    @if (mc.dndClass.author) {
+                      <span class="homebrew-badge">Homebrew</span>
+                    }
+                  </span>
                 </div>
                 <div class="mc-controls">
                   <ion-button fill="clear" size="small" (click)="updateMulticlassLevel(idx, -1)" [disabled]="mc.level <= 1">
@@ -584,7 +609,12 @@
                   @let prereq = validatePrereq(cls);
                   <div class="mc-add-card" [class.mc-add-card--disabled]="!prereq.met" (click)="prereq.met && addMulticlass(cls)">
                     <div class="mc-add-info">
-                      <span class="mc-add-name">{{ cls.name }}</span>
+                      <span class="mc-add-name">
+                        {{ cls.name }}
+                        @if (cls.author) {
+                          <span class="homebrew-badge">Homebrew</span>
+                        }
+                      </span>
                       <span class="mc-add-prereq" [class.mc-add-prereq--met]="prereq.met">
                         {{ prereq.met ? '✓ ' : '✗ ' }}{{ prereq.text }}
                       </span>
@@ -680,7 +710,12 @@
                   [class.skill-disabled]="isSpellDisabled(spell.id, true)"
                   [disabled]="isSpellDisabled(spell.id, true)"
                   (click)="toggleSpell(spell.id)">
-                  <span class="skill-name">{{ spell.name }}</span>
+                  <span class="skill-name">
+                    {{ spell.name }}
+                    @if (spell.author) {
+                      <span class="homebrew-badge">Homebrew</span>
+                    }
+                  </span>
                   <ion-icon name="information-circle-outline" 
                     style="color: #C5A059; margin-left: auto; cursor: pointer; font-size: 1.4rem;"
                     (click)="openDetail($event, spell, 'SPELL')"></ion-icon>
@@ -700,7 +735,13 @@
                   [class.skill-disabled]="isSpellDisabled(spell.id, false)"
                   [disabled]="isSpellDisabled(spell.id, false)"
                   (click)="toggleSpell(spell.id)">
-                  <span class="skill-name">{{ spell.name }} <span style="opacity:0.6;font-size:0.85em;margin-left:4px;">Nivel {{ spell.level }}</span></span>
+                  <span class="skill-name">
+                    {{ spell.name }}
+                    <span style="opacity:0.6;font-size:0.85em;margin-left:4px;margin-right:4px;">Nivel {{ spell.level }}</span>
+                    @if (spell.author) {
+                      <span class="homebrew-badge">Homebrew</span>
+                    }
+                  </span>
                   <ion-icon name="information-circle-outline" 
                     style="color: #C5A059; margin-left: auto; cursor: pointer; font-size: 1.4rem;"
                     (click)="openDetail($event, spell, 'SPELL')"></ion-icon>
@@ -795,7 +836,15 @@
         @if (formData.selectedRace) {
           <div class="review-card">
             <div class="review-card-header">Raza</div>
-            <div class="review-row"><span class="review-key">Raza</span><span class="review-val">{{ formData.selectedRace.name }}</span></div>
+            <div class="review-row">
+              <span class="review-key">Raza</span>
+              <span class="review-val">
+                {{ formData.selectedRace.name }}
+                @if (formData.selectedRace.author) {
+                  <span class="homebrew-badge">Homebrew</span>
+                }
+              </span>
+            </div>
             @if (formatRaceBonuses(formData.selectedRace)) {
               <div class="review-row"><span class="review-key">Bonos</span><span class="review-val review-val--gold">{{ formatRaceBonuses(formData.selectedRace) }}</span></div>
             }
@@ -806,13 +855,29 @@
         @if (formData.selectedClass) {
           <div class="review-card">
             <div class="review-card-header">Clase</div>
-            <div class="review-row"><span class="review-key">Clase</span><span class="review-val">{{ formData.selectedClass.name }}</span></div>
+            <div class="review-row">
+              <span class="review-key">Clase</span>
+              <span class="review-val">
+                {{ formData.selectedClass.name }}
+                @if (formData.selectedClass.author) {
+                  <span class="homebrew-badge">Homebrew</span>
+                }
+              </span>
+            </div>
             <div class="review-row"><span class="review-key">Dado de Golpe</span><span class="review-val review-val--gold">d{{ formData.selectedClass.hitDie }}</span></div>
             @if (formatSavingThrows(formData.selectedClass)) {
               <div class="review-row"><span class="review-key">Tiradas de Salvación</span><span class="review-val">{{ formatSavingThrows(formData.selectedClass) }}</span></div>
             }
             @if (formData.selectedSubclass) {
-              <div class="review-row"><span class="review-key">Subclase</span><span class="review-val">{{ formData.selectedSubclass.name }}</span></div>
+              <div class="review-row">
+                <span class="review-key">Subclase</span>
+                <span class="review-val">
+                  {{ formData.selectedSubclass.name }}
+                  @if (formData.selectedSubclass.author) {
+                    <span class="homebrew-badge">Homebrew</span>
+                  }
+                </span>
+              </div>
             }
           </div>
         }
@@ -900,7 +965,12 @@
               @let foundSpell = getSpellById(spellId);
               @if (foundSpell) {
                 <div class="review-row">
-                  <span class="review-key">{{ foundSpell.name }}</span>
+                  <span class="review-key">
+                    {{ foundSpell.name }}
+                    @if (foundSpell.author) {
+                      <span class="homebrew-badge">Homebrew</span>
+                    }
+                  </span>
                   <span class="review-val">{{ foundSpell.level === 0 ? 'Truco' : 'Nivel ' + foundSpell.level }}</span>
                 </div>
               }
@@ -956,7 +1026,12 @@
           <div class="detail-icon-circle">
             <ion-icon [name]="getDetailIcon()"></ion-icon>
           </div>
-          <h1>{{ detailType === 'SPELL' ? selectedDetail.spell.name : selectedDetail.name }}</h1>
+          <h1>
+            {{ detailType === 'SPELL' ? selectedDetail.spell.name : selectedDetail.name }}
+            @if ((detailType === 'SPELL' && selectedDetail.spell?.author) || (detailType !== 'SPELL' && selectedDetail.author)) {
+              <span class="homebrew-badge">Homebrew</span>
+            }
+          </h1>
           <div class="detail-subtitle">{{ getDetailSubtitle() }}</div>
         </div>
 

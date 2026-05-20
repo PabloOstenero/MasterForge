@@ -8,6 +8,7 @@ import com.masterforge.masterforge_backend.model.entity.DndRace
 import com.masterforge.masterforge_backend.model.entity.User
 import com.masterforge.masterforge_backend.repository.DndRaceRepository
 import com.masterforge.masterforge_backend.repository.UserRepository
+import com.masterforge.masterforge_backend.repository.HomebrewCollectionRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -18,12 +19,24 @@ import org.springframework.web.server.ResponseStatusException
 class DndRaceController(
     private val dndRaceRepository: DndRaceRepository,
     private val userRepository: UserRepository,
-    private val homebrewService: com.masterforge.masterforge_backend.service.HomebrewService
+    private val homebrewService: com.masterforge.masterforge_backend.service.HomebrewService,
+    private val homebrewCollectionRepository: HomebrewCollectionRepository
 ) {
 
     @GetMapping
     fun getAllDndRaces(): List<DndRace> {
-        return dndRaceRepository.findAll()
+        val currentUserId = SecurityUtils.getCurrentUserId()
+        val allRaces = dndRaceRepository.findAll()
+        val ownedIds = homebrewCollectionRepository.findByUserId(currentUserId)
+            .filter { it.contentType == "RACE" }
+            .map { it.contentId }
+            .toSet()
+
+        return allRaces.filter { race ->
+            race.author == null || 
+            race.author?.id == currentUserId || 
+            ownedIds.contains(race.id.toString())
+        }
     }
 
     @PostMapping

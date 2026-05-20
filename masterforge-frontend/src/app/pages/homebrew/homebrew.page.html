@@ -5,7 +5,7 @@
     <!-- Tab Selector -->
     <ion-segment [value]="selectedTab" (ionChange)="onTabChange($event)" class="custom-segment">
       <ion-segment-button value="mine">
-        <ion-label>Mis Creaciones</ion-label>
+        <ion-label>Mi Colección</ion-label>
       </ion-segment-button>
       <ion-segment-button value="community">
         <ion-label>Explorar Comunidad</ion-label>
@@ -236,7 +236,7 @@
                           Detalles
                         </ion-button>
 
-                        @if (selectedTab === 'mine') {
+                        @if (selectedTab === 'mine' && item.authorName === 'Mío') {
                           <ion-button fill="clear" size="small" class="action-btn edit-btn" (click)="navigateToEdit(type, item.id)" data-testid="edit-action">
                             <ion-icon name="pencil" slot="start"></ion-icon>
                             Editar
@@ -249,7 +249,7 @@
                               Eliminar
                             }
                           </ion-button>
-                        } @else {
+                        } @else if (selectedTab === 'community') {
                           @if (item.isOwned) {
                             <span class="owned-tag">
                               <ion-icon name="checkmark-circle"></ion-icon>

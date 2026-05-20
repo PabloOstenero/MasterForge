@@ -1,5 +1,6 @@
 package com.masterforge.masterforge_backend.controller
 
+import com.masterforge.masterforge_backend.config.SecurityUtils
 import com.masterforge.masterforge_backend.model.dto.CharacterDto
 import com.masterforge.masterforge_backend.model.dto.CharacterResponseDto
 import com.masterforge.masterforge_backend.model.dto.CharacterSummaryDto
@@ -46,7 +47,8 @@ class CharacterController(
     private val itemRepository: ItemRepository,
     private val characterSpellRepository: CharacterSpellRepository,
     private val spellRepository: SpellRepository,
-    private val characterClassLevelRepository: CharacterClassLevelRepository
+    private val characterClassLevelRepository: CharacterClassLevelRepository,
+    private val homebrewCollectionRepository: HomebrewCollectionRepository
 ) {
 
     private fun validateOwnerOrDm(character: Character) {
@@ -268,8 +270,18 @@ class CharacterController(
             spellRepository.findByNameIgnoreCase(name)?.let { allAvailable.add(it) }
         }
 
+        val currentUserId = SecurityUtils.getCurrentUserId()
+        val ownedSpellIds = homebrewCollectionRepository.findByUserId(currentUserId)
+            .filter { it.contentType == "SPELL" }
+            .map { it.contentId }
+            .toSet()
+
         val filtered = allAvailable
-            .filter { s -> s.id !in knownSpellIds && (s.level == 0 || s.level <= maxLevel) }
+            .filter { s -> 
+                (s.author == null || s.author?.id == currentUserId || ownedSpellIds.contains(s.id.toString())) &&
+                s.id !in knownSpellIds && 
+                (s.level == 0 || s.level <= maxLevel) 
+            }
             .map { s -> SpellDto(
                 id = s.id,
                 name = s.name,

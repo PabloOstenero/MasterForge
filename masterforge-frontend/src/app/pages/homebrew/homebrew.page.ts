@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import {
   IonSpinner, IonList, IonItem, IonLabel, IonButton,
   IonSegment, IonSegmentButton, IonModal, IonHeader,
@@ -128,13 +129,42 @@ export class HomebrewPage implements OnInit {
   loadMyHomebrew(): void {
     this.loading = true;
     this.error = null;
-    this.homebrewService.getMyHomebrew().subscribe({
-      next: (data) => {
-        this.homebrewItems = data;
+    forkJoin({
+      my: this.homebrewService.getMyHomebrew(),
+      community: this.homebrewService.getCommunityHomebrew()
+    }).subscribe({
+      next: ({ my, community }) => {
+        const merged: HomebrewSummary = {
+          classes: [], subclasses: [], races: [], monsters: [], spells: [], items: []
+        };
+        const keys: (keyof HomebrewSummary)[] = ['classes', 'subclasses', 'races', 'monsters', 'spells', 'items'];
+        for (const key of keys) {
+          const myArr = my[key] || [];
+          const ownedCommunityArr = (community[key] || []).filter(item => item.isOwned);
+          
+          const seenIds = new Set<string>();
+          const combined: HomebrewItem[] = [];
+          
+          for (const item of myArr) {
+            if (!seenIds.has(item.id)) {
+              seenIds.add(item.id);
+              combined.push(item);
+            }
+          }
+          for (const item of ownedCommunityArr) {
+            if (!seenIds.has(item.id)) {
+              seenIds.add(item.id);
+              combined.push(item);
+            }
+          }
+          
+          merged[key] = combined;
+        }
+        this.homebrewItems = merged;
         this.loading = false;
       },
       error: (err) => {
-        console.error('Error al cargar homebrew propio', err);
+        console.error('Error al cargar homebrew propio y adquirido', err);
         this.error = err?.message ?? 'Error al cargar el contenido homebrew';
         this.loading = false;
       }
@@ -1029,12 +1059,11 @@ export class HomebrewPage implements OnInit {
   }
 
   get totalHomebrewCount(): number {
-    return (this.homebrewItems.classes?.length || 0) +
-           (this.homebrewItems.subclasses?.length || 0) +
-           (this.homebrewItems.races?.length || 0) +
-           (this.homebrewItems.monsters?.length || 0) +
-           (this.homebrewItems.spells?.length || 0) +
-           (this.homebrewItems.items?.length || 0);
+    const keys: (keyof HomebrewSummary)[] = ['classes', 'subclasses', 'races', 'monsters', 'spells', 'items'];
+    return keys.reduce<number>((sum: number, key) => {
+      const items = this.homebrewItems[key] || [];
+      return sum + items.filter(item => item.authorName === 'Mío').length;
+    }, 0);
   }
 
   get limitReached(): boolean {
