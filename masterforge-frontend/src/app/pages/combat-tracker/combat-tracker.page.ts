@@ -300,11 +300,22 @@ export class CombatTrackerPage implements OnInit {
 
   openMonsterDetails(p: Participant) {
     if (p.type !== 'MONSTER') return;
-    const monster = this.allMonsters.find(m => m.id === p.id);
-    if (monster) {
-      this.selectedMonster = monster;
+    const cached = this.filteredMonsters.find(m => m.id === p.id);
+    if (cached) {
+      this.selectedMonster = cached;
       this.isDetailsModalOpen = true;
+      return;
     }
+
+    this.apiService.getMonsterById(p.id).subscribe({
+      next: (monster) => {
+        this.selectedMonster = monster;
+        this.isDetailsModalOpen = true;
+      },
+      error: (err) => {
+        console.error('Error fetching monster details:', err);
+      }
+    });
   }
 
   getMechanics(type: string): any[] {

@@ -213,6 +213,11 @@ levelUpCharacter(characterId: string, data: { hpBonus: number, statChanges: any,
     return this.http.get<any[]>(url);
   }
 
+  // Fetch a single monster by ID
+  getMonsterById(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/monsters/${id}`);
+  }
+
 
   // Fetch the unique player count for the authenticated DM
   getPlayerCount(): Observable<{ playerCount: number }> {
