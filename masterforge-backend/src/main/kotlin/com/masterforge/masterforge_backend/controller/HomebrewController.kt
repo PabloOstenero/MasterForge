@@ -26,6 +26,12 @@ class HomebrewController(
     private val paymentService: PaymentService
 ) {
 
+    private fun truncateDescription(text: String?, limit: Int = 120): String? {
+        if (text == null) return null
+        val cleanText = text.replace(Regex("\\s+"), " ").trim()
+        return if (cleanText.length <= limit) cleanText else cleanText.take(limit) + "..."
+    }
+
     @GetMapping("/my")
     @Transactional(readOnly = true)
     fun getMyHomebrew(): HomebrewSummaryDto {
@@ -33,22 +39,22 @@ class HomebrewController(
 
         return HomebrewSummaryDto(
             classes = dndClassRepository.findByAuthorId(userId).map {
-                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Mío", "CLASS", it.price, true)
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Mío", "CLASS", it.price, true, truncateDescription(it.description))
             },
             subclasses = dndSubclassRepository.findByAuthorId(userId).map {
-                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Mío", "SUBCLASS", it.price, true)
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Mío", "SUBCLASS", it.price, true, truncateDescription(it.description))
             },
             races = dndRaceRepository.findByAuthorId(userId).map {
-                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Mío", "RACE", it.price, true)
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Mío", "RACE", it.price, true, truncateDescription(it.description))
             },
             monsters = monsterRepository.findByAuthorId(userId).map {
-                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Mío", "MONSTER", it.price, true)
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Mío", "MONSTER", it.price, true, "Criatura ${it.size} ${it.type}, ${it.alignment} (CR ${it.challengeRating})")
             },
             spells = spellRepository.findByAuthorId(userId).map {
-                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Mío", "SPELL", it.price, true)
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Mío", "SPELL", it.price, true, truncateDescription(it.description))
             },
             items = itemRepository.findByAuthorId(userId).map {
-                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Mío", "ITEM", it.price, true)
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Mío", "ITEM", it.price, true, "Objeto de tipo ${it.type} (Peso: ${it.weight} lb.)")
             }
         )
     }
@@ -68,22 +74,22 @@ class HomebrewController(
 
         return HomebrewSummaryDto(
             classes = dndClassRepository.findByAuthorIdNotAndAuthorIdIsNotNull(userId).map {
-                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Desconocido", "CLASS", it.price, isOwned("CLASS", it.id.toString()))
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Desconocido", "CLASS", it.price, isOwned("CLASS", it.id.toString()), truncateDescription(it.description))
             },
             subclasses = dndSubclassRepository.findByAuthorIdNotAndAuthorIdIsNotNull(userId).map {
-                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Desconocido", "SUBCLASS", it.price, isOwned("SUBCLASS", it.id.toString()))
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Desconocido", "SUBCLASS", it.price, isOwned("SUBCLASS", it.id.toString()), truncateDescription(it.description))
             },
             races = dndRaceRepository.findByAuthorIdNotAndAuthorIdIsNotNull(userId).map {
-                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Desconocido", "RACE", it.price, isOwned("RACE", it.id.toString()))
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Desconocido", "RACE", it.price, isOwned("RACE", it.id.toString()), truncateDescription(it.description))
             },
             monsters = monsterRepository.findByAuthorIdNotAndAuthorIdIsNotNull(userId).map {
-                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Desconocido", "MONSTER", it.price, isOwned("MONSTER", it.id.toString()))
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Desconocido", "MONSTER", it.price, isOwned("MONSTER", it.id.toString()), "Criatura ${it.size} ${it.type}, ${it.alignment} (CR ${it.challengeRating})")
             },
             spells = spellRepository.findByAuthorIdNotAndAuthorIdIsNotNull(userId).map {
-                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Desconocido", "SPELL", it.price, isOwned("SPELL", it.id.toString()))
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Desconocido", "SPELL", it.price, isOwned("SPELL", it.id.toString()), truncateDescription(it.description))
             },
             items = itemRepository.findByAuthorIdNotAndAuthorIdIsNotNull(userId).map {
-                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Desconocido", "ITEM", it.price, isOwned("ITEM", it.id.toString()))
+                HomebrewItemDto(it.id.toString(), it.name, it.author?.name ?: "Desconocido", "ITEM", it.price, isOwned("ITEM", it.id.toString()), "Objeto de tipo ${it.type} (Peso: ${it.weight} lb.)")
             }
         )
     }
@@ -93,22 +99,22 @@ class HomebrewController(
     fun getOfficialHomebrew(): HomebrewSummaryDto {
         return HomebrewSummaryDto(
             classes = dndClassRepository.findByAuthorIdIsNull().map {
-                HomebrewItemDto(it.id.toString(), it.name, "Oficial", "CLASS", it.price, true)
+                HomebrewItemDto(it.id.toString(), it.name, "Oficial", "CLASS", it.price, true, truncateDescription(it.description))
             },
             subclasses = dndSubclassRepository.findByAuthorIdIsNull().map {
-                HomebrewItemDto(it.id.toString(), it.name, "Oficial", "SUBCLASS", it.price, true)
+                HomebrewItemDto(it.id.toString(), it.name, "Oficial", "SUBCLASS", it.price, true, truncateDescription(it.description))
             },
             races = dndRaceRepository.findByAuthorIdIsNull().map {
-                HomebrewItemDto(it.id.toString(), it.name, "Oficial", "RACE", it.price, true)
+                HomebrewItemDto(it.id.toString(), it.name, "Oficial", "RACE", it.price, true, truncateDescription(it.description))
             },
             monsters = monsterRepository.findByAuthorIdIsNull().map {
-                HomebrewItemDto(it.id.toString(), it.name, "Oficial", "MONSTER", it.price, true)
+                HomebrewItemDto(it.id.toString(), it.name, "Oficial", "MONSTER", it.price, true, "Criatura ${it.size} ${it.type}, ${it.alignment} (CR ${it.challengeRating})")
             },
             spells = spellRepository.findByAuthorIdIsNull().map {
-                HomebrewItemDto(it.id.toString(), it.name, "Oficial", "SPELL", it.price, true)
+                HomebrewItemDto(it.id.toString(), it.name, "Oficial", "SPELL", it.price, true, truncateDescription(it.description))
             },
             items = itemRepository.findByAuthorIdIsNull().map {
-                HomebrewItemDto(it.id.toString(), it.name, "Oficial", "ITEM", it.price, true)
+                HomebrewItemDto(it.id.toString(), it.name, "Oficial", "ITEM", it.price, true, "Objeto de tipo ${it.type} (Peso: ${it.weight} lb.)")
             }
         )
     }

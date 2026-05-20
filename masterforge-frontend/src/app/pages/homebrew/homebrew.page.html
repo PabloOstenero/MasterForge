@@ -12,6 +12,82 @@
       </ion-segment-button>
     </ion-segment>
 
+    <!-- Search and Forge Action Bar -->
+    <div class="search-filter-container animate__animated animate__fadeIn">
+      <ion-searchbar 
+        [(ngModel)]="searchQuery" 
+        placeholder="Buscar por nombre..." 
+        class="custom-searchbar"
+        debounce="100"
+        animated="true">
+      </ion-searchbar>
+
+      @if (selectedTab === 'mine') {
+        <div class="forge-action-wrapper">
+          <ion-button id="forge-trigger" color="warning" class="forge-main-btn" [disabled]="limitReached">
+            <ion-icon name="hammer" slot="start"></ion-icon>
+            Forjar Contenido
+          </ion-button>
+          
+          <ion-popover trigger="forge-trigger" triggerAction="click" [dismissOnSelect]="true" class="forge-popover">
+            <ng-template>
+              <ion-content color="dark">
+                <ion-list lines="none" class="forge-popover-list">
+                  <ion-item button (click)="navigateToCreate('CLASS')">
+                    <ion-icon name="book" slot="start" style="color: #c9a84c;"></ion-icon>
+                    <ion-label>Nueva Clase</ion-label>
+                  </ion-item>
+                  <ion-item button (click)="navigateToCreate('SUBCLASS')">
+                    <ion-icon name="color-wand" slot="start" style="color: #c9a84c;"></ion-icon>
+                    <ion-label>Nueva Subclase</ion-label>
+                  </ion-item>
+                  <ion-item button (click)="navigateToCreate('RACE')">
+                    <ion-icon name="people" slot="start" style="color: #c9a84c;"></ion-icon>
+                    <ion-label>Nueva Raza</ion-label>
+                  </ion-item>
+                  <ion-item button (click)="navigateToCreate('MONSTER')">
+                    <ion-icon name="skull" slot="start" style="color: #c9a84c;"></ion-icon>
+                    <ion-label>Nuevo Monstruo</ion-label>
+                  </ion-item>
+                  <ion-item button (click)="navigateToCreate('SPELL')">
+                    <ion-icon name="flash" slot="start" style="color: #c9a84c;"></ion-icon>
+                    <ion-label>Nuevo Conjuro</ion-label>
+                  </ion-item>
+                  <ion-item button (click)="navigateToCreate('ITEM')">
+                    <ion-icon name="hammer" slot="start" style="color: #c9a84c;"></ion-icon>
+                    <ion-label>Nuevo Objeto</ion-label>
+                  </ion-item>
+                </ion-list>
+              </ion-content>
+            </ng-template>
+          </ion-popover>
+        </div>
+      }
+    </div>
+
+    <!-- Category Ribbon -->
+    <div class="category-ribbon-container animate__animated animate__fadeIn">
+      <div class="category-ribbon">
+        <button 
+          class="category-pill" 
+          [class.active]="selectedCategory === 'all'" 
+          (click)="onCategoryChange('all')">
+          <ion-icon name="shield" class="pill-icon"></ion-icon>
+          <span>Todos</span>
+        </button>
+        @for (key of ['classes', 'subclasses', 'races', 'monsters', 'spells', 'items']; track key) {
+          <button 
+            class="category-pill" 
+            [class.active]="selectedCategory === key" 
+            (click)="onCategoryChange(key)">
+            <ion-icon [name]="categoryIcons[key]" class="pill-icon"></ion-icon>
+            <span>{{ sectionNames[key] }}</span>
+            <span class="pill-badge">{{ getCategoryCount(key) }}</span>
+          </button>
+        }
+      </div>
+    </div>
+
     <!-- Loading state -->
     @if (loading) {
       <div class="loading-container">
@@ -44,92 +120,184 @@
         </div>
       }
 
-      @let currentItems = selectedTab === 'mine' ? homebrewItems : communityItems;
+      @if (getFilteredTotalCount() === 0) {
+        <div class="empty-results-container animate__animated animate__fadeIn">
+          <div class="empty-icon-wrapper">
+            <ion-icon name="hammer"></ion-icon>
+          </div>
+          <h3>{{ selectedTab === 'mine' ? 'Forja tu Leyenda' : 'Ningún tomo encontrado' }}</h3>
+          <p>
+            {{ selectedTab === 'mine' 
+              ? 'Aún no has creado ningún contenido homebrew. ¡Empieza a forjar tus propias clases, razas, monstruos, hechizos y más!' 
+              : 'No hay contenido en esta sección que coincida con tu búsqueda o filtros.' }}
+          </p>
 
-      @for (key of ['classes', 'subclasses', 'races', 'monsters', 'spells', 'items']; track key) {
-        @let items = currentItems[key];
-        @let type = key === 'classes' ? 'CLASS' : (key === 'subclasses' ? 'SUBCLASS' : (key === 'races' ? 'RACE' : (key === 'monsters' ? 'MONSTER' : (key === 'spells' ? 'SPELL' : 'ITEM'))));
-
-        <div class="section-block" [attr.data-testid]="'section-' + type">
-          <div class="section-header">
-            <h2 class="section-title">{{ sectionNames[key] }}</h2>
-            @if (selectedTab === 'mine') {
-              <ion-button fill="outline" size="small" (click)="navigateToCreate(type)" [disabled]="limitReached" [attr.data-testid]="'create-' + type">
-                + Crear {{ sectionNames[key].slice(0, -1) }}
+          @if (selectedTab === 'mine') {
+            <div class="empty-actions-grid" style="display: flex; justify-content: center; gap: 10px; margin-top: 15px; margin-bottom: 10px;">
+              <ion-button id="empty-forge-trigger" color="warning" class="forge-main-btn" [disabled]="limitReached">
+                <ion-icon name="hammer" slot="start"></ion-icon>
+                Forjar Contenido
               </ion-button>
+              
+              <ion-popover trigger="empty-forge-trigger" triggerAction="click" [dismissOnSelect]="true" class="forge-popover">
+                <ng-template>
+                  <ion-content color="dark">
+                    <ion-list lines="none" class="forge-popover-list">
+                      <ion-item button (click)="navigateToCreate('CLASS')">
+                        <ion-icon name="book" slot="start" style="color: #c9a84c;"></ion-icon>
+                        <ion-label>Nueva Clase</ion-label>
+                      </ion-item>
+                      <ion-item button (click)="navigateToCreate('SUBCLASS')">
+                        <ion-icon name="color-wand" slot="start" style="color: #c9a84c;"></ion-icon>
+                        <ion-label>Nueva Subclase</ion-label>
+                      </ion-item>
+                      <ion-item button (click)="navigateToCreate('RACE')">
+                        <ion-icon name="people" slot="start" style="color: #c9a84c;"></ion-icon>
+                        <ion-label>Nueva Raza</ion-label>
+                      </ion-item>
+                      <ion-item button (click)="navigateToCreate('MONSTER')">
+                        <ion-icon name="skull" slot="start" style="color: #c9a84c;"></ion-icon>
+                        <ion-label>Nuevo Monstruo</ion-label>
+                      </ion-item>
+                      <ion-item button (click)="navigateToCreate('SPELL')">
+                        <ion-icon name="flash" slot="start" style="color: #c9a84c;"></ion-icon>
+                        <ion-label>Nuevo Conjuro</ion-label>
+                      </ion-item>
+                      <ion-item button (click)="navigateToCreate('ITEM')">
+                        <ion-icon name="hammer" slot="start" style="color: #c9a84c;"></ion-icon>
+                        <ion-label>Nuevo Objeto</ion-label>
+                      </ion-item>
+                    </ion-list>
+                  </ion-content>
+                </ng-template>
+              </ion-popover>
+            </div>
+            
+            @if (limitReached) {
+              <div class="empty-limit-notice animate__animated animate__pulse">
+                <ion-icon name="information-circle"></ion-icon>
+                <span>Límite de Forge alcanzado. Actualiza a PRO para forjar contenido ilimitado.</span>
+              </div>
             }
-          </div>
+          }
+        </div>
+      } @else {
+        @for (key of ['classes', 'subclasses', 'races', 'monsters', 'spells', 'items']; track key) {
+          @if (selectedCategory === 'all' || selectedCategory === key) {
+            @let items = getFilteredItems(key);
+            @let type = key === 'classes' ? 'CLASS' : (key === 'subclasses' ? 'SUBCLASS' : (key === 'races' ? 'RACE' : (key === 'monsters' ? 'MONSTER' : (key === 'spells' ? 'SPELL' : 'ITEM'))));
 
-          @if (items.length === 0) {
-            <p class="text-muted" [attr.data-testid]="'empty-' + type">
-              {{ selectedTab === 'mine' ? 'No has creado ninguna homebrew de este tipo aún.' : 'No hay contenido de la comunidad disponible.' }}
-            </p>
-          } @else {
-            <ion-list class="transparent-list">
-              @for (item of items; track item.id) {
-                <ion-item lines="full" class="skill-item list-item-interactive" data-testid="item-row" [attr.data-item-id]="item.id" [attr.data-item-type]="item.contentType">
-                  <ion-label>
-                    <h3 class="gold-title">{{ item.name }}</h3>
-                    @if (selectedTab === 'community' && !item.isOwned) {
-                      <p class="price-label">{{ item.price === 0 ? 'GRATIS' : (item.price | number:'1.2-2') + '€' }}</p>
-                    }
-                  </ion-label>
+            @if (items.length > 0) {
+              <div class="section-block" [attr.data-testid]="'section-' + type">
+                <div class="section-header">
+                  <h2 class="section-title">
+                    <ion-icon [name]="categoryIcons[key]" style="margin-right: 8px; vertical-align: middle;"></ion-icon>
+                    {{ sectionNames[key] }}
+                  </h2>
+                </div>
 
-                    @if (selectedTab === 'mine') {
-                      <ion-button slot="end" fill="clear" size="small" (click)="previewItem(item)">
-                        <ion-icon name="eye" slot="icon-only"></ion-icon>
-                      </ion-button>
-                      <ion-button slot="end" fill="clear" size="small" (click)="navigateToEdit(type, item.id)" data-testid="edit-action">
-                        Editar
-                      </ion-button>
-                      <ion-button slot="end" fill="clear" color="danger" size="small" [disabled]="deletingId === item.id" (click)="confirmDelete(item)" data-testid="delete-action">
-                        @if (deletingId === item.id) {
-                          <ion-spinner name="crescent" slot="icon-only"></ion-spinner>
-                        } @else {
-                          Eliminar
+                <div class="codex-grid">
+                  @for (item of items; track item.id) {
+                    <div class="codex-card animate__animated animate__fadeIn" data-testid="item-row" [attr.data-item-id]="item.id" [attr.data-item-type]="item.contentType">
+                      
+                      <div class="card-header-area">
+                        <div class="card-icon-container">
+                          <ion-icon [name]="categoryIcons[key]"></ion-icon>
+                        </div>
+                        <div class="card-title-group">
+                          <h3 class="card-title">{{ item.name }}</h3>
+                          <span class="card-badge">{{ sectionNames[key].slice(0, -1) }}</span>
+                        </div>
+                      </div>
+
+                      <div class="card-content-area">
+                        @if (selectedTab === 'community' && !item.isOwned) {
+                          <div class="card-price-badge">
+                            {{ item.price === 0 ? 'GRATIS' : (item.price | number:'1.2-2') + '€' }}
+                          </div>
                         }
-                      </ion-button>
-                    } @else {
-                      <ion-button slot="end" fill="clear" size="small" (click)="previewItem(item)">
-                        <ion-icon name="eye" slot="icon-only"></ion-icon>
-                      </ion-button>
-                      @if (item.isOwned) {
-                        <ion-label slot="end" class="owned-badge">Adquirido</ion-label>
-                      } @else {
-                        <ion-button slot="end" fill="solid" color="warning" size="small" [disabled]="purchasingId === item.id" (click)="purchaseItem(item)" data-testid="purchase-action">
-                          @if (purchasingId === item.id) {
-                            <ion-spinner name="crescent" slot="icon-only"></ion-spinner>
+                        
+                        <div class="card-meta">
+                          @if (item.authorName) {
+                            <span class="card-author">Forjado por: <strong>{{ item.authorName }}</strong></span>
                           } @else {
-                            Adquirir
+                            <span class="card-author">Forjado por: <strong>Creador Anónimo</strong></span>
                           }
+                        </div>
+
+                        <p class="card-desc">
+                          {{ item.description || 'Sin descripción disponible.' }}
+                        </p>
+                      </div>
+
+                      <div class="card-actions-area">
+                        <ion-button fill="clear" size="small" class="action-btn view-btn" (click)="previewItem(item)">
+                          <ion-icon name="eye" slot="start"></ion-icon>
+                          Detalles
                         </ion-button>
-                      }
-                    }
-                  </ion-item>
+
+                        @if (selectedTab === 'mine') {
+                          <ion-button fill="clear" size="small" class="action-btn edit-btn" (click)="navigateToEdit(type, item.id)" data-testid="edit-action">
+                            <ion-icon name="pencil" slot="start"></ion-icon>
+                            Editar
+                          </ion-button>
+                          <ion-button fill="clear" size="small" color="danger" class="action-btn delete-btn" [disabled]="deletingId === item.id" (click)="confirmDelete(item)" data-testid="delete-action">
+                            @if (deletingId === item.id) {
+                              <ion-spinner name="crescent"></ion-spinner>
+                            } @else {
+                              <ion-icon name="trash" slot="start"></ion-icon>
+                              Eliminar
+                            }
+                          </ion-button>
+                        } @else {
+                          @if (item.isOwned) {
+                            <span class="owned-tag">
+                              <ion-icon name="checkmark-circle"></ion-icon>
+                              Adquirido
+                            </span>
+                          } @else {
+                            <ion-button fill="solid" color="warning" size="small" class="action-btn purchase-btn" [disabled]="purchasingId === item.id" (click)="purchaseItem(item)" data-testid="purchase-action">
+                              @if (purchasingId === item.id) {
+                                <ion-spinner name="crescent"></ion-spinner>
+                              } @else {
+                                <ion-icon name="card" slot="start"></ion-icon>
+                                Adquirir
+                              }
+                            </ion-button>
+                          }
+                        }
+                      </div>
+
+                    </div>
+                  }
+                </div>
+
+                <!-- Load More Pagination -->
+                @if (hasMoreItems(key)) {
+                  <div class="pagination-container animate__animated animate__fadeIn">
+                    <ion-button fill="outline" class="load-more-btn" (click)="loadMoreItems(key)">
+                      <ion-icon name="arrow-down" slot="start"></ion-icon>
+                      Cargar más {{ sectionNames[key].toLowerCase() }}
+                    </ion-button>
+                  </div>
                 }
-              </ion-list>
+              </div>
             }
-          </div>
+          }
         }
       }
-    </div>
+    }
   </div>
 
   <!-- Preview Modal -->
-  <ion-modal [isOpen]="isPreviewModalOpen" (didDismiss)="closePreview()">
+  <ion-modal [isOpen]="isPreviewModalOpen" (didDismiss)="closePreview()" class="details-modal">
     <ng-template>
-      <ion-header>
-        <ion-toolbar color="dark">
-          <ion-title>{{ selectedPreviewItem?.name }}</ion-title>
-          <ion-buttons slot="end">
-            <ion-button (click)="closePreview()">
-              <ion-icon name="close" slot="icon-only"></ion-icon>
-            </ion-button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
+      <ion-content class="detail-content ion-padding">
+        <!-- Floating Close Button -->
+        <ion-button (click)="closePreview()" class="stat-block-close-btn" fill="clear">
+          <ion-icon name="close"></ion-icon>
+        </ion-button>
 
-      <ion-content class="ion-padding preview-modal-content">
         @if (loadingPreview) {
           <div class="loading-container">
             <ion-spinner name="crescent"></ion-spinner>
@@ -138,113 +306,533 @@
         } @else if (previewDetails) {
           <!-- Monster Stat Block -->
           @if (selectedPreviewItem?.contentType === 'MONSTER') {
-            <div class="stat-block-preview">
-              <div class="stat-header">
-                <h2>{{ previewDetails.name }}</h2>
-                <p><i>{{ previewDetails.size }} {{ previewDetails.type }}, {{ previewDetails.alignment }}</i></p>
-              </div>
-
-              <div class="stat-divider"></div>
-
-              <div class="primary-stats">
-                <p><strong>Clase de Armadura:</strong> {{ previewDetails.armorClass }}</p>
-                <p><strong>Puntos de Golpe:</strong> {{ previewDetails.hitPoints }}</p>
-                <p><strong>Velocidad:</strong> {{ previewDetails.speed }}</p>
-              </div>
-
-              <div class="stat-divider"></div>
-
-              <ion-grid class="ability-grid">
-                <ion-row>
-                  <ion-col><strong>FUE</strong><br>{{ previewDetails.str }} ({{ getModifier(previewDetails.str) }})</ion-col>
-                  <ion-col><strong>DES</strong><br>{{ previewDetails.dex }} ({{ getModifier(previewDetails.dex) }})</ion-col>
-                  <ion-col><strong>CON</strong><br>{{ previewDetails.con }} ({{ getModifier(previewDetails.con) }})</ion-col>
-                  <ion-col><strong>INT</strong><br>{{ previewDetails.intStat }} ({{ getModifier(previewDetails.intStat) }})</ion-col>
-                  <ion-col><strong>SAB</strong><br>{{ previewDetails.wis }} ({{ getModifier(previewDetails.wis) }})</ion-col>
-                  <ion-col><strong>CAR</strong><br>{{ previewDetails.cha }} ({{ getModifier(previewDetails.cha) }})</ion-col>
-                </ion-row>
-              </ion-grid>
-
-              <div class="stat-divider"></div>
-
-              <div class="secondary-stats">
-                <p><strong>Desafío:</strong> {{ previewDetails.challengeRating }} ({{ previewDetails.xp }} XP)</p>
-              </div>
-
-              @if (getMechanics('traits').length > 0) {
-                <div class="stat-divider"></div>
-                @for (trait of getMechanics('traits'); track trait.name) {
-                  <p class="feature-text"><strong>{{ trait.name }}.</strong> {{ trait.description || trait.desc }}</p>
+            <div class="stat-block-book">
+              <!-- Monster Name -->
+              <h1 class="stat-block-name">{{ previewDetails.name }}</h1>
+              
+              <!-- Size, Type, Alignment -->
+              <p class="stat-block-meta">{{ previewDetails.size }} {{ previewDetails.type }}, {{ previewDetails.alignment }}</p>
+              
+              <!-- Tapered Divider -->
+              <div class="stat-block-divider"></div>
+              
+              <!-- AC, HP, Speed -->
+              <p class="stat-block-attribute">
+                <strong>Clase de Armadura</strong> <span class="attribute-value">{{ previewDetails.armorClass }}</span>
+              </p>
+              
+              <p class="stat-block-attribute">
+                <strong>Puntos de Vida</strong> <span class="attribute-value">{{ previewDetails.hitPoints }}</span>
+              </p>
+              
+              <p class="stat-block-attribute">
+                <strong>Velocidad</strong> <span class="attribute-value">{{ previewDetails.speed }}</span>
+              </p>
+              
+              <!-- Tapered Divider -->
+              <div class="stat-block-divider"></div>
+              
+              <!-- Ability Table -->
+              <table class="stat-block-ability-table">
+                <thead>
+                  <tr>
+                    <th>FUE</th>
+                    <th>DES</th>
+                    <th>CON</th>
+                    <th>INT</th>
+                    <th>SAB</th>
+                    <th>CAR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div class="ability-val">{{ previewDetails.str }}</div>
+                      <div class="ability-mod">({{ getModifier(previewDetails.str) }})</div>
+                    </td>
+                    <td>
+                      <div class="ability-val">{{ previewDetails.dex }}</div>
+                      <div class="ability-mod">({{ getModifier(previewDetails.dex) }})</div>
+                    </td>
+                    <td>
+                      <div class="ability-val">{{ previewDetails.con }}</div>
+                      <div class="ability-mod">({{ getModifier(previewDetails.con) }})</div>
+                    </td>
+                    <td>
+                      <div class="ability-val">{{ previewDetails.intStat }}</div>
+                      <div class="ability-mod">({{ getModifier(previewDetails.intStat) }})</div>
+                    </td>
+                    <td>
+                      <div class="ability-val">{{ previewDetails.wis }}</div>
+                      <div class="ability-mod">({{ getModifier(previewDetails.wis) }})</div>
+                    </td>
+                    <td>
+                      <div class="ability-val">{{ previewDetails.cha }}</div>
+                      <div class="ability-mod">({{ getModifier(previewDetails.cha) }})</div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              
+              <!-- Tapered Divider -->
+              <div class="stat-block-divider"></div>
+              
+              <!-- Auxiliary Stats Section (Saving Throws, Skills, Senses, Languages, Challenge) -->
+              <div class="stat-block-auxiliary">
+                @if (getSavingThrowsString()) {
+                  <p>
+                    <strong>Tiradas de salvación:</strong> <span class="attribute-val">{{ getSavingThrowsString() }}</span>
+                  </p>
                 }
+                @if (getSkills() !== '—') {
+                  <p>
+                    <strong>Habilidades:</strong> <span class="attribute-val">{{ getSkills() }}</span>
+                  </p>
+                }
+                @if (getListMechanic('vulnerabilities') !== '—') {
+                  <p>
+                    <strong>Vulnerabilidades al daño:</strong> <span class="attribute-val">{{ getListMechanic('vulnerabilities') }}</span>
+                  </p>
+                }
+                @if (getListMechanic('resistances') !== '—') {
+                  <p>
+                    <strong>Resistencias al daño:</strong> <span class="attribute-val">{{ getListMechanic('resistances') }}</span>
+                  </p>
+                }
+                @if (getListMechanic('immunities') !== '—') {
+                  <p>
+                    <strong>Inmunidades al daño:</strong> <span class="attribute-val">{{ getListMechanic('immunities') }}</span>
+                  </p>
+                }
+                @if (getListMechanic('conditionImmunities') !== '—') {
+                  <p>
+                    <strong>Inmunidades a estados:</strong> <span class="attribute-val">{{ getListMechanic('conditionImmunities') }}</span>
+                  </p>
+                }
+                @if (formatSenses() !== '—') {
+                  <p>
+                    <strong>Sentidos:</strong> <span class="attribute-val">{{ formatSenses() }}</span>
+                  </p>
+                }
+                @if (getListMechanic('languages') !== '—') {
+                  <p>
+                    <strong>Idiomas:</strong> <span class="attribute-val">{{ getListMechanic('languages') }}</span>
+                  </p>
+                }
+                <p>
+                  <strong>Desafío:</strong> <span class="attribute-val">{{ previewDetails.challengeRating }} ({{ getChallengeXp(previewDetails.challengeRating) }} PE)</span>
+                </p>
+              </div>
+              
+              <!-- Tapered Divider -->
+              <div class="stat-block-divider"></div>
+              
+              <!-- Combat Mechanics Description (Description/Flavor Text) -->
+              @if (previewDetails.combatMechanics?.description) {
+                <div class="stat-block-description">
+                  {{ previewDetails.combatMechanics.description }}
+                </div>
               }
-
+              
+              <!-- Special Traits -->
+              @if (getMechanics('traits').length > 0) {
+                <div class="stat-block-section">
+                  @for (t of getMechanics('traits'); track t.name) {
+                    <p class="stat-block-inline-trait">
+                      <strong><em>{{ t.name }}.</em></strong> {{ t.desc }}
+                    </p>
+                  }
+                </div>
+              }
+              
+              <!-- Actions Header -->
               @if (getMechanics('actions').length > 0) {
-                <h3 class="section-divider-title">Acciones</h3>
-                <div class="stat-divider"></div>
-                @for (action of getMechanics('actions'); track action.name) {
-                  <p class="feature-text"><strong>{{ action.name }}.</strong> {{ action.description || action.desc }}</p>
-                }
+                <div class="stat-block-section-header">Acciones</div>
+                <div class="stat-block-section">
+                  @for (a of getMechanics('actions'); track a.name) {
+                    <p class="stat-block-inline-action">
+                      <strong><em>{{ a.name }}.</em></strong>
+                      @if (a.attackData) {
+                        <span class="attack-badges-inline">
+                          @if (a.attackData.bonus) { <span class="atk-badge bonus">{{ a.attackData.bonus }}</span> }
+                          @if (a.attackData.damage) { <span class="atk-badge damage">{{ a.attackData.damage }}</span> }
+                          @if (a.attackData.type) { <span class="atk-badge type">{{ a.attackData.type }}</span> }
+                          @if (a.attackData.reach) { <span class="atk-badge reach">{{ a.attackData.reach }}</span> }
+                        </span>
+                      }
+                      {{ a.desc }}
+                    </p>
+                  }
+                </div>
+              }
+              
+              <!-- Reactions Header -->
+              @if (getMechanics('reactions').length > 0) {
+                <div class="stat-block-section-header">Reacciones</div>
+                <div class="stat-block-section">
+                  @for (r of getMechanics('reactions'); track r.name) {
+                    <p class="stat-block-inline-action">
+                      <strong><em>{{ r.name }}.</em></strong> {{ r.desc }}
+                    </p>
+                  }
+                </div>
+              }
+              
+              <!-- Legendary Actions Header -->
+              @if (getMechanics('legendaryActions').length > 0) {
+                <div class="stat-block-section-header">Acciones Legendarias</div>
+                <div class="stat-block-section">
+                  @for (l of getMechanics('legendaryActions'); track l.name) {
+                    <p class="stat-block-inline-action">
+                      <strong><em>{{ l.name }}.</em></strong>
+                      @if (l.attackData) {
+                        <span class="attack-badges-inline">
+                          @if (l.attackData.bonus) { <span class="atk-badge bonus">{{ l.attackData.bonus }}</span> }
+                          @if (l.attackData.damage) { <span class="atk-badge damage">{{ l.attackData.damage }}</span> }
+                          @if (l.attackData.type) { <span class="atk-badge type">{{ l.attackData.type }}</span> }
+                        </span>
+                      }
+                      {{ l.desc }}
+                    </p>
+                  }
+                </div>
               }
             </div>
           }
 
           <!-- Spell Preview -->
           @if (selectedPreviewItem?.contentType === 'SPELL') {
-            <div class="stat-block-preview">
-              <div class="stat-header">
-                <h2>{{ previewDetails.name }}</h2>
-                <p><i>Nivel {{ previewDetails.level }}, {{ previewDetails.school }}</i></p>
-              </div>
-              <div class="stat-divider"></div>
-              <p><strong>Tiempo de lanzamiento:</strong> {{ previewDetails.castingTime }}</p>
-              <p><strong>Alcance:</strong> {{ previewDetails.range }}</p>
-              <p><strong>Componentes:</strong> 
-                {{ previewDetails.verbal ? 'V' : '' }}{{ previewDetails.somatic ? 'S' : '' }}{{ previewDetails.material ? 'M' : '' }}
-                @if (previewDetails.materialComponent) { ({{ previewDetails.materialComponent }}) }
+            <div class="stat-block-book">
+              <h1 class="stat-block-name">{{ previewDetails.name }}</h1>
+              <p class="stat-block-meta"><i>Nivel {{ previewDetails.level }}, {{ previewDetails.school }}</i></p>
+              
+              <div class="stat-block-divider"></div>
+              
+              <p class="stat-block-attribute"><strong>Tiempo de lanzamiento:</strong> <span class="attribute-value">{{ previewDetails.castingTime }}</span></p>
+              <p class="stat-block-attribute"><strong>Alcance:</strong> <span class="attribute-value">{{ previewDetails.range }}</span></p>
+              <p class="stat-block-attribute"><strong>Componentes:</strong> 
+                <span class="attribute-value">
+                  {{ previewDetails.verbal ? 'V' : '' }}{{ previewDetails.somatic ? 'S' : '' }}{{ previewDetails.material ? 'M' : '' }}
+                  @if (previewDetails.materialComponent) { ({{ previewDetails.materialComponent }}) }
+                </span>
               </p>
-              <p><strong>Duración:</strong> {{ previewDetails.duration }}</p>
-              <div class="stat-divider"></div>
-              <div class="description-text">{{ previewDetails.description }}</div>
+              <p class="stat-block-attribute"><strong>Duración:</strong> <span class="attribute-value">{{ previewDetails.duration }}</span></p>
+              
+              <div class="stat-block-divider"></div>
+              
+              <div class="stat-block-description" style="font-style: normal; border-left: none; padding-left: 0;">{{ previewDetails.description }}</div>
             </div>
           }
 
-          <!-- General Description for Class/Race/Item -->
-          @if (['CLASS', 'SUBCLASS', 'RACE', 'ITEM'].includes(selectedPreviewItem?.contentType || '')) {
-            <div class="stat-block-preview">
-              <div class="stat-header">
-                <h2>{{ previewDetails.name }}</h2>
-                @if (selectedPreviewItem?.contentType === 'CLASS') {
-                  <p>Dado de Golpe: d{{ previewDetails.hitDie }}</p>
-                }
-                @if (selectedPreviewItem?.contentType === 'SUBCLASS') {
-                  <p>Subclase de {{ previewDetails.parentClass?.name }}</p>
-                  <p><strong>Atributo Principal:</strong> {{ previewDetails.parentClass?.classFeatures?.primaryAbility || '—' }}</p>
+          <!-- Premium Class Details View -->
+          @if (selectedPreviewItem?.contentType === 'CLASS') {
+            <div class="stat-block-book">
+              <h1 class="stat-block-name">{{ previewDetails.name }}</h1>
+              <p class="stat-block-meta">Dado de Golpe: d{{ previewDetails.hitDie }}</p>
+
+              <div class="stat-block-divider"></div>
+
+              <!-- Class Core Attributes -->
+              <div class="stat-block-auxiliary">
+                <p style="margin: 3px 0;"><strong>Atributo Principal:</strong> <span class="attribute-val">{{ translateAbility(previewDetails.classFeatures?.primaryAbility || '') }}</span></p>
+                <p style="margin: 3px 0;"><strong>Salvaciones:</strong> <span class="attribute-val" style="color: #5c4013; font-weight: bold;">{{ getSavingThrowsList() }}</span></p>
+              </div>
+
+              <div class="stat-block-divider"></div>
+
+              <!-- Competencias (Proficiencies) -->
+              <div class="stat-block-section-header" style="margin-top: 8px;">Competencias</div>
+              <div class="stat-block-section">
+                @let cf = previewDetails.classFeatures;
+                @if (cf) {
+                  <p style="margin: 4px 0;"><strong>Armadura:</strong> <span class="attribute-value">{{ formatProficienciesList(cf.armorProficiencies) }}</span></p>
+                  <p style="margin: 4px 0;"><strong>Armas:</strong> <span class="attribute-value">{{ formatProficienciesList(cf.weaponProficiencies) }}</span></p>
+                  @if (cf.toolProficiencies?.length > 0) {
+                    <p style="margin: 4px 0;"><strong>Herramientas:</strong> <span class="attribute-value">{{ formatProficienciesList(cf.toolProficiencies) }}</span></p>
+                  }
+                  <p style="margin: 4px 0;"><strong>Habilidades:</strong> <span class="attribute-value">{{ formatSkillProficiencies(cf.skillProficiencies) }}</span></p>
                 }
               </div>
-              <div class="stat-divider"></div>
-              
-              @if (selectedPreviewItem?.contentType === 'CLASS') {
-                <p><strong>Atributo Principal:</strong> {{ previewDetails.classFeatures?.primaryAbility || '—' }}</p>
-                <p><strong>Salvaciones:</strong> {{ getSavingThrowsList() }}</p>
-                <div class="stat-divider"></div>
+
+              <!-- Spellcasting Details -->
+              @if (cf?.spellcasting) {
+                <div class="stat-block-divider"></div>
+                <div class="stat-block-section-header">Lanzamiento de Conjuros</div>
+                <div class="stat-block-section">
+                  <p style="margin: 4px 0;"><strong>Aptitud Mágica:</strong> <span class="attribute-value">{{ translateAbility(cf.spellcasting.ability) }}</span></p>
+                  <p style="margin: 4px 0;"><strong>Tipo de Lanzador:</strong> <span class="attribute-value">{{ translateSpellcastingType(cf.spellcasting.spellcastingType) }} ({{ translatePrepStyle(cf.spellcasting.preparationStyle) }})</span></p>
+                  <p style="margin: 4px 0;"><strong>Lanzamiento Ritual:</strong> <span class="attribute-value">{{ cf.spellcasting.ritualCasting ? 'Sí' : 'No' }}</span></p>
+                </div>
               }
 
-              <div class="description-text">{{ previewDetails.description }}</div>
-              
-              @if (selectedPreviewItem?.contentType === 'ITEM') {
-                <p><strong>Tipo:</strong> {{ previewDetails.type }}</p>
-                <p><strong>Peso:</strong> {{ previewDetails.weight }} lb.</p>
+              <!-- Multiclassing Requirements -->
+              @if (cf?.multiclassingPrerequisites?.requirements?.length > 0 || cf?.multiclassingProficiencies) {
+                <div class="stat-block-divider"></div>
+                <div class="stat-block-section-header">Multiclase</div>
+                <div class="stat-block-section">
+                  @if (cf.multiclassingPrerequisites?.requirements?.length > 0) {
+                    <p style="margin: 4px 0;"><strong>Requisitos:</strong> <span class="attribute-value">{{ formatMulticlassRequirements(cf.multiclassingPrerequisites) }}</span></p>
+                  }
+                  @if (cf.multiclassingProficiencies) {
+                    <p style="margin: 4px 0;"><strong>Competencias al unirse:</strong> <span class="attribute-value">
+                      Armadura: {{ formatProficienciesList(cf.multiclassingProficiencies.armor) || 'Ninguna' }}, 
+                      Armas: {{ formatProficienciesList(cf.multiclassingProficiencies.weapons) || 'Ninguna' }}
+                      @if (cf.multiclassingProficiencies.tools?.length > 0) {
+                        , Herramientas: {{ formatProficienciesList(cf.multiclassingProficiencies.tools) }}
+                      }
+                    </span></p>
+                  }
+                </div>
               }
 
-              @if (getClassFeatures().length > 0) {
-                <h3 class="section-divider-title">Rasgos</h3>
-                <div class="stat-divider"></div>
-                @for (feature of getClassFeatures(); track feature.name) {
-                  <p class="feature-text">
-                    <strong>{{ feature.name }} (Nvl {{ feature.levelRequired }}).</strong> 
-                    {{ feature.description }}
-                  </p>
-                }
+              <!-- Defensas / Resistencias (if any) -->
+              @if (cf?.damageResistances?.length > 0 || cf?.damageImmunities?.length > 0 || cf?.conditionImmunities?.length > 0) {
+                <div class="stat-block-divider"></div>
+                <div class="stat-block-section-header">Defensas</div>
+                <div class="stat-block-section">
+                  @if (cf.damageResistances?.length > 0) {
+                    <p style="margin: 4px 0;"><strong>Resistencias al Daño:</strong> <span class="attribute-value">{{ formatResistancesList(cf.damageResistances) }}</span></p>
+                  }
+                  @if (cf.damageImmunities?.length > 0) {
+                    <p style="margin: 4px 0;"><strong>Inmunidades al Daño:</strong> <span class="attribute-value">{{ formatResistancesList(cf.damageImmunities) }}</span></p>
+                  }
+                  @if (cf.conditionImmunities?.length > 0) {
+                    <p style="margin: 4px 0;"><strong>Inmunidades a Estados:</strong> <span class="attribute-value">{{ formatConditionsList(cf.conditionImmunities) }}</span></p>
+                  }
+                </div>
+              }
+
+              <div class="stat-block-divider"></div>
+
+              <!-- Description -->
+              @if (previewDetails.description) {
+                <div class="stat-block-description" style="font-style: normal; border-left: none; padding-left: 0; white-space: pre-line;">
+                  {{ previewDetails.description }}
+                </div>
+                <div class="stat-block-divider"></div>
+              }
+
+              <!-- Class Traits / Features -->
+              @let features = getClassFeatures();
+              @if (features.length > 0) {
+                <div class="stat-block-section-header">Rasgos de Clase</div>
+                <div class="stat-block-section">
+                  @for (feature of features; track feature.name) {
+                    <p class="stat-block-inline-trait" style="margin-bottom: 12px;">
+                      <strong><em>{{ feature.name }} (Nivel {{ feature.levelRequired }}).</em></strong> {{ feature.description }}
+                    </p>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Premium Subclass Details View -->
+          @if (selectedPreviewItem?.contentType === 'SUBCLASS') {
+            <div class="stat-block-book">
+              <h1 class="stat-block-name">{{ previewDetails.name }}</h1>
+              <p class="stat-block-meta">Subclase de {{ previewDetails.parentClass?.name }}</p>
+              @if (previewDetails.parentClass?.classFeatures?.primaryAbility) {
+                <p class="stat-block-attribute"><strong>Atributo Principal:</strong> <span class="attribute-value">{{ translateAbility(previewDetails.parentClass.classFeatures.primaryAbility) }}</span></p>
+              }
+
+              <div class="stat-block-divider"></div>
+
+              @let scf = previewDetails.subclassFeatures;
+              
+              <!-- Proficiencies / Competencias granted by subclass -->
+              @if (scf?.armorProficiencies?.length > 0 || scf?.weaponProficiencies?.length > 0 || scf?.toolProficiencies?.length > 0 || scf?.skillProficiencies?.fixed?.length > 0 || scf?.skillProficiencies?.choicePool?.length > 0) {
+                <div class="stat-block-section-header">Competencias Adicionales</div>
+                <div class="stat-block-section">
+                  @if (scf.armorProficiencies?.length > 0) {
+                    <p style="margin: 4px 0;"><strong>Armadura:</strong> <span class="attribute-value">{{ formatProficienciesList(scf.armorProficiencies) }}</span></p>
+                  }
+                  @if (scf.weaponProficiencies?.length > 0) {
+                    <p style="margin: 4px 0;"><strong>Armas:</strong> <span class="attribute-value">{{ formatProficienciesList(scf.weaponProficiencies) }}</span></p>
+                  }
+                  @if (scf.toolProficiencies?.length > 0) {
+                    <p style="margin: 4px 0;"><strong>Herramientas:</strong> <span class="attribute-value">{{ formatProficienciesList(scf.toolProficiencies) }}</span></p>
+                  }
+                  @if (scf.skillProficiencies?.fixed?.length > 0 || scf.skillProficiencies?.choicePool?.length > 0) {
+                    <p style="margin: 4px 0;"><strong>Habilidades:</strong> <span class="attribute-value">{{ formatSkillProficiencies(scf.skillProficiencies) }}</span></p>
+                  }
+                </div>
+                <div class="stat-block-divider"></div>
+              }
+
+              <!-- Subclass Spellcasting / Additional Spell Class / Expanded Spell list -->
+              @if (scf?.expandedSpellList?.length > 0 || scf?.additionalSpellClass || scf?.spellcasting) {
+                <div class="stat-block-section-header">Magia de Subclase</div>
+                <div class="stat-block-section">
+                  @if (scf.spellcasting) {
+                    <p style="margin: 4px 0;"><strong>Aptitud Mágica:</strong> <span class="attribute-value">{{ translateAbility(scf.spellcasting.ability) }}</span></p>
+                    <p style="margin: 4px 0;"><strong>Lanzamiento Ritual:</strong> <span class="attribute-value">{{ scf.spellcasting.ritualCasting ? 'Sí' : 'No' }}</span></p>
+                  }
+                  @if (scf.additionalSpellClass) {
+                    <p style="margin: 4px 0;"><strong>Lista de Conjuros:</strong> <span class="attribute-value">Acceso a conjuros de {{ translateClassName(scf.additionalSpellClass) }}</span></p>
+                  }
+                  @if (scf.expandedSpellList?.length > 0) {
+                    <p style="margin: 4px 0;"><strong>Conjuros Expandidos/Preparados:</strong> <span class="attribute-value">{{ formatExpandedSpells(scf.expandedSpellList) }}</span></p>
+                  }
+                </div>
+                <div class="stat-block-divider"></div>
+              }
+
+              <!-- Resource Pools (if any) -->
+              @if (scf?.resourcePools?.length > 0) {
+                <div class="stat-block-section-header">Recursos Especiales</div>
+                <div class="stat-block-section">
+                  @for (rp of scf.resourcePools; track rp.name) {
+                    <p style="margin: 4px 0;"><strong>{{ rp.name }}:</strong> <span class="attribute-value">{{ rp.count }}{{ rp.dieType }} (recarga con {{ rp.rechargeOn === 'SHORT_REST' ? 'Descanso Corto o Largo' : 'Descanso Largo' }})</span></p>
+                  }
+                </div>
+                <div class="stat-block-divider"></div>
+              }
+
+              <!-- Defensas subclass (if any) -->
+              @if (scf?.damageResistances?.length > 0 || scf?.damageImmunities?.length > 0 || scf?.conditionImmunities?.length > 0) {
+                <div class="stat-block-section-header">Defensas Adicionales</div>
+                <div class="stat-block-section">
+                  @if (scf.damageResistances?.length > 0) {
+                    <p style="margin: 4px 0;"><strong>Resistencias:</strong> <span class="attribute-value">{{ formatResistancesList(scf.damageResistances) }}</span></p>
+                  }
+                  @if (scf.damageImmunities?.length > 0) {
+                    <p style="margin: 4px 0;"><strong>Inmunidades:</strong> <span class="attribute-value">{{ formatResistancesList(scf.damageImmunities) }}</span></p>
+                  }
+                  @if (scf.conditionImmunities?.length > 0) {
+                    <p style="margin: 4px 0;"><strong>Inmunidades a Estados:</strong> <span class="attribute-value">{{ formatConditionsList(scf.conditionImmunities) }}</span></p>
+                  }
+                </div>
+                <div class="stat-block-divider"></div>
+              }
+
+              <!-- Description -->
+              @if (previewDetails.description) {
+                <div class="stat-block-description" style="font-style: normal; border-left: none; padding-left: 0; white-space: pre-line;">
+                  {{ previewDetails.description }}
+                </div>
+                <div class="stat-block-divider"></div>
+              }
+
+              <!-- Traits / Features -->
+              @let features = getClassFeatures();
+              @if (features.length > 0) {
+                <div class="stat-block-section-header">Rasgos de Subclase</div>
+                <div class="stat-block-section">
+                  @for (feature of features; track feature.name) {
+                    <p class="stat-block-inline-trait" style="margin-bottom: 12px;">
+                      <strong><em>{{ feature.name }} (Nivel {{ feature.levelRequired }}).</em></strong> {{ feature.description }}
+                    </p>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Premium Race Details View -->
+          @if (selectedPreviewItem?.contentType === 'RACE') {
+            <div class="stat-block-book">
+              <h1 class="stat-block-name">{{ previewDetails.name }}</h1>
+              <p class="stat-block-meta"><i>Raza</i></p>
+
+              <div class="stat-block-divider"></div>
+
+              <!-- Race properties grid -->
+              <div class="stat-block-auxiliary">
+                <p style="margin: 3px 0;"><strong>Tamaño:</strong> <span class="attribute-val">{{ getRaceSize(previewDetails) }}</span></p>
+                <p style="margin: 3px 0;"><strong>Velocidad:</strong> <span class="attribute-val">{{ getRaceSpeeds(previewDetails) }}</span></p>
+                <p style="margin: 3px 0;"><strong>Mejora de Característica:</strong> <span class="attribute-val" style="color: #5c4013; font-weight: bold;">{{ getRaceBonuses(previewDetails) }}</span></p>
+                <p style="margin: 3px 0;"><strong>Idiomas:</strong> <span class="attribute-val">{{ getRaceLanguages(previewDetails) }}</span></p>
+              </div>
+
+              <div class="stat-block-divider"></div>
+
+              <!-- Description -->
+              @if (previewDetails.description) {
+                <div class="stat-block-description" style="font-style: normal; border-left: none; padding-left: 0; white-space: pre-line;">
+                  {{ previewDetails.description }}
+                </div>
+                <div class="stat-block-divider"></div>
+              }
+
+              <!-- Racial Traits -->
+              @let raceTraits = getRaceTraits(previewDetails);
+              @if (raceTraits.length > 0) {
+                <div class="stat-block-section-header">Rasgos Raciales</div>
+                <div class="stat-block-section">
+                  @for (trait of raceTraits; track trait.name) {
+                    <p class="stat-block-inline-trait" style="margin-bottom: 12px;">
+                      <strong><em>{{ trait.name }}.</em></strong> {{ trait.description }}
+                    </p>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Premium Item Details View -->
+          @if (selectedPreviewItem?.contentType === 'ITEM') {
+            <div class="stat-block-book">
+              <h1 class="stat-block-name">{{ previewDetails.name }}</h1>
+              @if (getItemRarityAndAttunement(previewDetails)) {
+                <p class="stat-block-meta"><i>{{ getItemRarityAndAttunement(previewDetails) }}</i></p>
+              } @else {
+                <p class="stat-block-meta"><i>{{ previewDetails.type }}</i></p>
+              }
+
+              <div class="stat-block-divider"></div>
+
+              <!-- Item Properties Grid -->
+              @let itemProps = getItemPropertiesList(previewDetails);
+              @if (itemProps.length > 0) {
+                <div class="stat-block-auxiliary">
+                  @for (prop of itemProps; track prop.label) {
+                    <p style="margin: 3px 0;">
+                      <strong>{{ prop.label }}:</strong> <span class="attribute-val">{{ prop.value }}</span>
+                    </p>
+                  }
+                </div>
+                <div class="stat-block-divider"></div>
+              }
+
+              <!-- Buffs / ASI List -->
+              @let itemBuffs = getItemBuffsList(previewDetails);
+              @if (itemBuffs.length > 0) {
+                <div class="stat-block-auxiliary" style="margin-bottom: 12px;">
+                  <p style="margin: 3px 0;"><strong>Bonificadores:</strong></p>
+                  <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px;">
+                    @for (buff of itemBuffs; track buff) {
+                      <span class="atk-badge bonus" style="padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; border: 1px solid rgba(197, 160, 89, 0.4); background: rgba(197, 160, 89, 0.05); color: #5c4013;">
+                        {{ buff }}
+                      </span>
+                    }
+                  </div>
+                </div>
+                <div class="stat-block-divider"></div>
+              }
+
+              <!-- Description -->
+              @if (previewDetails.properties?.description || previewDetails.description || previewDetails.properties?.gearDescription) {
+                <div class="stat-block-description" style="font-style: normal; border-left: none; padding-left: 0; white-space: pre-line;">
+                  {{ previewDetails.properties?.description || previewDetails.description || previewDetails.properties?.gearDescription }}
+                </div>
+              }
+              @if (previewDetails.properties?.effectDescription) {
+                <div class="stat-block-description" style="font-style: italic; border-left: none; padding-left: 0; white-space: pre-line; margin-top: 8px;">
+                  {{ previewDetails.properties.effectDescription }}
+                </div>
+              }
+
+              <!-- Special Abilities -->
+              @if (previewDetails.properties?.specialAbilities?.length > 0) {
+                <div class="stat-block-section-header">Habilidades Especiales</div>
+                <div class="stat-block-section">
+                  @for (feat of previewDetails.properties.specialAbilities; track feat.name) {
+                    <p class="stat-block-inline-trait" style="margin-bottom: 8px;">
+                      <strong><em>{{ feat.name }}.</em></strong> {{ feat.description }}
+                    </p>
+                  }
+                </div>
               }
             </div>
           }

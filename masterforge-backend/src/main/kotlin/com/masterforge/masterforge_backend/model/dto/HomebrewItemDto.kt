@@ -10,5 +10,6 @@ data class HomebrewItemDto(
     val contentType: String,
     val price: BigDecimal = BigDecimal.ZERO,
     @get:JsonProperty("isOwned")
-    val isOwned: Boolean = false
+    val isOwned: Boolean = false,
+    val description: String? = null
 )

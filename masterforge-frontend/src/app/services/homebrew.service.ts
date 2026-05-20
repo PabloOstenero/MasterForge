@@ -26,6 +26,7 @@ export interface HomebrewItem {
   contentType: ContentType;
   price: number;
   isOwned: boolean;
+  description?: string;
 }
 
 export interface HomebrewSummary {

@@ -66,3 +66,79 @@ html {
   }
 }
 
+/* MasterForge Forge Action Popover custom styling */
+.forge-popover,
+ion-popover.forge-popover {
+  --background: #131313 !important;
+  --color: #ffffff !important;
+  --border-color: rgba(201, 168, 76, 0.3) !important;
+  --border-style: solid !important;
+  --border-width: 1px !important;
+  --border-radius: 12px !important;
+  --box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), 0 0 16px rgba(201, 168, 76, 0.2) !important;
+  --width: 220px !important;
+  
+  /* Target the shadow DOM part for the popover content directly */
+  &::part(content) {
+    --background: #131313 !important;
+    background: #131313 !important;
+    border: 1px solid rgba(201, 168, 76, 0.3) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), 0 0 16px rgba(201, 168, 76, 0.2) !important;
+  }
+
+  .popover-viewport {
+    --background: #131313 !important;
+    background: #131313 !important;
+    border: 1px solid rgba(201, 168, 76, 0.3) !important;
+    border-radius: 12px !important;
+  }
+  
+  ion-content {
+    --background: #131313 !important;
+    background: #131313 !important;
+    --color: #ffffff !important;
+    color: #ffffff !important;
+  }
+
+  .forge-popover-list {
+    --background: #131313 !important;
+    background: #131313 !important;
+    padding: 8px 4px !important;
+    margin: 0 !important;
+
+    ion-item {
+      --background: #131313 !important;
+      background: #131313 !important;
+      --background-hover: rgba(201, 168, 76, 0.12) !important;
+      --background-activated: rgba(201, 168, 76, 0.2) !important;
+      --color: #ffffff !important;
+      --color-hover: #c9a84c !important;
+      --inner-padding-end: 8px !important;
+      --padding-start: 12px !important;
+      --border-radius: 6px !important;
+      font-weight: 600 !important;
+      font-size: 0.88rem !important;
+      cursor: pointer !important;
+      margin: 2px 0 !important;
+      transition: all 0.2s ease !important;
+      
+      ion-icon {
+        font-size: 1.25rem !important;
+        margin-right: 12px !important;
+        color: #c9a84c !important;
+        transition: transform 0.2s ease !important;
+      }
+      
+      &:hover {
+        --color: #c9a84c !important;
+        
+        ion-icon {
+          transform: scale(1.15) rotate(5deg) !important;
+        }
+      }
+    }
+  }
+}
+
+
