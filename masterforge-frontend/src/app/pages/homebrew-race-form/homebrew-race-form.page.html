@@ -22,7 +22,7 @@
       <!-- ══════════════════════════════════════════════════════════════════
            SECCIÓN 1 · IDENTIDAD
       ══════════════════════════════════════════════════════════════════ -->
-      <div class="form-section col-left">
+      <div class="form-section col-full">
         <h2 class="section-title">Identidad</h2>
 
         <!-- Nombre -->
@@ -475,14 +475,14 @@
           <p class="empty-hint">Sin rasgos definidos.</p>
         }
 
-        @for (trait of traits.controls; track $index) {
-          <div class="entry-card" [formGroup]="$any(trait)" [attr.data-testid]="'trait-entry-' + $index">
+        @for (trait of traits.controls; track $index; let traitIdx = $index) {
+          <div class="entry-card" [formGroup]="$any(trait)" [attr.data-testid]="'trait-entry-' + traitIdx">
 
             <!-- ID oculto -->
             <input
               type="hidden"
               formControlName="id"
-              [attr.data-testid]="'trait-id-' + $index">
+              [attr.data-testid]="'trait-id-' + traitIdx">
 
             <div class="option-entry-grid">
               <!-- Nombre del rasgo -->
@@ -492,7 +492,7 @@
                   class="forge-input"
                   formControlName="name"
                   placeholder="Ej: Ventaja en Salvaciones"
-                  [attr.data-testid]="'trait-name-' + $index"
+                  [attr.data-testid]="'trait-name-' + traitIdx"
                   [class.input-error]="$any(trait).get('name')?.invalid && $any(trait).get('name')?.touched">
                 </ion-input>
               </div>
@@ -505,12 +505,12 @@
                   type="number"
                   formControlName="levelRequired"
                   placeholder="1"
-                  [attr.data-testid]="'trait-level-' + $index">
+                  [attr.data-testid]="'trait-level-' + traitIdx">
                 </ion-input>
               </div>
             </div>
             @if ($any(trait).get('name')?.invalid && $any(trait).get('name')?.touched) {
-              <p class="error-message" [attr.data-testid]="'trait-name-error-' + $index">El nombre del rasgo es obligatorio.</p>
+              <p class="error-message" [attr.data-testid]="'trait-name-error-' + traitIdx">El nombre del rasgo es obligatorio.</p>
             }
 
             <!-- Descripción del rasgo -->
@@ -521,18 +521,18 @@
                 formControlName="description"
                 placeholder="Describe el efecto del rasgo…"
                 rows="3"
-                [attr.data-testid]="'trait-description-' + $index"
+                [attr.data-testid]="'trait-description-' + traitIdx"
                 [class.input-error]="$any(trait).get('description')?.invalid && $any(trait).get('description')?.touched">
               </ion-textarea>
               @if ($any(trait).get('description')?.invalid && $any(trait).get('description')?.touched) {
-                <p class="error-message" [attr.data-testid]="'trait-description-error-' + $index">La descripción es obligatoria.</p>
+                <p class="error-message" [attr.data-testid]="'trait-description-error-' + traitIdx">La descripción es obligatoria.</p>
               }
             </div>
 
             <!-- ── Configuración de Opciones ── -->
             <div class="checkbox-group">
-              <input type="checkbox" formControlName="hasOptions" [id]="'hasOpt-' + $index" (change)="$any(trait).get('hasOptions').value ? addTraitOption($index) : null">
-              <label [for]="'hasOpt-' + $index" style="margin-left: 8px;">Este rasgo permite elegir opciones (ej: Invocaciones, Maniobras...)</label>
+              <input type="checkbox" formControlName="hasOptions" [id]="'hasOpt-' + traitIdx" (change)="$any(trait).get('hasOptions').value ? addTraitOption(traitIdx) : null">
+              <label [for]="'hasOpt-' + traitIdx" style="margin-left: 8px;">Este rasgo permite elegir opciones (ej: Invocaciones, Maniobras...)</label>
             </div>
 
             @if ($any(trait).get('hasOptions').value) {
@@ -545,11 +545,11 @@
                 <!-- Lista de opciones disponibles -->
                 <div class="subsection-header-row" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
                   <h4 class="field-label" style="margin-bottom: 0;">Opciones Disponibles</h4>
-                  <button type="button" class="btn-add" (click)="addTraitOption($index)">+ Añadir Opción</button>
+                  <button type="button" class="btn-add" (click)="addTraitOption(traitIdx)">+ Añadir Opción</button>
                 </div>
 
                 <div formArrayName="options" style="margin-top: 0.5rem;">
-                  @for (opt of getTraitOptions($index).controls; track $index; let optIdx = $index) {
+                  @for (opt of getTraitOptions(traitIdx).controls; track $index; let optIdx = $index) {
                     <div [formGroupName]="optIdx" class="entry-card" style="background: #252525; border: 1px solid #333;">
                       <div class="option-entry-grid">
                         <div class="field-group">
@@ -565,7 +565,7 @@
                         <label class="field-label">Descripción</label>
                         <ion-textarea class="forge-input" formControlName="description" rows="2"></ion-textarea>
                       </div>
-                      <button type="button" class="btn-remove" (click)="removeTraitOption($index, optIdx)">Eliminar Opción</button>
+                      <button type="button" class="btn-remove" (click)="removeTraitOption(traitIdx, optIdx)">Eliminar Opción</button>
                     </div>
                   }
                 </div>
@@ -573,11 +573,11 @@
                 <!-- Progresión de elecciones -->
                 <div class="subsection-header-row" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem;">
                   <h4 class="field-label" style="margin-bottom: 0;">Progresión de elecciones adicionales</h4>
-                  <button type="button" class="btn-add" (click)="addTraitProgression($index)">+ Añadir Nivel</button>
+                  <button type="button" class="btn-add" (click)="addTraitProgression(traitIdx)">+ Añadir Nivel</button>
                 </div>
 
                 <div formArrayName="progression" class="progression-list">
-                  @for (prog of getTraitProgression($index).controls; track $index; let progIdx = $index) {
+                  @for (prog of getTraitProgression(traitIdx).controls; track $index; let progIdx = $index) {
                     <div [formGroupName]="progIdx" class="progression-entry-row">
                       <div class="field-group" style="margin-bottom: 0;">
                         <label class="field-label" style="font-size: 0.65rem;">Al Nivel</label>
@@ -587,10 +587,10 @@
                         <label class="field-label" style="font-size: 0.65rem;">+ Elecciones</label>
                         <ion-input class="forge-input" type="number" formControlName="additionalChoices" placeholder="Ejs: 1"></ion-input>
                       </div>
-                      <button type="button" class="btn-remove-prog" (click)="removeTraitProgression($index, progIdx)">×</button>
+                      <button type="button" class="btn-remove-prog" (click)="removeTraitProgression(traitIdx, progIdx)">×</button>
                     </div>
                   }
-                  @if (getTraitProgression($index).length === 0) {
+                  @if (getTraitProgression(traitIdx).length === 0) {
                     <p class="empty-hint" style="font-size: 0.75rem;">Sin progresión adicional (elecciones fijas).</p>
                   }
                 </div>
@@ -599,7 +599,7 @@
 
             <app-feature-mechanics [parentForm]="$any(trait)"></app-feature-mechanics>
 
-            <button type="button" class="btn-remove" (click)="removeTrait($index)" [attr.data-testid]="'remove-trait-' + $index">
+            <button type="button" class="btn-remove" (click)="removeTrait(traitIdx)" [attr.data-testid]="'remove-trait-' + traitIdx">
               Eliminar Rasgo
             </button>
           </div>
