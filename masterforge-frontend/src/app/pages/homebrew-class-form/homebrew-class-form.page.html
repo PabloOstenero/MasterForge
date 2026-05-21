@@ -450,7 +450,8 @@
 
               <div class="header-group level-control">
                 <label>Nivel</label>
-                <input type="number" class="forge-input-native-small" formControlName="levelRequired" placeholder="1">
+                <input type="number" class="forge-input-native-small" formControlName="levelRequired" placeholder="1"
+                       [class.input-error]="feat.get('levelRequired')?.invalid && form.touched">
               </div>
 
               <button type="button" class="btn-card-delete" (click)="removeFeature(i)" title="Eliminar rasgo">
@@ -477,6 +478,7 @@
                     title="Mecánicas (CA, Recursos)">
                     <ion-icon name="shield-outline"></ion-icon>
                     <span>Mecánicas</span>
+                    @if (hasMechanicsConfigured(feat)) { <span class="tool-count-badge">✓</span> }
                     @if (feat.get('properties')?.invalid && form.touched) { <span class="tool-error-dot"></span> }
                   </button>
                   <button type="button" class="btn-tool" (click)="toggleFeatureSection(i, 'options')" 
@@ -485,6 +487,7 @@
                     title="Opciones y Elecciones">
                     <ion-icon name="list-outline"></ion-icon>
                     <span>Opciones</span>
+                    @if (feat.get('hasOptions')?.value && getOptionsCount(feat) > 0) { <span class="tool-count-badge">{{ getOptionsCount(feat) }}</span> }
                     @if (feat.get('options')?.invalid && form.touched) { <span class="tool-error-dot"></span> }
                   </button>
                   <button type="button" class="btn-tool" (click)="toggleFeatureSection(i, 'effects')" 
@@ -493,6 +496,7 @@
                     title="Automatización (Proficiencias, Sentidos)">
                     <ion-icon name="sparkles-outline"></ion-icon>
                     <span>Efectos</span>
+                    @if (getEffectsCount(feat) > 0) { <span class="tool-count-badge">{{ getEffectsCount(feat) }}</span> }
                     @if (feat.get('properties.effects')?.invalid && form.touched) { <span class="tool-error-dot"></span> }
                   </button>
                   <button type="button" class="btn-tool" (click)="toggleFeatureSection(i, 'progression')" 
@@ -501,6 +505,7 @@
                     title="Progresión por Nivel">
                     <ion-icon name="trending-up-outline"></ion-icon>
                     <span>Progresión</span>
+                    @if (getProgressionCount(feat) > 0) { <span class="tool-count-badge">{{ getProgressionCount(feat) }}</span> }
                     @if (feat.get('progression')?.invalid && form.touched) { <span class="tool-error-dot"></span> }
                   </button>
                 </div>
@@ -558,7 +563,7 @@
                             <th>Nº Elecciones</th>
                             <th>Nº Dados</th>
                             <th>Tipo Dado</th>
-                            <th>Valor/Bono</th>
+                            <th>Descripción / Bono</th>
                             <th></th>
                           </tr>
                         </thead>
@@ -569,7 +574,7 @@
                               <td><input type="number" class="forge-input-native-small" formControlName="additionalChoices" placeholder="+1"></td>
                               <td><input type="number" class="forge-input-native-small" formControlName="diceCount" placeholder="Ej: 1"></td>
                               <td>
-                                <select class="forge-input-native-small" formControlName="diceType">
+                                <select class="forge-select-native-small" formControlName="diceType">
                                   <option value="d4">d4</option>
                                   <option value="d6">d6</option>
                                   <option value="d8">d8</option>

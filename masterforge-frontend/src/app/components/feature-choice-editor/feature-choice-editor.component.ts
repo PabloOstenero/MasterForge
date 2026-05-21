@@ -92,7 +92,16 @@ export class FeatureChoiceEditorComponent {
       id: [this.generateId(), Validators.required],
       label: ['', Validators.required],
       description: ['', Validators.required],
-      effects: this.fb.array([])
+      effects: this.fb.array([]),
+      properties: this.fb.group({
+        statModifiers: this.fb.group({
+          str: [0], dex: [0], con: [0], int: [0], wis: [0], cha: [0]
+        }),
+        speedBonus: [0],
+        statsCondition: ['NONE'],
+        acBonus: [null],
+        acCondition: ['NONE']
+      })
     });
     this.choices.push(choice);
   }
@@ -107,7 +116,7 @@ export class FeatureChoiceEditorComponent {
 
   addEffect(choiceIndex: number, initialData?: any) {
     const effect = this.fb.group({
-      type: [initialData?.type ?? 'STAT_MODIFIER', Validators.required],
+      type: [initialData?.type ?? 'PROFICIENCY', Validators.required],
       target: [initialData?.target ?? '', Validators.required],
       customTarget: [initialData?.customTarget ?? ''],
       value: [initialData?.value ?? 1, Validators.required],
@@ -119,21 +128,6 @@ export class FeatureChoiceEditorComponent {
 
   removeEffect(choiceIndex: number, effectIndex: number) {
     this.getEffects(choiceIndex).removeAt(effectIndex);
-  }
-
-  get progression(): FormArray {
-    return this.parentForm.get('progression') as FormArray;
-  }
-
-  addProgression() {
-    this.progression.push(this.fb.group({
-      level: [null, Validators.required],
-      additionalChoices: [1, Validators.required]
-    }));
-  }
-
-  removeProgression(index: number) {
-    this.progression.removeAt(index);
   }
 
   private generateId(): string {

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
-  IonTitle, IonContent, IonSpinner, IonList, IonItem, IonLabel,
+  IonContent, IonSpinner, IonItem, IonLabel,
   IonAvatar, IonBadge, IonCard, IonCardContent, IonIcon,
   IonSearchbar, IonSegment, IonSegmentButton, IonButton,
   ToastController, AlertController
@@ -32,8 +32,8 @@ interface AdminUserDto {
   standalone: true,
   imports: [
     CommonModule, FormsModule,
-    IonTitle, IonContent, IonSpinner, IonList, IonItem, IonLabel,
-    IonAvatar, IonBadge, IonCard, IonCardContent, IonIcon,
+    IonContent, IonSpinner, IonLabel,
+    IonAvatar, IonBadge, IonIcon,
     IonSearchbar, IonSegment, IonSegmentButton, IonButton
   ],
 })

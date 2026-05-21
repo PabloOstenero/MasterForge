@@ -23,7 +23,7 @@ import {
   HostListener,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonSpinner, IonButton, IonIcon } from '@ionic/angular/standalone';
+import { IonSpinner, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   peopleOutline,
@@ -45,7 +45,7 @@ import { SearchHighlightPipe } from '../../pipes/search-highlight.pipe';
   styleUrls: ['./campaign-list.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, IonSpinner, IonButton, IonIcon, SearchHighlightPipe],
+  imports: [CommonModule, IonSpinner, IonIcon, SearchHighlightPipe],
 })
 export class CampaignListComponent {
   /** The list of campaigns to display. */

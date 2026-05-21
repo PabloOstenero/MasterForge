@@ -8,6 +8,7 @@ import {
   FormArray,
   FormControl,
   Validators,
+  AbstractControl,
 } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import {
@@ -648,7 +649,21 @@ export class HomebrewSubclassFormPage implements OnInit {
                 id: [c.id],
                 label: [c.label || c.name, Validators.required],
                 description: [c.description, Validators.required],
-                effects: this.fb.array((c.effects ?? []).map((e: any) => this.fb.group(e)))
+                effects: this.fb.array((c.effects ?? []).map((e: any) => this.fb.group(e))),
+                properties: this.fb.group({
+                  statModifiers: this.fb.group({
+                    str: [c.properties?.statModifiers?.str ?? 0],
+                    dex: [c.properties?.statModifiers?.dex ?? 0],
+                    con: [c.properties?.statModifiers?.con ?? 0],
+                    int: [c.properties?.statModifiers?.int ?? 0],
+                    wis: [c.properties?.statModifiers?.wis ?? 0],
+                    cha: [c.properties?.statModifiers?.cha ?? 0]
+                  }),
+                  speedBonus: [c.properties?.speedBonus ?? 0],
+                  statsCondition: [c.properties?.statsCondition ?? 'NONE'],
+                  acBonus: [c.properties?.acBonus ?? null],
+                  acCondition: [c.properties?.acCondition ?? 'NONE']
+                })
               }))),
               progression: this.fb.array(((entry.options as any)?.progression ?? []).map((p: any) => this.fb.group({
                 level: [p.level, Validators.required],
@@ -677,10 +692,16 @@ export class HomebrewSubclassFormPage implements OnInit {
             if (entry.properties) {
               const propsGroup = featureGroup.get('properties') as FormGroup;
               if (entry.properties.statModifiers) propsGroup.addControl('statModifiers', this.fb.group(entry.properties.statModifiers));
+              if (entry.properties.speedBonus !== undefined && entry.properties.speedBonus !== null) {
+                propsGroup.addControl('speedBonus', this.fb.control(entry.properties.speedBonus));
+              }
+              if (entry.properties.statsCondition !== undefined && entry.properties.statsCondition !== null) {
+                propsGroup.addControl('statsCondition', this.fb.control(entry.properties.statsCondition));
+              }
               if (entry.properties.acCalculation) propsGroup.addControl('acCalculation', this.fb.group(entry.properties.acCalculation));
               if (entry.properties.acBonus !== undefined && entry.properties.acBonus !== null) {
                 propsGroup.addControl('acBonus', this.fb.control(entry.properties.acBonus));
-                propsGroup.addControl('acBonusArmorOnly', this.fb.control(entry.properties.acBonusArmorOnly ?? false));
+                propsGroup.addControl('acCondition', this.fb.control(entry.properties.acCondition ?? 'NONE'));
               }
               if (entry.properties.resourcePool) propsGroup.addControl('resourcePool', this.fb.group(entry.properties.resourcePool));
               if (entry.properties.bonusAttunementSlots !== undefined && entry.properties.bonusAttunementSlots !== null) {
@@ -837,19 +858,6 @@ export class HomebrewSubclassFormPage implements OnInit {
       }),
       progression: this.fb.array([]),
       properties: this.fb.group({
-        acCalculation: this.fb.group({
-          base: [10],
-          stats: [[]],
-          requiresNoArmor: [false],
-          requiresNoShield: [false]
-        }),
-        acBonus: [0],
-        acBonusArmorOnly: [false],
-        resourcePool: this.fb.group({
-          name: [''],
-          max: [''],
-          reset: ['LONG_REST']
-        }),
         innateSpells: this.fb.array([]),
         effects: this.fb.array([])
       })
@@ -859,6 +867,32 @@ export class HomebrewSubclassFormPage implements OnInit {
   removeFeature(index: number): void {
     this.features.removeAt(index);
     delete this.featureActiveSection[index];
+  }
+
+  hasMechanicsConfigured(feat: AbstractControl): boolean {
+    const props = feat.get('properties');
+    if (!props) return false;
+    return !!props.get('statModifiers') || 
+           (props.get('speedBonus')?.value !== null && props.get('speedBonus')?.value !== 0 && props.get('speedBonus')?.value !== undefined) || 
+           !!props.get('acCalculation') || 
+           (props.get('acBonus')?.value !== null && props.get('acBonus')?.value !== 0 && props.get('acBonus')?.value !== undefined) || 
+           !!props.get('resourcePool') || 
+           props.get('bonusAttunementSlots')?.value !== null;
+  }
+
+  getOptionsCount(feat: AbstractControl): number {
+    const choices = feat.get('options.choices') as FormArray;
+    return choices ? choices.length : 0;
+  }
+
+  getEffectsCount(feat: AbstractControl): number {
+    const effects = feat.get('properties.effects') as FormArray;
+    return effects ? effects.length : 0;
+  }
+
+  getProgressionCount(feat: AbstractControl): number {
+    const progression = feat.get('progression') as FormArray;
+    return progression ? progression.length : 0;
   }
 
   toggleFeatureSection(index: number, section: string): void {
@@ -892,7 +926,7 @@ export class HomebrewSubclassFormPage implements OnInit {
   addFeatureEffect(featureIndex: number, initialData?: any): void {
     const effectsArray = this.getFeatureEffects(featureIndex);
     effectsArray.push(this.fb.group({
-      type: [initialData?.type ?? 'STAT_MODIFIER', Validators.required],
+      type: [initialData?.type ?? '', Validators.required],
       target: [initialData?.target ?? '', Validators.required],
       customTarget: [initialData?.customTarget ?? ''],
       value: [initialData?.value ?? 1],
@@ -1100,13 +1134,8 @@ export class HomebrewSubclassFormPage implements OnInit {
       case 'conjuros':
         return (
           isInvalidTouched('spellcastingAbility') ||
-          isInvalidTouched('spellcastingType')
-        );
-
-      case 'recursos':
-        return (
-          formArrayHasError('expandedSpellList') ||
-          formArrayHasError('resourcePools')
+          isInvalidTouched('spellcastingType') ||
+          formArrayHasError('expandedSpellList')
         );
 
       default:
@@ -1122,6 +1151,14 @@ export class HomebrewSubclassFormPage implements OnInit {
     this.form.markAllAsTouched();
 
     if (this.form.invalid) {
+      this.error = 'Por favor, completa todos los campos obligatorios marcados en rojo antes de continuar.';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const content = document.querySelector('ion-content');
+      if (content) {
+        try {
+          (content as any).scrollToTop(300);
+        } catch (e) {}
+      }
       return;
     }
 
@@ -1159,7 +1196,14 @@ export class HomebrewSubclassFormPage implements OnInit {
     // ---- Serialize subclass feature entries ----
     const subclassFeatureEntries: FeatureEntry[] = this.features.controls.map(ctrl => {
       const fg = ctrl as FormGroup;
-      const optionsValue = fg.get('hasOptions')?.value ? fg.get('options')?.value : null;
+      const hasOptions = fg.get('hasOptions')?.value;
+      const optionsValue = hasOptions ? fg.get('options')?.value : null;
+      if (optionsValue) {
+        optionsValue.progression = (fg.get('progression')?.value || []).map((p: any) => ({
+          level: p.level,
+          additionalChoices: p.additionalChoices || 0
+        }));
+      }
       const propertiesValue = fg.get('properties')?.value || {};
       const properties = {
         ...propertiesValue,

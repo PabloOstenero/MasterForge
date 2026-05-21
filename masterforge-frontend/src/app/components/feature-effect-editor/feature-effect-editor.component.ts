@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormArray, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormArray, FormGroup, ReactiveFormsModule, AbstractControl } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { shieldOutline, ribbonOutline, flashOutline, trash } from 'ionicons/icons';
@@ -19,14 +19,7 @@ export class FeatureEffectEditorComponent {
   @Input() effectsArray!: FormArray;
   @Input() label: string = 'Efectos Automatizados';
 
-  effectTypes = [
-    { value: 'STAT_MODIFIER', label: 'Modificador de Atributo (Suma)' },
-    { value: 'PROFICIENCY', label: 'Competencia (Habilidad/Salvación)' },
-    { value: 'SENSE', label: 'Sentido (Ej: Visión en la Oscuridad)' },
-    { value: 'DAMAGE_RESISTANCE', label: 'Resistencia a Daño' },
-    { value: 'DAMAGE_IMMUNITY', label: 'Inmunidad a Daño' },
-    { value: 'CONDITION_IMMUNITY', label: 'Inmunidad a Condición' }
-  ];
+  uiTypeMap = new Map<AbstractControl, string>();
 
   statTargets = [
     // Stats
@@ -113,16 +106,47 @@ export class FeatureEffectEditorComponent {
     { value: 'IS_USING_MELEE_WEAPON', label: 'Si usa arma cuerpo a cuerpo' }
   ];
 
-  getFilteredTargets(type: string) {
-    if (!type) return [];
+  getUiType(effect: AbstractControl): string {
+    if (this.uiTypeMap.has(effect)) {
+      return this.uiTypeMap.get(effect)!;
+    }
+    const type = effect.get('type')?.value;
+    if (type === 'PROFICIENCY') {
+      const target = effect.get('target')?.value || '';
+      if (target.startsWith('save_')) {
+        return 'PROFICIENCY_SAVE';
+      }
+      return 'PROFICIENCY_SKILL';
+    }
+    return type;
+  }
+
+  onUiTypeChange(index: number, event: any) {
+    const value = event.target.value;
+    const effect = this.effectsArray.at(index);
+    this.uiTypeMap.set(effect, value);
     
-    switch (type) {
-      case 'STAT_MODIFIER':
-        return this.statTargets.filter(t => 
-          ['armorClass', 'speed', 'baseStr', 'baseDex', 'baseCon', 'baseInt', 'baseWis', 'baseCha'].includes(t.value)
-        );
-      case 'PROFICIENCY':
-        return this.statTargets.filter(t => t.value.startsWith('save_') || t.value.startsWith('skill_'));
+    if (value === 'PROFICIENCY_SKILL' || value === 'PROFICIENCY_SAVE') {
+      effect.get('type')?.setValue('PROFICIENCY');
+      effect.get('value')?.setValue(1); // Default to standard proficiency
+    } else {
+      effect.get('type')?.setValue(value);
+      effect.get('value')?.setValue(null);
+    }
+    effect.get('target')?.setValue('');
+  }
+
+  getFilteredTargets(uiType: string) {
+    if (!uiType) return [];
+    
+    switch (uiType) {
+      case 'PROFICIENCY_SKILL':
+        return [
+          { value: 'skill_all', label: 'TODAS las habilidades' },
+          ...this.statTargets.filter(t => t.value.startsWith('skill_'))
+        ];
+      case 'PROFICIENCY_SAVE':
+        return this.statTargets.filter(t => t.value.startsWith('save_'));
       case 'SENSE':
         return this.statTargets.filter(t => t.value.startsWith('sense_'));
       case 'DAMAGE_RESISTANCE':
@@ -131,19 +155,16 @@ export class FeatureEffectEditorComponent {
       case 'CONDITION_IMMUNITY':
         return this.statTargets.filter(t => t.value.startsWith('cond_'));
       default:
-        return this.statTargets;
+        return [];
     }
-  }
-
-  onTypeChange(index: number) {
-    const effect = this.effectsArray.at(index);
-    effect.get('target')?.setValue('');
   }
 
   @Output() onAddEffect = new EventEmitter<void>();
   @Output() onRemoveEffect = new EventEmitter<number>();
 
   removeEffect(index: number) {
+    const effect = this.effectsArray.at(index);
+    this.uiTypeMap.delete(effect);
     this.onRemoveEffect.emit(index);
   }
 }

@@ -271,17 +271,25 @@
     <ion-list class="transparent-list">
       @for (skill of skills; track $index) {
       <ion-item lines="none" class="skill-item">
-        <div slot="start" class="prof-dot" [class.filled]="pj.skillProficiencies?.[skill.id]"
-          [class.outline]="!pj.skillProficiencies?.[skill.id]"></div>
+        <div slot="start" class="prof-dot" 
+          [class.filled]="getSkillProficiencyLevel(skill) === 1"
+          [class.expertise]="getSkillProficiencyLevel(skill) === 2"
+          [class.half]="getSkillProficiencyLevel(skill) === 0.5"
+          [class.outline]="getSkillProficiencyLevel(skill) === 0"></div>
         <ion-label>
           <h2>{{ skill.name }}
             @if (skill.id === 'stealth' && hasStealthDisadvantage) {
               <span style="color: #e57373; font-size: 0.75rem; margin-left: 4px;" title="Desventaja en Sigilo por armadura equipada">⚠ Desventaja</span>
             }
-            @if (pj.choicesJson?.expertise?.includes(skill.id)) {
-            <span class="accent-text" title="Pericia">[P+]</span>
+            @if (getSkillProficiencyLevel(skill) === 2) {
+              <span class="accent-text" title="Pericia">[P+]</span>
             }
-            @else if (pj.skillProficiencies?.[skill.id]) { <span class="accent-text" title="Competente">[P]</span> }
+            @else if (getSkillProficiencyLevel(skill) === 1) {
+              <span class="accent-text" title="Competente">[P]</span>
+            }
+            @else if (getSkillProficiencyLevel(skill) === 0.5) {
+              <span class="accent-text" style="color: #c1994c; opacity: 0.7;" title="Media Competencia">[P/2]</span>
+            }
           </h2>
           <p>({{ statLabels[skill.stat] }})</p>
         </ion-label>

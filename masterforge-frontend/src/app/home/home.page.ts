@@ -3,12 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import {
-  IonContent, IonGrid, IonRow, IonCol,
+  IonRow, IonCol,
   IonSpinner,
-  IonAvatar,
-  IonCard, IonCardContent,
-  IonList, IonItem, IonLabel, IonBadge, IonNote,
-  IonButton, IonIcon, IonInput, IonFab, IonFabButton
+  IonList, IonItem, IonLabel,
+  IonButton, IonIcon, IonFabButton
 } from '@ionic/angular/standalone';
 import { forkJoin } from 'rxjs';
 import { ApiService, NextSessionDto, DmNextSessionDto, ActiveCampaignsDto, ActiveCharactersDto, PlayerCampaignSummary } from '../services/api';
@@ -26,14 +24,11 @@ import { add, calendarOutline, peopleOutline, walletOutline, mapOutline, accessi
   imports: [
     CommonModule,
     FormsModule,
-    IonNote,
-    IonCard, IonCardContent,
-    IonContent, IonGrid, IonRow, IonCol, 
+    IonRow, IonCol, 
     IonSpinner,
-    IonList, IonItem, IonLabel, IonBadge,
-    IonAvatar,
-    IonButton, IonIcon, IonInput,
-    IonFab, IonFabButton,
+    IonList, IonItem, IonLabel,
+    IonButton, IonIcon,
+    IonFabButton,
     AsyncPipe,
     RouterLink
   ],

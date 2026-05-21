@@ -140,5 +140,50 @@ ion-popover.forge-popover {
     }
   }
 }
+/* Forge Global Select Resets */
+select.forge-select-native, 
+select.forge-select-native-small, 
+select.forge-select-native-mini {
+  background-color: #1a1a1f !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  cursor: pointer !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  background-repeat: no-repeat !important;
+  
+  &::-ms-expand {
+    display: none !important;
+  }
+  
+  option {
+    background-color: #1a1a1f !important;
+    color: #ffffff !important;
+  }
+  
+  option:disabled {
+    color: rgba(255, 255, 255, 0.3) !important;
+  }
+}
 
+select.forge-select-native {
+  padding-right: 32px !important;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C9A84C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-position: right 12px center !important;
+  background-size: 14px !important;
+}
 
+select.forge-select-native-small {
+  padding-right: 22px !important;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C9A84C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-position: right 6px center !important;
+  background-size: 11px !important;
+}
+
+select.forge-select-native-mini {
+  padding-right: 18px !important;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C9A84C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-position: right 4px center !important;
+  background-size: 9px !important;
+}

@@ -1,6 +1,6 @@
 <div class="forge-choice-engine" [formGroup]="parentForm">
   <!-- Engine Header -->
-  <header class="engine-header" [class.header--error]="(choices.invalid || progression.invalid) && parentForm.touched">
+  <header class="engine-header" [class.header--error]="choices.invalid && parentForm.touched">
     <div class="engine-info">
       <h2 class="engine-title">Configuración de Elecciones</h2>
       <p class="engine-subtitle">Define cómo los jugadores personalizarán este rasgo al subir de nivel.</p>
@@ -30,49 +30,12 @@
   </header>
 
   <!-- Choices Container -->
-  <!-- Choices Container -->
   <div class="choices-container">
     <div class="container-toolbar">
       <span class="count-badge">{{ choices.length }} Opciones definidas</span>
       <button type="button" class="btn-forge-primary" (click)="addChoice()">
         <ion-icon name="add"></ion-icon> Añadir Nueva Opción
       </button>
-    </div>
-
-    <!-- Choice Progression Table (Moved out of choices formArrayName) -->
-    <div class="progression-panel" formArrayName="progression">
-      <div class="panel-header">
-        <h3 class="panel-title"><ion-icon name="trending-up-outline"></ion-icon> Progresión de Elecciones</h3>
-        <p class="panel-hint">Define a qué niveles el jugador obtiene selecciones adicionales.</p>
-      </div>
-      
-      <div class="progression-table-wrapper">
-        <table class="forge-table-mini">
-          <thead>
-            <tr>
-              <th>Nivel</th>
-              <th>Elecciones Adicionales</th>
-              <th width="40"></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (prog of progression.controls; track prog; let pi = $index) {
-              <tr [formGroupName]="pi">
-                <td><input type="number" class="forge-input-native-small" formControlName="level" placeholder="Nivel"
-                           [class.input-error]="prog.get('level')?.invalid && prog.get('level')?.touched"></td>
-                <td><input type="number" class="forge-input-native-small" formControlName="additionalChoices" placeholder="+1"
-                           [class.input-error]="prog.get('additionalChoices')?.invalid && prog.get('additionalChoices')?.touched"></td>
-                <td>
-                  <button type="button" class="btn-icon-delete" (click)="removeProgression(pi)">
-                    <ion-icon name="trash-outline"></ion-icon>
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-        <button type="button" class="btn-text-add" (click)="addProgression()">+ Añadir Hito de Progresión</button>
-      </div>
     </div>
 
     <div class="choices-stack" formArrayName="choices">
@@ -100,6 +63,80 @@
               @if (choice.get('description')?.invalid && choice.get('description')?.touched) {
                 <p class="error-message">La descripción es obligatoria.</p>
               }
+            </div>
+
+            <!-- nested properties (Bonos Mecánicos) -->
+            <div class="choice-properties-panel" formGroupName="properties">
+              <header class="panel-subheader">
+                <ion-icon name="trending-up-outline"></ion-icon>
+                <span>Bonos Mecánicos de la Opción</span>
+              </header>
+              
+              <div class="properties-grid">
+                <!-- Attributes (statModifiers) -->
+                <div class="properties-subgroup" formGroupName="statModifiers">
+                  <span class="subgroup-title">Modificadores de Atributo</span>
+                  <div class="stats-compact-grid">
+                    <div class="stat-mini-group">
+                      <label>FU</label>
+                      <input type="number" formControlName="str" placeholder="0">
+                    </div>
+                    <div class="stat-mini-group">
+                      <label>DES</label>
+                      <input type="number" formControlName="dex" placeholder="0">
+                    </div>
+                    <div class="stat-mini-group">
+                      <label>CON</label>
+                      <input type="number" formControlName="con" placeholder="0">
+                    </div>
+                    <div class="stat-mini-group">
+                      <label>INT</label>
+                      <input type="number" formControlName="int" placeholder="0">
+                    </div>
+                    <div class="stat-mini-group">
+                      <label>SAB</label>
+                      <input type="number" formControlName="wis" placeholder="0">
+                    </div>
+                    <div class="stat-mini-group">
+                      <label>CAR</label>
+                      <input type="number" formControlName="cha" placeholder="0">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Speed & AC -->
+                <div class="properties-subgroup">
+                  <span class="subgroup-title">Movimiento y Defensa</span>
+                  <div class="defense-compact-fields">
+                    <div class="property-field">
+                      <label>Velocidad (ft)</label>
+                      <input type="number" formControlName="speedBonus" placeholder="Ej: 10">
+                    </div>
+                    <div class="property-field">
+                      <label>Condición Atrib/Vel</label>
+                      <select formControlName="statsCondition" class="forge-select-native-mini">
+                        <option value="NONE">Ninguna (Siempre)</option>
+                        <option value="UNARMORED">Sin Armadura</option>
+                        <option value="NO_SHIELD">Sin Escudo</option>
+                        <option value="IS_WEARING_ARMOR">Con Armadura</option>
+                      </select>
+                    </div>
+                    <div class="property-field">
+                      <label>Bono de CA</label>
+                      <input type="number" formControlName="acBonus" placeholder="Ej: +1">
+                    </div>
+                    <div class="property-field">
+                      <label>Condición CA</label>
+                      <select formControlName="acCondition" class="forge-select-native-mini">
+                        <option value="NONE">Ninguna (Siempre)</option>
+                        <option value="UNARMORED">Sin Armadura</option>
+                        <option value="NO_SHIELD">Sin Escudo</option>
+                        <option value="IS_WEARING_ARMOR">Con Armadura</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Nested Effects Section -->

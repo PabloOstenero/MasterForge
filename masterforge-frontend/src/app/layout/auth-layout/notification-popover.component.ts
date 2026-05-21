@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonList, IonItem, IonLabel, IonNote, IonButton, IonIcon, IonText, PopoverController } from '@ionic/angular/standalone';
+import { IonList, IonItem, IonLabel, IonNote, IonIcon} from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { notificationsOffOutline, trashOutline } from 'ionicons/icons';
 import { PersistentNotificationService, Notification } from '../../services/persistent-notification.service';
@@ -120,7 +120,7 @@ import { Router } from '@angular/router';
     }
   `],
   standalone: true,
-  imports: [CommonModule, IonList, IonItem, IonLabel, IonNote, IonButton, IonIcon, IonText]
+  imports: [CommonModule, IonList, IonItem, IonLabel, IonNote, IonIcon]
 })
 export class NotificationPopoverComponent implements OnInit {
   private notifService = inject(PersistentNotificationService);

@@ -578,10 +578,16 @@ export class HomebrewRaceFormPage implements OnInit {
               const props = t.properties;
               const propsGroup = traitGroup.get('properties') as FormGroup;
               if (props.statModifiers) propsGroup.addControl('statModifiers', this.fb.group(props.statModifiers));
+              if (props.speedBonus !== undefined && props.speedBonus !== null) {
+                propsGroup.addControl('speedBonus', this.fb.control(props.speedBonus));
+              }
+              if (props.statsCondition !== undefined && props.statsCondition !== null) {
+                propsGroup.addControl('statsCondition', this.fb.control(props.statsCondition));
+              }
               if (props.acCalculation) propsGroup.addControl('acCalculation', this.fb.group(props.acCalculation));
               if (props.acBonus !== undefined && props.acBonus !== null) {
                 propsGroup.addControl('acBonus', this.fb.control(props.acBonus));
-                propsGroup.addControl('acBonusArmorOnly', this.fb.control(props.acBonusArmorOnly ?? false));
+                propsGroup.addControl('acCondition', this.fb.control(props.acCondition ?? (props.acBonusArmorOnly ? 'IS_WEARING_ARMOR' : 'NONE')));
               }
               if (props.resourcePool) propsGroup.addControl('resourcePool', this.fb.group(props.resourcePool));
               if (props.bonusAttunementSlots !== undefined && props.bonusAttunementSlots !== null) {

@@ -41,10 +41,6 @@
           Conjuros
           @if (tabHasError('conjuros')) { <span class="tab-error-dot"></span> }
         </button>
-        <button type="button" class="tab-btn" [class.tab-btn--active]="activeTab === 'recursos'" (click)="activeTab = 'recursos'" data-testid="tab-recursos">
-          Recursos
-          @if (tabHasError('recursos')) { <span class="tab-error-dot"></span> }
-        </button>
       </div>
 
       <!-- ================================================================ -->
@@ -371,10 +367,15 @@
 
           <div class="features-stack" formArrayName="features">
             @for (feat of features.controls; track $index; let i = $index) {
-              <div class="feature-master-card" [formGroupName]="i" [attr.data-testid]="'feature-entry-' + i">
+              <div class="feature-master-card" [formGroupName]="i" [attr.data-testid]="'feature-entry-' + i"
+                   [class.card--error]="feat.invalid && form.touched">
                 <div class="card-header-main">
                   <div class="header-group flex-grow">
-                    <input type="text" class="input-feature-title" formControlName="name" placeholder="Nombre del rasgo (Ej: Golpe Divino)">
+                    <input type="text" class="input-feature-title" formControlName="name" placeholder="Nombre del rasgo (Ej: Golpe Divino)"
+                           [class.input-error]="feat.get('name')?.invalid && form.touched">
+                    @if (feat.get('name')?.invalid && form.touched) {
+                      <span class="error-text-mini">Nombre obligatorio</span>
+                    }
                   </div>
                   
                   <div class="header-group level-control">
@@ -391,7 +392,8 @@
 
                   <div class="header-group level-control">
                     <label>Nivel</label>
-                    <input type="number" class="forge-input-native-small" formControlName="levelRequired" placeholder="1">
+                    <input type="number" class="forge-input-native-small" formControlName="levelRequired" placeholder="1"
+                           [class.input-error]="feat.get('levelRequired')?.invalid && form.touched">
                   </div>
 
                   <button type="button" class="btn-card-delete" (click)="removeFeature(i)" title="Eliminar rasgo completo">
@@ -402,7 +404,11 @@
                 <div class="card-body-main">
                   <div class="field-wrapper">
                     <label class="field-label-small">Descripción del Rasgo</label>
-                    <textarea class="textarea-premium" formControlName="description" rows="2" placeholder="Explica qué hace este rasgo..."></textarea>
+                    <textarea class="textarea-premium" formControlName="description" rows="2" placeholder="Explica qué hace este rasgo..."
+                              [class.input-error]="feat.get('description')?.invalid && form.touched"></textarea>
+                    @if (feat.get('description')?.invalid && form.touched) {
+                      <p class="error-message">La descripción es obligatoria.</p>
+                    }
                   </div>
 
                   <!-- Mechanics Toolbar -->
@@ -411,18 +417,22 @@
                       <button type="button" class="btn-tool" (click)="toggleFeatureSection(i, 'mechanics')" [class.active]="featureActiveSection[i] === 'mechanics'" title="Mecánicas (CA, Recursos)">
                         <ion-icon name="shield-outline"></ion-icon>
                         <span>Mecánicas</span>
+                        @if (hasMechanicsConfigured(feat)) { <span class="tool-count-badge">✓</span> }
                       </button>
                       <button type="button" class="btn-tool" (click)="toggleFeatureSection(i, 'options')" [class.active]="featureActiveSection[i] === 'options'" title="Opciones y Elecciones">
                         <ion-icon name="list-outline"></ion-icon>
                         <span>Opciones</span>
+                        @if (feat.get('hasOptions')?.value && getOptionsCount(feat) > 0) { <span class="tool-count-badge">{{ getOptionsCount(feat) }}</span> }
                       </button>
                       <button type="button" class="btn-tool" (click)="toggleFeatureSection(i, 'effects')" [class.active]="featureActiveSection[i] === 'effects'" title="Automatización (Proficiencias, Sentidos)">
                         <ion-icon name="sparkles-outline"></ion-icon>
                         <span>Efectos</span>
+                        @if (getEffectsCount(feat) > 0) { <span class="tool-count-badge">{{ getEffectsCount(feat) }}</span> }
                       </button>
                       <button type="button" class="btn-tool" (click)="toggleFeatureSection(i, 'progression')" [class.active]="featureActiveSection[i] === 'progression'" title="Progresión por Nivel">
                         <ion-icon name="trending-up-outline"></ion-icon>
                         <span>Progresión</span>
+                        @if (getProgressionCount(feat) > 0) { <span class="tool-count-badge">{{ getProgressionCount(feat) }}</span> }
                       </button>
                     </div>
                   </div>
@@ -478,7 +488,7 @@
                                 <th>Nº Elecciones</th>
                                 <th>Nº Dados</th>
                                 <th>Tipo Dado</th>
-                                <th>Valor/Bono</th>
+                                <th>Descripción / Bono</th>
                                 <th></th>
                               </tr>
                             </thead>
@@ -489,7 +499,7 @@
                                   <td><input type="number" class="forge-input-native-small" formControlName="additionalChoices" placeholder="+1"></td>
                                   <td><input type="number" class="forge-input-native-small" formControlName="diceCount" placeholder="Ej: 1"></td>
                                   <td>
-                                    <select class="forge-input-native-small" formControlName="diceType">
+                                    <select class="forge-select-native-small" formControlName="diceType">
                                       <option value="d4">d4</option>
                                       <option value="d6">d6</option>
                                       <option value="d8">d8</option>
@@ -733,17 +743,8 @@
 
           }
 
-        </div>
-      }
-
-      <!-- ================================================================ -->
-      <!-- Tab: Recursos                                                    -->
-      <!-- ================================================================ -->
-      @if (activeTab === 'recursos') {
-        <div class="tab-content" data-testid="tab-content-recursos">
-
           <!-- Lista de Conjuros Ampliada -->
-          <div class="form-section">
+          <div class="form-section" style="margin-top: 20px;">
             <div class="section-header-row">
               <h2 class="section-title">Lista de Conjuros Ampliada <span class="section-badge">opcional</span></h2>
               <button type="button" class="btn-add" (click)="addExpandedSpell()" data-testid="add-expanded-spell-button">
@@ -835,86 +836,6 @@
 
                   <button type="button" class="btn-remove" (click)="removeExpandedSpell(i)"
                     [attr.data-testid]="'remove-expanded-spell-' + i">Eliminar</button>
-
-                </div>
-              }
-            </div>
-          </div>
-
-          <!-- Reservas de Recursos -->
-          <div class="form-section">
-            <div class="section-header-row">
-              <h2 class="section-title">Reservas de Recursos <span class="section-badge">opcional</span></h2>
-              <button type="button" class="btn-add" (click)="addResourcePool()" data-testid="add-resource-pool-button">
-                + Añadir
-              </button>
-            </div>
-
-            @if (resourcePools.length === 0) {
-              <p class="empty-hint" data-testid="resource-pools-empty-hint">Sin reservas de recursos definidas.</p>
-            }
-
-            <div formArrayName="resourcePools">
-              @for (pool of resourcePools.controls; track $index; let i = $index) {
-                <div class="entry-card" [formGroupName]="i" [attr.data-testid]="'resource-pool-entry-' + i">
-
-                  <div class="field-group">
-                    <label class="field-label">Nombre <span class="required">*</span></label>
-                    <ion-input
-                      class="forge-input"
-                      formControlName="name"
-                      placeholder="Ej: Dados de Superioridad, Disparos Arcanos…"
-                      [attr.data-testid]="'resource-pool-name-' + i"
-                      [class.input-error]="$any(pool).get('name')?.invalid && $any(pool).get('name')?.touched">
-                    </ion-input>
-                    @if ($any(pool).get('name')?.invalid && $any(pool).get('name')?.touched) {
-                      <p class="error-message" [attr.data-testid]="'resource-pool-name-error-' + i">El nombre del recurso es obligatorio.</p>
-                    }
-                  </div>
-
-                  <div class="field-group">
-                    <label class="field-label">Tipo de Dado <span class="required">*</span></label>
-                    <select
-                      class="forge-select-native"
-                      formControlName="dieType"
-                      [attr.data-testid]="'resource-pool-die-type-' + i"
-                      [class.input-error]="$any(pool).get('dieType')?.invalid && $any(pool).get('dieType')?.touched">
-                      @for (die of dieTypes; track die) {
-                        <option [value]="die">{{ die }}</option>
-                      }
-                    </select>
-                  </div>
-
-                  <div class="field-group">
-                    <label class="field-label">Cantidad <span class="required">*</span></label>
-                    <ion-input
-                      class="forge-input"
-                      type="number"
-                      formControlName="count"
-                      placeholder="1"
-                      [attr.data-testid]="'resource-pool-count-' + i"
-                      [class.input-error]="$any(pool).get('count')?.invalid && $any(pool).get('count')?.touched">
-                    </ion-input>
-                    @if ($any(pool).get('count')?.invalid && $any(pool).get('count')?.touched) {
-                      <p class="error-message" [attr.data-testid]="'resource-pool-count-error-' + i">La cantidad debe ser al menos 1.</p>
-                    }
-                  </div>
-
-                  <div class="field-group">
-                    <label class="field-label">Recarga <span class="required">*</span></label>
-                    <select
-                      class="forge-select-native"
-                      formControlName="rechargeOn"
-                      [attr.data-testid]="'resource-pool-recharge-' + i"
-                      [class.input-error]="$any(pool).get('rechargeOn')?.invalid && $any(pool).get('rechargeOn')?.touched">
-                      @for (opt of rechargeOptions; track opt) {
-                        <option [value]="opt">{{ opt }}</option>
-                      }
-                    </select>
-                  </div>
-
-                  <button type="button" class="btn-remove" (click)="removeResourcePool(i)"
-                    [attr.data-testid]="'remove-resource-pool-' + i">Eliminar</button>
 
                 </div>
               }

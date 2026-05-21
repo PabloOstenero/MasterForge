@@ -327,20 +327,8 @@ export class CharacterSheetPage implements OnInit {
       cha: data.baseCha || 10
     };
     let itemBonusMaxHp = 0;
+    let speedBonus = 0;
 
-    // Apply Feature-based Stat Modifiers
-    const allFeatures = this.getAllCharacterFeatures(data);
-    allFeatures.forEach(f => {
-      const sm = f.properties?.statModifiers;
-      if (sm) {
-        if (typeof sm.str === 'number') stats.str += sm.str;
-        if (typeof sm.dex === 'number') stats.dex += sm.dex;
-        if (typeof sm.con === 'number') stats.con += sm.con;
-        if (typeof sm.int === 'number') stats.int += sm.int;
-        if (typeof sm.wis === 'number') stats.wis += sm.wis;
-        if (typeof sm.cha === 'number') stats.cha += sm.cha;
-      }
-    });
     const isItemActive = (s: any) => {
       const reqAtt = s.item.properties?.requiresAttunement;
       const requiresAttunement = reqAtt === true || reqAtt === 'true';
@@ -348,6 +336,86 @@ export class CharacterSheetPage implements OnInit {
     };
 
     const equipped = (data.inventory || []).filter((s: any) => (s.equipped || s.isEquipped) && isItemActive(s));
+    const armor = equipped.find((s: any) => s.item.type === 'ARMOR');
+    const shield = equipped.find((s: any) => s.item.type === 'SHIELD');
+
+    // Apply Feature-based Stat Modifiers
+    const allFeatures = this.getAllCharacterFeatures(data);
+    allFeatures.forEach(f => {
+      // 1. Base Feature Stat Modifiers
+      const sm = f.properties?.statModifiers;
+      if (sm) {
+        let conditionMet = true;
+        const condition = f.properties?.statsCondition;
+        if (condition) {
+          if (condition === 'UNARMORED' && armor) conditionMet = false;
+          else if (condition === 'NO_SHIELD' && shield) conditionMet = false;
+          else if (condition === 'IS_WEARING_ARMOR' && !armor) conditionMet = false;
+        }
+
+        if (conditionMet) {
+          if (typeof sm.str === 'number') stats.str += sm.str;
+          if (typeof sm.dex === 'number') stats.dex += sm.dex;
+          if (typeof sm.con === 'number') stats.con += sm.con;
+          if (typeof sm.int === 'number') stats.int += sm.int;
+          if (typeof sm.wis === 'number') stats.wis += sm.wis;
+          if (typeof sm.cha === 'number') stats.cha += sm.cha;
+        }
+      }
+
+      // 2. Base Feature Speed Bonus
+      if (f.properties && typeof f.properties.speedBonus === 'number') {
+        let conditionMet = true;
+        const condition = f.properties?.statsCondition;
+        if (condition) {
+          if (condition === 'UNARMORED' && armor) conditionMet = false;
+          else if (condition === 'NO_SHIELD' && shield) conditionMet = false;
+          else if (condition === 'IS_WEARING_ARMOR' && !armor) conditionMet = false;
+        }
+
+        if (conditionMet) {
+          speedBonus += f.properties.speedBonus;
+        }
+      }
+
+      // 3. Selected Options Modifiers
+      if (f.selectedOptions && Array.isArray(f.selectedOptions)) {
+        f.selectedOptions.forEach((opt: any) => {
+          const optSm = opt.properties?.statModifiers;
+          if (optSm) {
+            let conditionMet = true;
+            const condition = opt.properties?.statsCondition;
+            if (condition) {
+              if (condition === 'UNARMORED' && armor) conditionMet = false;
+              else if (condition === 'NO_SHIELD' && shield) conditionMet = false;
+              else if (condition === 'IS_WEARING_ARMOR' && !armor) conditionMet = false;
+            }
+
+            if (conditionMet) {
+              if (typeof optSm.str === 'number') stats.str += optSm.str;
+              if (typeof optSm.dex === 'number') stats.dex += optSm.dex;
+              if (typeof optSm.con === 'number') stats.con += optSm.con;
+              if (typeof optSm.int === 'number') stats.int += optSm.int;
+              if (typeof optSm.wis === 'number') stats.wis += optSm.wis;
+              if (typeof optSm.cha === 'number') stats.cha += optSm.cha;
+            }
+          }
+          if (opt.properties && typeof opt.properties.speedBonus === 'number') {
+            let conditionMet = true;
+            const condition = opt.properties?.statsCondition;
+            if (condition) {
+              if (condition === 'UNARMORED' && armor) conditionMet = false;
+              else if (condition === 'NO_SHIELD' && shield) conditionMet = false;
+              else if (condition === 'IS_WEARING_ARMOR' && !armor) conditionMet = false;
+            }
+
+            if (conditionMet) {
+              speedBonus += opt.properties.speedBonus;
+            }
+          }
+        });
+      }
+    });
 
     equipped.forEach((slot: any) => {
       const props = slot.item.properties || {};
@@ -372,7 +440,7 @@ export class CharacterSheetPage implements OnInit {
       if (typeof props.bonusMaxHp === 'number') itemBonusMaxHp += props.bonusMaxHp;
     });
 
-    return { stats, itemBonusMaxHp };
+    return { stats, itemBonusMaxHp, speedBonus };
   }
 
   get currentLevelUpHitDie(): number {
@@ -448,6 +516,7 @@ export class CharacterSheetPage implements OnInit {
         const effective = this.calculateEffectiveValues(data);
         const effectiveStats = effective.stats;
         const itemMaxHp = effective.itemBonusMaxHp;
+        const speedBonus = effective.speedBonus || 0;
 
         const dexMod = getModifier(effectiveStats.dex);
         const wisMod = getModifier(effectiveStats.wis);
@@ -523,7 +592,7 @@ export class CharacterSheetPage implements OnInit {
           currentHp: data.currentHp ?? 10,
           tempHp: data.tempHp || 0,
           bonusMaxHp: (data.bonusMaxHp || 0) + itemMaxHp + retroactiveConHp,
-          speed: data.speed || 30,
+          speed: (data.speed || 30) + speedBonus,
           proficiencyBonus: proficiencyBonus,
           passivePerception: passivePerception,
           initiative: (() => {
@@ -2284,7 +2353,7 @@ export class CharacterSheetPage implements OnInit {
         
         const allEffects = [...globalEffects, ...optionEffects];
         allEffects.forEach((e: any) => {
-          if (e.type === 'PROFICIENCY' && (e.target === `skill_${skill.id}` || e.target === skill.id)) {
+          if (e.type === 'PROFICIENCY' && (e.target === `skill_${skill.id}` || e.target === skill.id || e.target === 'skill_all')) {
             const val = e.value !== undefined && e.value !== null ? e.value : 1;
             // Take the highest value (expertise > standard > half)
             const getValWeight = (v: any) => {
@@ -2322,6 +2391,60 @@ export class CharacterSheetPage implements OnInit {
     }
 
     return total >= 0 ? `+${total}` : `${total}`;
+  }
+
+  // Returns exact proficiency level (0 = none, 0.5 = half, 1 = proficient, 2 = expertise)
+  getSkillProficiencyLevel(skill: any): number {
+    let profValue = this.pj.skillProficiencies?.[skill.id];
+
+    if (this.rawCharacter) {
+      const allFeatures = this.getAllCharacterFeatures(this.rawCharacter);
+      allFeatures.forEach(f => {
+        const globalEffects = f.properties?.effects || [];
+        const optionEffects: any[] = [];
+        if (f.selectedOptions && f.options?.choices) {
+          f.selectedOptions.forEach((selectedId: string) => {
+            const optionObj = f.options.choices.find((c: any) =>
+              c.id === selectedId || c.label === selectedId || c.name === selectedId
+            );
+            if (optionObj) {
+              optionEffects.push(...(optionObj.effects || optionObj.properties?.effects || []));
+            }
+          });
+        }
+        
+        const allEffects = [...globalEffects, ...optionEffects];
+        allEffects.forEach((e: any) => {
+          if (e.type === 'PROFICIENCY' && (e.target === `skill_${skill.id}` || e.target === skill.id || e.target === 'skill_all')) {
+            const val = e.value !== undefined && e.value !== null ? e.value : 1;
+            const getValWeight = (v: any) => {
+              if (v === 'expertise' || v === 2 || v === '2') return 3;
+              if (v === true || v === 'proficient' || v === 1 || v === '1') return 2;
+              if (v === 'half' || v === 0.5 || v === '0.5') return 1;
+              return 0;
+            };
+            if (getValWeight(val) > getValWeight(profValue)) {
+              profValue = val;
+            }
+          }
+        });
+      });
+    }
+
+    const isProficient = profValue === true || profValue === 'proficient' || profValue === 1 || profValue === '1';
+    const isHalfProficient = profValue === 'half' || profValue === 0.5 || profValue === '0.5';
+    const hasExpertise = this.pj.choicesJson?.expertise?.includes(skill.id) || profValue === 'expertise' || profValue === 2 || profValue === '2';
+
+    if (hasExpertise) return 2;
+    if (isProficient) return 1;
+    if (isHalfProficient) return 0.5;
+
+    if (this.rawCharacter) {
+      const hasJack = this.hasFeature(this.rawCharacter, ['Jack of All Trades', 'Instinto Improvisado', 'Competente en todo']);
+      if (hasJack) return 0.5;
+    }
+
+    return 0;
   }
 
   // Helper to find the highest spell level the character has slots for
@@ -3392,25 +3515,28 @@ export class CharacterSheetPage implements OnInit {
 
       // --- DATA-DRIVEN AC CALCULATIONS (Homebrew Support) ---
       allFeatures.forEach(f => {
-        const props = f.properties || f.options || {};
-        if (props.acCalculation) {
-          const calc = props.acCalculation;
-          // Most special calculations (Unarmored Defense) don't work with armor
-          // but we check if the feature explicitly allows it
-          if (calc.requiresNoArmor === false || !armor) {
-            // Also validate shield constraint if specified
-            if (calc.requiresNoShield !== true || !shield) {
-              let val = calc.base || 10;
-              if (calc.stats) {
-                calc.stats.forEach((s: string) => {
-                  const statVal = stats[s.toLowerCase()];
-                  if (statVal !== undefined) val += getModifier(statVal);
-                });
+        const itemsToScan = [f, ...(f.selectedOptions || [])];
+        itemsToScan.forEach(obj => {
+          const props = obj.properties || obj.options || {};
+          if (props.acCalculation) {
+            const calc = props.acCalculation;
+            // Most special calculations (Unarmored Defense) don't work with armor
+            // but we check if the feature explicitly allows it
+            if (calc.requiresNoArmor === false || !armor) {
+              // Also validate shield constraint if specified
+              if (calc.requiresNoShield !== true || !shield) {
+                let val = calc.base || 10;
+                if (calc.stats) {
+                  calc.stats.forEach((s: string) => {
+                    const statVal = stats[s.toLowerCase()];
+                    if (statVal !== undefined) val += getModifier(statVal);
+                  });
+                }
+                calculations.push(val);
               }
-              calculations.push(val);
             }
           }
-        }
+        });
       });
 
       // --- RACE NATURAL ARMOR ---
@@ -3443,9 +3569,20 @@ export class CharacterSheetPage implements OnInit {
         const props = obj.properties || obj.options || {};
         if (props.acBonus !== undefined && props.acBonus !== null) {
           const bonus = Number(props.acBonus);
-          const armorOnly = !!props.acBonusArmorOnly;
-          // Apply if: (requires armor and we have it) OR (does not require armor)
-          if (!armorOnly || (armorOnly && armor)) {
+          let conditionMet = true;
+          const condition = props.acCondition;
+          
+          if (condition) {
+            if (condition === 'UNARMORED' && armor) conditionMet = false;
+            else if (condition === 'NO_SHIELD' && shield) conditionMet = false;
+            else if (condition === 'IS_WEARING_ARMOR' && !armor) conditionMet = false;
+          } else {
+            // Legacy fallback
+            const armorOnly = !!props.acBonusArmorOnly;
+            if (armorOnly && !armor) conditionMet = false;
+          }
+
+          if (conditionMet) {
             finalAc += bonus;
           }
         }

@@ -1222,6 +1222,8 @@ $red:         #C62828;
 // ─── Contextual Panels ────────────────────────────────────────────────────────
 .contextual-panels-stack {
   margin-top: 0.5rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .context-panel {
@@ -1232,6 +1234,9 @@ $red:         #C62828;
   margin-top: 1rem;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .panel-header-mini {
@@ -1248,66 +1253,129 @@ $red:         #C62828;
 }
 
 .progression-table-wrapper {
-  overflow-x: auto;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  overflow-x: auto; /* Allow horizontal scrollbars when needed */
 }
 
 .forge-table-mini {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
   margin-bottom: 1rem;
+  min-width: 500px; /* Ample room for progression input fields */
+
+  th, td {
+    padding: 6px 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
 
   th {
-    text-align: left;
     font-size: 0.65rem;
     text-transform: uppercase;
     color: rgba(193, 153, 76, 0.8);
-    padding: 8px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
 
   td {
-    padding: 8px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  }
+
+  /* Explicit column widths for visual balance and no overflow */
+  th:nth-child(1), td:nth-child(1) { width: 55px; }   /* Nivel */
+  th:nth-child(2), td:nth-child(2) { width: 90px; }   /* Nº Elecciones */
+  th:nth-child(3), td:nth-child(3) { width: 75px; }   /* Nº Dados */
+  th:nth-child(4), td:nth-child(4) { width: 85px; }   /* Tipo Dado */
+  th:nth-child(5), td:nth-child(5) { width: auto; }   /* Descripción / Bono */
+  th:nth-child(6), td:nth-child(6) { width: 38px; text-align: center; } /* Trash */
+}
+
+.forge-input-native-small, select.forge-select-native-small {
+  background: #1a1a1f !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  border-radius: 6px;
+  height: 32px;
+  font-size: 0.8rem;
+  padding: 0 6px;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+
+  &:focus {
+    border-color: #c1994c !important;
+    background: #232329 !important;
+  }
+
+  option {
+    background-color: #1a1a1f !important;
+    color: #ffffff !important;
   }
 }
 
-.forge-input-native-small {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  color: #fff;
-  padding: 6px 8px;
-  font-size: 0.85rem;
-  width: 100%;
-  outline: none;
+select.forge-select-native-small {
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding-right: 20px;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C9A84C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 6px center !important;
+  background-size: 11px !important;
 
-  &:focus { border-color: #c1994c; }
+  &::-ms-expand {
+    display: none;
+  }
 }
 
 .btn-text-add {
-  background: transparent;
-  border: none;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
   color: #c1994c;
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
-  padding: 4px 0;
-  &:hover { text-decoration: underline; }
+  padding: 10px 4px 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: #dfbc5e;
+    text-decoration: underline;
+  }
 }
 
 .btn-icon-delete {
-  background: rgba(255, 80, 80, 0.1);
-  color: #ff5050;
+  background: rgba(255, 80, 80, 0.08);
   border: none;
+  color: rgba(255, 80, 80, 0.6);
+  font-size: 1rem;
+  cursor: pointer;
   width: 28px;
   height: 28px;
-  border-radius: 4px;
-  display: flex;
+  border-radius: 6px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  &:hover { background: #ff5050; color: white; }
+  transition: all 0.2s ease;
+  
+  &:hover {
+    color: #ffffff;
+    background: rgba(255, 80, 80, 0.8);
+  }
 }
 
 /* Premium Mini Toggle for Panels */
@@ -1352,3 +1420,491 @@ $red:         #C62828;
     font-weight: 500;
   }
 }
+
+.tool-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #C9A84C 0%, #8A6D35 100%);
+  color: #101014;
+  font-size: 0.65rem;
+  font-weight: 800;
+  border-radius: 10px;
+  padding: 2px 6px;
+  min-width: 16px;
+  height: 16px;
+  margin-left: 6px;
+  box-shadow: 0 0 6px rgba(201, 168, 76, 0.4);
+  text-shadow: none;
+  line-height: 1;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ─── RESPONSIVE BREAKPOINTS ──────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ── Tablet (≤768px) ──────────────────────────────────────────────────────────
+@media (max-width: 768px) {
+  .homebrew-form-topbar {
+    padding: 12px 14px 10px;
+    gap: 10px;
+  }
+
+  .form-title {
+    font-size: 1.1rem;
+    padding-right: 40px;
+  }
+
+  .homebrew-form-content {
+    padding: 16px 12px 48px;
+  }
+
+  .form-section {
+    padding: 18px 16px;
+    border-radius: 12px;
+  }
+
+  .section-title {
+    font-size: 0.8rem;
+    margin-bottom: 16px;
+  }
+
+  .tab-bar {
+    gap: 4px;
+    margin-bottom: 18px;
+  }
+
+  .tab-btn {
+    padding: 8px 12px 10px;
+    font-size: 0.82rem;
+  }
+
+  .tab-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+
+    .section-title {
+      font-size: 1.25rem;
+    }
+  }
+
+  .feature-master-card {
+    border-radius: 10px;
+  }
+
+  .card-header-main {
+    padding: 12px 14px;
+    gap: 12px;
+    flex-wrap: wrap;
+
+    .header-group.flex-grow {
+      flex: 1 1 100%;
+      order: 1;
+    }
+
+    .header-group.level-control {
+      flex: 1 1 auto;
+      width: auto;
+      min-width: 0;
+      order: 2;
+    }
+
+    .btn-card-delete {
+      order: 3;
+      margin-left: auto;
+    }
+  }
+
+  .input-feature-title {
+    font-size: 1.1rem;
+  }
+
+  .card-body-main {
+    padding: 14px;
+    gap: 16px;
+  }
+
+  .mechanics-toolbar-container {
+    margin: 18px 0 12px;
+    padding-bottom: 12px;
+  }
+
+  .btn-tool {
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    gap: 6px;
+
+    ion-icon {
+      font-size: 1.05rem;
+    }
+  }
+
+  .context-panel {
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  .progression-table-wrapper {
+    padding: 6px;
+  }
+
+  .forge-table-mini {
+    min-width: 440px;
+  }
+
+  .empty-state-large {
+    padding: 40px 16px;
+
+    ion-icon { font-size: 3rem; }
+    h3 { font-size: 1.15rem; }
+    p { font-size: 0.85rem; }
+  }
+
+  .spellcasting-panel-content {
+    padding: 20px 14px 48px;
+  }
+
+  .spellcasting-config-row {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+  }
+
+  .preset-buttons {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .btn-preset {
+    padding: 8px 10px;
+    font-size: 0.82rem;
+  }
+
+  .options-pool-section {
+    padding: 14px;
+  }
+
+  .field-label {
+    font-size: 0.74rem;
+  }
+
+  .forge-input {
+    --padding-start: 10px;
+    --padding-end: 10px;
+  }
+
+  .forge-select-native {
+    padding: 8px 10px;
+    font-size: 0.84rem;
+  }
+
+  .section-header-row {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+}
+
+// ── Mobile (≤480px) ──────────────────────────────────────────────────────────
+@media (max-width: 480px) {
+  .homebrew-form-topbar {
+    padding: 10px 10px 8px;
+    gap: 8px;
+  }
+
+  .back-btn {
+    font-size: 0.85rem;
+    padding: 4px 8px;
+  }
+
+  .form-title {
+    font-size: 0.95rem;
+    padding-right: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  .homebrew-form-content {
+    padding: 12px 8px 40px;
+  }
+
+  .form-section {
+    padding: 14px 12px;
+    border-radius: 10px;
+    margin-bottom: 6px;
+
+    &:hover {
+      transform: none; // disable hover lift on mobile
+    }
+  }
+
+  .section-title {
+    font-size: 0.75rem;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .section-hint {
+    font-size: 0.8rem;
+    margin: -8px 0 14px;
+  }
+
+  .tab-bar {
+    gap: 2px;
+    margin-bottom: 14px;
+  }
+
+  .tab-btn {
+    padding: 7px 10px 9px;
+    font-size: 0.75rem;
+  }
+
+  .tab-section-header {
+    margin-bottom: 18px;
+    gap: 10px;
+
+    .section-title {
+      font-size: 1.1rem;
+    }
+
+    .section-subtitle {
+      font-size: 0.82rem;
+    }
+  }
+
+  .feature-master-card {
+    border-radius: 8px;
+
+    &:hover {
+      transform: none;
+    }
+  }
+
+  .card-header-main {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .input-feature-title {
+    font-size: 1rem;
+  }
+
+  .card-body-main {
+    padding: 12px 10px;
+    gap: 14px;
+  }
+
+  .textarea-premium {
+    padding: 10px;
+    font-size: 0.88rem;
+  }
+
+  .mechanics-toolbar-container {
+    margin: 14px 0 10px;
+    padding-bottom: 10px;
+  }
+
+  .btn-tool {
+    padding: 8px 10px;
+    font-size: 0.75rem;
+    gap: 5px;
+    border-radius: 6px;
+
+    span {
+      display: none; // icon-only on small mobile
+    }
+
+    ion-icon {
+      font-size: 1.2rem;
+    }
+  }
+
+  .context-panel {
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+
+  .progression-editor-header {
+    h3 { font-size: 0.88rem; }
+    p { font-size: 0.74rem; }
+  }
+
+  .progression-table-wrapper {
+    padding: 4px;
+  }
+
+  .forge-table-mini {
+    min-width: 380px;
+
+    th, td {
+      padding: 5px 3px;
+    }
+
+    th {
+      font-size: 0.6rem;
+    }
+  }
+
+  .forge-input-native-small, select.forge-select-native-small {
+    height: 30px;
+    font-size: 0.75rem;
+    padding: 0 5px;
+  }
+
+  .empty-state-large {
+    padding: 30px 12px;
+
+    ion-icon { font-size: 2.5rem; margin-bottom: 10px; }
+    h3 { font-size: 1rem; }
+    p { font-size: 0.82rem; margin: 6px 0 14px; }
+  }
+
+  .btn-forge-primary {
+    padding: 8px 14px;
+    font-size: 0.82rem;
+  }
+
+  .btn-forge-outline {
+    padding: 7px 14px;
+    font-size: 0.75rem;
+  }
+
+  .btn-add {
+    padding: 5px 12px;
+    font-size: 0.78rem;
+  }
+
+  .field-group {
+    margin-bottom: 14px;
+  }
+
+  .field-label {
+    font-size: 0.72rem;
+    margin-bottom: 5px;
+  }
+
+  .field-label-small {
+    font-size: 0.7rem;
+    margin-bottom: 6px;
+  }
+
+  .chip {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+  }
+
+  .skill-tag {
+    padding: 4px 10px;
+    font-size: 0.78rem;
+  }
+
+  .entry-card {
+    padding: 6px 0 18px 14px;
+
+    &:hover {
+      padding-left: 14px; // no shift on mobile
+    }
+  }
+
+  .option-entry-card {
+    padding: 6px 0 18px 14px;
+
+    &:hover {
+      padding-left: 14px;
+    }
+  }
+
+  .options-pool-section {
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .toggle-switch {
+    gap: 10px;
+
+    .slider {
+      width: 38px;
+      height: 20px;
+      &:before { width: 14px; height: 14px; }
+    }
+
+    .toggle-label {
+      font-size: 0.84rem;
+    }
+  }
+
+  .spellcasting-panel-topbar {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .spellcasting-panel-content {
+    padding: 14px 10px 40px;
+  }
+
+  .spellcasting-config-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .preset-buttons {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .btn-preset {
+    padding: 8px 10px;
+    font-size: 0.78rem;
+  }
+
+  .spellcasting-tables-row {
+    gap: 16px;
+  }
+
+  .form-actions {
+    margin-top: 24px;
+  }
+
+  .btn-submit {
+    height: 44px;
+    font-size: 0.92rem;
+  }
+
+  .btn-cancel {
+    height: 44px;
+    font-size: 0.92rem;
+  }
+
+  .progression-entry-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+
+    .field-group:last-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .option-entry-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .selectable-card {
+    padding: 8px 2px;
+    font-size: 0.78rem;
+  }
+
+  .asi-levels-grid {
+    grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+    gap: 6px;
+  }
+
+  // Disable hover animations on touch devices
+  .feature-master-card:hover,
+  .form-section:hover,
+  .entry-card:hover {
+    transform: none;
+    box-shadow: inherit;
+  }
+}
+

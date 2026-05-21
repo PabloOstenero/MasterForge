@@ -711,7 +711,21 @@ export class HomebrewClassFormPage implements OnInit {
                 id: [c.id],
                 label: [c.label || c.name, Validators.required],
                 description: [c.description, Validators.required],
-                effects: this.fb.array((c.effects ?? []).map((e: any) => this.fb.group(e)))
+                effects: this.fb.array((c.effects ?? []).map((e: any) => this.fb.group(e))),
+                properties: this.fb.group({
+                  statModifiers: this.fb.group({
+                    str: [c.properties?.statModifiers?.str ?? 0],
+                    dex: [c.properties?.statModifiers?.dex ?? 0],
+                    con: [c.properties?.statModifiers?.con ?? 0],
+                    int: [c.properties?.statModifiers?.int ?? 0],
+                    wis: [c.properties?.statModifiers?.wis ?? 0],
+                    cha: [c.properties?.statModifiers?.cha ?? 0]
+                  }),
+                  speedBonus: [c.properties?.speedBonus ?? 0],
+                  statsCondition: [c.properties?.statsCondition ?? 'NONE'],
+                  acBonus: [c.properties?.acBonus ?? null],
+                  acCondition: [c.properties?.acCondition ?? 'NONE']
+                })
               }))),
               progression: this.fb.array(((f.options as any)?.progression ?? []).map((p: any) => this.fb.group({
                 level: [p.level, Validators.required],
@@ -749,10 +763,16 @@ export class HomebrewClassFormPage implements OnInit {
             if (f.properties) {
               const propsGroup = featureGroup.get('properties') as FormGroup;
               if (f.properties.statModifiers) propsGroup.addControl('statModifiers', this.fb.group(f.properties.statModifiers));
+              if (f.properties.speedBonus !== undefined && f.properties.speedBonus !== null) {
+                propsGroup.addControl('speedBonus', this.fb.control(f.properties.speedBonus));
+              }
+              if (f.properties.statsCondition !== undefined && f.properties.statsCondition !== null) {
+                propsGroup.addControl('statsCondition', this.fb.control(f.properties.statsCondition));
+              }
               if (f.properties.acCalculation) propsGroup.addControl('acCalculation', this.fb.group(f.properties.acCalculation));
               if (f.properties.acBonus !== undefined && f.properties.acBonus !== null) {
                 propsGroup.addControl('acBonus', this.fb.control(f.properties.acBonus));
-                propsGroup.addControl('acBonusArmorOnly', this.fb.control(f.properties.acBonusArmorOnly ?? false));
+                propsGroup.addControl('acCondition', this.fb.control(f.properties.acCondition ?? 'NONE'));
               }
               if (f.properties.resourcePool) propsGroup.addControl('resourcePool', this.fb.group(f.properties.resourcePool));
               if (f.properties.bonusAttunementSlots !== undefined && f.properties.bonusAttunementSlots !== null) {
@@ -947,19 +967,6 @@ export class HomebrewClassFormPage implements OnInit {
       }),
       progression: this.fb.array([]),
       properties: this.fb.group({
-        acCalculation: this.fb.group({
-          base: [10],
-          stats: [[]],
-          requiresNoArmor: [false],
-          requiresNoShield: [false]
-        }),
-        acBonus: [0],
-        acBonusArmorOnly: [false],
-        resourcePool: this.fb.group({
-          name: [''],
-          max: [''],
-          reset: ['LONG_REST']
-        }),
         innateSpells: this.fb.array([]),
         effects: this.fb.array([])
       })
@@ -969,6 +976,32 @@ export class HomebrewClassFormPage implements OnInit {
   removeFeature(index: number): void {
     this.features.removeAt(index);
     delete this.featureActiveSection[index];
+  }
+
+  hasMechanicsConfigured(feat: AbstractControl): boolean {
+    const props = feat.get('properties');
+    if (!props) return false;
+    return !!props.get('statModifiers') || 
+           (props.get('speedBonus')?.value !== null && props.get('speedBonus')?.value !== 0 && props.get('speedBonus')?.value !== undefined) || 
+           !!props.get('acCalculation') || 
+           (props.get('acBonus')?.value !== null && props.get('acBonus')?.value !== 0 && props.get('acBonus')?.value !== undefined) || 
+           !!props.get('resourcePool') || 
+           props.get('bonusAttunementSlots')?.value !== null;
+  }
+
+  getOptionsCount(feat: AbstractControl): number {
+    const choices = feat.get('options.choices') as FormArray;
+    return choices ? choices.length : 0;
+  }
+
+  getEffectsCount(feat: AbstractControl): number {
+    const effects = feat.get('properties.effects') as FormArray;
+    return effects ? effects.length : 0;
+  }
+
+  getProgressionCount(feat: AbstractControl): number {
+    const progression = feat.get('progression') as FormArray;
+    return progression ? progression.length : 0;
   }
 
   toggleFeatureSection(index: number, section: string): void {
@@ -1002,7 +1035,7 @@ export class HomebrewClassFormPage implements OnInit {
   addFeatureEffect(featureIndex: number, initialData?: any): void {
     const effectsArray = this.getFeatureEffects(featureIndex);
     effectsArray.push(this.fb.group({
-      type: [initialData?.type ?? 'STAT_MODIFIER', Validators.required],
+      type: [initialData?.type ?? '', Validators.required],
       target: [initialData?.target ?? '', Validators.required],
       customTarget: [initialData?.customTarget ?? ''],
       value: [initialData?.value ?? 1],
@@ -1295,7 +1328,15 @@ export class HomebrewClassFormPage implements OnInit {
             levelRequired: ctrl.get('levelRequired')?.value,
             actionType: ctrl.get('actionType')?.value,
             classId,
-            options: ctrl.get('hasOptions')?.value ? ctrl.get('options')?.value : null,
+            options: ctrl.get('hasOptions')?.value
+              ? {
+                  ...ctrl.get('options')?.value,
+                  progression: (ctrl.get('progression')?.value || []).map((p: any) => ({
+                    level: p.level,
+                    additionalChoices: p.additionalChoices || 0
+                  }))
+                }
+              : null,
             properties: {
               ...propertiesValue,
               progression: ctrl.get('progression')?.value || [],
@@ -1318,7 +1359,10 @@ export class HomebrewClassFormPage implements OnInit {
             type: currentFormFeature.get('options.type')?.value,
             count: currentFormFeature.get('options.count')?.value,
             choices: currentFormFeature.get('options.choices')?.value,
-            progression: currentFormFeature.get('options.progression')?.value
+            progression: (currentFormFeature.get('progression')?.value || []).map((p: any) => ({
+              level: p.level,
+              additionalChoices: p.additionalChoices || 0
+            }))
           }
           : null;
 
@@ -1373,6 +1417,14 @@ export class HomebrewClassFormPage implements OnInit {
     this.equipmentPicker?.markAllTouched();
 
     if (this.form.invalid || !this.isPickerValid) {
+      this.error = 'Por favor, completa todos los campos obligatorios marcados en rojo antes de continuar.';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const content = document.querySelector('ion-content');
+      if (content) {
+        try {
+          (content as any).scrollToTop(300);
+        } catch (e) {}
+      }
       return;
     }
 

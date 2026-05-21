@@ -3,9 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
-  IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon, IonBadge,
-  IonSearchbar, IonGrid, IonRow, IonCol, IonCard, IonCardContent, IonModal,
-  IonSpinner, IonList, IonItem, IonLabel, IonNote, IonButtons, IonFooter,
+  IonToolbar, IonContent, IonButton, IonIcon,
+  IonSearchbar, IonModal,
+  IonSpinner, IonFooter,
   IonSelect, IonSelectOption
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -25,10 +25,10 @@ import { NotificationService } from '../../services/notification.service';
   styleUrls: ['./bestiary.page.scss'],
   standalone: true,
   imports: [
-    CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent,
-    IonButton, IonIcon, IonBadge, IonSearchbar, IonGrid, IonRow, IonCol,
-    IonCard, IonCardContent, IonModal, IonSpinner, IonList, IonItem, 
-    IonLabel, IonNote, IonButtons, IonFooter, IonSelect, IonSelectOption, RouterLink
+    CommonModule, FormsModule, IonToolbar, IonContent,
+    IonButton, IonIcon, IonSearchbar,
+    IonModal, IonSpinner,
+    IonFooter, IonSelect, IonSelectOption, RouterLink
   ],
 })
 export class BestiaryPage implements OnInit {

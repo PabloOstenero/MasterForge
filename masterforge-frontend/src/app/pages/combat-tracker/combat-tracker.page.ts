@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
-  IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon, IonBadge,
-  IonList, IonItem, IonLabel, IonNote, IonButtons, IonBackButton, IonInput,
+  IonHeader, IonToolbar, IonTitle, IonContent, IonIcon,
+  IonList, IonButtons,
   IonModal, IonSearchbar, IonGrid, IonRow, IonCol, IonCard, IonCardContent,
-  IonSelect, IonSelectOption
+
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { 
@@ -42,9 +42,9 @@ interface Participant {
   standalone: true,
   imports: [
     CommonModule, FormsModule, RouterLink, IonHeader, IonToolbar, IonTitle, IonContent,
-    IonButton, IonIcon, IonBadge, IonList, IonItem, IonLabel, IonNote,
-    IonButtons, IonBackButton, IonInput, IonModal, IonSearchbar, IonGrid,
-    IonRow, IonCol, IonCard, IonCardContent, IonSelect, IonSelectOption
+    IonIcon, IonList,
+    IonButtons, IonModal, IonSearchbar, IonGrid,
+    IonRow, IonCol, IonCard, IonCardContent
   ]
 })
 export class CombatTrackerPage implements OnInit {

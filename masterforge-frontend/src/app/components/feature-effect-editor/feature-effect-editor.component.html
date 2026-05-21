@@ -6,14 +6,18 @@
 
   <div class="effects-grid">
     @for (effect of effectsArray.controls; track effect; let ei = $index) {
-      <div class="effect-strip" [formGroup]="$any(effect)" [class.no-value]="!['STAT_MODIFIER', 'RESOURCE_MAX', 'SENSE', 'PROFICIENCY'].includes(effect.get('type')?.value)">
+      <div class="effect-strip" [formGroup]="$any(effect)" [class.no-value]="!['STAT_MODIFIER', 'RESOURCE_MAX', 'SENSE', 'PROFICIENCY'].includes(effect.get('type')?.value) || getUiType(effect) === 'PROFICIENCY_SAVE'">
         <div class="effect-col type">
           <label>Tipo</label>
-          <select class="forge-select-native-small" formControlName="type" (change)="onTypeChange(ei)"
+          <select class="forge-select-native-small" [value]="getUiType(effect)" (change)="onUiTypeChange(ei, $event)"
                   [class.input-error]="effect.get('type')?.invalid && effect.get('type')?.touched">
-            @for (t of effectTypes; track t.value) {
-              <option [value]="t.value">{{ t.label }}</option>
-            }
+            <option value="" disabled>Seleccionar...</option>
+            <option value="PROFICIENCY_SKILL">Competencia: Habilidad</option>
+            <option value="PROFICIENCY_SAVE">Competencia: Salvación</option>
+            <option value="SENSE">Sentido (Ej: Visión en la Oscuridad)</option>
+            <option value="DAMAGE_RESISTANCE">Resistencia a Daño</option>
+            <option value="DAMAGE_IMMUNITY">Inmunidad a Daño</option>
+            <option value="CONDITION_IMMUNITY">Inmunidad a Condición</option>
           </select>
         </div>
 
@@ -22,7 +26,7 @@
           <select class="forge-select-native-small" formControlName="target"
                   [class.input-error]="effect.get('target')?.invalid && effect.get('target')?.touched">
             <option value="" disabled>Seleccionar...</option>
-            @for (st of getFilteredTargets(effect.get('type')?.value); track st.value) {
+            @for (st of getFilteredTargets(getUiType(effect)); track st.value) {
               <option [value]="st.value">{{ st.label }}</option>
             }
           </select>
@@ -36,10 +40,10 @@
           }
         </div>
 
-        @if (['STAT_MODIFIER', 'RESOURCE_MAX', 'SENSE', 'PROFICIENCY'].includes(effect.get('type')?.value)) {
+        @if (['STAT_MODIFIER', 'RESOURCE_MAX', 'SENSE', 'PROFICIENCY'].includes(effect.get('type')?.value) && getUiType(effect) !== 'PROFICIENCY_SAVE') {
           <div class="effect-col value">
             <label>Valor</label>
-            @if (effect.get('type')?.value === 'PROFICIENCY') {
+            @if (getUiType(effect) === 'PROFICIENCY_SKILL') {
               <select class="forge-select-native-small" formControlName="value" style="width: 100%;">
                 <option [value]="1">Competencia Estándar (1x PB)</option>
                 <option [value]="2">Pericia / Doble (2x PB)</option>
@@ -49,10 +53,12 @@
               <div class="value-input-wrapper">
                 <input type="number" class="forge-input-native-small" formControlName="value" placeholder="1"
                        [class.input-error]="effect.get('value')?.invalid && effect.get('value')?.touched">
-                <label class="pb-checkbox" title="Sumar Bono de Competencia">
-                  <input type="checkbox" formControlName="useProficiencyBonus">
-                  <span>+PB</span>
-                </label>
+                @if (effect.get('type')?.value !== 'SENSE') {
+                  <label class="pb-checkbox" title="Sumar Bono de Competencia">
+                    <input type="checkbox" formControlName="useProficiencyBonus">
+                    <span>+PB</span>
+                  </label>
+                }
               </div>
             }
           </div>

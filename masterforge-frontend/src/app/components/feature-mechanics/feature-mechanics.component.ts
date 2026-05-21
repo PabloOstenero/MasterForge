@@ -17,7 +17,7 @@ import { shieldOutline, addOutline, flashOutline, trendingUpOutline, wifiOutline
           <label class="toggle-switch-mini">
             <input type="checkbox" [checked]="hasStats" (change)="toggleStats($event)">
             <span class="slider-mini"></span>
-            <span class="toggle-label-mini">Modificadores de Atributo</span>
+            <span class="toggle-label-mini">Atributos y Movimiento</span>
           </label>
           <label class="toggle-switch-mini">
             <input type="checkbox" [checked]="hasDefense" (change)="toggleDefense($event)">
@@ -36,15 +36,15 @@ import { shieldOutline, addOutline, flashOutline, trendingUpOutline, wifiOutline
           </label>
         </div>
         
-        <!-- STAT MODIFIERS -->
+        <!-- STAT MODIFIERS & SPEED -->
         @if (hasStats) {
           <div class="mechanic-group-box">
             <header class="mechanic-box-header">
               <ion-icon name="trending-up-outline"></ion-icon>
-              <h4>Modificadores de Atributo</h4>
+              <h4>Atributos y Movimiento</h4>
             </header>
-            <div formGroupName="statModifiers" class="mechanic-details">
-              <div class="field-grid stat-mod-grid">
+            <div class="mechanic-details">
+              <div formGroupName="statModifiers" class="field-grid stat-mod-grid" style="margin-bottom: 16px;">
                 <div class="field-group">
                   <label class="field-label">FU</label>
                   <ion-input type="number" formControlName="str" class="forge-input" placeholder="0"></ion-input>
@@ -70,7 +70,23 @@ import { shieldOutline, addOutline, flashOutline, trendingUpOutline, wifiOutline
                   <ion-input type="number" formControlName="cha" class="forge-input" placeholder="0"></ion-input>
                 </div>
               </div>
-              <p class="field-hint-mini">Usa esto para Mejoras de Puntuación de Característica (ej: +2 DES). Deja en 0 los que no cambian.</p>
+
+              <div class="field-grid">
+                <div class="field-group">
+                  <label class="field-label">Bono de Velocidad de Movimiento (ft)</label>
+                  <ion-input type="number" formControlName="speedBonus" class="forge-input" placeholder="Ej: 10 o -5"></ion-input>
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Condición de Atributos/Velocidad</label>
+                  <select formControlName="statsCondition" class="forge-select-native">
+                    <option value="NONE">Ninguna (Siempre activo)</option>
+                    <option value="UNARMORED">Sin Armadura (Unarmored)</option>
+                    <option value="NO_SHIELD">Sin Escudo (No Shield)</option>
+                    <option value="IS_WEARING_ARMOR">Con Armadura (Wearing Armor)</option>
+                  </select>
+                </div>
+              </div>
+              <p class="field-hint-mini">Usa estos modificadores para aumentar atributos básicos o la velocidad de movimiento.</p>
             </div>
           </div>
         }
@@ -124,12 +140,14 @@ import { shieldOutline, addOutline, flashOutline, trendingUpOutline, wifiOutline
                   <label class="field-label">Bono</label>
                   <ion-input type="number" formControlName="acBonus" class="forge-input" placeholder="+1"></ion-input>
                 </div>
-                <div class="field-group" style="align-self: flex-end; padding-bottom: 8px;">
-                  <label class="toggle-switch-mini">
-                    <input type="checkbox" formControlName="acBonusArmorOnly">
-                    <span class="slider-mini"></span>
-                    <span class="toggle-label-mini">Solo si lleva Armadura</span>
-                  </label>
+                <div class="field-group">
+                  <label class="field-label">Condición del Bono de CA</label>
+                  <select formControlName="acCondition" class="forge-select-native">
+                    <option value="NONE">Ninguna (Siempre activo)</option>
+                    <option value="UNARMORED">Sin Armadura (Unarmored)</option>
+                    <option value="NO_SHIELD">Sin Escudo (No Shield)</option>
+                    <option value="IS_WEARING_ARMOR">Con Armadura (Wearing Armor)</option>
+                  </select>
                 </div>
               </div>
 
@@ -191,6 +209,13 @@ import { shieldOutline, addOutline, flashOutline, trendingUpOutline, wifiOutline
     </div>
   `,
   styles: [`
+    :host {
+      display: block;
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
     .mechanics-container {
       display: flex;
       flex-direction: column;
@@ -356,10 +381,43 @@ export class FeatureMechanicsComponent implements OnInit {
     }
 
     // Check existing values to set toggles
-    this.hasStats = !!props.get('statModifiers');
-    this.hasDefense = !!props.get('acCalculation') || props.get('acBonus') !== null;
+    this.hasStats = !!props.get('statModifiers') || props.get('speedBonus') !== null || props.get('statsCondition') !== null;
+    this.hasDefense = !!props.get('acCalculation') || props.get('acBonus') !== null || props.get('acCondition') !== null;
     this.hasResource = !!props.get('resourcePool');
     this.hasAttunement = props.get('bonusAttunementSlots') !== null;
+
+    // Self-healing: if toggle is active but controls are missing (e.g. legacy loaded data),
+    // dynamically add the missing controls so they are bound to the template without errors.
+    if (this.hasStats) {
+      if (!props.get('statModifiers')) {
+        props.addControl('statModifiers', this.fb.group({
+          str: [0], dex: [0], con: [0], int: [0], wis: [0], cha: [0]
+        }));
+      }
+      if (!props.get('speedBonus')) {
+        props.addControl('speedBonus', this.fb.control(0));
+      }
+      if (!props.get('statsCondition')) {
+        props.addControl('statsCondition', this.fb.control('NONE'));
+      }
+    }
+
+    if (this.hasDefense) {
+      if (!props.get('acCalculation')) {
+        props.addControl('acCalculation', this.fb.group({
+          base: [10],
+          stats: [[]],
+          requiresNoArmor: [true],
+          requiresNoShield: [true]
+        }));
+      }
+      if (!props.get('acBonus')) {
+        props.addControl('acBonus', this.fb.control(0));
+      }
+      if (!props.get('acCondition')) {
+        props.addControl('acCondition', this.fb.control('NONE'));
+      }
+    }
   }
 
   toggleStats(event: any) {
@@ -369,8 +427,12 @@ export class FeatureMechanicsComponent implements OnInit {
       props.addControl('statModifiers', this.fb.group({
         str: [0], dex: [0], con: [0], int: [0], wis: [0], cha: [0]
       }));
+      props.addControl('speedBonus', this.fb.control(0));
+      props.addControl('statsCondition', this.fb.control('NONE'));
     } else {
       props.removeControl('statModifiers');
+      props.removeControl('speedBonus');
+      props.removeControl('statsCondition');
     }
   }
 
@@ -385,11 +447,11 @@ export class FeatureMechanicsComponent implements OnInit {
         requiresNoShield: [true]
       }));
       props.addControl('acBonus', this.fb.control(0));
-      props.addControl('acBonusArmorOnly', this.fb.control(false));
+      props.addControl('acCondition', this.fb.control('NONE'));
     } else {
       props.removeControl('acCalculation');
       props.removeControl('acBonus');
-      props.removeControl('acBonusArmorOnly');
+      props.removeControl('acCondition');
     }
   }
 

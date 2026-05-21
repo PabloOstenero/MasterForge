@@ -33,7 +33,7 @@ import { NotificationPopoverComponent } from './notification-popover.component';
 @Component({
   selector: 'app-auth-layout',
   standalone: true,
-  imports: [RouterModule, AsyncPipe, IonButton, IonIcon, NotificationPopoverComponent],
+  imports: [RouterModule, AsyncPipe, IonIcon, NotificationPopoverComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './auth-layout.component.html',
   styleUrls: ['./auth-layout.component.scss'],

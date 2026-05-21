@@ -40,13 +40,7 @@ import { AuthService } from '../../services/auth.service';
     RouterLink,
     IonContent,
     IonSpinner,
-    IonList,
-    IonItem,
-    IonLabel,
-    IonIcon,
-    IonSegment,
-    IonSegmentButton,
-    IonButton,
+    IonIcon
   ],
 })
 export class CampaignDetailPage implements OnInit {

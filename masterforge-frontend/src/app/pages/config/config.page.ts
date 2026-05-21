@@ -9,15 +9,8 @@ import {
   IonIcon, 
   IonRange, 
   IonLabel, 
-  IonItem, 
-  IonInput, 
-  IonButton, 
-  IonButtons, 
-  IonMenuButton,
-  IonAvatar,
   IonSpinner,
   IonToggle,
-  IonModal,
   AlertController, 
   ToastController 
 } from '@ionic/angular/standalone';
@@ -67,15 +60,8 @@ import * as QRCode from 'qrcode';
     IonIcon, 
     IonRange, 
     IonLabel, 
-    IonItem, 
-    IonInput, 
-    IonButton, 
-    IonButtons, 
-    IonMenuButton,
-    IonAvatar,
     IonSpinner,
     IonToggle,
-    IonModal,
     PaymentProcessorComponent
   ]
 })
