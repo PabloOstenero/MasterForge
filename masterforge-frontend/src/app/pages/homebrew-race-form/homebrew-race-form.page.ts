@@ -434,15 +434,7 @@ export class HomebrewRaceFormPage implements OnInit {
       error: () => { /* non-critical, fall back to free text */ },
     });
 
-    if (!id) {
-      this.addTrait();
-      const firstTrait = this.traits.at(0);
-      firstTrait.patchValue({
-        name: 'Mejora de Puntuación de Característica',
-        description: 'Aumenta tus puntuaciones de característica según tu elección.'
-      });
-      // You can manually add a STAT_MODIFIER effect to guide them, but they can use the builder.
-    }
+
   }
 
   // ---------------------------------------------------------------------------
