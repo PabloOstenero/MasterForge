@@ -90,7 +90,7 @@ export const CONDITIONS = [
 export const SKILL_NAMES = Object.keys(SKILL_DATA).sort() as string[];
 
 export const ABILITY_ABBREVIATIONS: Record<string, string> = {
-  'Strength': 'FU',
+  'Strength': 'FUE',
   'Dexterity': 'DES',
   'Constitution': 'CON',
   'Intelligence': 'INT',
@@ -128,6 +128,7 @@ export function buildCombatMechanics(
   abilities: FeatureEntry[],
   languages?: string | string[],
   speeds?: SpeedObject,
+  legendaryActions?: any[],
 ): CombatMechanics {
   // Filter savingThrows: keep only keys whose value is a non-null number
   const filteredSavingThrows: Partial<Record<keyof SavingThrows, number>> = {};
@@ -166,6 +167,7 @@ export function buildCombatMechanics(
     attacks,
     abilities,
     speeds,
+    legendaryActions,
   };
 }
 
@@ -220,6 +222,31 @@ export class HomebrewMonsterFormPage implements OnInit {
   getSkillAbbr(skill: string): string {
     const ability = this.getSkillAbility(skill);
     return this.abilityAbbr[ability] || '';
+  }
+
+  translateSkill(skill: string): string {
+    if (!skill) return '';
+    const map: Record<string, string> = {
+      'Acrobatics': 'Acrobacias',
+      'Animal Handling': 'Trato con Animales',
+      'Arcana': 'Arcana',
+      'Athletics': 'Atletismo',
+      'Deception': 'Engaño',
+      'History': 'Historia',
+      'Insight': 'Perspicacia',
+      'Intimidation': 'Intimidación',
+      'Investigation': 'Investigación',
+      'Medicine': 'Medicina',
+      'Nature': 'Naturaleza',
+      'Perception': 'Percepción',
+      'Performance': 'Interpretación',
+      'Persuasion': 'Persuasión',
+      'Religion': 'Religión',
+      'Sleight of Hand': 'Juego de Manos',
+      'Stealth': 'Sigilo',
+      'Survival': 'Supervivencia'
+    };
+    return map[skill] || skill;
   }
 
   /** Exposed for template iteration. */
@@ -310,6 +337,8 @@ export class HomebrewMonsterFormPage implements OnInit {
       }),
       attacks:   this.fb.array([]),
       abilities: this.fb.array([]),
+      hasLegendaryActions: [false],
+      legendaryActions: this.fb.array([]),
     });
 
     // Detect edit mode from route param
@@ -408,6 +437,17 @@ export class HomebrewMonsterFormPage implements OnInit {
             this.abilities.push(this.fb.group({
               name:        [a.name ?? '', Validators.required],
               description: [a.description ?? '', Validators.required],
+            }));
+          });
+        }
+
+        // Patch legendary actions
+        if (Array.isArray(cm.legendaryActions) && cm.legendaryActions.length > 0) {
+          this.form.patchValue({ hasLegendaryActions: true });
+          cm.legendaryActions.forEach((la: any) => {
+            this.legendaryActions.push(this.fb.group({
+              name: [la.name ?? '', Validators.required],
+              description: [la.description ?? '', Validators.required],
             }));
           });
         }
@@ -553,6 +593,27 @@ export class HomebrewMonsterFormPage implements OnInit {
   }
 
   // ---------------------------------------------------------------------------
+  // Legendary Actions helpers
+  // ---------------------------------------------------------------------------
+
+  get legendaryActions(): FormArray {
+    return this.form.get('legendaryActions') as FormArray;
+  }
+
+  addLegendaryAction(): void {
+    this.legendaryActions.push(
+      this.fb.group({
+        name: ['', Validators.required],
+        description: ['', Validators.required],
+      })
+    );
+  }
+
+  removeLegendaryAction(index: number): void {
+    this.legendaryActions.removeAt(index);
+  }
+
+  // ---------------------------------------------------------------------------
 
   submit(): void {
     // Mark all controls as touched so validation errors become visible
@@ -582,6 +643,7 @@ export class HomebrewMonsterFormPage implements OnInit {
       v.abilities ?? [],
       v.senses?.languages,
       v.speeds,
+      v.hasLegendaryActions ? v.legendaryActions : [],
     );
 
     // Build the complete DTO including combatMechanics

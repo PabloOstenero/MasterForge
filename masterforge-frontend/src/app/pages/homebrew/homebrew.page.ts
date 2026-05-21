@@ -148,13 +148,13 @@ export class HomebrewPage implements OnInit {
           for (const item of myArr) {
             if (!seenIds.has(item.id)) {
               seenIds.add(item.id);
-              combined.push(item);
+              combined.push({ ...item, isAuthor: true });
             }
           }
           for (const item of ownedCommunityArr) {
             if (!seenIds.has(item.id)) {
               seenIds.add(item.id);
-              combined.push(item);
+              combined.push({ ...item, isAuthor: false });
             }
           }
           
@@ -279,6 +279,10 @@ export class HomebrewPage implements OnInit {
     });
   }
 
+  canManageItem(item: HomebrewItem): boolean {
+    return this.selectedTab === 'mine' && item.isAuthor === true;
+  }
+
   navigateToCreate(type: ContentType): void {
     const routeMap: Record<ContentType, string> = {
       CLASS:    '/homebrew/class/new',
@@ -303,7 +307,19 @@ export class HomebrewPage implements OnInit {
     this.router.navigate([editMap[type]]);
   }
 
+  navigateToEditItem(item: HomebrewItem): void {
+    if (!this.canManageItem(item)) {
+      return;
+    }
+
+    this.navigateToEdit(item.contentType, item.id);
+  }
+
   confirmDelete(item: HomebrewItem): void {
+    if (!this.canManageItem(item)) {
+      return;
+    }
+
     const confirmed = window.confirm(`¿Estás seguro de que quieres eliminar "${item.name}"?`);
     if (confirmed) {
       this.deleteItem(item);
@@ -311,6 +327,10 @@ export class HomebrewPage implements OnInit {
   }
 
   deleteItem(item: HomebrewItem): void {
+    if (!this.canManageItem(item)) {
+      return;
+    }
+
     this.deletingId = item.id;
     this.error = null;
 
@@ -1062,7 +1082,7 @@ export class HomebrewPage implements OnInit {
     const keys: (keyof HomebrewSummary)[] = ['classes', 'subclasses', 'races', 'monsters', 'spells', 'items'];
     return keys.reduce<number>((sum: number, key) => {
       const items = this.homebrewItems[key] || [];
-      return sum + items.filter(item => item.authorName === 'Mío').length;
+      return sum + items.filter(item => item.isAuthor === true).length;
     }, 0);
   }
 

@@ -178,6 +178,9 @@ describe('buildCombatMechanics() — Property-Based Tests', () => {
           emptySenses,
           [],
           [],
+          [],
+          undefined,
+          [],
         );
 
         expect(result.description).toBe(description);
@@ -204,6 +207,7 @@ describe('buildCombatMechanics() — Property-Based Tests', () => {
       'senses',
       'attacks',
       'abilities',
+      'legendaryActions',
     ].sort();
 
     fc.assert(
@@ -218,6 +222,7 @@ describe('buildCombatMechanics() — Property-Based Tests', () => {
         sensesArb,
         fc.array(attackEntryArb, { maxLength: 5 }),
         fc.array(abilityEntryArb, { maxLength: 5 }),
+        fc.array(fc.record({ name: fc.string(), description: fc.string() }), { maxLength: 5 }),
         (
           description,
           savingThrows,
@@ -229,6 +234,7 @@ describe('buildCombatMechanics() — Property-Based Tests', () => {
           senses,
           attacks,
           abilities,
+          legendaryActions,
         ) => {
           const result = buildCombatMechanics(
             description,
@@ -241,6 +247,9 @@ describe('buildCombatMechanics() — Property-Based Tests', () => {
             senses,
             attacks,
             abilities,
+            [],
+            undefined,
+            legendaryActions,
           );
 
           const actualKeys = Object.keys(result).sort();
@@ -270,6 +279,9 @@ describe('buildCombatMechanics() — Property-Based Tests', () => {
           [],
           emptySenses,
           [],
+          [],
+          [],
+          undefined,
           [],
         );
 
@@ -315,6 +327,9 @@ describe('buildCombatMechanics() — Property-Based Tests', () => {
           [],
           senses,
           [],
+          [],
+          [],
+          undefined,
           [],
         );
 

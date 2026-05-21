@@ -162,6 +162,12 @@
   border-left: 3px solid rgba(201, 168, 76, 0.35);
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
+
+  &:focus-within, &:hover {
+    z-index: 10;
+  }
 
   &:hover {
     border-left-color: rgba(201, 168, 76, 0.85);

@@ -262,6 +262,7 @@ export interface CombatMechanics {
   abilities: FeatureEntry[];
   languages?: string[];
   speeds?: SpeedObject;
+  legendaryActions?: any[];
 }
 
 // Legacy aliases for tests

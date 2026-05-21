@@ -425,7 +425,7 @@
               (click)="toggleSkillDropdown()"
               data-testid="skill-picker-select">
               <span [class.custom-dropdown-placeholder]="!pendingSkillName">
-                {{ pendingSkillName || 'Selecciona una habilidad…' }}
+                {{ pendingSkillName ? translateSkill(pendingSkillName) + ' (' + getSkillAbbr(pendingSkillName) + ')' : 'Selecciona una habilidad…' }}
               </span>
               <span class="custom-dropdown-arrow">{{ skillDropdownOpen ? '▲' : '▼' }}</span>
             </button>
@@ -437,8 +437,7 @@
                     type="button"
                     class="custom-dropdown-option"
                     (click)="selectSkillFromDropdown(skill)">
-                    <span class="skill-option-name">{{ skill }}</span>
-                    <span class="skill-option-stat">{{ getSkillAbbr(skill) }}</span>
+                    <span class="skill-option-name">{{ translateSkill(skill) }} ({{ getSkillAbbr(skill) }})</span>
                   </button>
                 }
                 @if (availableSkillNames.length === 0) {
@@ -475,7 +474,7 @@
           <div class="skill-tags" data-testid="skill-tags">
             @for (skill of selectedSkillNames; track skill) {
               <div class="skill-tag" [attr.data-testid]="'skill-tag-' + skill.toLowerCase().replace(' ', '-')">
-                <span class="skill-tag-name">{{ skill }} ({{ getSkillAbbr(skill) }})</span>
+                <span class="skill-tag-name">{{ translateSkill(skill) }} ({{ getSkillAbbr(skill) }})</span>
                 <span class="skill-tag-bonus">+{{ getSkillBonus(skill) ?? 0 }}</span>
                 <button
                   type="button"
@@ -638,6 +637,69 @@
             <button type="button" class="btn-remove" (click)="removeAbility($index)" [attr.data-testid]="'remove-ability-' + $index">
               Eliminar
             </button>
+          </div>
+        }
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════════
+           SECCIÓN 10 · ACCIONES LEGENDARIAS
+      ══════════════════════════════════════════════════════════════════ -->
+      <div class="form-section col-full">
+        <div class="section-header-row" style="justify-content: flex-start; gap: 1rem;">
+          <h2 class="section-title" style="margin-bottom: 0;">Acciones Legendarias</h2>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" formControlName="hasLegendaryActions" style="width: 18px; height: 18px;" data-testid="has-legendary-actions-toggle">
+            <span style="color: #ff9f0a; font-weight: bold;">Habilitar</span>
+          </label>
+        </div>
+
+        @if (form.get('hasLegendaryActions')?.value) {
+          <div style="margin-top: 1rem;">
+            <div class="section-header-row">
+              <p class="section-hint" style="margin: 0;">El monstruo puede usar acciones legendarias, eligiendo de las opciones a continuación.</p>
+              <button type="button" class="btn-add" (click)="addLegendaryAction()" data-testid="add-legendary-action-button">
+                + Añadir Acción
+              </button>
+            </div>
+
+            @if (legendaryActions.length === 0) {
+              <p class="empty-hint">Sin acciones legendarias definidas.</p>
+            }
+
+            @for (action of legendaryActions.controls; track $index) {
+              <div class="entry-card" [formGroup]="$any(action)" [attr.data-testid]="'legendary-action-entry-' + $index">
+                <div class="field-group">
+                  <label class="field-label">Nombre <span class="required">*</span></label>
+                  <ion-input
+                    class="forge-input"
+                    formControlName="name"
+                    placeholder="Ej: Ataque de Cola"
+                    [attr.data-testid]="'legendary-action-name-' + $index"
+                    [class.input-error]="$any(action).get('name')?.invalid && $any(action).get('name')?.touched">
+                  </ion-input>
+                  @if ($any(action).get('name')?.invalid && $any(action).get('name')?.touched) {
+                    <p class="error-message" [attr.data-testid]="'legendary-action-name-error-' + $index">El nombre es obligatorio.</p>
+                  }
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Descripción <span class="required">*</span></label>
+                  <ion-textarea
+                    class="forge-input forge-textarea"
+                    formControlName="description"
+                    placeholder="Describe la acción legendaria…"
+                    rows="3"
+                    [attr.data-testid]="'legendary-action-description-' + $index"
+                    [class.input-error]="$any(action).get('description')?.invalid && $any(action).get('description')?.touched">
+                  </ion-textarea>
+                  @if ($any(action).get('description')?.invalid && $any(action).get('description')?.touched) {
+                    <p class="error-message" [attr.data-testid]="'legendary-action-description-error-' + $index">La descripción es obligatoria.</p>
+                  }
+                </div>
+                <button type="button" class="btn-remove" (click)="removeLegendaryAction($index)" [attr.data-testid]="'remove-legendary-action-' + $index">
+                  Eliminar
+                </button>
+              </div>
+            }
           </div>
         }
       </div>

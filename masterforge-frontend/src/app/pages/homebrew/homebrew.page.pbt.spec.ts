@@ -44,6 +44,7 @@ import * as fc from 'fast-check';
 import { HomebrewPage } from './homebrew.page';
 import { HomebrewService, HomebrewItem, HomebrewSummary, ContentType } from '../../services/homebrew.service';
 import { AuthService } from '../../services/auth.service';
+import { NotificationService } from '../../services/notification.service';
 
 // ---------------------------------------------------------------------------
 // Helpers shared across suites (defined at module level to avoid duplication)
@@ -115,7 +116,11 @@ function getItemRowsInSection(sectionEl: HTMLElement): HTMLElement[] {
 const homebrewItemArb: fc.Arbitrary<HomebrewItem> = fc.record<HomebrewItem>({
   id:          fc.uuid(),
   name:        fc.string({ minLength: 1, maxLength: 60 }),
+  authorName:  fc.constant('Mío'),
   contentType: fc.constantFrom<ContentType>(...ALL_CONTENT_TYPES),
+  price:       fc.constant(0),
+  isOwned:     fc.constant(true),
+  isAuthor:    fc.constant(true),
 });
 
 // ---------------------------------------------------------------------------
@@ -125,9 +130,11 @@ const homebrewItemArb: fc.Arbitrary<HomebrewItem> = fc.record<HomebrewItem>({
 function buildHomebrewServiceSpy(): jasmine.SpyObj<HomebrewService> {
   const spy = jasmine.createSpyObj<HomebrewService>('HomebrewService', [
     'getMyHomebrew',
+    'getCommunityHomebrew',
     'deleteItem',
   ]);
   spy.getMyHomebrew.and.returnValue(of(emptyHomebrew()));
+  spy.getCommunityHomebrew.and.returnValue(of(emptyHomebrew()));
   return spy;
 }
 
@@ -148,6 +155,12 @@ describe('HomebrewPage — Property 2: Grouping by content type', () => {
     const authServiceMock = {
       getUserIdFromToken: () => 'user-pbt',
       getCurrentUser: () => ({ id: 'user-pbt', name: 'PBT User' }),
+      isPro: () => false,
+    };
+
+    const notificationServiceMock = {
+      showError: jasmine.createSpy('showError'),
+      showSuccess: jasmine.createSpy('showSuccess'),
     };
 
     await TestBed.configureTestingModule({
@@ -155,6 +168,7 @@ describe('HomebrewPage — Property 2: Grouping by content type', () => {
       providers: [
         { provide: HomebrewService, useValue: homebrewServiceSpy },
         { provide: AuthService, useValue: authServiceMock },
+        { provide: NotificationService, useValue: notificationServiceMock },
         provideRouter([]),
       ],
     }).compileComponents();
@@ -427,6 +441,12 @@ describe('HomebrewPage — Property 9: Deletion removes item from list', () => {
     const authServiceMock = {
       getUserIdFromToken: () => 'user-pbt-p9',
       getCurrentUser: () => ({ id: 'user-pbt-p9', name: 'PBT User P9' }),
+      isPro: () => false,
+    };
+
+    const notificationServiceMock = {
+      showError: jasmine.createSpy('showError'),
+      showSuccess: jasmine.createSpy('showSuccess'),
     };
 
     await TestBed.configureTestingModule({
@@ -434,6 +454,7 @@ describe('HomebrewPage — Property 9: Deletion removes item from list', () => {
       providers: [
         { provide: HomebrewService, useValue: homebrewServiceSpy },
         { provide: AuthService, useValue: authServiceMock },
+        { provide: NotificationService, useValue: notificationServiceMock },
         provideRouter([]),
       ],
     }).compileComponents();
@@ -718,6 +739,12 @@ describe('HomebrewPage — Property 10: Delete action present for each item', ()
     const authServiceMock = {
       getUserIdFromToken: () => 'user-pbt-p10',
       getCurrentUser: () => ({ id: 'user-pbt-p10', name: 'PBT User P10' }),
+      isPro: () => false,
+    };
+
+    const notificationServiceMock = {
+      showError: jasmine.createSpy('showError'),
+      showSuccess: jasmine.createSpy('showSuccess'),
     };
 
     await TestBed.configureTestingModule({
@@ -725,6 +752,7 @@ describe('HomebrewPage — Property 10: Delete action present for each item', ()
       providers: [
         { provide: HomebrewService, useValue: homebrewServiceSpy },
         { provide: AuthService, useValue: authServiceMock },
+        { provide: NotificationService, useValue: notificationServiceMock },
         provideRouter([]),
       ],
     }).compileComponents();

@@ -236,8 +236,8 @@
                           Detalles
                         </ion-button>
 
-                        @if (selectedTab === 'mine' && item.authorName === 'Mío') {
-                          <ion-button fill="clear" size="small" class="action-btn edit-btn" (click)="navigateToEdit(type, item.id)" data-testid="edit-action">
+                        @if (canManageItem(item)) {
+                          <ion-button fill="clear" size="small" class="action-btn edit-btn" (click)="navigateToEditItem(item)" data-testid="edit-action">
                             <ion-icon name="pencil" slot="start"></ion-icon>
                             Editar
                           </ion-button>

@@ -27,6 +27,8 @@ export interface HomebrewItem {
   price: number;
   isOwned: boolean;
   description?: string;
+  /** True when this item was created by the current user (not just purchased). */
+  isAuthor?: boolean;
 }
 
 export interface HomebrewSummary {

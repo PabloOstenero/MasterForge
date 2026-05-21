@@ -1198,4 +1198,59 @@ describe('HomebrewMonsterFormPage', () => {
       expect(component.attacks.length).toBe(1);
     });
   });
+
+  // -------------------------------------------------------------------------
+  // Legendary Actions section
+  // -------------------------------------------------------------------------
+
+  describe('Legendary Actions section', () => {
+
+    it('should start with hasLegendaryActions as false and empty FormArray', () => {
+      expect(component.form.get('hasLegendaryActions')?.value).toBeFalse();
+      expect(component.legendaryActions.length).toBe(0);
+    });
+
+    it('should add a legendary action entry when addLegendaryAction() is called', () => {
+      component.addLegendaryAction();
+      expect(component.legendaryActions.length).toBe(1);
+    });
+
+    it('should remove a legendary action entry when removeLegendaryAction() is called', () => {
+      component.addLegendaryAction();
+      expect(component.legendaryActions.length).toBe(1);
+
+      component.removeLegendaryAction(0);
+      expect(component.legendaryActions.length).toBe(0);
+    });
+
+    it('should render the add-legendary-action button when hasLegendaryActions is true', () => {
+      component.form.patchValue({ hasLegendaryActions: true });
+      fixture.detectChanges();
+
+      const addBtn = fixture.nativeElement.querySelector('[data-testid="add-legendary-action-button"]');
+      expect(addBtn).toBeTruthy();
+    });
+
+    it('should show legendary action name and description inputs after adding an action', () => {
+      component.form.patchValue({ hasLegendaryActions: true });
+      component.addLegendaryAction();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('[data-testid="legendary-action-name-0"]')).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('[data-testid="legendary-action-description-0"]')).toBeTruthy();
+    });
+
+    it('should show error message when legendary action name is empty and touched', () => {
+      component.form.patchValue({ hasLegendaryActions: true });
+      component.addLegendaryAction();
+      fixture.detectChanges();
+
+      const actionGroup = component.legendaryActions.at(0);
+      actionGroup.get('name')?.markAsTouched();
+      fixture.detectChanges();
+
+      const nameError = fixture.nativeElement.querySelector('[data-testid="legendary-action-name-error-0"]');
+      expect(nameError).toBeTruthy();
+    });
+  });
 });

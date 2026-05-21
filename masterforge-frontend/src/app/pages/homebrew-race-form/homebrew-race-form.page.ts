@@ -65,7 +65,7 @@ export const CONDITIONS = [
 export const SKILL_NAMES = Object.keys(SKILL_DATA).sort() as string[];
 
 export const ABILITY_ABBREVIATIONS: Record<string, string> = {
-  'Strength': 'FU',
+  'Strength': 'FUE',
   'Dexterity': 'DES',
   'Constitution': 'CON',
   'Intelligence': 'INT',
@@ -332,6 +332,31 @@ export class HomebrewRaceFormPage implements OnInit {
   getSkillAbbr(skill: string): string {
     const ability = this.getSkillAbility(skill);
     return this.abilityAbbr[ability] || '';
+  }
+
+  translateSkill(skill: string): string {
+    if (!skill) return '';
+    const map: Record<string, string> = {
+      'Acrobatics': 'Acrobacias',
+      'Animal Handling': 'Trato con Animales',
+      'Arcana': 'Arcana',
+      'Athletics': 'Atletismo',
+      'Deception': 'Engaño',
+      'History': 'Historia',
+      'Insight': 'Perspicacia',
+      'Intimidation': 'Intimidación',
+      'Investigation': 'Investigación',
+      'Medicine': 'Medicina',
+      'Nature': 'Naturaleza',
+      'Perception': 'Percepción',
+      'Performance': 'Interpretación',
+      'Persuasion': 'Persuasión',
+      'Religion': 'Religión',
+      'Sleight of Hand': 'Juego de Manos',
+      'Stealth': 'Sigilo',
+      'Survival': 'Supervivencia'
+    };
+    return map[skill] || skill;
   }
 
   // ---------------------------------------------------------------------------

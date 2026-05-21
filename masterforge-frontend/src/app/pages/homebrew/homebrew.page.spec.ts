@@ -9,8 +9,9 @@ import { provideRouter } from '@angular/router';
 import { of, throwError, Subject } from 'rxjs';
 
 import { HomebrewPage } from './homebrew.page';
-import { HomebrewService, HomebrewSummary } from '../../services/homebrew.service';
+import { HomebrewService, HomebrewItem, HomebrewSummary } from '../../services/homebrew.service';
 import { AuthService } from '../../services/auth.service';
+import { NotificationService } from '../../services/notification.service';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -27,17 +28,27 @@ function emptyHomebrew(): HomebrewSummary {
   };
 }
 
-function makeItem(id: string, name: string, contentType: any) {
-  return { id, name, contentType };
+function makeItem(id: string, name: string, contentType: any, isAuthor = true): HomebrewItem {
+  return {
+    id,
+    name,
+    contentType,
+    authorName: isAuthor ? 'Mío' : 'Otro Autor',
+    price: 0,
+    isOwned: true,
+    isAuthor,
+  };
 }
 
 function buildHomebrewServiceSpy(): jasmine.SpyObj<HomebrewService> {
   const spy = jasmine.createSpyObj<HomebrewService>('HomebrewService', [
     'getMyHomebrew',
+    'getCommunityHomebrew',
     'deleteItem',
   ]);
   // Default: return empty homebrew so ngOnInit doesn't leave loading=true
   spy.getMyHomebrew.and.returnValue(of(emptyHomebrew()));
+  spy.getCommunityHomebrew.and.returnValue(of(emptyHomebrew()));
   return spy;
 }
 
@@ -56,6 +67,12 @@ describe('HomebrewPage', () => {
     const authServiceMock = {
       getUserIdFromToken: () => 'user-1',
       getCurrentUser: () => ({ id: 'user-1', name: 'Test User' }),
+      isPro: () => false,
+    };
+
+    const notificationServiceMock = {
+      showError: jasmine.createSpy('showError'),
+      showSuccess: jasmine.createSpy('showSuccess'),
     };
 
     await TestBed.configureTestingModule({
@@ -63,6 +80,7 @@ describe('HomebrewPage', () => {
       providers: [
         { provide: HomebrewService, useValue: homebrewServiceSpy },
         { provide: AuthService, useValue: authServiceMock },
+        { provide: NotificationService, useValue: notificationServiceMock },
         provideRouter([]),
       ],
     }).compileComponents();
@@ -465,6 +483,60 @@ describe('HomebrewPage', () => {
 
       // Complete the observable so the test doesn't leave a dangling subscription
       subject.complete();
+    });
+
+    it('should not confirm deletion for purchased items in the collection', () => {
+      const purchasedItem = makeItem('30', 'Bought Spell', 'SPELL', false);
+      spyOn(window, 'confirm');
+
+      component.confirmDelete(purchasedItem);
+
+      expect(window.confirm).not.toHaveBeenCalled();
+      expect(homebrewServiceSpy.deleteItem).not.toHaveBeenCalled();
+    });
+
+    it('should not call DELETE for purchased items even if deleteItem is called directly', () => {
+      const purchasedItem = makeItem('31', 'Bought Class', 'CLASS', false);
+
+      component.deleteItem(purchasedItem);
+
+      expect(homebrewServiceSpy.deleteItem).not.toHaveBeenCalled();
+      expect(component.deletingId).toBeNull();
+    });
+  });
+
+  describe('Manage actions visibility', () => {
+    it('should show edit and delete actions for authored items only', () => {
+      component.homebrewItems = {
+        ...emptyHomebrew(),
+        classes: [
+          makeItem('40', 'Mine', 'CLASS', true),
+          makeItem('41', 'Purchased', 'CLASS', false),
+        ],
+      };
+      component.loading = false;
+      component.selectedTab = 'mine';
+      fixture.detectChanges();
+
+      const ownedRow = fixture.nativeElement.querySelector('[data-testid="item-row"][data-item-id="40"]');
+      const purchasedRow = fixture.nativeElement.querySelector('[data-testid="item-row"][data-item-id="41"]');
+
+      expect(ownedRow.querySelector('[data-testid="edit-action"]')).toBeTruthy();
+      expect(ownedRow.querySelector('[data-testid="delete-action"]')).toBeTruthy();
+      expect(purchasedRow.querySelector('[data-testid="edit-action"]')).toBeNull();
+      expect(purchasedRow.querySelector('[data-testid="delete-action"]')).toBeNull();
+    });
+
+    it('should count only authored items toward the free homebrew limit', () => {
+      component.homebrewItems = {
+        ...emptyHomebrew(),
+        classes: [
+          makeItem('50', 'Mine', 'CLASS', true),
+          makeItem('51', 'Purchased', 'CLASS', false),
+        ],
+      };
+
+      expect(component.totalHomebrewCount).toBe(1);
     });
   });
 });
