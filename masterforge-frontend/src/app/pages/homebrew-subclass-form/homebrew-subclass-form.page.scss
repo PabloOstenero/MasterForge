@@ -1,17 +1,17 @@
 @use 'src/theme/variables' as *;
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
-$gold:        #C5A059;
-$gold-hover:  #d9b96e;
-$bg-page:     #121212;
-$bg-surface:  #1E1E1E;
-$bg-card:     #1a1a1a;
-$border:      #2e2e2e;
-$border-card: #383838;
-$text-white:  #f0e6d3;
-$text-muted:  #888;
-$text-dim:    #555;
-$red:         #C62828;
+$gold:        #C9A84C;
+$gold-hover:  #dfbc5e;
+$bg-page:     #101014;
+$bg-surface:  rgba(30, 30, 42, 0.65);
+$bg-card:     #18181f;
+$border:      rgba(255, 255, 255, 0.06);
+$border-card: rgba(255, 255, 255, 0.08);
+$text-white:  #F0E6D3;
+$text-muted:  #8C8C8C;
+$text-dim:    #555566;
+$red:         #ff6b6b;
 
 // ─── Host ─────────────────────────────────────────────────────────────────────
 :host {
@@ -21,7 +21,7 @@ $red:         #C62828;
 // ─── Page wrapper ─────────────────────────────────────────────────────────────
 .homebrew-form-wrapper {
   min-height: 100%;
-  background: $bg-page;
+  background: radial-gradient(circle at 50% 0%, #1e1e28 0%, #101014 100%);
   color: $text-white;
 }
 
@@ -31,8 +31,11 @@ $red:         #C62828;
   align-items: center;
   gap: 16px;
   padding: 14px 20px 12px;
-  background: $bg-page;
-  border-bottom: 1px solid $border;
+  background: rgba(18, 18, 24, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(201, 168, 76, 0.25);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.05);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -42,63 +45,86 @@ $red:         #C62828;
   background: none;
   border: none;
   color: $gold;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 700;
   cursor: pointer;
-  padding: 4px 0;
+  padding: 6px 12px;
+  border-radius: 8px;
   white-space: nowrap;
   flex-shrink: 0;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 
-  &:hover { color: $gold-hover; }
+  &:hover {
+    color: $gold-hover;
+    background: rgba(201, 168, 76, 0.15);
+    transform: translateX(-2px);
+  }
 }
 
 .form-title {
   color: $text-white;
-  font-size: 1.15rem;
-  font-weight: bold;
+  font-size: 1.3rem;
+  font-weight: 800;
+  font-family: 'Cinzel', 'Outfit', serif;
+  letter-spacing: 1px;
   margin: 0;
   flex: 1;
   text-align: center;
-  padding-right: 60px; // compensate for back-btn width so title looks centered
+  padding-right: 90px; // balance back-btn width for perfect centering
+  text-shadow: 0 0 10px rgba(201, 168, 76, 0.15);
 }
 
 // ─── Content area ─────────────────────────────────────────────────────────────
 .homebrew-form-content {
-  padding: 20px 16px 40px;
-  max-width: 1280px;
+  padding: 24px 20px 60px;
+  max-width: 1200px;
   margin: 0 auto;
+  animation: formFadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes formFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 // ─── Form grid (two columns on wide screens) ──────────────────────────────────
 .form-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
+  gap: 20px;
 
   @media (min-width: 900px) {
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: 24px;
   }
 }
 
 .col-left {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 
   @media (min-width: 900px) {
     grid-column: 1;
-    gap: 20px;
   }
 }
 
 .col-right {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 
   @media (min-width: 900px) {
     grid-column: 2;
-    gap: 20px;
   }
 }
 
@@ -110,58 +136,77 @@ $red:         #C62828;
 
 // ─── Error banner ─────────────────────────────────────────────────────────────
 .form-error-banner {
-  background: rgba(198, 40, 40, 0.12);
-  border: 1px solid rgba(198, 40, 40, 0.4);
-  border-radius: 8px;
-  color: #e57373;
-  font-size: 0.9rem;
-  padding: 10px 14px;
-  margin-bottom: 20px;
+  background: rgba(192, 57, 43, 0.12);
+  border: 1px solid rgba(192, 57, 43, 0.45);
+  border-radius: 10px;
+  color: #ff6b6b;
+  font-size: 0.92rem;
+  font-weight: 600;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 15px rgba(192, 57, 43, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 // ─── Form sections ────────────────────────────────────────────────────────────
 .form-section {
-  background: $bg-surface;
+  background: rgba(30, 30, 42, 0.65);
   border: 1px solid $border;
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-left: 3px solid rgba(201, 168, 76, 0.35);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  margin-bottom: 8px;
+
+  &:hover {
+    border-left-color: rgba(201, 168, 76, 0.85);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), 0 0 15px rgba(201, 168, 76, 0.08);
+    transform: translateY(-2px);
+  }
 }
 
 .section-title {
   color: $gold;
-  font-size: 0.8rem;
-  font-weight: bold;
+  font-size: 0.85rem;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  margin: 0 0 16px;
+  margin: 0 0 20px;
   display: flex;
   align-items: center;
   gap: 8px;
+  font-family: 'Outfit', sans-serif;
 }
 
 .section-badge {
-  color: $text-dim;
-  font-size: 0.7rem;
-  font-weight: normal;
-  text-transform: lowercase;
-  letter-spacing: 0;
+  color: $text-muted;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid $border-card;
   border-radius: 4px;
-  padding: 1px 6px;
+  padding: 2px 8px;
 }
 
 .section-hint {
   color: $text-muted;
-  font-size: 0.8rem;
-  margin: -8px 0 14px;
-  line-height: 1.4;
+  font-size: 0.85rem;
+  margin: -12px 0 20px;
+  line-height: 1.5;
 }
 
 .section-header-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 
   .section-title {
     margin-bottom: 0;
@@ -170,7 +215,7 @@ $red:         #C62828;
 
 // ─── Field group ──────────────────────────────────────────────────────────────
 .field-group {
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 
   &:last-child { margin-bottom: 0; }
 
@@ -184,7 +229,7 @@ $red:         #C62828;
 .field-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 16px;
 
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
@@ -193,19 +238,19 @@ $red:         #C62828;
 
 .field-label {
   display: block;
-  color: $text-muted;
+  color: #C8C8D0;
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 5px;
-  font-weight: bold;
+  margin-bottom: 6px;
+  font-weight: 700;
 
   .required { color: $gold; }
 }
 
 .optional-tag {
   color: $text-dim;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: normal;
   text-transform: lowercase;
   letter-spacing: 0;
@@ -213,44 +258,52 @@ $red:         #C62828;
 
 // ─── Inputs ───────────────────────────────────────────────────────────────────
 .forge-input {
-  --background: #141414;
+  --background: rgba(16, 16, 20, 0.75);
   --color: #{$text-white};
   --placeholder-color: #{$text-dim};
   --border-radius: 8px;
   --padding-start: 12px;
   --padding-end: 12px;
-  border: 1px solid $border-card;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
-  transition: border-color 0.15s;
+  transition: all 0.25s ease-in-out;
+  background: rgba(16, 16, 20, 0.75);
+  color: $text-white;
 
   &:focus-within {
-    border-color: rgba(197, 160, 89, 0.5);
+    border-color: rgba(201, 168, 76, 0.5);
+    box-shadow: 0 0 12px rgba(201, 168, 76, 0.25);
+    background: rgba(16, 16, 20, 0.9);
   }
 
   &.input-error {
-    border-color: $red;
+    border-color: $red !important;
+    background: rgba(192, 57, 43, 0.06);
+    box-shadow: 0 0 12px rgba(192, 57, 43, 0.15);
   }
 }
 
 .forge-input-plain {
   display: block;
   width: 100%;
-  background: #141414;
+  background: rgba(16, 16, 20, 0.75);
   color: #{$text-white};
-  border: 1px solid $border-card;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
-  padding: 8px 12px;
+  padding: 10px 12px;
   font-size: 0.88rem;
   outline: none;
   box-sizing: border-box;
-  transition: border-color 0.15s;
+  transition: all 0.25s ease-in-out;
 
   &::placeholder {
     color: #{$text-dim};
   }
 
   &:focus {
-    border-color: rgba(197, 160, 89, 0.5);
+    border-color: rgba(201, 168, 76, 0.5);
+    box-shadow: 0 0 12px rgba(201, 168, 76, 0.25);
+    background: rgba(16, 16, 20, 0.9);
   }
 
   &.input-error {
@@ -259,52 +312,80 @@ $red:         #C62828;
 }
 
 .forge-textarea {
-  --padding-top: 10px;
-  --padding-bottom: 10px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
 }
 
 .forge-select-native {
-  background: #141414;
+  background: rgba(16, 16, 20, 0.75);
   color: $text-white;
-  border: 1px solid $border-card;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
-  padding: 8px 12px;
+  padding: 10px 12px;
   font-size: 0.88rem;
   cursor: pointer;
   outline: none;
   width: 100%;
-  transition: border-color 0.15s;
+  transition: all 0.25s ease-in-out;
 
-  option { background: #1e1e1e; }
+  option { background: #18181f; color: $text-white; }
 
-  &:focus { border-color: rgba(197, 160, 89, 0.5); }
+  &:focus {
+    border-color: rgba(201, 168, 76, 0.5);
+    box-shadow: 0 0 12px rgba(201, 168, 76, 0.25);
+    background: rgba(16, 16, 20, 0.9);
+  }
 
-  &.input-error { border-color: $red; }
+  &.input-error {
+    border-color: $red;
+    background: rgba(192, 57, 43, 0.06);
+  }
 }
 
 // ─── Error message ────────────────────────────────────────────────────────────
 .error-message {
-  color: $red;
+  color: #ff6b6b;
   font-size: 0.8rem;
-  margin-top: 4px;
+  margin-top: 6px;
   padding-left: 2px;
+  font-weight: 600;
 }
 
 // ─── Entry cards (class features / multiclassing prerequisites) ───────────────
 .entry-card {
-  background: $bg-card;
-  border: 1px solid $border-card;
-  border-radius: 10px;
-  padding: 14px;
-  margin-bottom: 10px;
+  background: transparent;
+  border: none;
+  border-left: 3px solid rgba(201, 168, 76, 0.25);
+  border-radius: 0;
+  padding: 8px 0 24px 20px;
+  margin-bottom: 20px;
+  position: relative;
+  transition: all 0.25s ease;
 
-  &:last-of-type { margin-bottom: 0; }
+  &:last-of-type {
+    margin-bottom: 0;
+    &::after { display: none; }
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 20px;
+    right: 0;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+  }
+
+  &:hover {
+    border-left-color: rgba(201, 168, 76, 0.85);
+    padding-left: 24px;
+  }
 }
 
 .entry-card-fields {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 16px;
 
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
@@ -313,29 +394,33 @@ $red:         #C62828;
 
 // ─── Empty state hint ─────────────────────────────────────────────────────────
 .empty-hint {
-  color: $text-dim;
-  font-size: 0.85rem;
+  color: $text-muted;
+  font-size: 0.88rem;
   font-style: italic;
   text-align: center;
-  padding: 12px 0 4px;
+  padding: 16px 0 8px;
 }
 
 // ─── Add button ───────────────────────────────────────────────────────────────
 .btn-add {
-  background: rgba(197, 160, 89, 0.12);
+  background: rgba(201, 168, 76, 0.08);
   color: $gold;
-  border: 1px solid rgba(197, 160, 89, 0.35);
+  border: 1px solid rgba(201, 168, 76, 0.3);
   border-radius: 8px;
-  padding: 5px 14px;
+  padding: 6px 16px;
   font-size: 0.82rem;
-  font-weight: bold;
+  font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, border-color 0.15s;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 
   &:hover {
-    background: rgba(197, 160, 89, 0.22);
-    border-color: $gold;
+    background: rgba(201, 168, 76, 0.18);
+    border-color: #C9A84C;
+    box-shadow: 0 0 10px rgba(201, 168, 76, 0.1);
   }
 
   &:disabled {
@@ -347,21 +432,21 @@ $red:         #C62828;
 // ─── Remove button ────────────────────────────────────────────────────────────
 .btn-remove {
   background: transparent;
-  color: #e57373;
-  border: 1px solid rgba(198, 40, 40, 0.4);
-  border-radius: 7px;
+  color: #ff6b6b;
+  border: 1px solid rgba(192, 57, 43, 0.3);
+  border-radius: 6px;
   padding: 5px 12px;
   font-size: 0.8rem;
-  font-weight: bold;
+  font-weight: 700;
   cursor: pointer;
   display: block;
-  margin-top: 8px;
+  margin-top: 10px;
   margin-left: auto;
-  transition: background 0.15s, color 0.15s;
+  transition: all 0.2s ease;
 
   &:hover {
-    background: rgba(198, 40, 40, 0.15);
-    border-color: $red;
+    background: rgba(192, 57, 43, 0.12);
+    border-color: #ff6b6b;
   }
 }
 
@@ -369,32 +454,35 @@ $red:         #C62828;
 .chip-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 2px;
+  gap: 8px;
+  margin-top: 4px;
 }
 
 .chip {
-  background: #1a1a1a;
+  background: rgba(255, 255, 255, 0.03);
   color: $text-muted;
   border: 1px solid $border-card;
   border-radius: 20px;
-  padding: 4px 12px;
-  font-size: 0.78rem;
-  font-weight: 500;
+  padding: 5px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: all 0.2s ease;
   white-space: nowrap;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 
   &:hover {
-    border-color: rgba(197, 160, 89, 0.4);
+    border-color: rgba(201, 168, 76, 0.4);
     color: $text-white;
+    background: rgba(255, 255, 255, 0.05);
   }
 
   &--active {
-    background: rgba(197, 160, 89, 0.15);
+    background: rgba(201, 168, 76, 0.12);
     color: $gold;
     border-color: $gold;
-    font-weight: 600;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(201, 168, 76, 0.1);
   }
 }
 
@@ -402,8 +490,8 @@ $red:         #C62828;
 .skill-picker-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 10px;
+  margin-bottom: 16px;
   flex-wrap: wrap;
 }
 
@@ -418,18 +506,19 @@ $red:         #C62828;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #141414;
+  background: rgba(16, 16, 20, 0.75);
   color: $text-white;
-  border: 1px solid $border-card;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
-  padding: 8px 12px;
+  padding: 10px 14px;
   font-size: 0.88rem;
   cursor: pointer;
   text-align: left;
-  transition: border-color 0.15s;
+  transition: all 0.2s ease;
 
   &:hover, .custom-dropdown--open & {
-    border-color: rgba(197, 160, 89, 0.5);
+    border-color: rgba(201, 168, 76, 0.5);
+    background: rgba(16, 16, 20, 0.9);
   }
 }
 
@@ -449,8 +538,8 @@ $red:         #C62828;
   top: calc(100% + 4px);
   left: 0;
   right: 0;
-  background: #1a1a1a;
-  border: 1px solid $border-card;
+  background: #18181f;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   z-index: 100;
   max-height: 200px;
@@ -463,21 +552,19 @@ $red:         #C62828;
 }
 
 .custom-dropdown-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: block;
   width: 100%;
   background: none;
   border: none;
   color: $text-white;
-  padding: 9px 14px;
+  padding: 10px 14px;
   font-size: 0.88rem;
   text-align: left;
   cursor: pointer;
-  transition: background 0.1s, color 0.1s;
+  transition: all 0.15s ease;
 
   &:hover {
-    background: rgba(197, 160, 89, 0.12);
+    background: rgba(201, 168, 76, 0.12);
     color: $gold;
   }
 
@@ -491,7 +578,7 @@ $red:         #C62828;
   border-bottom: 1px solid $border-card;
   position: sticky;
   top: 0;
-  background: #1a1a1a;
+  background: rgba(20, 20, 28, 0.98);
   z-index: 1;
 }
 
@@ -545,11 +632,12 @@ $red:         #C62828;
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(197, 160, 89, 0.12);
-  border: 1px solid rgba(197, 160, 89, 0.4);
-  border-radius: 20px;
-  padding: 4px 10px 4px 12px;
+  background: rgba(201, 168, 76, 0.12);
+  border: 1px solid rgba(201, 168, 76, 0.36);
+  border-radius: 999px;
+  padding: 5px 10px 5px 12px;
   font-size: 0.82rem;
+  box-shadow: 0 8px 18px rgba(201, 168, 76, 0.08);
 }
 
 .skill-tag-name {
@@ -571,10 +659,77 @@ $red:         #C62828;
 }
 
 // ─── Toggle row (spellcasting enable, ritual casting) ─────────────────────────
+.official-toggle-group {
+  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  margin-top: 18px;
+  padding-top: 18px;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid $border-card;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+
+  &:hover {
+    background: rgba(201, 168, 76, 0.08);
+    border-color: rgba(201, 168, 76, 0.22);
+  }
+
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: $gold;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+}
+
+.toggle-row--official {
+  .toggle-title {
+    color: $gold;
+  }
+}
+
+.toggle-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.toggle-title {
+  color: $text-white;
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.toggle-hint {
+  color: $text-muted;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
 .natural-armor-toggle-row {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid $border-card;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  transition: border-color 0.18s ease, background 0.18s ease;
+
+  &:hover {
+    background: rgba(201, 168, 76, 0.08);
+    border-color: rgba(201, 168, 76, 0.22);
+  }
 
   input[type="checkbox"] {
     width: 18px;
@@ -669,7 +824,7 @@ $red:         #C62828;
   text-align: center;
 
   &:focus-within {
-    border-color: rgba(197, 160, 89, 0.4);
+    border-color: rgba(201, 168, 76, 0.4);
   }
 }
 
@@ -678,10 +833,21 @@ $red:         #C62828;
 .spellcasting-toggle-label {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   color: $text-white;
   font-size: 0.88rem;
+  font-weight: 700;
+  padding: 10px 12px;
+  border: 1px solid $border-card;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
   cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease;
+
+  &:hover {
+    background: rgba(201, 168, 76, 0.08);
+    border-color: rgba(201, 168, 76, 0.22);
+  }
 
   input[type="checkbox"] {
     width: 18px;
@@ -694,9 +860,9 @@ $red:         #C62828;
 
 .customized-badge {
   display: inline-block;
-  background: rgba(197, 160, 89, 0.15);
+  background: rgba(201, 168, 76, 0.15);
   color: $gold;
-  border: 1px solid rgba(197, 160, 89, 0.4);
+  border: 1px solid rgba(201, 168, 76, 0.4);
   border-radius: 4px;
   font-size: 0.68rem;
   font-weight: 600;
@@ -1083,38 +1249,42 @@ $red:         #C62828;
 // ─── Tab bar ──────────────────────────────────────────────────────────────────
 .tab-bar {
   display: flex;
-  gap: 4px;
-  border-bottom: 1px solid $border;
-  margin-bottom: 20px;
+  gap: 8px;
+  border: 1px solid $border;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+  margin-bottom: 24px;
   overflow-x: auto;
-  padding-bottom: 0;
+  padding: 6px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
 
   &::-webkit-scrollbar { height: 3px; }
-  &::-webkit-scrollbar-thumb { background: $border-card; border-radius: 2px; }
+  &::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 2px; }
 }
 
 .tab-btn {
   position: relative;
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 7px;
   color: $text-muted;
   font-size: 0.85rem;
-  font-weight: 500;
-  padding: 8px 16px 10px;
+  font-weight: 800;
+  padding: 9px 16px;
   cursor: pointer;
   white-space: nowrap;
-  transition: color 0.15s, border-color 0.15s;
-  margin-bottom: -1px;
+  transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
 
   &:hover {
     color: $text-white;
+    background: rgba(255, 255, 255, 0.04);
   }
 
   &--active {
     color: $gold;
-    border-bottom-color: $gold;
-    font-weight: 600;
+    background: rgba(201, 168, 76, 0.13);
+    border-color: rgba(201, 168, 76, 0.32);
+    box-shadow: 0 8px 18px rgba(201, 168, 76, 0.08);
   }
 }
 
@@ -1138,24 +1308,26 @@ $red:         #C62828;
 .form-actions {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 20px;
+  gap: 12px;
+  margin-top: 24px;
 }
 
 .btn-submit {
   --background: #{$gold};
   --background-activated: #{$gold-hover};
   --color: #121212;
-  --border-radius: 12px;
-  font-weight: bold;
+  --border-radius: 8px;
+  font-weight: 900;
   font-size: 1rem;
+  min-height: 48px;
+  filter: drop-shadow(0 12px 26px rgba(201, 168, 76, 0.18));
 }
 
 .btn-cancel {
   --color: #{$gold};
   --border-color: #{$gold};
-  --border-radius: 12px;
-  font-weight: bold;
+  --border-radius: 8px;
+  font-weight: 800;
   font-size: 1rem;
 }
 

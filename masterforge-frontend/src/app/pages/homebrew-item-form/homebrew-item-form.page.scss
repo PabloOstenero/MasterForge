@@ -1,86 +1,115 @@
 @use 'src/theme/variables' as *;
 
-// ─── Design tokens ────────────────────────────────────────────────────────────
-$gold:        #C5A059;
-$gold-hover:  #d9b96e;
-$bg-page:     #121212;
-$bg-surface:  #1E1E1E;
-$bg-card:     #1a1a1a;
-$border:      #2e2e2e;
-$border-card: #383838;
-$text-white:  #f0e6d3;
-$text-muted:  #888;
-$text-dim:    #555;
-$red:         #C62828;
-
-// ─── Host ─────────────────────────────────────────────────────────────────────
 :host {
   display: block;
 }
 
-// ─── Page wrapper ─────────────────────────────────────────────────────────────
 .homebrew-form-wrapper {
   min-height: 100%;
-  background: $bg-page;
-  color: $text-white;
+  background: radial-gradient(circle at 50% 0%, #1e1e28 0%, #101014 100%);
+  color: #f0e6d3;
 }
 
-// ─── Top bar ──────────────────────────────────────────────────────────────────
 .homebrew-form-topbar {
   display: flex;
   align-items: center;
   gap: 16px;
   padding: 14px 20px 12px;
-  background: $bg-page;
-  border-bottom: 1px solid $border;
+  background: rgba(18, 18, 24, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(201, 168, 76, 0.25);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.05);
   position: sticky;
   top: 0;
   z-index: 10;
+
+  @media (max-width: 480px) {
+    padding: 10px 12px;
+    gap: 8px;
+  }
 }
 
 .back-btn {
   background: none;
   border: none;
-  color: $gold;
-  font-size: 0.9rem;
+  color: #c9a84c;
+  font-size: 0.95rem;
+  font-weight: 700;
   cursor: pointer;
-  padding: 4px 0;
+  padding: 6px 12px;
+  border-radius: 8px;
   white-space: nowrap;
   flex-shrink: 0;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 
-  &:hover { color: $gold-hover; }
-}
+  &:hover {
+    color: #dfbc5e;
+    background: rgba(201, 168, 76, 0.15);
+    transform: translateX(-2px);
+  }
 
-.form-title {
-  color: $text-white;
-  font-size: 1.15rem;
-  font-weight: bold;
-  margin: 0;
-  flex: 1;
-  text-align: center;
-  padding-right: 60px; // compensate for back-btn width so title looks centered
-}
-
-// ─── Content area ─────────────────────────────────────────────────────────────
-.homebrew-form-content {
-  padding: 20px 16px 40px;
-  max-width: 1280px;
-  margin: 0 auto;
-}
-
-// ─── Form grid (two columns on wide screens) ──────────────────────────────────
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-
-  @media (min-width: 900px) {
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+  @media (max-width: 480px) {
+    padding: 4px 8px;
+    font-size: 0.85rem;
   }
 }
 
-// Column assignments
+.form-title {
+  color: #f0e6d3;
+  font-size: 1.3rem;
+  font-weight: 800;
+  font-family: 'Cinzel', 'Outfit', serif;
+  letter-spacing: 1px;
+  margin: 0;
+  flex: 1;
+  text-align: center;
+  padding-right: 90px;
+  text-shadow: 0 0 10px rgba(201, 168, 76, 0.15);
+
+  @media (max-width: 480px) {
+    font-size: 1.1rem;
+    padding-right: 0;
+    text-align: right;
+  }
+}
+
+.homebrew-form-content {
+  padding: 24px 20px 60px;
+  max-width: 1200px;
+  margin: 0 auto;
+  animation: formFadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+
+  @media (max-width: 576px) {
+    padding: 16px 12px 40px;
+  }
+}
+
+@keyframes formFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+
+  @media (min-width: 900px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+}
+
 .col-left {
   @media (min-width: 900px) {
     grid-column: 1;
@@ -95,356 +124,491 @@ $red:         #C62828;
 
 .col-full {
   @media (min-width: 900px) {
-    grid-column: 1 / -1; // span both columns
+    grid-column: 1 / -1;
   }
 }
 
-// ─── Error banner ─────────────────────────────────────────────────────────────
 .form-error-banner {
-  background: rgba(198, 40, 40, 0.12);
-  border: 1px solid rgba(198, 40, 40, 0.4);
-  border-radius: 8px;
-  color: #e57373;
-  font-size: 0.9rem;
-  padding: 10px 14px;
-  margin-bottom: 20px;
+  background: rgba(192, 57, 43, 0.12);
+  border: 1px solid rgba(192, 57, 43, 0.45);
+  border-radius: 10px;
+  color: #ff6b6b;
+  font-size: 0.92rem;
+  font-weight: 600;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 15px rgba(192, 57, 43, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-// ─── Form sections ────────────────────────────────────────────────────────────
 .form-section {
-  background: $bg-surface;
-  border: 1px solid $border;
-  border-radius: 12px;
-  padding: 20px;
+  background: rgba(30, 30, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-left: 3px solid rgba(201, 168, 76, 0.35);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  margin-bottom: 8px;
+  &:hover {
+    border-left-color: rgba(201, 168, 76, 0.85);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), 0 0 15px rgba(201, 168, 76, 0.08);
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 480px) {
+    padding: 16px;
+    border-radius: 10px;
+  }
 }
 
 .section-title {
-  color: $gold;
-  font-size: 0.8rem;
-  font-weight: bold;
+  color: #c9a84c;
+  font-size: 0.85rem;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin: 0 0 16px;
+  letter-spacing: 0.12em;
+  margin: 0 0 20px;
   display: flex;
   align-items: center;
   gap: 8px;
+  font-family: 'Outfit', sans-serif;
+  text-shadow: 0 0 8px rgba(201, 168, 76, 0.2);
 }
 
 .section-badge {
-  color: $text-dim;
+  color: #8c8c8c;
   font-size: 0.7rem;
-  font-weight: normal;
-  text-transform: lowercase;
-  letter-spacing: 0;
-  border: 1px solid $border-card;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 4px;
-  padding: 1px 6px;
+  padding: 2px 6px;
+  margin-left: 6px;
 }
 
 .section-hint {
-  color: $text-muted;
-  font-size: 0.8rem;
-  margin: -8px 0 14px;
-  line-height: 1.4;
+  color: #8c8c8c;
+  font-size: 0.82rem;
+  margin: -12px 0 18px;
+  line-height: 1.45;
 }
 
-// Section header with inline "Añadir" button
 .section-header-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  gap: 14px;
+  margin-bottom: 18px;
 
   .section-title {
     margin-bottom: 0;
   }
 }
 
-// ─── Field group ──────────────────────────────────────────────────────────────
 .field-group {
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 
-  &:last-child { margin-bottom: 0; }
+  &:last-child {
+    margin-bottom: 0;
+  }
 
   &--half {
     max-width: 50%;
 
-    @media (max-width: 480px) { max-width: 100%; }
+    @media (max-width: 480px) {
+      max-width: 100%;
+    }
   }
 
   &--bonus {
     max-width: 140px;
     flex-shrink: 0;
 
-    @media (max-width: 480px) { max-width: 100%; }
+    @media (max-width: 480px) {
+      max-width: 100%;
+    }
   }
 }
 
-// Two-column row for paired fields
 .field-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 16px;
 
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 }
 
 .field-label {
   display: block;
-  color: $text-muted;
-  font-size: 0.78rem;
+  color: #8c8c8c;
+  font-size: 0.76rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 5px;
-  font-weight: bold;
+  letter-spacing: 0.07em;
+  margin-bottom: 6px;
+  font-weight: 700;
 
-  .required { color: $gold; }
+  .required {
+    color: #c9a84c;
+    margin-left: 2px;
+  }
 }
 
 .optional-tag {
-  color: $text-dim;
+  color: #555566;
   font-size: 0.7rem;
   font-weight: normal;
   text-transform: lowercase;
   letter-spacing: 0;
+  margin-left: 4px;
 }
 
-// ─── Inputs ───────────────────────────────────────────────────────────────────
 .forge-input {
-  --background: #141414;
-  --color: #{$text-white};
-  --placeholder-color: #{$text-dim};
+  --background: rgba(16, 16, 22, 0.8);
+  --color: #f0e6d3;
+  --placeholder-color: #555566;
   --border-radius: 8px;
-  --padding-start: 12px;
-  --padding-end: 12px;
-  border: 1px solid $border-card;
+  --padding-start: 14px;
+  --padding-end: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
-  transition: border-color 0.15s;
+  transition: all 0.25s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+
+  &:hover {
+    border-color: rgba(201, 168, 76, 0.35);
+  }
 
   &:focus-within {
-    border-color: rgba(197, 160, 89, 0.5);
+    border-color: #c9a84c;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 12px rgba(201, 168, 76, 0.25);
   }
 
   &.input-error {
-    border-color: $red;
+    border-color: rgba(192, 57, 43, 0.8) !important;
+    box-shadow: 0 0 8px rgba(192, 57, 43, 0.2) !important;
   }
 }
 
-.forge-textarea {
-  --background: #141414;
-  --color: #{$text-white};
-  --placeholder-color: #{$text-dim};
-  --border-radius: 8px;
-  --padding-start: 12px;
-  --padding-end: 12px;
-  --padding-top: 10px;
-  --padding-bottom: 10px;
-  border: 1px solid $border-card;
-  border-radius: 8px;
-  transition: border-color 0.15s;
-
-  &:focus-within {
-    border-color: rgba(197, 160, 89, 0.5);
-  }
+ion-textarea.forge-input {
+  --padding-top: 12px;
+  --padding-bottom: 12px;
 }
 
-// ─── Native select ────────────────────────────────────────────────────────────
 .forge-select-native {
-  background: #141414;
-  color: $text-white;
-  border: 1px solid $border-card;
+  background: rgba(16, 16, 22, 0.8);
+  color: #f0e6d3;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
-  padding: 8px 12px;
+  padding: 10px 14px;
   font-size: 0.88rem;
   cursor: pointer;
   outline: none;
   width: 100%;
-  transition: border-color 0.15s;
+  transition: all 0.25s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
 
-  option { background: #1e1e1e; }
+  option {
+    background: #18181f;
+    color: #f0e6d3;
+  }
 
-  &:focus { border-color: rgba(197, 160, 89, 0.5); }
+  &:hover {
+    border-color: rgba(201, 168, 76, 0.35);
+  }
+
+  &:focus {
+    border-color: #c9a84c;
+    box-shadow: 0 0 12px rgba(201, 168, 76, 0.25);
+  }
+
+  &.input-error {
+    border-color: rgba(192, 57, 43, 0.8);
+  }
 }
 
-// ─── Error message ────────────────────────────────────────────────────────────
 .error-message {
-  color: $red;
+  color: #ff6b6b;
   font-size: 0.8rem;
-  margin-top: 4px;
+  font-weight: 500;
+  margin-top: 5px;
   padding-left: 2px;
 }
 
-// ─── Entry cards (special abilities) ─────────────────────────────────────────
-.entry-card {
-  background: $bg-card;
-  border: 1px solid $border-card;
-  border-radius: 10px;
-  padding: 14px;
-  margin-bottom: 10px;
-
-  &:last-of-type { margin-bottom: 0; }
+.field-hint {
+  font-size: 0.8rem;
+  color: #8c8c8c;
+  margin: 6px 0 0;
+  font-style: italic;
+  line-height: 1.4;
 }
 
-// Two-column layout inside entry cards
-.entry-card-fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+.toggle-row {
+  display: flex;
+  align-items: flex-start;
   gap: 12px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
+  &:hover {
+    border-color: rgba(201, 168, 76, 0.35);
+    background: rgba(201, 168, 76, 0.05);
+  }
+
+  input[type='checkbox'] {
+    width: 18px;
+    height: 18px;
+    margin: 1px 0 0;
+    accent-color: #c9a84c;
+    cursor: pointer;
+    flex-shrink: 0;
   }
 }
 
-// ─── Chip multi-select (damage types / weapon properties) ────────────────────
+.toggle-row--official {
+  border-color: rgba(255, 159, 10, 0.28);
+  background: rgba(255, 159, 10, 0.07);
+
+  .toggle-title {
+    color: #ffb340;
+  }
+}
+
+.toggle-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.toggle-title {
+  color: #f0e6d3;
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.toggle-hint {
+  color: #8c8c8c;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.official-toggle-group {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
 .chip-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 2px;
+  gap: 8px;
+  margin-top: 4px;
 }
 
 .chip {
-  background: #1a1a1a;
-  color: $text-muted;
-  border: 1px solid $border-card;
+  background: rgba(255, 255, 255, 0.03);
+  color: #8c8c8c;
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 20px;
-  padding: 4px 12px;
-  font-size: 0.78rem;
-  font-weight: 500;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
 
   &:hover {
-    border-color: rgba(197, 160, 89, 0.4);
-    color: $text-white;
+    border-color: rgba(201, 168, 76, 0.45);
+    color: #fff;
+    background: rgba(201, 168, 76, 0.06);
+    transform: translateY(-1px);
   }
 
   &--active {
-    background: rgba(197, 160, 89, 0.15);
-    color: $gold;
-    border-color: $gold;
-    font-weight: 600;
+    background: linear-gradient(135deg, rgba(201, 168, 76, 0.2) 0%, rgba(201, 168, 76, 0.05) 100%);
+    color: #c9a84c;
+    border-color: #c9a84c;
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(201, 168, 76, 0.15);
   }
 }
 
-// ─── Add button (inline in section header) ────────────────────────────────────
-.btn-add {
-  background: rgba(197, 160, 89, 0.12);
-  color: $gold;
-  border: 1px solid rgba(197, 160, 89, 0.35);
-  border-radius: 8px;
-  padding: 5px 14px;
-  font-size: 0.82rem;
-  font-weight: bold;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s, border-color 0.15s;
-
-  &:hover {
-    background: rgba(197, 160, 89, 0.22);
-    border-color: $gold;
-  }
-}
-
-// ─── Remove button ────────────────────────────────────────────────────────────
-.btn-remove {
+.entry-card {
   background: transparent;
-  color: #e57373;
-  border: 1px solid rgba(198, 40, 40, 0.4);
-  border-radius: 7px;
-  padding: 5px 12px;
-  font-size: 0.8rem;
-  font-weight: bold;
-  cursor: pointer;
-  display: block;
-  margin-top: 8px;
-  margin-left: auto;
-  transition: background 0.15s, color 0.15s;
+  border: none;
+  border-left: 3px solid rgba(201, 168, 76, 0.25);
+  border-radius: 0;
+  padding: 8px 0 20px 16px;
+  margin-bottom: 20px;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 16px;
+    right: 0;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+  }
+
+  &:last-of-type {
+    margin-bottom: 0;
+
+    &::after {
+      display: none;
+    }
+  }
 
   &:hover {
-    background: rgba(198, 40, 40, 0.15);
-    border-color: $red;
+    border-left-color: rgba(201, 168, 76, 0.85);
+    padding-left: 20px;
   }
 }
 
-// ─── Empty hint ───────────────────────────────────────────────────────────────
+.entry-card-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
 .empty-hint {
-  color: $text-dim;
+  color: #555566;
   font-size: 0.85rem;
   font-style: italic;
   text-align: center;
-  padding: 12px 0 4px;
+  padding: 16px 0 8px;
 }
 
-// ─── Submit button row ────────────────────────────────────────────────────────
+.btn-add {
+  background: rgba(201, 168, 76, 0.12);
+  color: #c9a84c;
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(201, 168, 76, 0.22);
+    border-color: #c9a84c;
+    transform: translateY(-1px);
+  }
+}
+
+.btn-remove {
+  background: transparent;
+  color: #ff6b6b;
+  border: 1px solid rgba(192, 57, 43, 0.4);
+  border-radius: 7px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: block;
+  margin-top: 10px;
+  margin-left: auto;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(192, 57, 43, 0.15);
+    border-color: #ff6b6b;
+  }
+}
 
 .btn-submit {
-  --background: #{$gold};
-  --background-activated: #{$gold-hover};
-  --color: #121212;
-  --border-radius: 12px;
-  font-weight: bold;
+  --background: linear-gradient(135deg, #c9a84c 0%, #a3822a 100%);
+  --background-hover: linear-gradient(135deg, #dfbc5e 0%, #b89535 100%);
+  --background-activated: linear-gradient(135deg, #dfbc5e 0%, #b89535 100%);
+  --color: #101014;
+  --border-radius: 10px;
+  font-weight: 800;
   font-size: 1rem;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin: 16px 0 0;
+  height: 48px;
+  box-shadow: 0 4px 14px rgba(201, 168, 76, 0.25);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(201, 168, 76, 0.4);
+    transform: translateY(-1px);
+  }
+
+  &::part(native) {
+    font-weight: 800;
+  }
 }
 
-// ─── Dice row (structured damage input) ──────────────────────────────────────
 .dice-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
-.dice-count {
-  flex: 0 0 60px;
+.dice-count,
+.dice-bonus {
+  flex: 0 0 70px;
   min-width: 0;
 }
 
 .die-type {
-  flex: 0 0 70px;
+  flex: 0 0 80px;
 }
 
 .dice-plus {
-  color: $text-muted;
-  font-size: 0.9rem;
+  color: #8c8c8c;
+  font-size: 0.95rem;
+  font-weight: 700;
   flex-shrink: 0;
 }
 
-.dice-bonus {
-  flex: 0 0 60px;
-  min-width: 0;
-}
-
-// ─── Stat & HP Buffs Section ──────────────────────────────────────────────────
 .forge-grid-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-top: 5px;
+  gap: 12px;
+  margin-top: 6px;
+
+  @media (max-width: 560px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
 }
 
 .mini-field {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  
-  label {
-    font-size: 0.65rem;
-    color: #888;
-    text-transform: uppercase;
-    font-weight: bold;
-    margin-left: 5px;
-  }
-}
+  gap: 4px;
 
-.field-hint {
-  font-size: 0.8rem;
-  color: #888;
-  margin-top: 5px;
-  font-style: italic;
-  line-height: 1.4;
+  label {
+    color: #f0e6d3;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-align: center;
+    letter-spacing: 0.04em;
+  }
 }

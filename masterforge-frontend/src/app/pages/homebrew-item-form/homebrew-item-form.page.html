@@ -5,8 +5,12 @@
     <h1 class="form-title">{{ editMode ? 'Editar Objeto' : 'Nuevo Objeto' }}</h1>
   </div>
 
+  <div class="homebrew-form-content">
+
   @if (error) {
-    <div class="form-error-banner">{{ error }}</div>
+    <div class="form-error-banner">
+      <span>! {{ error }}</span>
+    </div>
   }
 
   <form [formGroup]="form" (ngSubmit)="submit()">
@@ -76,21 +80,26 @@
           </div>
 
           <div class="field-group">
-            <label class="field-label">Requiere Sintonización</label>
-            <input type="checkbox" formControlName="requiresAttunement" />
+            <label class="toggle-row">
+              <input type="checkbox" formControlName="requiresAttunement" />
+              <span class="toggle-copy">
+                <span class="toggle-title">Requiere Sintonización</span>
+                <span class="toggle-hint">Marca esto si el objeto necesita vincularse con su portador.</span>
+              </span>
+            </label>
           </div>
 
           @if (isManagerOrAdmin) {
-            <div class="field-group" style="margin-top: 1rem; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 1rem;">
-              <label class="field-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input type="checkbox" formControlName="isOfficial" style="width: 18px; height: 18px;" data-testid="is-official-toggle">
-                <span style="font-weight: 600; color: #ff9f0a; display: flex; align-items: center; gap: 4px;">
-                  ⭐ Contenido Oficial (System Core)
+            <div class="field-group official-toggle-group">
+              <label class="toggle-row toggle-row--official">
+                <input type="checkbox" formControlName="isOfficial" data-testid="is-official-toggle">
+                <span class="toggle-copy">
+                  <span class="toggle-title">Contenido Oficial (System Core)</span>
+                  <span class="toggle-hint">
+                    Si se marca, este homebrew se publicará como contenido oficial del sistema sin autor asociado.
+                  </span>
                 </span>
               </label>
-              <p style="font-size: 0.85rem; color: #8a8a8f; margin: 4px 0 0 26px;">
-                Si se marca, este homebrew se publicará como contenido oficial del sistema sin autor asociado.
-              </p>
             </div>
           }
         </div>
@@ -244,8 +253,13 @@
             </div>
 
             <div class="field-group">
-              <label class="field-label">Permite Bonificador de DES</label>
-              <input type="checkbox" formControlName="dexBonus" />
+              <label class="toggle-row">
+                <input type="checkbox" formControlName="dexBonus" />
+                <span class="toggle-copy">
+                  <span class="toggle-title">Permite Bonificador de DES</span>
+                  <span class="toggle-hint">Aplica el modificador de destreza a la CA si corresponde.</span>
+                </span>
+              </label>
             </div>
 
             <div class="field-group">
@@ -254,8 +268,13 @@
             </div>
 
             <div class="field-group">
-              <label class="field-label">Desventaja en Sigilo</label>
-              <input type="checkbox" formControlName="stealthDisadvantage" />
+              <label class="toggle-row">
+                <input type="checkbox" formControlName="stealthDisadvantage" />
+                <span class="toggle-copy">
+                  <span class="toggle-title">Desventaja en Sigilo</span>
+                  <span class="toggle-hint">La armadura impone desventaja en tiradas de sigilo.</span>
+                </span>
+              </label>
             </div>
 
             <div class="field-group">
@@ -457,5 +476,7 @@
 
     </div><!-- /form-grid -->
   </form>
+
+  </div>
 
 </div>
