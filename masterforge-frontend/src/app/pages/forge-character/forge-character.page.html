@@ -690,63 +690,40 @@
         }
 
         @if (!spellsLoading) {
-          <div class="skills-count">
-            <span [class.skills-count--complete]="selectedCantripsCount === cantripsAllowed">
-              Trucos: {{ selectedCantripsCount }} / {{ cantripsAllowed }}
-            </span>
-            <span style="margin-left: 16px;" [class.skills-count--complete]="selectedNonCantripsCount === spellsAllowed">
-              Conjuros: {{ selectedNonCantripsCount }} / {{ spellsAllowed }}
-            </span>
+          <div class="spells-summary-card">
+            <div class="spells-summary-row">
+              <span [class.summary-complete]="selectedCantripsCount === cantripsAllowed">
+                🎭 Trucos: {{ selectedCantripsCount }} / {{ cantripsAllowed }}
+              </span>
+              <span [class.summary-complete]="selectedNonCantripsCount === spellsAllowed">
+                ✨ Conjuros: {{ selectedNonCantripsCount }} / {{ spellsAllowed }}
+              </span>
+            </div>
           </div>
 
-          <!-- Cantrips -->
-          @if (cantripsAllowed > 0) {
-            <h3 class="subsection-title">Trucos (Nivel 0)</h3>
-            <div class="skills-list">
-              @for (spell of availableCantrips; track spell.id) {
-                <button
-                  class="skill-option"
-                  [class.skill-selected]="isSpellSelected(spell.id)"
-                  [class.skill-disabled]="isSpellDisabled(spell.id, true)"
-                  [disabled]="isSpellDisabled(spell.id, true)"
-                  (click)="toggleSpell(spell.id)">
-                  <span class="skill-name">
-                    {{ spell.name }}
-                    @if (spell.author) {
-                      <span class="homebrew-badge">Homebrew</span>
-                    }
-                  </span>
-                  <ion-icon name="information-circle-outline" 
-                    style="color: #C5A059; margin-left: auto; cursor: pointer; font-size: 1.4rem;"
-                    (click)="openDetail($event, spell, 'SPELL')"></ion-icon>
-                </button>
-              }
-            </div>
-          }
+          <button ion-button (click)="openSpellsModal()" class="spell-modal-btn">
+            <ion-icon name="sparkles" style="margin-right: 8px;"></ion-icon>
+            Seleccionar Conjuros
+          </button>
 
-          <!-- Spells -->
-          @if (spellsAllowed > 0) {
-            <h3 class="subsection-title">Conjuros (Nivel 1+)</h3>
-            <div class="skills-list">
-              @for (spell of availableNonCantrips; track spell.id) {
-                <button
-                  class="skill-option"
-                  [class.skill-selected]="isSpellSelected(spell.id)"
-                  [class.skill-disabled]="isSpellDisabled(spell.id, false)"
-                  [disabled]="isSpellDisabled(spell.id, false)"
-                  (click)="toggleSpell(spell.id)">
-                  <span class="skill-name">
-                    {{ spell.name }}
-                    <span style="opacity:0.6;font-size:0.85em;margin-left:4px;margin-right:4px;">Nivel {{ spell.level }}</span>
-                    @if (spell.author) {
-                      <span class="homebrew-badge">Homebrew</span>
-                    }
-                  </span>
-                  <ion-icon name="information-circle-outline" 
-                    style="color: #C5A059; margin-left: auto; cursor: pointer; font-size: 1.4rem;"
-                    (click)="openDetail($event, spell, 'SPELL')"></ion-icon>
-                </button>
-              }
+          @if (formData.selectedSpells.length > 0) {
+            <div class="selected-spells-preview">
+              <h3 class="subsection-title">Conjuros Seleccionados</h3>
+              <div class="selected-spells-list">
+                @for (spellId of formData.selectedSpells; track spellId) {
+                  @let spell = getSpellById(spellId);
+                  @if (spell) {
+                    <div class="selected-spell-chip">
+                      <span>{{ spell.name }}
+                        @if (spell.level > 0) {
+                          <span class="spell-level-badge">L{{ spell.level }}</span>
+                        }
+                      </span>
+                      <ion-icon name="close-circle" (click)="toggleSpell(spellId)"></ion-icon>
+                    </div>
+                  }
+                }
+              </div>
             </div>
           }
 
@@ -756,6 +733,124 @@
         }
       </div>
     }
+
+    <!-- Spell Selection Modal -->
+    <ion-modal #spellsModal class="spells-modal">
+      <ng-template>
+        <ion-header class="spells-modal-header">
+          <ion-toolbar>
+            <ion-title>Seleccionar Conjuros</ion-title>
+            <ion-buttons slot="end">
+              <ion-button (click)="closeSpellsModal()">
+                <ion-icon name="close"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+          
+          <!-- Search and filters -->
+          <div class="spells-search-container">
+            <ion-searchbar 
+              [(ngModel)]="spellSearchQuery"
+              placeholder="Buscar conjuros..."
+              (ionInput)="onSpellSearch($event)"
+              class="spells-searchbar"></ion-searchbar>
+          </div>
+        </ion-header>
+
+        <ion-content class="spells-modal-content">
+          <!-- Cantrips section -->
+          @if (cantripsAllowed > 0 && filteredCantrips.length > 0) {
+            <div class="spell-level-section">
+              <button 
+                class="spell-level-header"
+                (click)="toggleSpellCategory('cantrips')"
+                [class.expanded]="expandedSpellCategories['cantrips']">
+                <ion-icon 
+                  [name]="expandedSpellCategories['cantrips'] ? 'chevron-down' : 'chevron-forward'"
+                  class="category-icon"></ion-icon>
+                <span>🎭 Trucos ({{ selectedCantripsCount }}/{{ cantripsAllowed }})</span>
+              </button>
+
+              @if (expandedSpellCategories['cantrips']) {
+                <div class="spell-level-content">
+                  @for (spell of filteredCantrips; track spell.id) {
+                    <button
+                      class="spell-option-item"
+                      [class.spell-selected]="isSpellSelected(spell.id)"
+                      [class.spell-disabled]="isSpellDisabled(spell.id, true)"
+                      [disabled]="isSpellDisabled(spell.id, true)"
+                      (click)="toggleSpell(spell.id)">
+                      <div class="spell-option-info">
+                        <span class="spell-name">{{ spell.name }}</span>
+                        @if (spell.author) {
+                          <span class="homebrew-badge">Homebrew</span>
+                        }
+                      </div>
+                      @if (isSpellSelected(spell.id)) {
+                        <ion-icon name="checkmark-circle" color="success"></ion-icon>
+                      }
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Spell levels 1-9 -->
+          @for (level of [1,2,3,4,5,6,7,8,9]; track level) {
+            @let spellsAtLevel = filteredSpellsByLevel[level];
+            @if (spellsAtLevel && spellsAtLevel.length > 0 && level <= maxSpellLevel) {
+              <div class="spell-level-section">
+                <button 
+                  class="spell-level-header"
+                  (click)="toggleSpellCategory('level' + level)"
+                  [class.expanded]="expandedSpellCategories['level' + level]">
+                  <ion-icon 
+                    [name]="expandedSpellCategories['level' + level] ? 'chevron-down' : 'chevron-forward'"
+                    class="category-icon"></ion-icon>
+                  <span>✨ Nivel {{ level }} ({{ getSelectedSpellCountByLevel(level) }}/{{ spellsAllowed }})</span>
+                </button>
+
+                @if (expandedSpellCategories['level' + level]) {
+                  <div class="spell-level-content">
+                    @for (spell of spellsAtLevel; track spell.id) {
+                      <button
+                        class="spell-option-item"
+                        [class.spell-selected]="isSpellSelected(spell.id)"
+                        [class.spell-disabled]="isSpellDisabled(spell.id, false)"
+                        [disabled]="isSpellDisabled(spell.id, false)"
+                        (click)="toggleSpell(spell.id)">
+                        <div class="spell-option-info">
+                          <span class="spell-name">{{ spell.name }}</span>
+                          @if (spell.author) {
+                            <span class="homebrew-badge">Homebrew</span>
+                          }
+                        </div>
+                        @if (isSpellSelected(spell.id)) {
+                          <ion-icon name="checkmark-circle" color="success"></ion-icon>
+                        }
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          }
+
+          @if (hasNoFilteredSpells()) {
+            <div class="no-spells-message">
+              <p>No se encontraron conjuros que coincidan con tu búsqueda</p>
+            </div>
+          }
+        </ion-content>
+
+        <ion-footer class="spells-modal-footer">
+          <div class="spells-footer-content">
+            <ion-button fill="outline" (click)="closeSpellsModal()">Cerrar</ion-button>
+          </div>
+        </ion-footer>
+      </ng-template>
+    </ion-modal>
 
     <!-- ── STEP: FEATURE OPTIONS ─────────────────────────────────────────── -->
     @if (currentStepName === 'feature-options') {
@@ -776,7 +871,7 @@
               <p class="feature-choice-desc">{{ feature.description }}</p>
 
               <div class="options-grid">
-                @for (opt of feature.filteredOptions; track opt.name) {
+                @for (opt of feature.filteredOptions; track $index) {
                   <button
                     class="skill-option"
                     [class.skill-selected]="isFeatureOptionSelected(feature.name, opt.name)"

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -6,11 +6,12 @@ import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonButtons, IonBackButton,
   IonIcon, IonItem, IonLabel, IonInput, IonSelect, IonSelectOption,
   IonGrid, IonRow, IonCol, IonSpinner, IonBadge, IonList,
-  IonSegment, IonSegmentButton, IonModal
+  IonSegment, IonSegmentButton, IonModal, IonSearchbar, IonFooter
 } from '@ionic/angular/standalone';
 import { 
   informationCircleOutline, sparkles, flashOutline, shield, flaskOutline, briefcase, bookOutline,
-  checkmarkCircle, peopleOutline, ribbonOutline, addOutline, addCircleOutline, removeCircleOutline, trashOutline
+  checkmarkCircle, peopleOutline, ribbonOutline, addOutline, addCircleOutline, removeCircleOutline, trashOutline,
+  chevronDown, chevronForward, closeCircle, checkmarkCircleOutline, close
 } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
 import { getProficiencyBonus, getModifier, calculatePassive, calculateMulticlassHp } from '../../utils/dnd-utils';
@@ -194,7 +195,7 @@ export function calculateHp(hitDie: number, con: number): number {
     IonButton, IonButtons, IonBackButton,
     IonIcon, IonItem, IonLabel, IonInput, IonSelect, IonSelectOption,
     IonGrid, IonRow, IonCol, IonSpinner, IonBadge, IonList,
-    IonSegment, IonSegmentButton, IonModal
+    IonSegment, IonSegmentButton, IonModal, IonSearchbar, IonFooter
   ],
   encapsulation: ViewEncapsulation.None
 })
@@ -418,6 +419,14 @@ export class ForgeCharacterPage implements OnInit {
   allSpells: any[] = [];
   spellsLoading: boolean = false;
   spellsError: boolean = false;
+  spellSearchQuery: string = '';
+  filteredCantrips: any[] = [];
+  filteredSpellsByLevel: Record<number, any[]> = {};
+  expandedSpellCategories: Record<string, boolean> = {
+    'cantrips': true,
+    'level1': true
+  };
+  @ViewChild('spellsModal') spellsModal: any;
 
   // ─── Equipment step state ───────────────────────────────────────────────────
   itemCatalog: ItemSummary[] = [];
@@ -444,7 +453,12 @@ export class ForgeCharacterPage implements OnInit {
       'add-outline': addOutline,
       'add-circle-outline': addCircleOutline,
       'remove-circle-outline': removeCircleOutline,
-      'trash-outline': trashOutline
+      'trash-outline': trashOutline,
+      'chevron-down': chevronDown,
+      'chevron-forward': chevronForward,
+      'close-circle': closeCircle,
+      'checkmark-circle-outline': checkmarkCircleOutline,
+      'close': close
     });
   }
 
@@ -1383,6 +1397,70 @@ export class ForgeCharacterPage implements OnInit {
     } else {
       this.formData.selectedSpells.push(spellId);
     }
+  }
+
+  // ─── Spell Modal methods ───────────────────────────────────────────────────────
+
+  openSpellsModal(): void {
+    this.updateFilteredSpells();
+    this.spellsModal?.present();
+  }
+
+  closeSpellsModal(): void {
+    this.spellsModal?.dismiss();
+  }
+
+  onSpellSearch(event: any): void {
+    this.updateFilteredSpells();
+  }
+
+  updateFilteredSpells(): void {
+    const query = this.spellSearchQuery.toLowerCase();
+
+    // Filter cantrips
+    this.filteredCantrips = this.availableCantrips.filter(s =>
+      s.name.toLowerCase().includes(query)
+    );
+
+    // Filter spells by level
+    this.filteredSpellsByLevel = {};
+    for (let level = 1; level <= 9; level++) {
+      const spellsAtLevel = this.availableNonCantrips.filter(s => s.level === level);
+      this.filteredSpellsByLevel[level] = spellsAtLevel.filter(s =>
+        s.name.toLowerCase().includes(query)
+      );
+    }
+  }
+
+  toggleSpellCategory(categoryId: string): void {
+    this.expandedSpellCategories[categoryId] = !this.expandedSpellCategories[categoryId];
+  }
+
+  hasNoFilteredSpells(): boolean {
+    const hasCantrips = this.filteredCantrips.length > 0;
+    const hasSpells = Object.values(this.filteredSpellsByLevel).some(spells => spells && spells.length > 0);
+    return !hasCantrips && !hasSpells;
+  }
+
+  getSelectedSpellCountByLevel(level: number): number {
+    return this.formData.selectedSpells.filter(spellId => {
+      const spell = this.getSpellById(spellId);
+      return spell && spell.level === level;
+    }).length;
+  }
+
+  getSpellSlotsForLevel(level: number): number {
+    const cls = this.formData.selectedClass;
+    const sc = this.formData.selectedSubclass?.subclassFeatures?.spellcasting || cls?.classFeatures?.spellcasting;
+    if (!sc || !sc.spellSlots?.slots) return 0;
+
+    const charLevel = this.formData.level;
+    const idx = Math.min(Math.max(charLevel - 1, 0), 19);
+    const slotsAtLevel = sc.spellSlots.slots[idx] || [];
+    
+    // spellSlots.slots is typically: [1st level slots, 2nd level slots, ..., 9th level slots]
+    // So index 0 = level 1 spells, index 1 = level 2 spells, etc.
+    return slotsAtLevel[level - 1] || 0;
   }
 
   /** Submit the character to the backend. */

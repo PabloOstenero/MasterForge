@@ -1,14 +1,20 @@
-// ─── Theme variables ──────────────────────────────────────────────────────────
-:root {
-  --bg-dark: #121212;
-  --bg-card: #1E1E1E;
-  --gold: #C5A059;
+// ─── Design System ────────────────────────────────────────────────────────────
+@use '../../../theme/variables' as *;
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+.forge-content {
+  --background: #{$bg-primary};
+  --overflow: auto;
 }
 
 // ─── Header & toolbar ─────────────────────────────────────────────────────────
 .header-toolbar {
-  --background: #121212;
-  --color: #C5A059;
+  --background: #{$bg-primary};
+  --color: #{$accent-gold};
   --border-width: 0;
 }
 
@@ -17,119 +23,138 @@
   font-weight: bold;
   font-size: 1.6rem;
   margin-top: 10px;
+  color: $accent-gold;
 }
 
 // ─── Step indicator ───────────────────────────────────────────────────────────
 .step-indicator {
-  background: #121212;
-  padding: 8px 16px 12px;
-  border-bottom: 1px solid #333;
+  background: $bg-primary;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .step-progress {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 6px;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .step-dot {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background: #333;
-  border: 1px solid #555;
-  transition: background 0.2s, border-color 0.2s;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
 
   &.active {
-    background: #C5A059;
-    border-color: #C5A059;
+    background: $accent-gold;
+    border-color: $accent-gold;
+    transform: scale(1.2);
   }
 
   &.completed {
-    background: #7a6030;
-    border-color: #C5A059;
+    background: rgba($accent-gold, 0.4);
+    border-color: $accent-gold;
   }
 }
 
 .step-label {
   text-align: center;
-  color: #888;
+  color: $text-muted;
   font-size: 0.85rem;
+  font-weight: 500;
 }
 
 .step-name {
-  color: #C5A059;
+  color: $accent-gold;
   font-weight: bold;
   text-transform: capitalize;
 }
 
 // ─── Content ──────────────────────────────────────────────────────────────────
-.forge-content {
-  --background: #121212;
+
+.ion-padding {
+  padding: 20px;
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 14px;
+  }
 }
 
 // ─── Section title (reused from character-sheet.page.scss) ───────────────────
 .section-title {
-  color: #C5A059;
-  margin-bottom: 20px;
-  font-size: 1.4rem;
+  color: $accent-gold;
+  margin-bottom: 24px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 // ─── Info box (reused from character-sheet.page.scss) ────────────────────────
 .info-box {
-  background: #1E1E1E;
-  color: white;
-  padding: 12px;
-  border-radius: 6px;
-  border: 1px solid #333;
+  background: rgba(30, 30, 30, 0.6);
+  backdrop-filter: blur(12px);
+  color: $text-primary;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   font-weight: 500;
   text-align: center;
 }
 
 // ─── Stat card (reused from character-sheet.page.scss) ───────────────────────
 .stat-card {
-  background: #1E1E1E;
-  margin: 5px;
-  padding: 20px 5px;
-  border-radius: 10px;
+  background: rgba(30, 30, 30, 0.6);
+  backdrop-filter: blur(12px);
+  margin: 8px;
+  padding: 20px 8px;
+  border-radius: 12px;
   text-align: center;
-  border: 1px solid #333;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 
   .stat-label {
-    color: #888;
+    color: $text-muted;
     text-transform: uppercase;
     font-size: 0.8rem;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     font-weight: bold;
+    letter-spacing: 0.05em;
   }
 
   .stat-value {
-    color: white;
+    color: $text-primary;
     font-size: 2rem;
     font-weight: bold;
   }
 
   .stat-mod {
-    color: #C5A059;
+    color: $accent-gold;
     font-size: 1.2rem;
     font-weight: 500;
-    margin-top: 5px;
+    margin-top: 8px;
   }
 }
 
 // ─── Skill item (reused from character-sheet.page.scss) ──────────────────────
 .skill-item {
-  --background: #1E1E1E;
-  --border-radius: 10px;
+  --background: #{rgba(30, 30, 30, 0.6)};
+  --border-radius: 12px;
   margin-bottom: 12px;
-  --padding-start: 15px;
-  border: 1px solid #333;
+  --padding-start: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
 
-  h2 { color: white; font-weight: bold; }
-  p { color: #888; }
-  .skill-mod { color: white; font-size: 1.3rem; font-weight: bold; }
-  .accent-text { color: #C5A059; font-size: 0.8rem; margin-left: 5px; }
+  h2 { color: $text-primary; font-weight: bold; }
+  p { color: $text-muted; }
+  .skill-mod { color: $text-primary; font-size: 1.3rem; font-weight: bold; }
+  .accent-text { color: $accent-gold; font-size: 0.8rem; margin-left: 8px; }
 }
 
 // ─── Transparent list (reused from character-sheet.page.scss) ────────────────
@@ -139,16 +164,18 @@
 
 // ─── Footer toolbar ───────────────────────────────────────────────────────────
 .footer-toolbar {
-  --background: #1E1E1E;
-  border-top: 1px solid #333;
+  --background: rgba(30, 30, 30, 0.8);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
 }
 
 // ─── Navigation buttons ───────────────────────────────────────────────────────
 .nav-buttons {
   display: flex;
-  gap: 10px;
-  padding: 16px 0 8px;
+  gap: 12px;
+  padding: 16px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .nav-btn-prev {
@@ -157,149 +184,179 @@
 
 .nav-btn-next {
   flex: 1;
+  min-width: 100px;
 }
 
 .btn-gold {
-  --background: #C5A059;
-  --color: #121212;
-  --border-radius: 12px;
-  font-weight: bold;
+  --background: #{$accent-gold};
+  --color: #{$bg-primary};
+  --background-activated: #b8922e;
+  --border-radius: 10px;
+  font-weight: 700;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:active {
+    transform: translateY(2px);
+  }
 }
 
 // ─── Identity step fields ─────────────────────────────────────────────────────
 .field-group {
   margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .field-label {
   display: block;
-  color: #888;
+  color: $text-muted;
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 6px;
   font-weight: bold;
 
   .required {
-    color: #C5A059;
+    color: $accent-gold;
   }
 }
 
 .forge-input {
-  --background: #1E1E1E;
-  --color: white;
-  --placeholder-color: #555;
-  --border-radius: 8px;
-  --padding-start: 12px;
-  --padding-end: 12px;
-  border: 1px solid #333;
-  border-radius: 8px;
+  --background: rgba(30, 30, 30, 0.6);
+  --color: #{$text-primary};
+  --placeholder-color: #{rgba(255, 255, 255, 0.3)};
+  --border-radius: 10px;
+  --padding-start: 14px;
+  --padding-end: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  backdrop-filter: blur(12px);
+
+  &:focus {
+    border-color: rgba($accent-gold, 0.5);
+    --background: rgba(30, 30, 30, 0.8);
+  }
 
   &.input-error {
-    border-color: #C62828;
+    border-color: $accent-crimson;
   }
 }
 
 .forge-select {
-  --background: #1E1E1E;
-  --color: white;
-  --placeholder-color: #555;
-  border: 1px solid #333;
-  border-radius: 8px;
-  padding: 8px 12px;
+  --background: rgba(30, 30, 30, 0.6);
+  --color: #{$text-primary};
+  --placeholder-color: #{rgba(255, 255, 255, 0.3)};
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 12px 14px;
+  backdrop-filter: blur(12px);
+  transition: border-color 0.2s ease;
+
+  &:focus {
+    border-color: rgba($accent-gold, 0.5);
+  }
 
   &.input-error {
-    border-color: #C62828;
+    border-color: $accent-crimson;
   }
 }
 
 .forge-select-native {
-  background: #1E1E1E;
-  color: white;
-  border: 1px solid #333;
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-size: 0.9rem;
+  background: rgba(30, 30, 30, 0.6);
+  color: $text-primary;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 0.95rem;
   cursor: pointer;
   outline: none;
   width: 100%;
   transition: all 0.25s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(12px);
 
   option {
-    background: #1E1E1E;
-    color: white;
+    background: $bg-surface;
+    color: $text-primary;
     padding: 8px;
     
     &:disabled {
-      color: #666;
-      background: #141414;
+      color: $text-muted;
+      background: rgba(30, 30, 30, 0.4);
     }
   }
 
   &:focus {
-    border-color: #C5A059;
-    box-shadow: 0 0 8px rgba(197, 160, 89, 0.25);
+    border-color: rgba($accent-gold, 0.5);
+    box-shadow: 0 0 8px rgba($accent-gold, 0.2);
   }
 
   &.input-error {
-    border-color: #C62828;
+    border-color: $accent-crimson;
   }
 }
 
 // ─── Step placeholder (temporary, removed in later tasks) ────────────────────
 .step-placeholder {
-  background: #1E1E1E;
-  border: 1px dashed #333;
-  border-radius: 10px;
+  background: rgba(30, 30, 30, 0.6);
+  border: 2px dashed rgba($accent-gold, 0.2);
+  border-radius: 12px;
   padding: 40px 20px;
   text-align: center;
-  color: #555;
+  color: $text-muted;
   font-style: italic;
+  backdrop-filter: blur(12px);
 }
 
 // ─── Selectable card (used in race/class steps) ───────────────────────────────
 .selectable-card {
-  background: #1E1E1E;
-  border: 1px solid #333;
-  border-radius: 10px;
+  background: rgba(30, 30, 30, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
   padding: 16px;
   margin-bottom: 12px;
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+  backdrop-filter: blur(12px);
 
   &.selected {
-    border: 2px solid #C5A059;
-    background: #252010;
+    border: 2px solid $accent-gold;
+    background: rgba($accent-gold, 0.08);
+    transform: translateY(-2px);
   }
 
   &:active {
-    background: #2a2a2a;
+    background: rgba(30, 30, 30, 0.8);
+  }
+
+  &:hover:not(.selected) {
+    border-color: rgba($accent-gold, 0.3);
+    background: rgba(30, 30, 30, 0.7);
   }
 
   .card-title {
-    color: white;
+    color: $text-primary;
     font-weight: bold;
     font-size: 1.1rem;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
   }
 
   .card-subtitle {
-    color: #888;
+    color: $text-muted;
     font-size: 0.85rem;
   }
 
   .card-bonus {
-    color: #C5A059;
+    color: $accent-gold;
     font-size: 0.85rem;
-    margin-top: 6px;
+    margin-top: 8px;
     font-weight: 500;
   }
 }
 
 // ─── Error message ────────────────────────────────────────────────────────────
 .error-message {
-  color: #C62828;
+  color: $accent-crimson;
   font-size: 0.85rem;
   margin-top: 4px;
   padding-left: 4px;
@@ -315,8 +372,8 @@
 }
 
 .loading-text {
-  color: #888;
-  font-size: 0.9rem;
+  color: $text-muted;
+  font-size: 0.95rem;
 }
 
 // ─── Error container ──────────────────────────────────────────────────────────
@@ -326,14 +383,15 @@
   align-items: center;
   padding: 24px 16px;
   gap: 12px;
-  background: #1E1E1E;
-  border: 1px solid #333;
-  border-radius: 10px;
+  background: rgba(192, 57, 43, 0.08);
+  border: 1px solid rgba(192, 57, 43, 0.3);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
 }
 
 // ─── Empty message ────────────────────────────────────────────────────────────
 .empty-message {
-  color: #555;
+  color: $text-muted;
   text-align: center;
   font-style: italic;
   padding: 20px;
@@ -342,27 +400,34 @@
 // ─── Races grid ───────────────────────────────────────────────────────────────
 .races-grid {
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .languages-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 12px;
   margin-top: 16px;
 }
 
 // ─── Ion segment (reused from character-sheet.page.scss) ─────────────────────
 ion-segment {
-  --background: #1E1E1E;
+  --background: rgba(30, 30, 30, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 ion-segment-button {
-  --color: #888;
-  --color-checked: #C5A059;
+  --color: #{$text-muted};
+  --color-checked: #{$accent-gold};
   --indicator-color: transparent;
 
   ion-label {
     color: inherit;
+    font-weight: 500;
   }
 }
 
@@ -372,19 +437,20 @@ ion-segment-button {
 }
 
 .subsection-title {
-  color: #888;
-  font-size: 1rem;
+  color: $text-muted;
+  font-size: 0.95rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   font-weight: bold;
 }
 
 .selectable-card--small {
-  padding: 10px 14px;
+  padding: 12px 14px;
 
   .card-title {
     font-size: 0.95rem;
+    margin-bottom: 4px;
   }
 }
 
@@ -392,12 +458,12 @@ ion-segment-button {
 
 .score-mode-segment {
   margin-bottom: 20px;
-  border-radius: 8px;
+  border-radius: 10px;
   overflow: hidden;
 }
 
 .mode-hint {
-  color: #888;
+  color: $text-muted;
   font-size: 0.85rem;
   margin-bottom: 16px;
   font-style: italic;
@@ -410,31 +476,37 @@ ion-segment-button {
   gap: 10px;
   margin-bottom: 20px;
   min-height: 48px;
-  padding: 8px;
-  background: #1E1E1E;
-  border: 1px solid #333;
+  padding: 12px;
+  background: rgba(30, 30, 30, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
+  backdrop-filter: blur(12px);
 }
 
 .score-token {
-  background: #2a2a2a;
-  color: white;
-  border: 1px solid #555;
+  background: rgba(30, 30, 30, 0.8);
+  color: $text-primary;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
   padding: 8px 16px;
   font-size: 1.1rem;
   font-weight: bold;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
 
   &.token-selected {
-    background: #3a2e10;
-    border-color: #C5A059;
-    color: #C5A059;
+    background: rgba($accent-gold, 0.15);
+    border-color: $accent-gold;
+    color: $accent-gold;
+    transform: scale(1.05);
   }
 
   &:active {
-    background: #3a3a3a;
+    background: rgba(30, 30, 30, 0.9);
+  }
+
+  &:hover:not(.token-selected) {
+    border-color: rgba($accent-gold, 0.3);
   }
 }
 
@@ -443,71 +515,75 @@ ion-segment-button {
 .manual-entry-section {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .ability-slot-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .ability-slot-label {
-  color: #888;
+  color: $text-muted;
   font-size: 0.8rem;
   font-weight: bold;
   text-transform: uppercase;
-  width: 36px;
+  min-width: 36px;
   flex-shrink: 0;
+  letter-spacing: 0.05em;
 }
 
 .ability-slot {
-  background: #1E1E1E;
-  color: #555;
-  border: 1px dashed #444;
+  background: rgba(30, 30, 30, 0.6);
+  color: $text-muted;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
   border-radius: 8px;
   width: 52px;
-  height: 40px;
+  height: 44px;
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
   flex-shrink: 0;
+  backdrop-filter: blur(12px);
 
   &.slot-filled {
-    color: white;
+    color: $text-primary;
     border-style: solid;
-    border-color: #555;
+    border-color: rgba(255, 255, 255, 0.2);
   }
 
   &.slot-active {
-    border-color: #C5A059;
+    border-color: $accent-gold;
     border-style: solid;
+    background: rgba($accent-gold, 0.08);
   }
 
   &:active {
-    background: #2a2a2a;
+    background: rgba(30, 30, 30, 0.8);
   }
 }
 
 .racial-bonus {
-  color: #C5A059;
+  color: $accent-gold;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
   width: 32px;
   flex-shrink: 0;
 }
 
 .final-score-preview {
-  color: #555;
+  color: $text-muted;
   font-size: 0.9rem;
 
   &.final-score-ready {
-    color: #888;
+    color: $text-primary;
   }
 
   .final-value {
-    color: #C5A059;
+    color: $accent-gold;
     font-weight: bold;
     font-size: 1rem;
   }
@@ -515,20 +591,21 @@ ion-segment-button {
 
 // Manual entry inputs
 .manual-score-input {
-  --background: #1E1E1E;
-  --color: white;
-  --placeholder-color: #555;
+  --background: rgba(30, 30, 30, 0.6);
+  --color: #{$text-primary};
+  --placeholder-color: #{rgba(255, 255, 255, 0.3)};
   --border-radius: 8px;
   --padding-start: 8px;
   --padding-end: 8px;
-  border: 1px solid #333;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   width: 72px;
   flex-shrink: 0;
   text-align: center;
+  backdrop-filter: blur(12px);
 
   &.input-error {
-    border-color: #C62828;
+    border-color: $accent-crimson;
   }
 }
 
@@ -541,16 +618,18 @@ ion-segment-button {
 .hp-preview-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin-top: 20px;
-  padding: 12px 16px;
-  background: #1E1E1E;
-  border: 1px solid #333;
+  padding: 16px;
+  background: rgba(30, 30, 30, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
+  backdrop-filter: blur(12px);
+  flex-wrap: wrap;
 }
 
 .hp-preview-label {
-  color: #888;
+  color: $text-muted;
   font-size: 0.9rem;
   font-weight: bold;
   text-transform: uppercase;
@@ -558,20 +637,20 @@ ion-segment-button {
 }
 
 .hp-preview-value {
-  color: #C5A059;
-  font-size: 1.6rem;
+  color: $accent-gold;
+  font-size: 1.8rem;
   font-weight: bold;
 }
 
 // ─── Skills step ──────────────────────────────────────────────────────────────
 .skills-count {
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   font-size: 0.9rem;
-  color: #888;
+  color: $text-muted;
 
   &--complete {
-    color: #C5A059;
+    color: $accent-gold;
     font-weight: bold;
   }
 }
@@ -579,7 +658,7 @@ ion-segment-button {
 .skills-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .skill-option {
@@ -587,18 +666,19 @@ ion-segment-button {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 12px 16px;
-  background: #1E1E1E;
-  border: 1px solid #333;
-  border-radius: 8px;
-  color: #fff;
+  padding: 14px 16px;
+  background: rgba(30, 30, 30, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: $text-primary;
   cursor: pointer;
-  transition: border-color 0.2s, opacity 0.2s;
+  transition: border-color 0.2s, opacity 0.2s, background 0.2s;
   text-align: left;
+  backdrop-filter: blur(12px);
 
   &.skill-selected {
-    border-color: #C5A059;
-    background: rgba(197, 160, 89, 0.1);
+    border-color: $accent-gold;
+    background: rgba($accent-gold, 0.08);
   }
 
   &.skill-disabled {
@@ -606,13 +686,19 @@ ion-segment-button {
     cursor: not-allowed;
   }
 
+  &:hover:not(.skill-disabled):not(.skill-selected) {
+    border-color: rgba($accent-gold, 0.2);
+    background: rgba(30, 30, 30, 0.7);
+  }
+
   .skill-name {
     font-size: 0.95rem;
+    font-weight: 500;
   }
 
   .skill-stat {
     font-size: 0.8rem;
-    color: #C5A059;
+    color: $accent-gold;
     font-weight: bold;
   }
 
@@ -624,7 +710,7 @@ ion-segment-button {
 
   .option-level-badge {
     font-size: 0.7rem;
-    color: #888;
+    color: $text-muted;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -635,64 +721,66 @@ ion-segment-button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #1E1E1E;
-  border: 2px solid #C5A059;
+  background: rgba($accent-gold, 0.08);
+  border: 2px solid $accent-gold;
   border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
   text-align: center;
 
   .review-hp-label {
-    color: #aaa;
+    color: $text-muted;
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
+    font-weight: bold;
   }
 
   .review-hp-value {
-    color: #C5A059;
-    font-size: 2.5rem;
+    color: $accent-gold;
+    font-size: 2.8rem;
     font-weight: bold;
   }
 }
 
 .review-card {
-  background: #1E1E1E;
-  border: 1px solid #333;
-  border-radius: 8px;
-  padding: 12px 16px;
+  background: rgba(30, 30, 30, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 16px;
   margin-bottom: 12px;
+  backdrop-filter: blur(12px);
 
   .review-card-header {
-    color: #C5A059;
+    color: $accent-gold;
     font-size: 0.8rem;
     font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    margin-bottom: 8px;
-    border-bottom: 1px solid #333;
-    padding-bottom: 6px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 8px;
   }
 
   .review-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 4px 0;
+    padding: 6px 0;
 
     .review-key {
-      color: #aaa;
+      color: $text-muted;
       font-size: 0.9rem;
     }
 
     .review-val {
-      color: #e0e0e0;
+      color: $text-primary;
       font-size: 0.9rem;
       text-align: right;
 
       &--gold {
-        color: #C5A059;
+        color: $accent-gold;
         font-weight: bold;
       }
     }
@@ -700,8 +788,10 @@ ion-segment-button {
 }
 
 .submit-error {
-  margin-top: 8px;
+  margin-top: 12px;
   text-align: center;
+  color: $accent-crimson;
+  font-size: 0.9rem;
 }
 
 // ─── Equipment step ───────────────────────────────────────────────────────────
@@ -713,32 +803,33 @@ ion-segment-button {
 .fixed-grants-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .fixed-grant-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: #1E1E1E;
-  border: 1px solid #333;
-  border-radius: 8px;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(30, 30, 30, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  backdrop-filter: blur(12px);
 
   .grant-name {
-    color: #e0e0e0;
-    font-size: 0.9rem;
+    color: $text-primary;
+    font-size: 0.95rem;
     flex: 1;
   }
 
   .grant-qty {
-    color: #C5A059;
+    color: $accent-gold;
     font-weight: bold;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
   }
 
   .grant-type {
-    color: #666;
+    color: $text-muted;
     font-size: 0.75rem;
     font-style: italic;
   }
@@ -749,10 +840,10 @@ ion-segment-button {
 }
 
 .choice-set-label {
-  color: #C5A059;
+  color: $accent-gold;
   font-size: 1rem;
   font-weight: bold;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -760,31 +851,38 @@ ion-segment-button {
 .options-grid {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .option-card {
-  background: #1E1E1E;
-  border: 1px solid #333;
-  border-radius: 10px;
-  padding: 14px 16px;
+  background: rgba(30, 30, 30, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px;
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+  backdrop-filter: blur(12px);
 
   &.option-selected {
-    border: 2px solid #C5A059;
-    background: #252010;
+    border: 2px solid $accent-gold;
+    background: rgba($accent-gold, 0.08);
+    transform: translateY(-2px);
   }
 
   &:active {
-    background: #2a2a2a;
+    background: rgba(30, 30, 30, 0.8);
+  }
+
+  &:hover:not(.option-selected) {
+    border-color: rgba($accent-gold, 0.2);
+    background: rgba(30, 30, 30, 0.7);
   }
 }
 
 .option-lines {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .option-line {
@@ -793,19 +891,19 @@ ion-segment-button {
   gap: 8px;
 
   .option-item-name {
-    color: #e0e0e0;
-    font-size: 0.9rem;
+    color: $text-primary;
+    font-size: 0.95rem;
     flex: 1;
   }
 
   .option-item-qty {
-    color: #C5A059;
+    color: $accent-gold;
     font-weight: bold;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
   }
 
   .option-item-type {
-    color: #666;
+    color: $text-muted;
     font-size: 0.75rem;
     font-style: italic;
   }
@@ -813,7 +911,7 @@ ion-segment-button {
 
 .option-selected-badge {
   margin-top: 8px;
-  color: #C5A059;
+  color: $accent-gold;
   font-size: 0.8rem;
   font-weight: bold;
   text-align: right;
@@ -822,9 +920,9 @@ ion-segment-button {
 // ─── Review step — equipment additions ───────────────────────────────────────
 
 .review-equipment-choice {
-  margin-top: 6px;
-  padding-top: 6px;
-  border-top: 1px solid #2a2a2a;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 
   &:first-of-type {
     border-top: none;
@@ -832,7 +930,7 @@ ion-segment-button {
 }
 
 .review-choice-label {
-  color: #888;
+  color: $text-muted;
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -848,94 +946,98 @@ ion-segment-button {
 .feature-options-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   margin-top: 20px;
 }
 
 .feature-choice-card {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(30, 30, 30, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   padding: 16px;
+  backdrop-filter: blur(12px);
+  transition: border-color 0.2s, background 0.2s;
+
+  &:hover {
+    border-color: rgba($accent-gold, 0.2);
+    background: rgba(30, 30, 30, 0.7);
+  }
 }
 
 .feature-choice-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .feature-choice-badge {
   font-size: 0.75rem;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 4px 12px;
   border-radius: 20px;
-  color: #aaa;
+  color: $text-muted;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 .feature-choice-badge--complete {
-  background: rgba(var(--ion-color-secondary-rgb), 0.2);
-  color: var(--ion-color-secondary);
+  background: rgba($accent-gold, 0.15);
+  color: $accent-gold;
+  border: 1px solid rgba($accent-gold, 0.3);
 }
 
 .feature-choice-desc {
-  font-size: 0.88rem;
-  color: #aaa;
+  font-size: 0.9rem;
+  color: $text-muted;
   margin-bottom: 16px;
-  line-height: 1.4;
-}
-
-.options-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  line-height: 1.5;
 }
 
 /* --- Detail Modal Styling --- */
 ion-modal {
-  --background: #121212;
-  --color: white;
+  --background: #{$bg-primary};
+  --color: #{$text-primary};
   --height: 80%;
   --border-radius: 20px 20px 0 0;
   
   &::part(content) {
-    border-top: 2px solid #C5A059;
+    border-top: 2px solid $accent-gold;
   }
 }
 
 .detail-header {
-  padding: 30px 20px 20px 20px;
-  background: linear-gradient(to bottom, #1E1E1E, #121212);
+  padding: 30px 20px 20px;
+  background: linear-gradient(to bottom, #{$bg-surface}, #{$bg-primary});
   text-align: center;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 
   .detail-icon-circle {
     width: 60px;
     height: 60px;
-    background: #121212;
-    border: 2px solid #C5A059;
+    background: $bg-primary;
+    border: 2px solid $accent-gold;
     border-radius: 50%;
-    margin: 0 auto 15px auto;
+    margin: 0 auto 15px;
     display: flex;
     justify-content: center;
     align-items: center;
-    ion-icon { font-size: 2rem; color: #C5A059; }
+    ion-icon { font-size: 2rem; color: $accent-gold; }
   }
 
   h1 {
-    color: white;
+    color: $text-primary;
     font-size: 1.8rem;
     font-weight: bold;
     margin: 0;
   }
   
   .detail-subtitle {
-    color: #C5A059;
+    color: $accent-gold;
     font-size: 0.9rem;
     text-transform: uppercase;
     font-weight: bold;
-    margin-top: 5px;
+    margin-top: 8px;
     letter-spacing: 0.1em;
   }
 }
@@ -944,54 +1046,61 @@ ion-modal {
   padding: 20px;
 
   .detail-section-title {
-    color: #888;
+    color: $text-muted;
     font-size: 0.75rem;
     text-transform: uppercase;
     font-weight: bold;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
     gap: 8px;
+    letter-spacing: 0.05em;
     
     &::after {
       content: '';
       flex: 1;
       height: 1px;
-      background: #333;
+      background: rgba(255, 255, 255, 0.08);
     }
   }
 
   .detail-description {
-    color: #ccc;
+    color: $text-primary;
     line-height: 1.6;
     font-size: 1rem;
-    margin-bottom: 30px;
+    margin-bottom: 24px;
     white-space: pre-wrap;
   }
 
   .detail-properties-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-bottom: 30px;
+    gap: 12px;
+    margin-bottom: 24px;
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
+    }
   }
 
   .prop-item {
-    background: #1E1E1E;
-    padding: 10px;
+    background: rgba(30, 30, 30, 0.6);
+    padding: 12px;
     border-radius: 8px;
-    border: 1px solid #333;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
 
     .prop-label {
-      color: #888;
+      color: $text-muted;
       font-size: 0.65rem;
       text-transform: uppercase;
       font-weight: bold;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
+      letter-spacing: 0.05em;
     }
     .prop-value {
-      color: white;
-      font-size: 0.9rem;
+      color: $text-primary;
+      font-size: 0.95rem;
       font-weight: 500;
     }
   }
@@ -1001,13 +1110,13 @@ ion-modal {
   display: inline-block;
   font-size: 0.75rem;
   font-weight: bold;
-  background: #2a1f0e;
-  color: #C5A059;
-  border: 1px solid #C5A059;
+  background: rgba($accent-gold, 0.15);
+  color: $accent-gold;
+  border: 1px solid rgba($accent-gold, 0.3);
   border-radius: 6px;
-  padding: 3px 10px;
-  margin-right: 5px;
-  margin-bottom: 5px;
+  padding: 4px 10px;
+  margin-right: 6px;
+  margin-bottom: 6px;
 }
 
 /* Multiclassing Styles */
@@ -1026,14 +1135,20 @@ ion-modal {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(197, 160, 89, 0.15);
+  padding: 14px 16px;
+  background: rgba(30, 30, 30, 0.6);
+  border: 1px solid rgba($accent-gold, 0.15);
   border-radius: 12px;
+  backdrop-filter: blur(12px);
+  transition: border-color 0.2s, background 0.2s;
   
   &--primary {
-    border-color: rgba(197, 160, 89, 0.4);
-    background: rgba(197, 160, 89, 0.05);
+    border-color: rgba($accent-gold, 0.4);
+    background: rgba($accent-gold, 0.08);
+  }
+
+  &:hover {
+    border-color: rgba($accent-gold, 0.25);
   }
 }
 
@@ -1044,14 +1159,16 @@ ion-modal {
 
 .mc-name {
   font-weight: 600;
-  color: #fff;
+  color: $text-primary;
+  margin-bottom: 4px;
 }
 
 .mc-tag {
   font-size: 0.75rem;
-  color: #C5A059;
+  color: $accent-gold;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  font-weight: bold;
 }
 
 .mc-controls {
@@ -1060,11 +1177,11 @@ ion-modal {
   gap: 8px;
   
   ion-button {
-    --padding-start: 4px;
-    --padding-end: 4px;
+    --padding-start: 6px;
+    --padding-end: 6px;
     margin: 0 !important;
     height: 32px;
-    color: #C5A059;
+    color: $accent-gold;
   }
 }
 
@@ -1072,62 +1189,71 @@ ion-modal {
   min-width: 60px;
   text-align: center;
   font-weight: 700;
-  color: #C5A059;
-  background: rgba(197, 160, 89, 0.1);
-  padding: 4px 8px;
+  color: $accent-gold;
+  background: rgba($accent-gold, 0.12);
+  padding: 6px 10px;
   border-radius: 6px;
+  border: 1px solid rgba($accent-gold, 0.2);
 }
 
 .mc-available-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 12px;
-  margin-top: 12px;
+  margin-top: 16px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .mc-add-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px dashed rgba(197, 160, 89, 0.3);
+  padding: 14px 16px;
+  background: rgba(30, 30, 30, 0.4);
+  border: 1px dashed rgba($accent-gold, 0.3);
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
+  backdrop-filter: blur(12px);
   
   &:hover:not(.mc-add-card--disabled) {
-    background: rgba(197, 160, 89, 0.1);
+    background: rgba($accent-gold, 0.08);
     border-style: solid;
+    border-color: rgba($accent-gold, 0.4);
     transform: translateY(-2px);
   }
   
   &--disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.08);
   }
   
   ion-icon {
-    font-size: 1.2rem;
-    color: #C5A059;
+    font-size: 1.3rem;
+    color: $accent-gold;
   }
 }
 
 .mc-add-info {
   display: flex;
   flex-direction: column;
+  margin-right: 8px;
 }
 
 .mc-add-name {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #ddd;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: $text-primary;
+  margin-bottom: 2px;
 }
 
 .mc-add-prereq {
-  font-size: 0.7rem;
-  color: #888;
+  font-size: 0.75rem;
+  color: $text-muted;
   
   &--met {
     color: #4cd964;
@@ -1145,13 +1271,526 @@ ion-modal {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: 2px 6px;
+  padding: 4px 8px;
   border-radius: 4px;
-  background: rgba(201, 168, 76, 0.15);
-  color: #C9A84C;
-  border: 1px solid rgba(201, 168, 76, 0.3);
+  background: rgba($accent-gold, 0.15);
+  color: $accent-gold;
+  border: 1px solid rgba($accent-gold, 0.3);
   font-family: 'Outfit', sans-serif;
   margin-left: 8px;
   vertical-align: middle;
+}
+
+// ─── Mobile Responsive Styles ─────────────────────────────────────────────────
+@media (max-width: 768px) {
+  // Header and step indicator
+  .step-indicator {
+    padding: 12px;
+  }
+
+  .step-progress {
+    gap: 8px;
+  }
+
+  .step-label {
+    font-size: 0.8rem;
+  }
+
+  // Content and sections
+  :host {
+    --padding-top: 16px;
+    --padding-bottom: 16px;
+  }
+
+  .ion-padding {
+    padding: 16px;
+  }
+
+  .section-title {
+    font-size: 1.3rem;
+    margin-bottom: 18px;
+  }
+
+  .field-group {
+    margin-bottom: 16px;
+  }
+
+  .field-label {
+    font-size: 0.8rem;
+  }
+
+  // Cards and buttons
+  .selectable-card {
+    padding: 14px;
+    margin-bottom: 10px;
+
+    .card-title {
+      font-size: 1rem;
+    }
+
+    .card-subtitle {
+      font-size: 0.8rem;
+    }
+  }
+
+  // Skill options
+  .skill-option {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px;
+
+    .skill-stat {
+      align-self: flex-end;
+    }
+  }
+
+  // Ability scores
+  .ability-slot-row {
+    gap: 8px;
+  }
+
+  .ability-slot {
+    width: 48px;
+    height: 40px;
+    font-size: 0.95rem;
+  }
+
+  // HP and review
+  .hp-preview-row {
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .review-hp-banner {
+    padding: 14px;
+
+    .review-hp-value {
+      font-size: 2.4rem;
+    }
+  }
+
+  .review-card {
+    padding: 12px;
+    margin-bottom: 10px;
+
+    .review-card-header {
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+    }
+
+    .review-row {
+      padding: 4px 0;
+    }
+  }
+
+  // Modal and details
+  .detail-properties-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .detail-body {
+    padding: 16px;
+  }
+
+  // Multiclass cards
+  .mc-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .mc-controls {
+    width: 100%;
+  }
+
+  .mc-available-grid {
+    grid-template-columns: 1fr;
+  }
+
+  // Options grid
+  .options-grid {
+    gap: 10px;
+  }
+
+  .option-card {
+    padding: 14px;
+  }
+
+  // Navigation buttons
+  .nav-buttons {
+    gap: 10px;
+    padding: 12px;
+    flex-wrap: wrap;
+  }
+
+  .nav-btn-next {
+    width: 100%;
+    min-width: unset;
+  }
+
+  // Languages grid
+  .languages-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+
+  // Feature cards
+  .feature-options-container {
+    gap: 12px;
+  }
+
+  .feature-choice-card {
+    padding: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  // Very small screens
+  .section-title {
+    font-size: 1.1rem;
+    margin-bottom: 14px;
+  }
+
+  .step-progress {
+    gap: 6px;
+  }
+
+  .step-dot {
+    width: 10px;
+    height: 10px;
+  }
+
+  .step-label {
+    font-size: 0.75rem;
+  }
+
+  .field-label {
+    font-size: 0.75rem;
+  }
+
+  .forge-input,
+  .forge-select,
+  .forge-select-native {
+    --padding-start: 12px;
+    --padding-end: 12px;
+    font-size: 16px; // Prevent zoom on iOS
+  }
+
+  .skill-option {
+    padding: 12px;
+  }
+
+  .review-hp-banner {
+    padding: 12px;
+
+    .review-hp-value {
+      font-size: 2rem;
+    }
+  }
+
+  .detail-header {
+    padding: 20px 16px 16px;
+  }
+
+  .detail-icon-circle {
+    width: 50px;
+    height: 50px;
+  }
+
+  .detail-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .detail-body {
+    padding: 12px;
+
+    .detail-section-title {
+      font-size: 0.7rem;
+      margin-bottom: 10px;
+    }
+
+    .detail-description {
+      font-size: 0.95rem;
+      margin-bottom: 16px;
+    }
+  }
+
+  .mc-item {
+    padding: 12px;
+  }
+
+  .nav-buttons {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .btn-gold {
+    font-size: 0.9rem;
+    --padding-start: 12px;
+    --padding-end: 12px;
+  }
+
+  // Token pool responsiveness
+  .token-pool {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .score-token {
+    padding: 6px 12px;
+    font-size: 1rem;
+  }
+
+  // Languages grid on very small screens
+  .languages-grid {
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+    gap: 8px;
+  }
+}
+
+// ─── Spell Modal Styles ────────────────────────────────────────────────────────
+
+.spell-modal-btn {
+  --background: #{$accent-gold};
+  --color: #{$bg-primary};
+  --border-radius: 10px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  width: 100%;
+  margin-bottom: 16px;
+  font-weight: 700;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:active {
+    transform: translateY(2px);
+  }
+}
+
+.spells-summary-card {
+  background: rgba(30, 30, 30, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  backdrop-filter: blur(12px);
+}
+
+.spells-summary-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  span {
+    color: $text-muted;
+    font-size: 0.95rem;
+    font-weight: 500;
+
+    &.summary-complete {
+      color: $accent-gold;
+      font-weight: 700;
+    }
+  }
+}
+
+.selected-spells-preview {
+  background: rgba(30, 30, 30, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.selected-spells-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.selected-spell-chip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba($accent-gold, 0.08);
+  border: 1px solid rgba($accent-gold, 0.2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: $text-primary;
+  font-size: 0.95rem;
+
+  ion-icon {
+    cursor: pointer;
+    color: $accent-crimson;
+    font-size: 1.2rem;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+}
+
+.spell-level-badge {
+  display: inline-block;
+  background: rgba($accent-gold, 0.15);
+  color: $accent-gold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  margin-left: 6px;
+}
+
+.spells-modal {
+  --width: 100%;
+  --height: 90%;
+  --border-radius: 20px 20px 0 0;
+}
+
+.spells-modal-header {
+  background: linear-gradient(to bottom, #{$bg-surface}, #{$bg-primary});
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+  ion-toolbar {
+    --background: transparent;
+    --color: #{$text-primary};
+  }
+
+  ion-title {
+    color: $accent-gold;
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+}
+
+.spells-search-container {
+  padding: 12px 16px;
+  background: #{$bg-primary};
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.spells-searchbar {
+  --background: rgba(30, 30, 30, 0.6);
+  --color: #{$text-primary};
+  --placeholder-color: #{rgba(255, 255, 255, 0.3)};
+  --icon-color: #{$text-muted};
+  --border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+.spells-modal-content {
+  --background: #{$bg-primary};
+  padding: 8px 0;
+}
+
+.spell-level-section {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.spell-level-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(30, 30, 30, 0.3);
+  border: none;
+  color: $accent-gold;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: rgba(30, 30, 30, 0.5);
+  }
+
+  &.expanded {
+    background: rgba(30, 30, 30, 0.5);
+  }
+}
+
+.category-icon {
+  font-size: 1.1rem;
+  transition: transform 0.2s ease;
+}
+
+.spell-level-content {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.spell-option-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-left: 3px solid transparent;
+
+  &:hover:not(.spell-disabled) {
+    background: rgba(30, 30, 30, 0.4);
+  }
+
+  &.spell-selected {
+    background: rgba($accent-gold, 0.08);
+    border-left-color: $accent-gold;
+  }
+
+  &.spell-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  ion-icon {
+    color: #4cd964;
+    font-size: 1.3rem;
+  }
+}
+
+.spell-option-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.spell-name {
+  color: $text-primary;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.no-spells-message {
+  padding: 40px 20px;
+  text-align: center;
+  color: $text-muted;
+
+  p {
+    margin: 0;
+    font-size: 1rem;
+  }
+}
+
+.spells-modal-footer {
+  background: linear-gradient(to top, #{$bg-surface}, #{$bg-primary});
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 12px 0;
+}
+
+.spells-footer-content {
+  display: flex;
+  gap: 12px;
+  padding: 0 16px;
+  justify-content: center;
 }
 

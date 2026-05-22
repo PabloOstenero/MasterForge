@@ -21,7 +21,11 @@ import {
   notifications,
   menuOutline,
   shieldOutline,
-  shieldHalfOutline
+  shieldHalfOutline,
+  buildOutline,
+  hammerOutline,
+  constructOutline,
+  createOutline
 } from 'ionicons/icons';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
@@ -56,7 +60,8 @@ export class AuthLayoutComponent implements OnDestroy {
       settingsOutline, logOutOutline, swapHorizontalOutline,
       homeOutline, peopleOutline, mapOutline, skullOutline,
       personAddOutline, bookOutline, colorWandOutline, searchOutline, listOutline,
-      personCircleOutline, notificationsOutline, notifications, menuOutline, shieldOutline, shieldHalfOutline
+      personCircleOutline, notificationsOutline, notifications, menuOutline, shieldOutline, shieldHalfOutline,
+      buildOutline, hammerOutline, constructOutline, createOutline
     });
 
     this.roleService.activeRole$.subscribe(role => {
