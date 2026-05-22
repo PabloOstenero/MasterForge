@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, ViewChild } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -10,8 +10,9 @@ import {
 } from '@ionic/angular/standalone';
 import { ApiService } from '../../services/api';
 import { addIcons } from 'ionicons';
-import { statsChart, sparkles, shield, briefcase, trash, add, addCircleOutline, checkmarkCircle, trashOutline, syncOutline, book, bookOutline, settingsOutline, trendingUpOutline, removeCircleOutline, refreshOutline, sparklesOutline, flaskOutline, hammerOutline, flashOutline, addOutline, wifiOutline, closeCircleOutline } from 'ionicons/icons';
+import { statsChart, sparkles, shield, briefcase, trash, add, addCircleOutline, checkmarkCircle, trashOutline, syncOutline, book, bookOutline, settingsOutline, trendingUpOutline, removeCircleOutline, refreshOutline, sparklesOutline, flaskOutline, hammerOutline, flashOutline, addOutline, wifiOutline, closeCircleOutline, heartDislikeOutline, heartOutline, moonOutline, bedOutline, chevronUpOutline, chevronDownOutline, close } from 'ionicons/icons';
 import { FeatureChoicePickerComponent } from '../../components/feature-choice-picker/feature-choice-picker.component';
+import { HitDiceModalComponent } from './hit-dice-modal.component';
 import { getProficiencyBonus, getModifier, calculatePassive, calculateMulticlassHp } from '../../utils/dnd-utils';
 
 export const DND_SKILLS = [
@@ -45,7 +46,7 @@ export const DND_SKILLS = [
     IonSegment, IonSegmentButton, IonLabel, IonGrid, IonRow, IonCol,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonBadge, IonList,
     IonIcon, IonButton, IonFooter, IonBackButton, IonButtons, IonSearchbar, IonModal,
-    IonCheckbox, FeatureChoicePickerComponent
+    IonCheckbox, FeatureChoicePickerComponent, HitDiceModalComponent
   ],
   encapsulation: ViewEncapsulation.None // Re-enabled to allow styling the Alert pop-ups
 })
@@ -244,10 +245,15 @@ export class CharacterSheetPage implements OnInit {
   senses: string[] = [];
   private characterId: string | null = null;
 
+  // Combat Buttons State
+  showCombatButtons = true;
+
   // Detail Modal State
   isDetailModalOpen = false;
   selectedDetail: any = null;
   detailType: 'SPELL' | 'ITEM' | 'FEATURE' = 'ITEM';
+
+  @ViewChild('hitDiceModal') hitDiceModal: any;
 
   // Inyectamos el servicio en el constructor
   constructor(
@@ -283,7 +289,14 @@ export class CharacterSheetPage implements OnInit {
       'hammer-outline': hammerOutline,
       'flash-outline': flashOutline,
       'wifi-outline': wifiOutline,
-      'close-circle-outline': closeCircleOutline
+      'close-circle-outline': closeCircleOutline,
+      'heart-dislike-outline': heartDislikeOutline,
+      'heart-outline': heartOutline,
+      'moon-outline': moonOutline,
+      'bed-outline': bedOutline,
+      'chevron-up-outline': chevronUpOutline,
+      'chevron-down-outline': chevronDownOutline,
+      'close': close
     });
   }
 
@@ -2166,121 +2179,58 @@ export class CharacterSheetPage implements OnInit {
     await alert.present();
   }
 
-  // Opens an alert to update the number of spent hit dice
+  // Opens a modal to update the number of spent hit dice with multiclass options
   async updateHitDiceAlert() {
-    if (this.hitDicePools && this.hitDicePools.length > 1) {
-      const inputs = this.hitDicePools.map((pool, idx) => ({
-        name: `pool_${idx}`,
-        type: 'number' as const,
-        placeholder: `Disponibles (${pool.className})`,
-        value: pool.total - pool.spent,
-        min: 0,
-        max: pool.total,
-        label: `${pool.className} (d${pool.dieType})`
-      }));
+    const pools = this.hitDicePools && this.hitDicePools.length > 0 
+      ? this.hitDicePools
+      : [{
+          className: this.rawCharacter?.dndClass?.name || 'Clase',
+          dieType: this.pj.hitDieType,
+          total: this.pj.hitDiceTotal,
+          spent: this.pj.hitDiceSpent
+        }];
 
-      // Generate buttons: standard buttons + optional roll buttons for each pool
-      const buttons: any[] = [
-        { text: 'Cancelar', role: 'cancel' }
-      ];
+    let modalRef: any;
 
-      this.hitDicePools.forEach((pool) => {
-        if (pool.total - pool.spent > 0) {
-          buttons.push({
-            text: `🎲 Tirar d${pool.dieType} (${pool.className})`,
-            handler: () => {
-              this.rollHitDieHealing(pool);
-              alert.dismiss();
-              setTimeout(() => {
-                this.updateHitDiceAlert();
-              }, 150);
-              return false;
-            }
-          });
-        }
-      });
-
-      buttons.push({
-        text: 'Guardar',
-        handler: (data: any) => {
-          this.hitDicePools.forEach((pool, idx) => {
-            const val = parseInt(data[`pool_${idx}`], 10);
-            if (!isNaN(val) && val >= 0 && val <= pool.total) {
-              pool.spent = pool.total - val;
-            }
-          });
-          
-          this.pj.hitDiceSpent = this.hitDicePools.reduce((sum, p) => sum + p.spent, 0);
-          this.updateHitDiceOnBackend();
-        }
-      });
-
-      const alert = await this.alertController.create({
-        header: 'Actualizar Dados de Golpe',
-        cssClass: 'heal-alert',
-        message: 'Introduce los dados disponibles o tira para curarte (d+CON):',
-        inputs: inputs,
-        buttons: buttons
-      });
-      await alert.present();
-    } else {
-      const remaining = this.pj.hitDiceTotal - this.pj.hitDiceSpent;
-      const buttons: any[] = [
-        { text: 'Cancelar', role: 'cancel' }
-      ];
-
-      if (remaining > 0) {
-        buttons.push({
-          text: `🎲 Tirar d${this.pj.hitDieType}`,
-          handler: () => {
-            const pool = this.hitDicePools && this.hitDicePools[0] ? this.hitDicePools[0] : {
-              className: this.rawCharacter.dndClass?.name || 'Clase',
-              dieType: this.pj.hitDieType,
-              total: this.pj.hitDiceTotal,
-              spent: this.pj.hitDiceSpent
-            };
-            this.rollHitDieHealing(pool);
-            alert.dismiss();
-            setTimeout(() => {
-              this.updateHitDiceAlert();
-            }, 150);
-            return false;
+    const onSaveCallback = (values: number[]) => {
+      if (this.hitDicePools && this.hitDicePools.length > 0) {
+        let totalSpent = 0;
+        this.hitDicePools.forEach((pool, idx) => {
+          const availableCount = values[idx];
+          if (!isNaN(availableCount)) {
+            pool.spent = pool.total - availableCount;
+            totalSpent += pool.spent;
           }
         });
-      }
-
-      buttons.push({
-        text: 'Guardar',
-        handler: (data: any) => {
-          const val = parseInt(data.remainingAmount, 10);
-          if (!isNaN(val) && val >= 0 && val <= this.pj.hitDiceTotal) {
-            this.pj.hitDiceSpent = this.pj.hitDiceTotal - val;
-            if (this.hitDicePools && this.hitDicePools.length === 1) {
-              this.hitDicePools[0].spent = this.pj.hitDiceSpent;
-            }
-            this.updateHitDiceOnBackend();
-          }
+        this.pj.hitDiceSpent = totalSpent;
+      } else {
+        const availableCount = values[0];
+        if (!isNaN(availableCount)) {
+          this.pj.hitDiceSpent = this.pj.hitDiceTotal - availableCount;
         }
-      });
+      }
+      this.updateHitDiceOnBackend();
+      modalRef.dismiss();
+    };
 
-      const alert = await this.alertController.create({
-        header: 'Actualizar Dados de Golpe',
-        cssClass: 'heal-alert',
-        message: `Total de dados: ${this.pj.hitDiceTotal}d${this.pj.hitDieType}`,
-        inputs: [
-          {
-            name: 'remainingAmount',
-            type: 'number',
-            placeholder: 'Dados disponibles',
-            value: remaining,
-            min: 0,
-            max: this.pj.hitDiceTotal
-          }
-        ],
-        buttons: buttons
-      });
-      await alert.present();
-    }
+    const onDismissCallback = () => {
+      modalRef.dismiss();
+    };
+
+    const modal = await this.modalController.create({
+      component: HitDiceModalComponent,
+      componentProps: { 
+        pools,
+        onRollDice: (index: number) => {
+          this.rollHitDieHealing(pools[index]);
+        },
+        onSaveCallback,
+        onDismissCallback
+      }
+    });
+
+    modalRef = modal;
+    await modal.present();
   }
 
   // Helper method to roll hit die healing with CON modifier
@@ -3705,6 +3655,10 @@ export class CharacterSheetPage implements OnInit {
       'PASSIVE': 'Pasivo'
     };
     return map[type] || '';
+  }
+
+  toggleCombatButtons() {
+    this.showCombatButtons = !this.showCombatButtons;
   }
 }
 

@@ -16,6 +16,16 @@
   text-align: center;
   min-width: 60px;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  
+  @media (max-width: 600px) {
+    flex: 1;
+    min-width: auto;
+    padding: 8px;
+  }
 }
 
 .bonus-val {
@@ -28,6 +38,7 @@
   font-size: 0.6rem;
   color: #4cd964;
   text-transform: uppercase;
+  margin-top: 2px;
 }
 
 .header-toolbar {
@@ -41,30 +52,229 @@
   font-weight: bold;
   font-size: 1.6rem;
   margin-top: 10px;
+  
+  @media (max-width: 600px) {
+    font-size: 1rem;
+    margin-top: 5px;
+  }
+}
+
+.title-full {
+  display: inline;
+  
+  @media (max-width: 600px) {
+    display: none;
+  }
+}
+
+.title-short {
+  display: none;
+  
+  @media (max-width: 600px) {
+    display: inline;
+  }
+}
+
+.button-text {
+  @media (max-width: 600px) {
+    display: none;
+  }
+}
+
+/* Responsive header button */
+ion-button {
+  @media (max-width: 600px) {
+    --padding-start: 6px;
+    --padding-end: 6px;
+    font-size: 0.75rem;
+    
+    ion-icon {
+      font-size: 1rem;
+    }
+  }
 }
 
 .char-sheet-content {
   --background: #121212;
 }
 
-.info-box {
-  background: #1E1E1E;
+/* Character Header Section - Contains info box and AC shield */
+.character-header-section {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  
+  @media (max-width: 600px) {
+    gap: 12px;
+    align-items: center;
+  }
+}
+
+/* Redesigned Info Box */
+.info-box-redesigned {
+  flex: 1;
+  background: linear-gradient(135deg, #1E1E1E 0%, #252525 100%);
   color: white;
-  padding: 12px;
-  border-radius: 6px;
+  padding: 16px;
+  border-radius: 12px;
   border: 1px solid #333;
-  font-weight: 500;
-  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  
+  @media (max-width: 600px) {
+    flex: 1;
+    min-width: 0;
+    padding: 10px;
+  }
+}
+
+.character-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  border-left: 3px solid #C5A059;
+  
+  @media (max-width: 600px) {
+    padding: 6px;
+    gap: 2px;
+  }
+  
+  &:nth-child(5) {
+    grid-column: span 2;
+    
+    @media (max-width: 600px) {
+      grid-column: span 1;
+    }
+  }
+}
+
+.info-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: #888;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  
+  @media (max-width: 600px) {
+    font-size: 0.6rem;
+  }
+}
+
+.info-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #C5A059;
+  
+  @media (max-width: 600px) {
+    font-size: 0.8rem;
+  }
+}
+
+/* AC Shield Container - Positioned next to info box */
+.ac-shield-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  @media (max-width: 600px) {
+    width: auto;
+  }
+}
+
+/* Shield Design */
+.ac-shield {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  
+  .shield-icon {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    color: #C5A059;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+  }
+  
+  @media (max-width: 600px) {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+.ac-value {
+  font-size: 2.4rem;
+  font-weight: bold;
+  color: #121212;
+  line-height: 1;
+  position: relative;
+  z-index: 2;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.3);
+  
+  @media (max-width: 600px) {
+    font-size: 1.6rem;
+  } 
+}
+
+
+.ac-label {
+  font-size: 0.7rem;
+  color: #121212;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+  position: relative;
+  z-index: 2;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.3);
 }
 
 .hp-section {
   display: flex;
   align-items: center;
   gap: 12px;
+  
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
 }
 
 .hp-main-side {
   flex: 1;
+  width: 100%;
+  
+  @media (max-width: 600px) {
+    width: 100%;
+  }
+}
+
+.hp-side-counters {
+  display: flex;
+  gap: 10px;
+  
+  @media (max-width: 600px) {
+    width: 100%;
+    gap: 8px;
+  }
 }
 
 .temp-hp-counter {
@@ -79,6 +289,12 @@
   align-items: center;
   cursor: pointer;
   transition: background 0.2s;
+  
+  @media (max-width: 600px) {
+    flex: 1;
+    min-width: auto;
+    height: 48px;
+  }
 
   &:active {
     background: #2a2a2a;
@@ -132,20 +348,123 @@
   font-size: 0.9rem;
 }
 
+/* Combat Buttons Section */
+.combat-buttons-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  
+  @media (max-width: 600px) {
+    gap: 6px;
+  }
+}
+
+.damage-heal-buttons-group {
+  display: flex;
+  gap: 8px;
+  
+  @media (max-width: 600px) {
+    gap: 6px;
+  }
+}
+
 .btn-damage {
   --background: #C62828;
   --color: white;
   --border-radius: 12px;
+  --padding-start: 12px;
+  --padding-end: 12px;
   font-weight: bold;
-  height: 50px;
+  height: auto;
+  min-height: 40px;
+  flex: 1;
+  
+  @media (max-width: 480px) {
+    --padding-start: 8px;
+    --padding-end: 8px;
+    font-size: 0.9rem;
+    min-height: 36px;
+  }
 }
 
 .btn-heal {
   --background: #C5A059;
   --color: #121212;
   --border-radius: 12px;
+  --padding-start: 12px;
+  --padding-end: 12px;
   font-weight: bold;
-  height: 50px;
+  height: auto;
+  min-height: 40px;
+  flex: 1;
+  
+  @media (max-width: 480px) {
+    --padding-start: 8px;
+    --padding-end: 8px;
+    font-size: 0.9rem;
+    min-height: 36px;
+  }
+}
+
+.rest-buttons-group {
+  display: flex;
+  gap: 8px;
+  
+  @media (max-width: 480px) {
+    gap: 6px;
+  }
+}
+
+.btn-rest-short,
+.btn-rest-long {
+  flex: 1;
+  --border-radius: 12px;
+  --padding-start: 4px;
+  --padding-end: 4px;
+  font-weight: bold;
+  height: auto;
+  min-height: 44px;
+  font-size: 0.85rem;
+  
+  @media (max-width: 480px) {
+    --padding-start: 2px;
+    --padding-end: 2px;
+    font-size: 0.75rem;
+    min-height: 40px;
+  }
+}
+
+/* Toggle Combat Buttons */
+.toggle-combat-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 2px;
+  margin-bottom: -16px;
+}
+
+.btn-toggle {
+  --background: rgba(197, 160, 89, 0.15);
+  --color: #C5A059;
+  --border-radius: 8px;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  height: auto;
+  min-height: 36px;
+  width: auto;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  
+  &:hover {
+    --background: rgba(197, 160, 89, 0.25);
+  }
+  
+  @media (max-width: 480px) {
+    min-height: 32px;
+    padding: 4px 8px;
+    font-size: 0.85rem;
+  }
 }
 
 .selected-options-sheet {
@@ -249,28 +568,17 @@
 }
 
 .ac-shield {
+  position: relative;
+  width: 100px;
+  height: 140px;
   display: flex;
-  flex-direction: row;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  gap: 5px;
-  background: #1E1E1E;
-  color: white;
-  padding: 12px;
-  border-radius: 6px;
-  border: 1px solid #333;
-  font-weight: 500;
-
-  .ac-value { font-size: 1.1rem; order: 2; }
-  .combat-label { font-size: 1.1rem; order: 1; &::after { content: ':'; } }
-}
-
-.clickable-box {
-  cursor: pointer;
-  transition: background 0.2s;
+  justify-content: center;
   
-  &:active {
-    background: #2a2a2a;
+  @media (max-width: 600px) {
+    width: 90px;
+    height: 120px;
   }
 }
 
@@ -326,6 +634,85 @@
   justify-content: space-between;
   margin-bottom: 5px;
   span { color: #888; font-size: 0.7rem; margin-right: 10px; }
+}
+
+/* Hit Dice Card */
+.hit-dice-card {
+  border: 1px solid #C5A059;
+  border-radius: 6px;
+  padding: 10px;
+  text-align: center;
+  background: #1e1e1e;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  &:active {
+    background: #2a2a2a;
+    border-color: #e8c547;
+  }
+
+  .hd-label {
+    color: #999;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-bottom: 6px;
+    letter-spacing: 0.05em;
+  }
+
+  .hd-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .hd-pool {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+  }
+
+  .hd-value {
+    color: #C5A059;
+    font-size: 1rem;
+    font-weight: bold;
+  }
+
+  .hd-class {
+    color: #666;
+    font-size: 0.6rem;
+    font-style: italic;
+  }
+
+  .hd-content-single {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .hd-big-value {
+    color: #C5A059;
+    font-size: 1.6rem;
+    font-weight: bold;
+    
+    span {
+      font-size: 0.9rem;
+      color: #999;
+      margin-left: 2px;
+    }
+  }
+
+  .hd-total {
+    color: #666;
+    font-size: 0.65rem;
+  }
 }
 
 .ds-dot {
@@ -405,19 +792,50 @@
 
 ion-segment {
   --background: #1E1E1E;
+  display: flex;
+  width: 100%;
 }
 
 ion-segment-button {
   --color: #888;
   --color-checked: #C5A059;
   --indicator-color: transparent;
+  flex: 1;
+  min-width: 0;
+  font-size: clamp(0.65rem, 2vw, 0.85rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   ion-label {
     color: inherit;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    max-width: 100%;
   }
 
   ion-icon {
     color: inherit;
+    font-size: clamp(1rem, 4vw, 1.5rem);
+    margin-right: 4px;
+  }
+
+  @media (max-width: 480px) {
+    --padding-start: 0;
+    --padding-end: 0;
+    padding: 0;
+    min-height: 48px;
+    
+    ion-label {
+      display: none;
+    }
+    ion-icon {
+      margin-right: 0;
+      margin-top: 0;
+      margin-bottom: 0;
+    }
   }
 }
 
@@ -596,6 +1014,110 @@ ion-segment-button {
 .heal-alert .alert-button:last-child { 
   background: #C5A059 !important; 
   color: #121212 !important;
+}
+
+/* --- Hit Dice Alert Layout --- */
+.hit-dice-alert {
+  --max-width: 90vw;
+
+  .alert-head {
+    padding-top: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #333;
+  }
+
+  .alert-title {
+    color: #C5A059;
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+
+  /* Style for input wrapper */
+  .alert-input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 12px 0;
+    padding: 8px 0;
+    border-bottom: 1px solid #333;
+
+    &:last-of-type {
+      border-bottom: none;
+    }
+  }
+
+  .alert-input-label {
+    color: #888;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+  }
+
+  .alert-input {
+    color: white;
+    font-size: 1rem;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 8px 10px;
+
+    &::placeholder {
+      color: #666;
+    }
+  }
+
+  /* Button Layout */
+  .alert-button-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 8px 0;
+
+    &:nth-last-child(-n+2) {
+      padding-top: 12px;
+      border-top: 1px solid #333;
+      margin-top: 12px;
+    }
+  }
+
+  .hit-dice-roll-btn {
+    --background: #C5A059;
+    --color: #121212;
+    --border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.85rem;
+    min-width: 100px;
+    height: 36px;
+    padding: 0 12px;
+    flex: 0 1 auto;
+  }
+
+  .alert-cancel-btn {
+    --background: #333;
+    --color: white;
+    --border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    min-width: 80px;
+    height: 36px;
+  }
+
+  .alert-save-btn {
+    --background: #C5A059;
+    --color: #121212;
+    --border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    min-width: 80px;
+    height: 36px;
+  }
+
+  .alert-button {
+    flex: 1;
+    min-width: 70px;
+  }
 }
 
 /* --- Enhanced Header Details --- */
@@ -1174,4 +1696,85 @@ ion-segment-button {
 .active-concentration-banner {
   transition: all 0.3s ease-in-out;
 }
+
+/* --- Hit Dice Modal Styles --- */
+.hd-modal-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+  background: #1e1e1e;
+  border-radius: 8px;
+  border: 1px solid #333;
+  min-height: 50px;
+}
+
+.hd-pool-info {
+  min-width: 90px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hd-pool-name {
+  color: white;
+  font-weight: bold;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hd-pool-type {
+  color: #999;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.hd-pool-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.hd-input {
+  --background: #2a2a2a !important;
+  --color: white !important;
+  --padding-start: 8px !important;
+  --padding-end: 8px !important;
+  --placeholder-color: #666 !important;
+  border-radius: 4px;
+  width: 80px;
+  flex-shrink: 0;
+  height: 40px;
+}
+
+.hd-input input {
+  color: white !important;
+  font-size: 1rem !important;
+}
+
+/* Hit Dice Modal content area */
+ion-modal.hd-modal ion-content {
+  --background: #121212;
+  --color: white;
+}
+
+ion-modal.hd-modal ion-toolbar {
+  --background: #1e1e1e;
+  --color: #C5A059;
+}
+
+ion-modal.hd-modal ion-title {
+  color: #C5A059;
+  font-weight: bold;
+}
+
+
 

@@ -3,33 +3,87 @@
 
 .register-content {
   --background: #{$bg-primary};
+  min-height: 100vh;
 }
 
 .register-wrapper {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100%;
   padding: 24px;
+  gap: 32px;
 }
+
+/* ── Auth Header ──────────────────────────────────────────────────────────── */
+
+.auth-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.header-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba($accent-gold, 0.2), rgba($accent-gold, 0.05));
+  border: 2px solid rgba($accent-gold, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: float 3s ease-in-out infinite;
+}
+
+.header-icon {
+  font-size: 2.5rem;
+  color: $accent-gold;
+  filter: drop-shadow(0 0 8px rgba($accent-gold, 0.3));
+}
+
+.auth-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: $accent-gold;
+  letter-spacing: 2px;
+  margin: 0;
+  background: linear-gradient(135deg, $accent-gold 0%, #fff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.auth-subtitle {
+  font-size: 0.95rem;
+  color: $text-muted;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+/* ── Register Card ────────────────────────────────────────────────────────── */
 
 .register-card {
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
   --background: #{$bg-surface};
-  border-radius: 12px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
+              0 0 1px 1px rgba($accent-gold, 0.1);
+  border: 1px solid rgba($accent-gold, 0.15);
+  overflow: hidden;
 }
 
-.register-title {
-  color: $accent-gold;
-  font-size: 1.8rem;
-  font-weight: 700;
-  text-align: center;
-  letter-spacing: 1px;
+.form-container {
+  padding: 32px 24px;
 }
+
+/* ── Form Groups ──────────────────────────────────────────────────────────── */
 
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 
   ion-input {
     --color: #{$text-primary};
@@ -37,23 +91,75 @@
     --background: transparent;
     --border-color: #{$text-muted};
     --highlight-color-focused: #{$accent-gold};
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+    --border-bottom: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+
+    &:focus-within {
+      --border-color: #{$accent-gold};
+    }
+  }
+
+  &:last-of-type {
+    margin-bottom: 24px;
   }
 }
 
-.error-msg {
-  color: $accent-crimson;
-  font-size: 0.875rem;
-  margin: 8px 0 0;
-  text-align: center;
+/* ── Error Banner ─────────────────────────────────────────────────────────── */
+
+.error-banner {
+  display: flex;
+  gap: 12px;
+  background: rgba($accent-crimson, 0.1);
+  border: 1px solid rgba($accent-crimson, 0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  align-items: flex-start;
+  animation: slideIn 0.3s ease-out;
+
+  ion-icon {
+    color: $accent-crimson;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  p {
+    color: $accent-crimson;
+    font-size: 0.875rem;
+    margin: 0;
+    line-height: 1.4;
+  }
 }
 
-.register-btn {
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
+
+.btn-gold {
   --background: #{$accent-gold};
-  --background-activated: #{color.adjust($accent-gold, $lightness: -10%)};
+  --background-activated: #{color.adjust($accent-gold, $lightness: -12%)};
+  --background-hover: #{color.adjust($accent-gold, $lightness: -5%)};
   --color: #{$bg-primary};
   --border-radius: 8px;
-  font-weight: 600;
-  margin-top: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-register {
+  margin: 0 !important;
+  height: 48px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .toggle-btn {
@@ -62,16 +168,99 @@
   --padding-end: 0;
   margin: 0;
   height: 100%;
+  transition: color 0.2s ease;
+
+  &:not(:disabled) {
+    cursor: pointer;
+
+    &:hover {
+      --color: #{$accent-gold};
+    }
+  }
 }
 
-.nav-link {
-  color: $text-muted;
-  text-align: center;
-  margin-top: 16px;
-  font-size: 0.875rem;
+/* ── Auth Footer ──────────────────────────────────────────────────────────── */
 
-  span {
+.auth-footer {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.auth-link {
+  color: $text-muted;
+  font-size: 0.9rem;
+  margin: 0;
+  letter-spacing: 0.3px;
+
+  .link-text {
     color: $accent-gold;
+    font-weight: 600;
     cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: $accent-gold;
+      transition: width 0.3s ease;
+    }
+
+    &:hover {
+      &::after {
+        width: 100%;
+      }
+    }
+  }
+}
+
+/* ── Animations ───────────────────────────────────────────────────────────── */
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Responsive Design ────────────────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .register-wrapper {
+    gap: 24px;
+    padding: 16px;
+  }
+
+  .auth-header {
+    gap: 12px;
+  }
+
+  .auth-title {
+    font-size: 1.8rem;
+  }
+
+  .register-card {
+    max-width: 100%;
+  }
+
+  .form-container {
+    padding: 24px 16px;
   }
 }

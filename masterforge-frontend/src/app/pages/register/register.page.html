@@ -1,11 +1,18 @@
 <ion-content class="register-content">
   <div class="register-wrapper">
-    <ion-card class="register-card">
-      <ion-card-header>
-        <ion-card-title class="register-title">MasterForge</ion-card-title>
-      </ion-card-header>
+    <!-- Header with Icon and Title -->
+    <div class="auth-header">
+      <div class="header-icon-wrapper">
+        <ion-icon name="create-outline" class="header-icon"></ion-icon>
+      </div>
+      <h1 class="auth-title">MasterForge</h1>
+      <p class="auth-subtitle">Crea tu cuenta de aventurero</p>
+    </div>
 
-      <ion-card-content>
+    <!-- Main Card -->
+    <ion-card class="register-card">
+      <ion-card-content class="form-container">
+        <!-- Name Input -->
         <div class="form-group">
           <ion-input
             label="Nombre"
@@ -16,6 +23,7 @@
           </ion-input>
         </div>
 
+        <!-- Email Input -->
         <div class="form-group">
           <ion-input
             label="Correo electrónico"
@@ -28,6 +36,7 @@
           </ion-input>
         </div>
 
+        <!-- Password Input -->
         <div class="form-group">
           <ion-input
             label="Contraseña"
@@ -43,6 +52,7 @@
           </ion-input>
         </div>
 
+        <!-- Confirm Password Input -->
         <div class="form-group">
           <ion-input
             label="Confirmar contraseña"
@@ -58,20 +68,35 @@
           </ion-input>
         </div>
 
+        <!-- Error Message -->
         @if (errorMessage) {
-          <p class="error-msg" data-testid="error-message">{{ errorMessage }}</p>
+          <div class="error-banner" data-testid="error-message">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <p>{{ errorMessage }}</p>
+          </div>
         }
 
+        <!-- Submit Button -->
         <ion-button
           expand="block"
-          class="register-btn ion-margin-top"
+          class="btn-gold btn-register"
           [disabled]="isLoading"
           (click)="onSubmit()"
           data-testid="submit-button">
-          {{ isLoading ? 'Registrando...' : 'Registrarse' }}
+          @if (isLoading) {
+            <ion-spinner slot="start"></ion-spinner>
+            Registrando...
+          } @else {
+            Crear Cuenta
+          }
         </ion-button>
 
-        <p class="nav-link">¿Ya tienes cuenta? <span (click)="router.navigate(['/login'])">Inicia sesión</span></p>
+        <!-- Navigation Link -->
+        <div class="auth-footer">
+          <p class="auth-link">¿Ya tienes cuenta? 
+            <span class="link-text" (click)="router.navigate(['/login'])">Inicia sesión aquí</span>
+          </p>
+        </div>
       </ion-card-content>
     </ion-card>
   </div>

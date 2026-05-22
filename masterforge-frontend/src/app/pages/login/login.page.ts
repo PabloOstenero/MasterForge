@@ -5,11 +5,11 @@ import { Router } from '@angular/router';
 import {
   IonContent,
   IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-  IonInput, IonButton, IonLabel, IonIcon, ToastController, ModalController
+  IonInput, IonButton, IonLabel, IonIcon, IonSpinner, ToastController, ModalController
 } from '@ionic/angular/standalone';
 import { MfaModalComponent } from '../../components/mfa-modal/mfa-modal.component';
 import { addIcons } from 'ionicons';
-import { eyeOutline, eyeOffOutline } from 'ionicons/icons';
+import { eyeOutline, eyeOffOutline, shieldOutline } from 'ionicons/icons';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -22,7 +22,7 @@ import { AuthService } from '../../services/auth.service';
     FormsModule,
     IonContent,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-    IonInput, IonButton, IonLabel, IonIcon
+    IonInput, IonButton, IonLabel, IonIcon, IonSpinner
   ]
 })
 export class LoginPage {
@@ -40,7 +40,7 @@ export class LoginPage {
     private toastCtrl: ToastController,
     private modalCtrl: ModalController
   ) {
-    addIcons({ eyeOutline, eyeOffOutline });
+    addIcons({ eyeOutline, eyeOffOutline, shieldOutline });
   }
 
   ionViewWillEnter() {

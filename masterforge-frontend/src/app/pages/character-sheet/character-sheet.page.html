@@ -6,33 +6,48 @@
     <ion-buttons slot="end">
       <ion-button color="warning" fill="solid" size="small" (click)="openLevelUpModal()">
         <ion-icon name="trending-up-outline" slot="start"></ion-icon>
-        Subir Nivel
+        <span class="button-text">Subir Nivel</span>
       </ion-button>
     </ion-buttons>
-    <ion-title class="gold-title">Ficha de {{ pj.name }}</ion-title>
+    <ion-title class="gold-title">
+      <span class="title-full">Ficha de {{ pj.name }}</span>
+      <span class="title-short">{{ pj.name }}</span>
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="char-sheet-content">
   <div class="ion-padding">
     <!-- Class, Background, and AC Info boxes -->
-    <ion-row class="ion-margin-bottom ion-align-items-center">
-      <ion-col size="8">
-        <div class="info-box">
-          <div class="info-line"><strong>Clase:</strong> {{ pj.fullClassName }}</div>
-          <div class="info-line"><strong>Raza:</strong> {{ pj.raceName }} ({{ pj.creatureType }})</div>
-          <div class="info-line"><strong>Trasfondo:</strong> {{ pj.background }}</div>
-          <div class="info-line"><strong>Alineamiento:</strong> {{ pj.alignment }}</div>
-          <div class="info-line"><strong>Experiencia:</strong> {{ pj.xp }} XP</div>
+    <div class="character-header-section ion-margin-bottom">
+      <div class="info-box-redesigned">
+        <div class="character-info-grid">
+          <div class="info-item">
+            <div class="info-label">Clase</div>
+            <div class="info-value">{{ pj.fullClassName }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Raza</div>
+            <div class="info-value">{{ pj.raceName }} ({{ pj.creatureType }})</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Trasfondo</div>
+            <div class="info-value">{{ pj.background }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Alineamiento</div>
+            <div class="info-value">{{ pj.alignment }}</div>
+          </div>
         </div>
-      </ion-col>
-      <ion-col size="4" class="ion-text-center">
-        <div class="ac-shield top-shield">
+      </div>
+      <div class="ac-shield-container">
+        <div class="ac-shield">
+          <ion-icon name="shield" class="shield-icon"></ion-icon>
           <div class="ac-value">{{ pj.armorClass }}</div>
-          <div class="combat-label">CA</div>
+          <div class="ac-label">CA</div>
         </div>
-      </ion-col>
-    </ion-row>
+      </div>
+    </div>
 
     <!-- HP Progress Bar -->
     <div class="hp-section ion-margin-bottom">
@@ -55,28 +70,37 @@
     </div>
 
     <!-- Combat Action Buttons -->
-    <ion-row class="ion-margin-bottom">
-      <ion-col size="4">
+    @if (showCombatButtons) {
+    <div class="combat-buttons-section">
+      <div class="damage-heal-buttons-group">
         <ion-button expand="block" class="btn-damage" (click)="takeDamage()">
-          – Daño
+          <ion-icon name="heart-dislike-outline" slot="start"></ion-icon>
+          Daño
         </ion-button>
-      </ion-col>
-      <ion-col size="4">
         <ion-button expand="block" class="btn-heal" (click)="healDamage()">
-          + Curar
+          <ion-icon name="heart-outline" slot="start"></ion-icon>
+          Curar
         </ion-button>
-      </ion-col>
-      <ion-col size="4">
-        <div style="display: flex; gap: 5px;">
-          <ion-button expand="block" color="medium" (click)="performShortRest()" style="flex: 1; --padding-start: 2px; --padding-end: 2px; font-size: 0.8rem;">
-            S. Rest
-          </ion-button>
-          <ion-button expand="block" color="success" (click)="performLongRest()" style="flex: 1; --padding-start: 2px; --padding-end: 2px; font-size: 0.8rem;">
-            L. Rest
-          </ion-button>
-        </div>
-      </ion-col>
-    </ion-row>
+      </div>
+      <div class="rest-buttons-group">
+        <ion-button expand="block" color="medium" (click)="performShortRest()" class="btn-rest-short">
+          <ion-icon name="moon-outline" slot="start"></ion-icon>
+          S. Rest
+        </ion-button>
+        <ion-button expand="block" color="success" (click)="performLongRest()" class="btn-rest-long">
+          <ion-icon name="bed-outline" slot="start"></ion-icon>
+          L. Rest
+        </ion-button>
+      </div>
+    </div>
+    }
+
+    <!-- Toggle Combat Buttons -->
+    <div class="toggle-combat-buttons">
+      <ion-button fill="clear" color="warning" (click)="toggleCombatButtons()" class="btn-toggle">
+        <ion-icon [name]="showCombatButtons ? 'chevron-down-outline' : 'chevron-up-outline'"></ion-icon>
+      </ion-button>
+    </div>
   </div>
 
   @if (currentTab === 'stats') {
@@ -183,89 +207,7 @@
       </ion-row>
     </ion-grid>
 
-    <!-- New Section: Class Features -->
-    <h2 class="section-title" style="margin-top: 30px;">Rasgos de Clase</h2>
-    <ion-list class="transparent-list">
-      @for (feature of pj.features; track $index) {
-      <ion-item lines="none" class="skill-item">
-        <ion-label>
-          <h2 style="color: #C5A059; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            {{ feature.name }}
-            <small style="color: #888;">(Nivel {{ feature.levelRequired }})</small>
-            @if (feature.actionType && feature.actionType !== 'PASSIVE') {
-              <ion-badge color="warning" style="font-size: 0.6rem; padding: 2px 6px;">{{ getActionTypeLabel(feature.actionType) }}</ion-badge>
-            }
-            @if (feature._scalingText) {
-              <ion-badge color="danger" style="font-size: 0.6rem; padding: 2px 6px; --background: #8b0000;">{{ feature._scalingText }}</ion-badge>
-            }
-            @if (feature.isSubclassFeature) {
-              <span class="subclass-badge">{{ pj.subclass }}</span>
-            }
-          </h2>
-          <p>{{ feature.description }}</p>
-          @if (feature.selectedOptions?.length > 0) {
-          <div class="selected-options-sheet">
-            <strong>Opciones:</strong>
-            @for (opt of feature.selectedOptions; track $index) {
-            <span class="option-tag-sheet">{{ opt }}</span>
-            }
-          </div>
-          }
-        </ion-label>
-      </ion-item>
-      } @empty {
-      <p style="color: #666; font-style: italic; padding-left: 10px;">No hay rasgos de clase disponibles.</p>
-      }
-    </ion-list>
 
-    <!-- New Section: Racial Traits -->
-    <h2 class="section-title" style="margin-top: 30px;">Rasgos de Raza</h2>
-    <ion-list class="transparent-list">
-      @for (trait of pj.traits; track $index) {
-      <ion-item lines="none" class="skill-item">
-        <ion-label>
-          <h2 style="color: #C5A059; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            {{ trait.name }}
-            @if (trait.actionType && trait.actionType !== 'PASSIVE') {
-              <ion-badge color="warning" style="font-size: 0.6rem; padding: 2px 6px;">{{ getActionTypeLabel(trait.actionType) }}</ion-badge>
-            }
-          </h2>
-          <p>{{ trait.description }}</p>
-          @if (trait.selectedOptions?.length > 0) {
-          <div class="selected-options-sheet">
-            <strong>Opciones:</strong>
-            @for (opt of trait.selectedOptions; track $index) {
-            <span class="option-tag-sheet">{{ opt }}</span>
-            }
-          </div>
-          }
-        </ion-label>
-      </ion-item>
-      } @empty {
-      <p style="color: #666; font-style: italic; padding-left: 10px;">No hay rasgos raciales disponibles.</p>
-      }
-    </ion-list>
-
-    <!-- New Section: Other Proficiencies -->
-    <h2 class="section-title" style="margin-top: 30px;">Otras Competencias</h2>
-    <div class="info-box-medium">
-      <div class="prof-group">
-        <div class="prof-label">Armaduras</div>
-        <div class="prof-values">{{ pj.proficiencies.armor.join(', ') || 'Ninguna' }}</div>
-      </div>
-      <div class="prof-group">
-        <div class="prof-label">Armas</div>
-        <div class="prof-values">{{ pj.proficiencies.weapons.join(', ') || 'Ninguna' }}</div>
-      </div>
-      <div class="prof-group">
-        <div class="prof-label">Herramientas</div>
-        <div class="prof-values">{{ pj.proficiencies.tools.join(', ') || 'Ninguna' }}</div>
-      </div>
-      <div class="prof-group">
-        <div class="prof-label">Idiomas</div>
-        <div class="prof-values">{{ pj.proficiencies.languages.join(', ') || 'Común' }}</div>
-      </div>
-    </div>
 
     <h2 class="section-title" style="margin-top: 30px;">Habilidades (Skills)</h2>
     <ion-list class="transparent-list">
@@ -330,18 +272,23 @@
     <!-- Hit Dice and Death Saves -->
     <ion-row>
       <ion-col size="5">
-        <div class="combat-square-box hit-dice clickable" (click)="updateHitDiceAlert()" style="min-height: 90px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 6px;">
+        <div class="hit-dice-card clickable" (click)="updateHitDiceAlert()">
           @if (hitDicePools && hitDicePools.length > 1) {
-            <div class="hp-header" style="font-size: 10px; margin-bottom: 2px;">Dados de Golpe</div>
-            <div class="combat-value small" style="font-size: 11px; line-height: 1.3; font-weight: normal; width: 100%; text-align: center;">
+            <div class="hd-label">Dados de Golpe</div>
+            <div class="hd-content">
               @for (pool of hitDicePools; track $index) {
-                <div>{{ pool.total - pool.spent }}d{{ pool.dieType }} <span style="font-size: 9px; opacity: 0.8;">({{ pool.className }})</span></div>
+                <div class="hd-pool">
+                  <span class="hd-value">{{ pool.total - pool.spent }}d{{ pool.dieType }}</span>
+                  <span class="hd-class">{{ pool.className }}</span>
+                </div>
               }
             </div>
           } @else {
-            <div class="hp-header">Total: {{ pj.hitDiceTotal }}d{{ pj.hitDieType }}</div>
-            <div class="combat-value small">{{ pj.hitDiceTotal - pj.hitDiceSpent }}d{{ pj.hitDieType }}</div>
-            <div class="combat-label">Dados de Golpe</div>
+            <div class="hd-label">Dados de Golpe</div>
+            <div class="hd-content-single">
+              <div class="hd-big-value">{{ pj.hitDiceTotal - pj.hitDiceSpent }}<span>d{{ pj.hitDieType }}</span></div>
+              <div class="hd-total">Total: {{ pj.hitDiceTotal }}d{{ pj.hitDieType }}</div>
+            </div>
           }
         </div>
       </ion-col>
@@ -678,6 +625,94 @@
   </div>
   }
 
+  @if (currentTab === 'features') {
+  <div class="ion-padding">
+    <!-- Class Features -->
+    <h2 class="section-title">Rasgos de Clase</h2>
+    <ion-list class="transparent-list">
+      @for (feature of pj.features; track $index) {
+      <ion-item lines="none" class="skill-item">
+        <ion-label>
+          <h2 style="color: #C5A059; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            {{ feature.name }}
+            <small style="color: #888;">(Nivel {{ feature.levelRequired }})</small>
+            @if (feature.actionType && feature.actionType !== 'PASSIVE') {
+              <ion-badge color="warning" style="font-size: 0.6rem; padding: 2px 6px;">{{ getActionTypeLabel(feature.actionType) }}</ion-badge>
+            }
+            @if (feature._scalingText) {
+              <ion-badge color="danger" style="font-size: 0.6rem; padding: 2px 6px; --background: #8b0000;">{{ feature._scalingText }}</ion-badge>
+            }
+            @if (feature.isSubclassFeature) {
+              <span class="subclass-badge">{{ pj.subclass }}</span>
+            }
+          </h2>
+          <p>{{ feature.description }}</p>
+          @if (feature.selectedOptions?.length > 0) {
+          <div class="selected-options-sheet">
+            <strong>Opciones:</strong>
+            @for (opt of feature.selectedOptions; track $index) {
+            <span class="option-tag-sheet">{{ opt }}</span>
+            }
+          </div>
+          }
+        </ion-label>
+      </ion-item>
+      } @empty {
+      <p style="color: #666; font-style: italic; padding-left: 10px;">No hay rasgos de clase disponibles.</p>
+      }
+    </ion-list>
+
+    <!-- Racial Traits -->
+    <h2 class="section-title" style="margin-top: 30px;">Rasgos de Raza</h2>
+    <ion-list class="transparent-list">
+      @for (trait of pj.traits; track $index) {
+      <ion-item lines="none" class="skill-item">
+        <ion-label>
+          <h2 style="color: #C5A059; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            {{ trait.name }}
+            @if (trait.actionType && trait.actionType !== 'PASSIVE') {
+              <ion-badge color="warning" style="font-size: 0.6rem; padding: 2px 6px;">{{ getActionTypeLabel(trait.actionType) }}</ion-badge>
+            }
+          </h2>
+          <p>{{ trait.description }}</p>
+          @if (trait.selectedOptions?.length > 0) {
+          <div class="selected-options-sheet">
+            <strong>Opciones:</strong>
+            @for (opt of trait.selectedOptions; track $index) {
+            <span class="option-tag-sheet">{{ opt }}</span>
+            }
+          </div>
+          }
+        </ion-label>
+      </ion-item>
+      } @empty {
+      <p style="color: #666; font-style: italic; padding-left: 10px;">No hay rasgos raciales disponibles.</p>
+      }
+    </ion-list>
+
+    <!-- Other Proficiencies -->
+    <h2 class="section-title" style="margin-top: 30px;">Otras Competencias</h2>
+    <div class="info-box-medium">
+      <div class="prof-group">
+        <div class="prof-label">Armaduras</div>
+        <div class="prof-values">{{ pj.proficiencies.armor.join(', ') || 'Ninguna' }}</div>
+      </div>
+      <div class="prof-group">
+        <div class="prof-label">Armas</div>
+        <div class="prof-values">{{ pj.proficiencies.weapons.join(', ') || 'Ninguna' }}</div>
+      </div>
+      <div class="prof-group">
+        <div class="prof-label">Herramientas</div>
+        <div class="prof-values">{{ pj.proficiencies.tools.join(', ') || 'Ninguna' }}</div>
+      </div>
+      <div class="prof-group">
+        <div class="prof-label">Idiomas</div>
+        <div class="prof-values">{{ pj.proficiencies.languages.join(', ') || 'Común' }}</div>
+      </div>
+    </div>
+  </div>
+  }
+
 </ion-content>
 
 <!-- Searchable Spell Picker Modal -->
@@ -1011,6 +1046,10 @@
       <ion-segment-button value="magic">
         <ion-icon name="sparkles"></ion-icon>
         <ion-label>Hechizos</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="features">
+        <ion-icon name="flash-outline"></ion-icon>
+        <ion-label>Rasgos</ion-label>
       </ion-segment-button>
     </ion-segment>
   </ion-toolbar>

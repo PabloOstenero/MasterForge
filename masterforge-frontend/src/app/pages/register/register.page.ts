@@ -5,10 +5,10 @@ import { Router } from '@angular/router';
 import {
   IonContent,
   IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-  IonInput, IonButton, IonLabel, IonIcon
+  IonInput, IonButton, IonLabel, IonIcon, IonSpinner
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { eyeOutline, eyeOffOutline } from 'ionicons/icons';
+import { eyeOutline, eyeOffOutline, createOutline } from 'ionicons/icons';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -21,7 +21,7 @@ import { AuthService } from '../../services/auth.service';
     FormsModule,
     IonContent,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-    IonInput, IonButton, IonLabel, IonIcon
+    IonInput, IonButton, IonLabel, IonIcon, IonSpinner
   ]
 })
 export class RegisterPage {
@@ -35,7 +35,7 @@ export class RegisterPage {
   showConfirmPassword = false;
 
   constructor(private authService: AuthService, public router: Router) {
-    addIcons({ eyeOutline, eyeOffOutline });
+    addIcons({ eyeOutline, eyeOffOutline, createOutline });
   }
 
   onSubmit() {
