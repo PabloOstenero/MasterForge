@@ -7,8 +7,8 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="modal-overlay">
-      <div class="modal-content">
+    <div class="modal-overlay" (click)="onDismiss()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h2>Dados de Golpe</h2>
           <button class="close-btn" (click)="onDismiss()">✕</button>
@@ -54,11 +54,12 @@ import { FormsModule } from '@angular/forms';
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.15);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 1000;
+      backdrop-filter: blur(1px);
     }
 
     .modal-content {
@@ -84,6 +85,7 @@ import { FormsModule } from '@angular/forms';
         margin: 0;
         color: #C5A059;
         font-size: 1.2rem;
+        flex: 1;
       }
     }
 
@@ -96,6 +98,11 @@ import { FormsModule } from '@angular/forms';
       padding: 0;
       width: 32px;
       height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-left: 16px;
     }
 
     .modal-body {

@@ -956,6 +956,8 @@ export class CharacterSheetPage implements OnInit {
     });
   }
 
+
+
   private updateMoneyOnBackend() {
     if (!this.characterId) return;
     this.apiService.updateMoney(this.characterId!, this.pj.money).subscribe({
