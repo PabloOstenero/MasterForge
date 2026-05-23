@@ -1776,5 +1776,90 @@ ion-modal.hd-modal ion-title {
   font-weight: bold;
 }
 
+/* --- Add Item Modal Styles --- */
+ion-modal.add-item-modal {
+  --background: #121212 !important;
+  --ion-background-color: #121212 !important;
+}
+
+.add-item-modal {
+  --background: #121212 !important;
+  --ion-background-color: #121212 !important;
+
+  ion-header {
+    --background: #1a1a1a !important;
+    --color: #C5A059 !important;
+    border-bottom: 1px solid #333 !important;
+  }
+
+  ion-toolbar {
+    --background: #1a1a1a !important;
+    --color: #C5A059 !important;
+    --border-color: #333 !important;
+  }
+
+  ion-title {
+    color: #C5A059 !important;
+  }
+
+  ion-content {
+    --background: #121212 !important;
+    --color: white !important;
+  }
+
+  ion-searchbar {
+    --background: #1a1a1a !important;
+    --icon-color: #C5A059 !important;
+    --placeholder-color: rgba(197, 160, 89, 0.6) !important;
+
+    input {
+      color: white !important;
+    }
+
+    input::placeholder {
+      color: rgba(197, 160, 89, 0.6) !important;
+    }
+  }
+
+  .modal-title {
+    color: #C5A059 !important;
+    font-weight: bold;
+  }
+
+  .item-card {
+    --background: #1a1a1a !important;
+    --color: #ffffff !important;
+    border: 2px solid rgba(197, 160, 89, 0.2) !important;
+    
+    &.selected {
+      border-color: #C5A059 !important;
+      background-color: rgba(197, 160, 89, 0.1) !important;
+    }
+  }
+
+  .item-badge {
+    --background: #0066CC !important;
+    --color: white !important;
+  }
+
+  .item-name {
+    color: white !important;
+    font-weight: 600;
+  }
+
+  .item-type {
+    color: #C5A059 !important;
+  }
+
+  .item-author {
+    color: rgba(197, 160, 89, 0.6) !important;
+  }
+}
+
+ion-modal.add-item-modal::part(content) {
+  background: #121212 !important;
+}
+
+
 
 

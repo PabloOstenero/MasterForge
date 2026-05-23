@@ -9,10 +9,12 @@ import {
   AlertController, ActionSheetController, ModalController, IonSearchbar, IonModal, IonCheckbox, ToastController
 } from '@ionic/angular/standalone';
 import { ApiService } from '../../services/api';
+import { HomebrewService } from '../../services/homebrew.service';
 import { addIcons } from 'ionicons';
 import { statsChart, sparkles, shield, briefcase, trash, add, addCircleOutline, checkmarkCircle, trashOutline, syncOutline, book, bookOutline, settingsOutline, trendingUpOutline, removeCircleOutline, refreshOutline, sparklesOutline, flaskOutline, hammerOutline, flashOutline, addOutline, wifiOutline, closeCircleOutline, heartDislikeOutline, heartOutline, moonOutline, bedOutline, chevronUpOutline, chevronDownOutline, close } from 'ionicons/icons';
 import { FeatureChoicePickerComponent } from '../../components/feature-choice-picker/feature-choice-picker.component';
 import { HitDiceModalComponent } from './hit-dice-modal.component';
+import { AddItemModalComponent } from './add-item-modal.component';
 import { getProficiencyBonus, getModifier, calculatePassive, calculateMulticlassHp } from '../../utils/dnd-utils';
 
 export const DND_SKILLS = [
@@ -46,7 +48,7 @@ export const DND_SKILLS = [
     IonSegment, IonSegmentButton, IonLabel, IonGrid, IonRow, IonCol,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonBadge, IonList,
     IonIcon, IonButton, IonFooter, IonBackButton, IonButtons, IonSearchbar, IonModal,
-    IonCheckbox, FeatureChoicePickerComponent, HitDiceModalComponent
+    IonCheckbox, FeatureChoicePickerComponent, HitDiceModalComponent, AddItemModalComponent
   ],
   encapsulation: ViewEncapsulation.None // Re-enabled to allow styling the Alert pop-ups
 })
@@ -258,6 +260,7 @@ export class CharacterSheetPage implements OnInit {
   // Inyectamos el servicio en el constructor
   constructor(
     private apiService: ApiService,
+    private homebrewService: HomebrewService,
     private route: ActivatedRoute,
     private alertController: AlertController,
     private actionSheetController: ActionSheetController,
@@ -825,43 +828,72 @@ export class CharacterSheetPage implements OnInit {
   }
 
   async addItemAlert() {
-    // 1. Fetch available items from the database
+    // Fetch all available items (official items)
     this.apiService.getAllItems().subscribe({
-      next: async (items) => {
-        if (!items || items.length === 0) {
-          console.warn("No items available in master catalog.");
-          return;
-        }
+      next: async (officialItems: any[]) => {
+        // Also fetch homebrew items (user's collection)
+        this.homebrewService.getMyHomebrew().subscribe({
+          next: async (myHomebrewData: any) => {
+            // Combine official items (mark as official)
+            const allItems = [
+              ...(officialItems || []).map((item: any) => ({
+                ...item,
+                itemCategory: 'official' as const,
+                authorName: undefined
+              })),
+              // Add homebrew items from user's collection (items category only)
+              ...(myHomebrewData?.items || []).map((item: any) => ({
+                ...item,
+                itemCategory: 'homebrew' as const,
+                authorName: item.authorName || 'Desconocido'
+              }))
+            ];
 
-        const alert = await this.alertController.create({
-          header: 'Añadir al Equipo',
-          cssClass: 'heal-alert',
-          inputs: items.map(item => ({
-            type: 'radio',
-            label: `${item.name} (${item.type})`,
-            value: item.id
-          })),
-          buttons: [
-            { text: 'Cancelar', role: 'cancel' },
-            {
-              text: 'Añadir',
-              handler: (itemId) => {
-                if (!itemId) {
-                  console.warn("No item selected.");
-                  return false;
-                }
-                if (this.characterId) {
-                  this.apiService.addItemToInventory(this.characterId!, itemId).subscribe({
+            // Create and present the modal with items passed as componentProps
+            const modal = await this.modalController.create({
+              component: AddItemModalComponent,
+              componentProps: { items: allItems },
+              cssClass: 'add-item-modal'
+            });
+
+            await modal.present();
+
+            // Handle modal dismissal
+            const { data, role } = await modal.onDidDismiss();
+            if (role === 'confirm' && data && this.characterId) {
+              // data contains the selected item ID
+              this.apiService.addItemToInventory(this.characterId, data).subscribe({
+                next: () => this.loadCharacter(this.characterId!),
+                error: (err) => console.error("Error adding item to inventory:", err)
+              });
+            }
+          },
+          error: (err) => {
+            console.warn("Could not load homebrew items, showing official items only:", err);
+            // Fallback: show only official items if homebrew fetch fails
+            const officialItemsOnly = (officialItems || []).map((item: any) => ({
+              ...item,
+              itemCategory: 'official' as const,
+              authorName: undefined
+            }));
+
+            this.modalController.create({
+              component: AddItemModalComponent,
+              componentProps: { items: officialItemsOnly },
+              cssClass: 'add-item-modal'
+            }).then(modal => {
+              modal.present();
+              modal.onDidDismiss().then(async ({ data, role }) => {
+                if (role === 'confirm' && data && this.characterId) {
+                  this.apiService.addItemToInventory(this.characterId, data).subscribe({
                     next: () => this.loadCharacter(this.characterId!),
                     error: (err) => console.error("Error adding item to inventory:", err)
                   });
                 }
-                return true;
-              }
-            }
-          ]
+              });
+            });
+          }
         });
-        await alert.present();
       },
       error: (err) => console.error("Error loading item catalog:", err)
     });
