@@ -649,9 +649,14 @@
           <p>{{ feature.description }}</p>
           @if (feature.selectedOptions?.length > 0) {
           <div class="selected-options-sheet">
-            <strong>Opciones:</strong>
+            <strong>Opciones Elegidas:</strong>
             @for (opt of feature.selectedOptions; track $index) {
-            <span class="option-tag-sheet">{{ opt }}</span>
+            <div class="selected-option-item">
+              <div class="option-name">{{ opt.name }}</div>
+              @if (opt.description) {
+                <p class="option-desc">{{ opt.description }}</p>
+              }
+            </div>
             }
           </div>
           }
@@ -677,9 +682,14 @@
           <p>{{ trait.description }}</p>
           @if (trait.selectedOptions?.length > 0) {
           <div class="selected-options-sheet">
-            <strong>Opciones:</strong>
+            <strong>Opciones Elegidas:</strong>
             @for (opt of trait.selectedOptions; track $index) {
-            <span class="option-tag-sheet">{{ opt }}</span>
+            <div class="selected-option-item">
+              <div class="option-name">{{ opt.name }}</div>
+              @if (opt.description) {
+                <p class="option-desc">{{ opt.description }}</p>
+              }
+            </div>
             }
           </div>
           }

@@ -15,6 +15,10 @@ object FeatureChoiceEngine {
     /**
      * Validates that the provided choices for a feature match its defined options.
      * Expects choices for this feature to be in choicesJson under the feature's ID or name.
+     * Accepts choices as either:
+     * - Choice IDs (strings matching the "id" field in choices)
+     * - Choice labels (strings matching the "label" field in choices)
+     * - Arrays of either for SELECT_MANY
      */
     fun validateChoices(feature: ClassFeature, userChoice: Any?): Boolean {
         val options = feature.options ?: return true // No choices required
@@ -23,16 +27,24 @@ object FeatureChoiceEngine {
         @Suppress("UNCHECKED_CAST")
         val choices = options["choices"] as? List<Map<String, Any>> ?: return true
         val validIds = choices.mapNotNull { it["id"] as? String }.toSet()
+        val validLabels = choices.mapNotNull { it["label"] as? String }.toSet()
+
+        // Normalize userChoice to a list of strings for consistent handling
+        val selectedValues = when (userChoice) {
+            is String -> listOf(userChoice)
+            is List<*> -> userChoice.filterIsInstance<String>()
+            else -> return false
+        }
 
         return when (type) {
             "SELECT_ONE" -> {
-                val selectedId = userChoice as? String
-                selectedId != null && selectedId in validIds
+                // Should have exactly 1 choice, and it should match either an ID or label
+                selectedValues.size == 1 && (selectedValues[0] in validIds || selectedValues[0] in validLabels)
             }
             "SELECT_MANY" -> {
-                val selectedIds = userChoice as? List<*>
                 val count = (options["count"] as? Number)?.toInt() ?: 1
-                selectedIds != null && selectedIds.size == count && selectedIds.all { it in validIds }
+                // Should have exactly 'count' choices, each matching either an ID or label
+                selectedValues.size == count && selectedValues.all { it in validIds || it in validLabels }
             }
             "BOOLEAN" -> userChoice is Boolean
             else -> true
@@ -96,23 +108,21 @@ object FeatureChoiceEngine {
             @Suppress("UNCHECKED_CAST")
             val availableChoices = options["choices"] as? List<Map<String, Any>> ?: emptyList()
 
-            when (userChoice) {
-                is String -> {
-                    // SELECT_ONE
-                    availableChoices.find { it["id"] == userChoice }?.let { choice ->
-                        (choice["effects"] as? List<*>)?.filterIsInstance<Map<String, Any>>()?.forEach {
-                            effects.add(mapToEffect(it))
-                        }
-                    }
-                }
-                is List<*> -> {
-                    // SELECT_MANY
-                    userChoice.filterIsInstance<String>().forEach { choiceId ->
-                        availableChoices.find { it["id"] == choiceId }?.let { choice ->
-                            (choice["effects"] as? List<*>)?.filterIsInstance<Map<String, Any>>()?.forEach {
-                                effects.add(mapToEffect(it))
-                            }
-                        }
+            // Normalize userChoice to a list for consistent handling
+            val selectedValues = when (userChoice) {
+                is String -> listOf(userChoice)
+                is List<*> -> userChoice.filterIsInstance<String>()
+                else -> emptyList()
+            }
+
+            selectedValues.forEach { value ->
+                // Try to find by ID first, then by label
+                val choice = availableChoices.find { it["id"] == value }
+                    ?: availableChoices.find { it["label"] == value }
+                
+                choice?.let {
+                    (it["effects"] as? List<*>)?.filterIsInstance<Map<String, Any>>()?.forEach { effect ->
+                        effects.add(mapToEffect(effect))
                     }
                 }
             }

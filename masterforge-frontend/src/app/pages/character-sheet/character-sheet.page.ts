@@ -656,10 +656,13 @@ export class CharacterSheetPage implements OnInit {
           traits: [
             ...(data.dndRace?.traits || []),
             ...this.extractInnateSpellsAsFeatures(data.dndRace?.raceFeatures?.innateSpells)
-          ].map(t => ({
-            ...t,
-            selectedOptions: (data.choicesJson?.featureOptions?.[t.name] || [])
-          })),
+          ].map(t => {
+            const keys = (data.choicesJson?.featureOptions?.[t.id] || data.choicesJson?.featureOptions?.[t.name] || []);
+            return {
+              ...t,
+              selectedOptions: this.resolveSelectedOptions(t, keys)
+            };
+          }),
           features: (() => {
             const allFeats: any[] = [];
             // We use classLevels to correctly filter features by the level IN THAT class
@@ -701,10 +704,11 @@ export class CharacterSheetPage implements OnInit {
                   }
                 }
               }
+              const keys = (data.choicesJson?.featureOptions?.[f.id] || data.choicesJson?.featureOptions?.[f.name] || []);
               return {
                 ...f,
                 _scalingText: scalingText,
-                selectedOptions: (data.choicesJson?.featureOptions?.[f.name] || [])
+                selectedOptions: this.resolveSelectedOptions(f, keys)
               };
             });
           })(),
@@ -735,8 +739,19 @@ export class CharacterSheetPage implements OnInit {
 
         this.calculateResourcePools();
         this.calculateAutomatedEffects();
+        
+        // Debug: Log choicesJson and features with options
+        console.log('choicesJson:', this.pj.choicesJson);
+        console.log('choicesJson.featureOptions keys:', Object.keys(this.pj.choicesJson?.featureOptions || {}));
+        console.log('All features (id, name, selectedOptions):', this.pj.features.map((f: any) => ({
+          id: f.id,
+          name: f.name,
+          selectedOptions: f.selectedOptions,
+          hasOptions: f.options ? 'yes' : 'no'
+        })));
+        console.log('Features with selectedOptions:', this.pj.features.filter((f: any) => f.selectedOptions?.length > 0));
       },
-      error: async (err) => {
+      error: async (err: any) => {
         console.error("Critical error loading character:", err);
         if (err.status === 403) {
           const accessAlert = await this.alertController.create({
@@ -1416,11 +1431,14 @@ export class CharacterSheetPage implements OnInit {
 
     this.isLevelUpModalOpen = true;
 
-    // Reset data
+    // Reset data - only keep featureOptions from existing choicesJson
+    const existingChoicesJson = this.pj.choicesJson || {};
     this.levelUpData = {
       hpBonus: 0,
       statChanges: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
-      choicesJson: JSON.parse(JSON.stringify(this.pj.choicesJson || {})), // Deep copy
+      choicesJson: {
+        featureOptions: JSON.parse(JSON.stringify(existingChoicesJson.featureOptions || {}))
+      },
       selectedSpells: [],
       subclassId: null
     };
@@ -1765,17 +1783,21 @@ export class CharacterSheetPage implements OnInit {
 
   onFeatureChoiceChange(feature: any, selection: any) {
     const key = feature.id ? feature.id.toString() : feature.name;
-    this.levelUpData.choicesJson[key] = selection;
+    this.levelUpData.choicesJson.featureOptions = this.levelUpData.choicesJson.featureOptions || {};
+    // Always store as array for consistency
+    this.levelUpData.choicesJson.featureOptions[key] = Array.isArray(selection) ? selection : [selection];
   }
 
   isFeatureOptionSelected(feature: any, optionName: string): boolean {
     const choices = this.levelUpData.choicesJson.featureOptions || {};
-    return (choices[feature.name] || []).includes(optionName);
+    const key = feature.id ? feature.id.toString() : feature.name;
+    return (choices[key] || []).includes(optionName);
   }
 
   isFeatureMaxed(feature: any): boolean {
     const choices = this.levelUpData.choicesJson.featureOptions || {};
-    const selected = choices[feature.name] || [];
+    const key = feature.id ? feature.id.toString() : feature.name;
+    const selected = choices[key] || [];
     return selected.length >= this.calculateMaxChoices(feature, this.pj.level + 1);
   }
 
@@ -1806,6 +1828,36 @@ export class CharacterSheetPage implements OnInit {
     return [];
   }
 
+  resolveSelectedOptions(feature: any, selectedKeys: any[]): any[] {
+    if (!selectedKeys || !Array.isArray(selectedKeys) || selectedKeys.length === 0) {
+      return [];
+    }
+    const choices = this.getFeatureOptionsArray(feature);
+    if (!choices || choices.length === 0) {
+      return selectedKeys.map(k => {
+        if (k && typeof k === 'object') return k;
+        return { id: k, name: k, label: k, description: '' };
+      });
+    }
+    return selectedKeys.map(key => {
+      if (key && typeof key === 'object') return key;
+      const match = choices.find((c: any) =>
+        c?.id === key || c?.label === key || c?.name === key
+      );
+      if (match) {
+        return {
+          id: match.id || key,
+          name: match.label || match.name || match.id || key,
+          label: match.label || match.name || match.id || key,
+          description: match.description || '',
+          effects: match.effects || match.properties?.effects || [],
+          properties: match.properties || {}
+        };
+      }
+      return { id: key, name: key, label: key, description: '' };
+    });
+  }
+
   isLevelUpValid(): boolean {
     if (this.levelUpData.hpBonus <= 0) return false;
     if (this.isASIDue() && this.getTotalASISpent() < 2) return false;
@@ -1820,7 +1872,7 @@ export class CharacterSheetPage implements OnInit {
     for (const f of this.levelUpNewFeatures) {
       if (f.options) {
         const key = f.id ? f.id.toString() : f.name;
-        const selected = this.levelUpData.choicesJson[key];
+        const selected = this.levelUpData.choicesJson.featureOptions?.[key];
 
         // Basic validation: if there are options, there must be a choice
         if (!selected) return false;
@@ -1855,6 +1907,9 @@ export class CharacterSheetPage implements OnInit {
       classToLevelId: this.levelUpMode === 'EXISTING' ? this.levelUpData.classToLevelId : null,
       subclassId: this.levelUpData.subclassId
     };
+
+    console.log('Sending level-up request with choicesJson:', request.choicesJson);
+    console.log('Feature options being sent:', request.choicesJson?.featureOptions);
 
     this.apiService.levelUpCharacter(this.characterId, request).subscribe({
       next: () => {
@@ -2324,11 +2379,16 @@ export class CharacterSheetPage implements OnInit {
       allFeatures.forEach(f => {
         const globalEffects = f.properties?.effects || [];
         const optionEffects: any[] = [];
-        if (f.selectedOptions && f.options?.choices) {
-          f.selectedOptions.forEach((selectedId: string) => {
-            const optionObj = f.options.choices.find((c: any) =>
-              c.id === selectedId || c.label === selectedId || c.name === selectedId
-            );
+        if (f.selectedOptions) {
+          f.selectedOptions.forEach((selectedId: any) => {
+            let optionObj = null;
+            if (selectedId && typeof selectedId === 'object') {
+              optionObj = selectedId;
+            } else if (f.options?.choices) {
+              optionObj = f.options.choices.find((c: any) =>
+                c.id === selectedId || c.label === selectedId || c.name === selectedId
+              );
+            }
             if (optionObj) {
               optionEffects.push(...(optionObj.effects || optionObj.properties?.effects || []));
             }
@@ -2386,11 +2446,16 @@ export class CharacterSheetPage implements OnInit {
       allFeatures.forEach(f => {
         const globalEffects = f.properties?.effects || [];
         const optionEffects: any[] = [];
-        if (f.selectedOptions && f.options?.choices) {
-          f.selectedOptions.forEach((selectedId: string) => {
-            const optionObj = f.options.choices.find((c: any) =>
-              c.id === selectedId || c.label === selectedId || c.name === selectedId
-            );
+        if (f.selectedOptions) {
+          f.selectedOptions.forEach((selectedId: any) => {
+            let optionObj = null;
+            if (selectedId && typeof selectedId === 'object') {
+              optionObj = selectedId;
+            } else if (f.options?.choices) {
+              optionObj = f.options.choices.find((c: any) =>
+                c.id === selectedId || c.label === selectedId || c.name === selectedId
+              );
+            }
             if (optionObj) {
               optionEffects.push(...(optionObj.effects || optionObj.properties?.effects || []));
             }
@@ -3072,11 +3137,16 @@ export class CharacterSheetPage implements OnInit {
       allFeatures.forEach(f => {
         const globalEffects = f.properties?.effects || [];
         const optionEffects: any[] = [];
-        if (f.selectedOptions && f.options?.choices) {
-          f.selectedOptions.forEach((selectedId: string) => {
-            const optionObj = f.options.choices.find((c: any) =>
-              c.id === selectedId || c.label === selectedId || c.name === selectedId
-            );
+        if (f.selectedOptions) {
+          f.selectedOptions.forEach((selectedId: any) => {
+            let optionObj = null;
+            if (selectedId && typeof selectedId === 'object') {
+              optionObj = selectedId;
+            } else if (f.options?.choices) {
+              optionObj = f.options.choices.find((c: any) =>
+                c.id === selectedId || c.label === selectedId || c.name === selectedId
+              );
+            }
             if (optionObj) {
               optionEffects.push(...(optionObj.effects || optionObj.properties?.effects || []));
             }
@@ -3121,11 +3191,16 @@ export class CharacterSheetPage implements OnInit {
       allFeatures.forEach(f => {
         const globalEffects = f.properties?.effects || [];
         const optionEffects: any[] = [];
-        if (f.selectedOptions && f.options?.choices) {
-          f.selectedOptions.forEach((selectedId: string) => {
-            const optionObj = f.options.choices.find((c: any) =>
-              c.id === selectedId || c.label === selectedId || c.name === selectedId
-            );
+        if (f.selectedOptions) {
+          f.selectedOptions.forEach((selectedId: any) => {
+            let optionObj = null;
+            if (selectedId && typeof selectedId === 'object') {
+              optionObj = selectedId;
+            } else if (f.options?.choices) {
+              optionObj = f.options.choices.find((c: any) =>
+                c.id === selectedId || c.label === selectedId || c.name === selectedId
+              );
+            }
             if (optionObj) {
               optionEffects.push(...(optionObj.effects || optionObj.properties?.effects || []));
             }
@@ -3274,12 +3349,16 @@ export class CharacterSheetPage implements OnInit {
       globalEffects.forEach((e: any) => this.applyEffect(e, res, imm, conditionImm, senses));
 
       // 2. Check selected options effects
-      if (f.selectedOptions && f.options?.choices) {
-        f.selectedOptions.forEach((selectedId: string) => {
-          // Find option object by ID, label or name
-          const optionObj = f.options.choices.find((c: any) =>
-            c.id === selectedId || c.label === selectedId || c.name === selectedId
-          );
+      if (f.selectedOptions) {
+        f.selectedOptions.forEach((selectedId: any) => {
+          let optionObj = null;
+          if (selectedId && typeof selectedId === 'object') {
+            optionObj = selectedId;
+          } else if (f.options?.choices) {
+            optionObj = f.options.choices.find((c: any) =>
+              c.id === selectedId || c.label === selectedId || c.name === selectedId
+            );
+          }
           if (optionObj) {
             const optionEffects = optionObj.effects || optionObj.properties?.effects || [];
             optionEffects.forEach((e: any) => this.applyEffect(e, res, imm, conditionImm, senses));
@@ -3674,7 +3753,8 @@ export class CharacterSheetPage implements OnInit {
 
     // 3. Attach selected options ( Fighting Styles, Eldritch Invocations, etc.)
     return allFeats.map(f => {
-      const selectedOptions = (data.choicesJson?.featureOptions?.[f.name] || []);
+      const keys = (data.choicesJson?.featureOptions?.[f.id] || data.choicesJson?.featureOptions?.[f.name] || []);
+      const selectedOptions = this.resolveSelectedOptions(f, keys);
       return { ...f, selectedOptions };
     });
   }

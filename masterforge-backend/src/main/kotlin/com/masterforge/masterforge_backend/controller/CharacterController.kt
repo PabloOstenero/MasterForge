@@ -1002,10 +1002,13 @@ class CharacterController(
         targetSubclass?.features?.filter { it.levelRequired == newClassLevel }?.let { newFeatures.addAll(it) }
 
         // Validate each feature choice
+        @Suppress("UNCHECKED_CAST")
+        val featureOptions = dto.choicesJson["featureOptions"] as? Map<String, Any> ?: emptyMap()
+        
         newFeatures.forEach { feature ->
             if (feature.options != null) {
                 val featureKey = feature.id?.toString() ?: feature.name
-                val userChoice = dto.choicesJson[featureKey]
+                val userChoice = featureOptions[featureKey]
                 if (!FeatureChoiceEngine.validateChoices(feature, userChoice)) {
                     throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid choice for feature: ${feature.name}")
                 }
@@ -1156,11 +1159,13 @@ class CharacterController(
     private fun extractConModifier(character: Character): Int {
         var conBonus = 0
         val choices = character.choicesJson ?: emptyMap()
+        @Suppress("UNCHECKED_CAST")
+        val featureOptions = choices["featureOptions"] as? Map<String, Any> ?: emptyMap()
 
         fun processFeature(id: Int?, name: String, options: Map<String, Any>?, properties: Map<String, Any>?) {
             conBonus += getStatModifierFromProperties(properties, "con")
             val featureKey = id?.toString() ?: name
-            val userChoice = choices[featureKey]
+            val userChoice = featureOptions[featureKey]
             if (userChoice != null && options != null) {
                 val choicesList = options["choices"] as? List<*>
                 val choiceArray = if (userChoice is List<*>) userChoice else listOf(userChoice)
@@ -1189,11 +1194,13 @@ class CharacterController(
     private fun getMaxAttunementSlots(character: Character): Int {
         var bonusSlots = 0
         val choices = character.choicesJson ?: emptyMap()
+        @Suppress("UNCHECKED_CAST")
+        val featureOptions = choices["featureOptions"] as? Map<String, Any> ?: emptyMap()
 
         fun processFeature(id: Int?, name: String, options: Map<String, Any>?, properties: Map<String, Any>?) {
             bonusSlots += (properties?.get("bonusAttunementSlots") as? Number)?.toInt() ?: 0
             val featureKey = id?.toString() ?: name
-            val userChoice = choices[featureKey]
+            val userChoice = featureOptions[featureKey]
             if (userChoice != null && options != null) {
                 val choicesList = options["choices"] as? List<*>
                 val choiceArray = if (userChoice is List<*>) userChoice else listOf(userChoice)
