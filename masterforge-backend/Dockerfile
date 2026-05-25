@@ -5,7 +5,7 @@ WORKDIR /home/gradle/src
 RUN ./gradlew build -x test --no-daemon
 
 # Stage 2: Create the final lightweight runtime container
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jre
 EXPOSE 8080
 
 # Copy the compiled jar from the build stage
