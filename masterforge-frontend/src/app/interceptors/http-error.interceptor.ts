@@ -21,6 +21,16 @@ import { catchError, timeout } from 'rxjs/operators';
 import { ErrorHandlerService } from '../services/error-handler.service';
 import { environment } from '../../environments/environment';
 
+export const apiBaseUrlInterceptor: HttpInterceptorFn = (req, next) => {
+  if (req.url.startsWith('/api/')) {
+    const cloned = req.clone({
+      url: `${environment.apiBaseUrl}${req.url}`
+    });
+    return next(cloned);
+  }
+  return next(req);
+};
+
 export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
   const errorHandler = inject(ErrorHandlerService);
 

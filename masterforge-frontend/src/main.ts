@@ -7,7 +7,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
 import { authInterceptor } from './app/services/auth.service';
-import { httpErrorInterceptor } from './app/interceptors/http-error.interceptor';
+import { httpErrorInterceptor, apiBaseUrlInterceptor } from './app/interceptors/http-error.interceptor';
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -15,6 +15,6 @@ bootstrapApplication(AppComponent, {
     provideIonicAngular(),
     provideAnimations(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
-    provideHttpClient(withInterceptors([authInterceptor, httpErrorInterceptor])),
+    provideHttpClient(withInterceptors([apiBaseUrlInterceptor, authInterceptor, httpErrorInterceptor])),
   ],
 });
