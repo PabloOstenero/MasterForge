@@ -2,7 +2,7 @@
 FROM gradle:8.5-jdk17 AS build
 COPY --chown=gradle:gradle . /home/gradle/src
 WORKDIR /home/gradle/src
-RUN ./gradlew build -x test --no-daemon
+RUN chmod +x gradlew && ./gradlew build -x test --no-daemon
 
 # Stage 2: Create the final lightweight runtime container
 FROM eclipse-temurin:17-jre
