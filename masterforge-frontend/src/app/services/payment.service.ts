@@ -22,11 +22,9 @@ import {
   PaymentTransaction,
 } from '../shared/models/payment.models';
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
+import { environment } from '../../environments/environment';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = `${environment.apiBaseUrl}/api`;
 
 /** HTTP request timeout in milliseconds (10 seconds). */
 const REQUEST_TIMEOUT_MS = 10_000;

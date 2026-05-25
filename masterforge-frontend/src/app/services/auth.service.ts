@@ -5,8 +5,10 @@ import { tap, catchError } from 'rxjs/operators';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { environment } from '../../environments/environment';
+
 const TOKEN_KEY = 'mf_token';
-const API_URL = 'http://localhost:8080/api';
+const API_URL = `${environment.apiBaseUrl}/api`;
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
