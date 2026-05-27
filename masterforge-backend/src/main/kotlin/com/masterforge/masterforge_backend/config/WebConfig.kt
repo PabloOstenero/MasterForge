@@ -10,11 +10,10 @@ class WebConfig : WebMvcConfigurer {
     override fun addCorsMappings(registry: CorsRegistry) {
         // Aplicamos la configuración a todos los endpoints de la API
         registry.addMapping("/**")
-            // Whitelist specific frontend development, production, and mobile origins
-            .allowedOriginPatterns("http://localhost:8100", "http://localhost:4200", "https://pabloostenero.github.io", "http://localhost", "capacitor://localhost")
+            // Allow all origins since it is a stateless JWT-based API
+            .allowedOrigins("*")
             // Permitimos todos los métodos necesarios, incluyendo PUT y OPTIONS (preflight)
             .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
             .allowedHeaders("*")
-            .allowCredentials(true)
     }
 }
