@@ -502,13 +502,13 @@ Para optimizar el tamaño, la legibilidad y el mantenimiento del presente manual
 
 *   **Guía de Desarrollo Local y Primeros Pasos Sandbox**:
     *   *Descripción:* Manual técnico detallado para desarrolladores que describe los requisitos previos de software (Node.js 18+, JDK 17, PostgreSQL 15+) y la secuencia paso a paso de comandos de consola para levantar localmente tanto el servidor Spring Boot (REST API) como el cliente frontend Ionic/Angular.
-    *   *Enlace de acceso local:* [GETTING_STARTED.md](file:///d:/MasterForge/documentation/documentacion_esp/GETTING_STARTED.md)
+    *   *Enlace de acceso local:* [GETTING_STARTED.md](https://github.com/PabloOstenero/MasterForge/blob/main/documentation/documentacion_esp/GETTING_STARTED.md)
 *   **Manual de Usuario (Experiencia de Jugador y Director de Juego)**:
     *   *Descripción:* Guía interactiva destinada al usuario final que explica detalladamente la creación de cuentas, la activación de la seguridad de dos factores (2FA), la sincronización con Discord, la búsqueda e inscripción de partidas en el Gremio, el funcionamiento dinámico de la hoja de personaje (triggers de descanso y subida de nivel) y las herramientas de combate en vivo (*Combat Tracker*).
-    *   *Enlace de acceso local:* [MANUAL_USUARIO.md](file:///d:/MasterForge/documentation/documentacion_esp/MANUAL_USUARIO.md)
+    *   *Enlace de acceso local:* [MANUAL_USUARIO.md](https://github.com/PabloOstenero/MasterForge/blob/main/documentation/documentacion_esp/MANUAL_USUARIO.md)
 *   **Manual de Arquitectura de Seguridad (Autenticación 2FA)**:
     *   *Descripción:* Especificación detallada de la arquitectura de seguridad reforzada MFA implementada bajo el protocolo TOTP (RFC 6238), detallando el cálculo del secreto de 80 bits en Base32, la forja de la URI otpauth, el sistema de ventana de deriva temporal de +/- 60 segundos y el flujo de los códigos de recuperación de uso único.
-    *   *Enlace de acceso local:* [SEGURIDAD_2FA.md](file:///d:/MasterForge/documentation/documentacion_esp/SEGURIDAD_2FA.md)
+    *   *Enlace de acceso local:* [SEGURIDAD_2FA.md](https://github.com/PabloOstenero/MasterForge/blob/main/documentation/documentacion_esp/SEGURIDAD_2FA.md)
 
 ---
 
@@ -540,9 +540,9 @@ Se ha estructurado un roadmap de desarrollo técnico a medio y largo plazo enfoc
 
 #### **16.1 Especificaciones de Arquitectura Detallada**
 Para profundizar en las capas profundas de diseño físico de bases de datos, flujos detallados de endpoints de red y planificación de tareas del proyecto, se anexa el acceso a los diagramas físicos interactivos y especificaciones técnicas complementarias redactadas durante el ciclo de desarrollo:
-*   [Diseño del Sistema MasterForge](file:///d:/MasterForge/documentation/documentacion_esp/dise%C3%B1o_sistema_masterforge.md)
-*   [Implementación del Sistema MasterForge](file:///d:/MasterForge/documentation/documentacion_esp/implementacion_sistema_masterforge.md)
-*   [Planificación y Plan de Calidad de MasterForge](file:///d:/MasterForge/documentation/documentacion_esp/planificacion_dise%C3%B1o_masterforge.md)
+*   [Diseño del Sistema MasterForge](https://github.com/PabloOstenero/MasterForge/blob/main/documentation/documentacion_esp/dise%C3%B1o_sistema_masterforge.md)
+*   [Implementación del Sistema MasterForge](https://github.com/PabloOstenero/MasterForge/blob/main/documentation/documentacion_esp/implementacion_sistema_masterforge.md)
+*   [Planificación y Plan de Calidad de MasterForge](https://github.com/PabloOstenero/MasterForge/blob/main/documentation/documentacion_esp/planificacion_dise%C3%B1o_masterforge.md)
 
 ---
 

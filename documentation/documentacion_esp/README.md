@@ -38,11 +38,11 @@ La plataforma centraliza:
 
 Para facilitar la evaluación académica y la puesta en marcha técnica de **MasterForge**, se ha redactado un completo ecosistema documental en español que cubre todos los aspectos de la plataforma:
 
-*   **[Manual de Proyecto (18 Capítulos)](file:///d:/MasterForge/documentation/documentacion_esp/DOCUMENTO_PROYECTO.md)**: El documento de ingeniería principal del proyecto, redactado bajo una estructura exhaustiva de 18 partes que detalla los requisitos (MOSCOW), diagramas de diseño UML, flujogramas de reglas 5e, matriz de gestión de riesgos, arquitectura técnica y planes de calidad con automatización de pruebas.
-*   **[Manual de Usuario (Jugador y DM)](file:///d:/MasterForge/documentation/documentacion_esp/MANUAL_USUARIO.md)**: Guía detallada para el usuario final que explica la experiencia completa del jugador (hojas interactivas, subida de nivel, monedero virtual, descansos) y del Dungeon Master (gestión de aforos de campañas, agenda e inicio de combates con Combat Tracker).
-*   **[Guía de Configuración Local y Sandbox](file:///d:/MasterForge/documentation/documentacion_esp/GETTING_STARTED.md)**: Manual de instalación ágil paso a paso para desarrolladores que deseen desplegar localmente los contenedores, la base de datos PostgreSQL, la API Spring Boot y el cliente frontend de Ionic.
-*   **[Manual de Arquitectura de Seguridad 2FA](file:///d:/MasterForge/documentation/documentacion_esp/SEGURIDAD_2FA.md)**: Especificación formal detrás del sistema de autenticación de dos factores (TOTP RFC 6238) y el protocolo de invalidación de códigos de emergencia.
-*   **[English Guides & Manuals (Manuales en Inglés)](file:///d:/MasterForge/README.md#-documentation)**: Acceso directo a la suite de especificaciones técnicas y manuales en inglés para la consistencia del repositorio.
+*   **[Manual de Proyecto (18 Capítulos)](./DOCUMENTO_PROYECTO.md)**: El documento de ingeniería principal del proyecto, redactado bajo una estructura exhaustiva de 18 partes que detalla los requisitos (MOSCOW), diagramas de diseño UML, flujogramas de reglas 5e, matriz de gestión de riesgos, arquitectura técnica y planes de calidad con automatización de pruebas.
+*   **[Manual de Usuario (Jugador y DM)](./MANUAL_USUARIO.md)**: Guía detallada para el usuario final que explica la experiencia completa del jugador (hojas interactivas, subida de nivel, monedero virtual, descansos) y del Dungeon Master (gestión de aforos de campañas, agenda e inicio de combates con Combat Tracker).
+*   **[Guía de Configuración Local y Sandbox](./GETTING_STARTED.md)**: Manual de instalación ágil paso a paso para desarrolladores que deseen desplegar localmente los contenedores, la base de datos PostgreSQL, la API Spring Boot y el cliente frontend de Ionic.
+*   **[Manual de Arquitectura de Seguridad 2FA](./SEGURIDAD_2FA.md)**: Especificación formal detrás del sistema de autenticación de dos factores (TOTP RFC 6238) y el protocolo de invalidación de códigos de emergencia.
+*   **[English Guides & Manuals (Manuales en Inglés)](../../README.md#-documentation)**: Acceso directo a la suite de especificaciones técnicas y manuales en inglés para la consistencia del repositorio.
 
 ---
 

@@ -53,16 +53,16 @@ However, this emerging professional niche lacks a **specialized software managem
 
 A comprehensive suite of technical manuals and guides is available in the repository:
 
-*   **[Official Project Manual (18 Chapters)](file:///d:/MasterForge/documentation/PROJECT_DOCUMENT.md)**: Official comprehensive engineering manual detailing project specifications, Gantt WBS schedules, UML/Mermaid diagrams, and dynamic E2E quality test results.
-*   **[User Guide (Player & DM)](file:///d:/MasterForge/documentation/USER_MANUAL.md)**: Dynamic player character sheet interactions (rests, wallet balance, multiclass level-ups) and Dungeon Master campaign control (session scheduler, Combat Tracker grids).
-*   **[Local Sandbox Setup Guide](file:///d:/MasterForge/documentation/GETTING_STARTED.md)**: Step-by-step developer installation guide to deploy the backend database, Spring Boot REST API, and Ionic client.
-*   **[Two-Factor Authentication Architecture (2FA)](file:///d:/MasterForge/documentation/2FA_SECURITY.md)**: Security specifications detailing the TOTP (RFC 6238) algorithm, time synchronization, and emergency recovery codes.
+*   **[Official Project Manual (18 Chapters)](./documentation/PROJECT_DOCUMENT.md)**: Official comprehensive engineering manual detailing project specifications, Gantt WBS schedules, UML/Mermaid diagrams, and dynamic E2E quality test results.
+*   **[User Guide (Player & DM)](./documentation/USER_MANUAL.md)**: Dynamic player character sheet interactions (rests, wallet balance, multiclass level-ups) and Dungeon Master campaign control (session scheduler, Combat Tracker grids).
+*   **[Local Sandbox Setup Guide](./documentation/GETTING_STARTED.md)**: Step-by-step developer installation guide to deploy the backend database, Spring Boot REST API, and Ionic client.
+*   **[Two-Factor Authentication Architecture (2FA)](./documentation/2FA_SECURITY.md)**: Security specifications detailing the TOTP (RFC 6238) algorithm, time synchronization, and emergency recovery codes.
 *   **Planning & Architecture Specs**:
-    *   [Planning & Design](file:///d:/MasterForge/documentation/masterforge_planning_design.md) | [System Design](file:///d:/MasterForge/documentation/system_design_masterforge.md) | [System Implementation](file:///d:/MasterForge/documentation/system_implementation_masterforge.md) | [Presentation Deck](file:///d:/MasterForge/documentation/masterforge_presentation.md)
+    *   [Planning & Design](./documentation/masterforge_planning_design.md) | [System Design](./documentation/system_design_masterforge.md) | [System Implementation](./documentation/system_implementation_masterforge.md) | [Presentation Deck](./documentation/masterforge_presentation.md)
 
 ---
 
-🌎 **[Spanish Documentation (Documentación Oficial en Español)](file:///d:/MasterForge/documentation/documentacion_esp/README.md)**: Acceda a toda la suite documental y manuales técnicos en español (TFG).
+🌎 **[Spanish Documentation (Documentación Oficial en Español)](./documentation/documentacion_esp/README.md)**: Acceda a toda la suite documental y manuales técnicos en español (TFG).
 
 ---
 

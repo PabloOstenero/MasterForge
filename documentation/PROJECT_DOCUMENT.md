@@ -288,9 +288,9 @@ Our end-to-end verification script **`audit_runner.js`** validates the engine ca
 
 ### **14. Manuals**
 Detailed technical documentation and user guides are linked:
-*   **[Local Sandbox Setup Guide](file:///d:/MasterForge/documentation/documentacion_esp/GETTING_STARTED.md)**: Steps to install and boot developers environments.
-*   **[User Guide (Player & DM)](file:///d:/MasterForge/documentation/documentacion_esp/MANUAL_USUARIO.md)**: Interactive guides covering character management, 2FA, Discord, campaign searching, and live Combat tracking.
-*   **[Security & MFA manual](file:///d:/MasterForge/documentation/documentacion_esp/SEGURIDAD_2FA.md)**: Underpinnings of the TOTP security and backup recovery workflows.
+*   **[Local Sandbox Setup Guide](https://github.com/PabloOstenero/MasterForge/blob/main/documentation/GETTING_STARTED.md)**: Steps to install and boot developers environments.
+*   **[User Guide (Player & DM)](https://github.com/PabloOstenero/MasterForge/blob/main/documentation/USER_MANUAL.md)**: Interactive guides covering character management, 2FA, Discord, campaign searching, and live Combat tracking.
+*   **[Security & MFA manual](https://github.com/PabloOstenero/MasterForge/blob/main/documentation/2FA_SECURITY.md)**: Underpinnings of the TOTP security and backup recovery workflows.
 
 ---
 
@@ -312,9 +312,9 @@ MasterForge unifies rules precision and co-creation freedom. The MVP delivers an
 
 ### **16. Annexes**
 Additional system design models are available:
-*   [English Planning & Design Document](file:///d:/MasterForge/documentation/masterforge_planning_design.md)
-*   [English System Design Document](file:///d:/MasterForge/documentation/system_design_masterforge.md)
-*   [English System Implementation Report](file:///d:/MasterForge/documentation/system_implementation_masterforge.md)
+*   [English Planning & Design Document](https://github.com/PabloOstenero/MasterForge/blob/main/documentation/masterforge_planning_design.md)
+*   [English System Design Document](https://github.com/PabloOstenero/MasterForge/blob/main/documentation/system_design_masterforge.md)
+*   [English System Implementation Report](https://github.com/PabloOstenero/MasterForge/blob/main/documentation/system_implementation_masterforge.md)
 
 ---
 
