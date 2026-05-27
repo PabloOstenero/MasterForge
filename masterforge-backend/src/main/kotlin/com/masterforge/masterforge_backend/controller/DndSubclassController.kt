@@ -78,6 +78,7 @@ class DndSubclassController(
         val dndSubclass = DndSubclass(
             name = dto.name,
             description = dto.description,
+            price = dto.price ?: java.math.BigDecimal.ZERO,
             parentClass = parentClass,
             author = author,
             subclassFeatures = dto.subclassFeatures
@@ -134,6 +135,7 @@ class DndSubclassController(
         val updatedSubclass = existingSubclass.copy(
             name = dto.name,
             description = dto.description,
+            price = dto.price ?: java.math.BigDecimal.ZERO,
             parentClass = parentClass,
             author = author,
             subclassFeatures = dto.subclassFeatures

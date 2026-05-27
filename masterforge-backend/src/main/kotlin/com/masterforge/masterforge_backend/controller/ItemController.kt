@@ -60,7 +60,8 @@ class ItemController(
             type = dto.type,
             weight = dto.weight,
             properties = dto.properties,
-            author = author
+            author = author,
+            price = dto.price ?: java.math.BigDecimal.ZERO
         )
         return itemRepository.save(item)
     }
@@ -113,7 +114,8 @@ class ItemController(
             type = dto.type,
             weight = dto.weight,
             properties = dto.properties,
-            author = author
+            author = author,
+            price = dto.price ?: java.math.BigDecimal.ZERO
         )
         return itemRepository.save(updatedItem)
     }

@@ -79,8 +79,14 @@
             formControlName="price"
             placeholder="Ej: 0"
             data-testid="price-input"
-            [class.input-error]="form.get('price')?.invalid && form.get('price')?.touched">
+            [class.input-error]="form.get('price')?.invalid && form.get('price')?.touched"
+            [readonly]="!isPro">
           </ion-input>
+          @if (!isPro) {
+            <p class="field-hint" style="color: #8a8a8f; font-size: 0.85rem; margin-top: 4px;">
+              Solo los usuarios PRO pueden monetizar su contenido homebrew.
+            </p>
+          }
           @if (form.get('price')?.invalid && form.get('price')?.touched) {
             <p class="error-message" data-testid="price-error">El precio no puede ser negativo.</p>
           }

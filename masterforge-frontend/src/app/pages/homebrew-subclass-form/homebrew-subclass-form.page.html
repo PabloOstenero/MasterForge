@@ -81,6 +81,28 @@
                   </ion-textarea>
                 </div>
 
+                <!-- Precio -->
+                <div class="field-group">
+                  <label class="field-label">Precio <span class="optional-tag">opcional</span></label>
+                  <ion-input
+                    class="forge-input"
+                    type="number"
+                    formControlName="price"
+                    placeholder="0"
+                    data-testid="price-input"
+                    [class.input-error]="form.get('price')?.invalid && form.get('price')?.touched"
+                    [readonly]="!isPro">
+                  </ion-input>
+                  @if (!isPro) {
+                    <p class="field-hint" style="color: #8a8a8f; font-size: 0.85rem; margin-top: 4px;">
+                      Solo los usuarios PRO pueden monetizar su contenido homebrew.
+                    </p>
+                  }
+                  @if (form.get('price')?.invalid && form.get('price')?.touched) {
+                    <p class="error-message" data-testid="price-error">El precio no puede ser negativo.</p>
+                  }
+                </div>
+
                 @if (isManagerOrAdmin) {
                   <div class="field-group official-toggle-group">
                     <label class="toggle-row toggle-row--official">

@@ -85,7 +85,8 @@ class MonsterController(
             challengeRating = dto.challengeRating,
             xp = dto.xp,
             combatMechanics = dto.combatMechanics,
-            author = author
+            author = author,
+            price = dto.price ?: java.math.BigDecimal.ZERO
         )
         return monsterRepository.save(monster)
     }
@@ -150,7 +151,8 @@ class MonsterController(
             challengeRating = dto.challengeRating,
             xp = dto.xp,
             combatMechanics = dto.combatMechanics,
-            author = author
+            author = author,
+            price = dto.price ?: java.math.BigDecimal.ZERO
         )
         return monsterRepository.save(updatedMonster)
     }

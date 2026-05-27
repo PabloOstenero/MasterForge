@@ -134,6 +134,10 @@ export class HomebrewSpellFormPage implements OnInit {
     return user?.role === 'MANAGER' || user?.role === 'ADMIN';
   }
 
+  get isPro(): boolean {
+    return this.authService.isPro();
+  }
+
   constructor(
     private fb: FormBuilder,
     private homebrewService: HomebrewService,
@@ -153,6 +157,7 @@ export class HomebrewSpellFormPage implements OnInit {
       range:       ['', Validators.required],
       duration:    ['', Validators.required],
       description: ['', Validators.required],
+      price:       [null, Validators.min(0)],
       isOfficial:  [true],
 
       // Boolean toggles (default false)
@@ -246,6 +251,7 @@ export class HomebrewSpellFormPage implements OnInit {
           range:                  spell.range ?? '',
           duration:               spell.duration ?? '',
           description:            spell.description ?? '',
+          price:                  spell.price ?? null,
           verbal:                 spell.verbal ?? false,
           somatic:                spell.somatic ?? false,
           material:               spell.material ?? false,
@@ -312,6 +318,7 @@ export class HomebrewSpellFormPage implements OnInit {
       higherLevelDescription: v.higherLevelDescription ?? '',
       authorId:               null, // Service will override with getUserIdFromToken()
       isOfficial:             !!v.isOfficial,
+      price:                  this.isPro ? (v.price ?? 0) : 0,
     };
 
     const request$ = this.editMode && this.editId

@@ -76,6 +76,7 @@ class SpellController(
             higherLevelDescription = dto.higherLevelDescription,
             description = dto.description,
             author = author,
+            price = dto.price ?: java.math.BigDecimal.ZERO
         )
         return spellRepository.save(spell)
     }
@@ -143,6 +144,7 @@ class SpellController(
             higherLevelDescription = dto.higherLevelDescription,
             description = dto.description,
             author = author,
+            price = dto.price ?: java.math.BigDecimal.ZERO
         )
         return spellRepository.save(updatedSpell)
     }

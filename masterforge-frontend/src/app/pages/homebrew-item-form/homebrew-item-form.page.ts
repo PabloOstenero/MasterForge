@@ -323,6 +323,10 @@ export class HomebrewItemFormPage implements OnInit {
     return user?.role === 'MANAGER' || user?.role === 'ADMIN';
   }
 
+  get isPro(): boolean {
+    return this.authService.isPro();
+  }
+
   constructor(
     private fb: FormBuilder,
     private homebrewService: HomebrewService,
@@ -454,6 +458,7 @@ export class HomebrewItemFormPage implements OnInit {
       name:               ['', Validators.required],
       type:               ['', Validators.required],
       weight:             [null, [Validators.required, Validators.min(0)]],
+      price:              [null, Validators.min(0)],
       rarity:             [''],
       valueGp:            [null, Validators.min(0)],
       description:        [''],
@@ -567,6 +572,7 @@ export class HomebrewItemFormPage implements OnInit {
           name:               item.name ?? '',
           type:               item.type ?? '',
           weight:             item.weight ?? null,
+          price:              item.price ?? null,
           rarity:             p.rarity ?? '',
           valueGp:            p.valueGp ?? null,
           description:        p.description ?? '',
@@ -717,6 +723,7 @@ export class HomebrewItemFormPage implements OnInit {
       name:       v.name,
       type:       v.type,
       weight:     v.weight,
+      price:      this.isPro ? (v.price ?? 0) : 0,
       properties,
       isOfficial: !!v.isOfficial,
     };

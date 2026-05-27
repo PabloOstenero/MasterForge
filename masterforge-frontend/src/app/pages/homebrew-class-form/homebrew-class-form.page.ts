@@ -454,6 +454,10 @@ export class HomebrewClassFormPage implements OnInit {
     return user?.role === 'MANAGER' || user?.role === 'ADMIN';
   }
 
+  get isPro(): boolean {
+    return this.authService.isPro();
+  }
+
   constructor(
     private fb: FormBuilder,
     private homebrewService: HomebrewService,
@@ -488,7 +492,7 @@ export class HomebrewClassFormPage implements OnInit {
       // Identity
       name: ['', Validators.required],
       description: [''],
-      price: [null, [Validators.required, Validators.min(0)]],
+      price: [null, Validators.min(0)],
       hitDie: ['', Validators.required],
       isOfficial: [true],
 
@@ -1538,7 +1542,7 @@ export class HomebrewClassFormPage implements OnInit {
     const dto: CreateClassDto = {
       name: v.name,
       description: v.description ?? '',
-      price: v.price,
+      price: this.isPro ? (v.price ?? 0) : 0,
       hitDie: hitDieNumber as any,
       savingThrows: savingThrowsRecord,
       classFeatures,

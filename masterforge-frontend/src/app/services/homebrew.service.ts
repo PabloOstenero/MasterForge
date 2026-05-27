@@ -59,6 +59,7 @@ export interface CreateClassDto {
 export interface CreateSubclassDto {
   name: string;
   description: string;
+  price?: number;
   parentClassId: number;
   subclassFeatures: SubclassFeatures;
   authorId: string;  // injected by service, not set by form
@@ -84,6 +85,7 @@ export interface CreateMonsterDto {
   alignment: string;
   armorClass: number;
   hitPoints: number;
+  price?: number;
   speed: string;
   str: number;
   dex: number;
@@ -105,6 +107,7 @@ export interface CreateSpellDto {
   castingTime: string;
   range: string;
   duration: string;
+  price?: number;
   verbal: boolean;
   somatic: boolean;
   material: boolean;
@@ -124,6 +127,7 @@ export interface CreateItemDto {
   name: string;
   type: string;
   weight: number;
+  price?: number;
   properties?: Record<string, any>;
   authorId?: string;
   isOfficial?: boolean;

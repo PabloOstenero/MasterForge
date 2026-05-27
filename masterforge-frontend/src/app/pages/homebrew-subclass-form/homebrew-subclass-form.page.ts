@@ -357,6 +357,10 @@ export class HomebrewSubclassFormPage implements OnInit {
     return user?.role === 'MANAGER' || user?.role === 'ADMIN';
   }
 
+  get isPro(): boolean {
+    return this.authService.isPro();
+  }
+
   constructor(
     private fb: FormBuilder,
     private homebrewService: HomebrewService,
@@ -386,6 +390,7 @@ export class HomebrewSubclassFormPage implements OnInit {
       // Identity
       name: ['', Validators.required],
       description: [''],
+      price: [null, Validators.min(0)],
       parentClassId: [null, Validators.required],
       isOfficial: [true],
 
@@ -565,6 +570,7 @@ export class HomebrewSubclassFormPage implements OnInit {
         this.form.patchValue({
           name: subclass.name ?? '',
           description: subclass.description ?? '',
+          price: subclass.price ?? null,
           parentClassId: pId ? Number(pId) : null,
           additionalSpellClass: sf.additionalSpellClass ?? '',
           isOfficial: subclass.author === null || !subclass.author,
@@ -1286,6 +1292,7 @@ export class HomebrewSubclassFormPage implements OnInit {
     const dto = {
       name: this.form.get('name')?.value,
       description: this.form.get('description')?.value ?? '',
+      price: this.isPro ? (this.form.get('price')?.value ?? 0) : 0,
       parentClassId: this.form.get('parentClassId')?.value,
       subclassFeatures,
       isOfficial: !!this.form.get('isOfficial')?.value,

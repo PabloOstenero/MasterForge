@@ -74,6 +74,28 @@
             <ion-input class="forge-input" type="number" formControlName="valueGp" placeholder="0"></ion-input>
           </div>
 
+          <!-- Precio -->
+          <div class="field-group">
+            <label class="field-label">Precio <span class="optional-tag">opcional</span></label>
+            <ion-input
+              class="forge-input"
+              type="number"
+              formControlName="price"
+              placeholder="0"
+              data-testid="price-input"
+              [class.input-error]="form.get('price')?.invalid && form.get('price')?.touched"
+              [readonly]="!isPro">
+            </ion-input>
+            @if (!isPro) {
+              <p class="field-hint" style="color: #8a8a8f; font-size: 0.85rem; margin-top: 4px;">
+                Solo los usuarios PRO pueden monetizar su contenido homebrew.
+              </p>
+            }
+            @if (form.get('price')?.invalid && form.get('price')?.touched) {
+              <p class="error-message" data-testid="price-error">El precio debe ser mayor o igual a 0.</p>
+            }
+          </div>
+
           <div class="field-group">
             <label class="field-label">Descripción / Trasfondo <span class="optional-tag">opcional</span></label>
             <ion-textarea class="forge-input" formControlName="description" placeholder="Historia o descripción del objeto" [rows]="4"></ion-textarea>

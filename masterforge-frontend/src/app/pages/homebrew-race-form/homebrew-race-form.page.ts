@@ -317,6 +317,10 @@ export class HomebrewRaceFormPage implements OnInit {
     return user?.role === 'MANAGER' || user?.role === 'ADMIN';
   }
 
+  get isPro(): boolean {
+    return this.authService.isPro();
+  }
+
   constructor(
     private fb: FormBuilder,
     private homebrewService: HomebrewService,
@@ -820,7 +824,7 @@ export class HomebrewRaceFormPage implements OnInit {
       name:        v.name,
       description: v.description ?? '',
       size:        v.size,
-      price:       v.price,
+      price:       this.isPro ? (v.price ?? 0) : 0,
       bonusStr:    v.bonusStr ?? 0,
       bonusDex:    v.bonusDex ?? 0,
       bonusCon:    v.bonusCon ?? 0,

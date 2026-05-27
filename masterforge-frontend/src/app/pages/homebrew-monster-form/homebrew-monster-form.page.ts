@@ -275,6 +275,10 @@ export class HomebrewMonsterFormPage implements OnInit {
     return user?.role === 'MANAGER' || user?.role === 'ADMIN';
   }
 
+  get isPro(): boolean {
+    return this.authService.isPro();
+  }
+
   constructor(
     private fb: FormBuilder,
     private homebrewService: HomebrewService,
@@ -300,6 +304,7 @@ export class HomebrewMonsterFormPage implements OnInit {
       alignment:       ['', Validators.required],
       armorClass:      [null, [Validators.required, Validators.min(1), Validators.max(30)]],
       hitPoints:       [null, [Validators.required, Validators.min(1)]],
+      price:           [null, Validators.min(0)],
       isOfficial:      [true],
       speed:           ['', Validators.required],
       ...abilityControls,
@@ -364,6 +369,7 @@ export class HomebrewMonsterFormPage implements OnInit {
           alignment: monster.alignment,
           armorClass: monster.armorClass,
           hitPoints: monster.hitPoints,
+          price: monster.price ?? null,
           speed: monster.speed,
           str: monster.str,
           dex: monster.dex,
@@ -655,6 +661,7 @@ export class HomebrewMonsterFormPage implements OnInit {
       alignment: v.alignment,
       armorClass: v.armorClass,
       hitPoints: v.hitPoints,
+      price: this.isPro ? (v.price ?? 0) : 0,
       speed: v.speed,
       str: v.str,
       dex: v.dex,
