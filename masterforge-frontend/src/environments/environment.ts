@@ -11,6 +11,7 @@ export const environment = {
   requestTimeoutMs: 10_000,             // 10 s per Req 7.5
   enableMockPaymentDisclaimer: true,
   logLevel: 'debug',
+  enablePushNotifications: false,
 };
 
 /*

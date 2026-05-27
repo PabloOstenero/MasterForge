@@ -15,10 +15,10 @@ export class FCMService {
   ) { }
 
   initPush() {
-    if (this.platform.is('capacitor')) {
+    if (this.platform.is('capacitor') && environment.enablePushNotifications) {
       this.registerPush();
     } else {
-      console.log('Push notifications not available on this platform (Web fallback or missing Capacitor).');
+      console.log('Push notifications are disabled in environment configuration or not running on Capacitor.');
     }
   }
 

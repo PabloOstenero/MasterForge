@@ -7,4 +7,5 @@ export const environment = {
   requestTimeoutMs: 10_000,
   enableMockPaymentDisclaimer: true,
   logLevel: 'warn',
+  enablePushNotifications: false,
 };
