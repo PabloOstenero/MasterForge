@@ -53,9 +53,10 @@ describe('HomebrewRaceFormPage', () => {
 
   beforeEach(async () => {
     homebrewServiceSpy = jasmine.createSpyObj<HomebrewService>('HomebrewService', [
-      'createRace',
+      'createRace', 'getAllSpells'
     ]);
     homebrewServiceSpy.createRace.and.returnValue(of({}));
+    homebrewServiceSpy.getAllSpells.and.returnValue(of([]));
 
     const authServiceMock = {
       getUserIdFromToken: () => 'user-1',

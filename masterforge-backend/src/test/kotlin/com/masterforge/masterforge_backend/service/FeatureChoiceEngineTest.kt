@@ -32,15 +32,23 @@ class FeatureChoiceEngineTest {
         )
 
         // Setup a character who made the choice
-        val dndClass = DndClass(id = 1, name = "Ranger", hitDie = 10, features = listOf(feature))
+        val dndClass = DndClass(id = 1, name = "Ranger", hitDie = 10, features = mutableListOf(feature))
         val character = Character(
             id = UUID.randomUUID(),
             name = "Test Ranger",
             level = 1,
+            maxHp = 10,
+            currentHp = 10,
             speed = 30,
+            baseStr = 10,
+            baseDex = 10,
+            baseCon = 10,
+            baseInt = 10,
+            baseWis = 10,
+            baseCha = 10,
             dndClass = dndClass,
             dndRace = DndRace(id = 1, name = "Human", bonusStr = 1, bonusDex = 1, bonusCon = 1, bonusInt = 1, bonusWis = 1, bonusCha = 1),
-            user = User(id = UUID.randomUUID(), name = "Tester", email = "test@test.com", password = "pw"),
+            user = User(id = UUID.randomUUID(), name = "Tester", email = "test@test.com", passwordHash = "pw"),
             choicesJson = mapOf("1" to "fast") // Choice using feature ID as key
         )
 
@@ -66,15 +74,22 @@ class FeatureChoiceEngineTest {
             )
         )
 
-        val dndClass = DndClass(id = 1, name = "Barbarian", hitDie = 12, features = listOf(feature))
+        val dndClass = DndClass(id = 1, name = "Barbarian", hitDie = 12, features = mutableListOf(feature))
         val character = Character(
             id = UUID.randomUUID(),
             name = "Test Barbarian",
             level = 2,
+            maxHp = 10,
+            currentHp = 10,
             baseStr = 15,
+            baseDex = 10,
+            baseCon = 10,
+            baseInt = 10,
+            baseWis = 10,
+            baseCha = 10,
             dndClass = dndClass,
             dndRace = DndRace(id = 2, name = "Orc", bonusStr = 2),
-            user = User(id = UUID.randomUUID(), name = "Tester", email = "test@test.com", password = "pw"),
+            user = User(id = UUID.randomUUID(), name = "Tester", email = "test@test.com", passwordHash = "pw"),
             choicesJson = emptyMap()
         )
 
@@ -211,14 +226,22 @@ class FeatureChoiceEngineTest {
             )
         )
 
-        val dndClass = DndClass(id = 100, name = "Test", hitDie = 10, features = listOf(feature))
+        val dndClass = DndClass(id = 100, name = "Test", hitDie = 10, features = mutableListOf(feature))
         val character = Character(
             id = UUID.randomUUID(),
             name = "Test",
             level = 1,
+            maxHp = 10,
+            currentHp = 10,
+            baseStr = 10,
+            baseDex = 10,
+            baseCon = 10,
+            baseInt = 10,
+            baseWis = 10,
+            baseCha = 10,
             dndClass = dndClass,
             dndRace = DndRace(id = 1, name = "Test"),
-            user = User(id = UUID.randomUUID(), name = "Test", email = "test@test.com", password = "pw"),
+            user = User(id = UUID.randomUUID(), name = "Test", email = "test@test.com", passwordHash = "pw"),
             choicesJson = mapOf("8" to "speed_10") // Choice by ID
         )
 
@@ -248,14 +271,22 @@ class FeatureChoiceEngineTest {
             )
         )
 
-        val dndClass = DndClass(id = 101, name = "Test", hitDie = 10, features = listOf(feature))
+        val dndClass = DndClass(id = 101, name = "Test", hitDie = 10, features = mutableListOf(feature))
         val character = Character(
             id = UUID.randomUUID(),
             name = "Test",
             level = 1,
+            maxHp = 10,
+            currentHp = 10,
+            baseStr = 10,
+            baseDex = 10,
+            baseCon = 10,
+            baseInt = 10,
+            baseWis = 10,
+            baseCha = 10,
             dndClass = dndClass,
             dndRace = DndRace(id = 1, name = "Test"),
-            user = User(id = UUID.randomUUID(), name = "Test", email = "test@test.com", password = "pw"),
+            user = User(id = UUID.randomUUID(), name = "Test", email = "test@test.com", passwordHash = "pw"),
             choicesJson = mapOf("9" to "Fire Damage") // Choice by label
         )
 
@@ -293,14 +324,22 @@ class FeatureChoiceEngineTest {
             )
         )
 
-        val dndClass = DndClass(id = 102, name = "Test", hitDie = 10, features = listOf(feature))
+        val dndClass = DndClass(id = 102, name = "Test", hitDie = 10, features = mutableListOf(feature))
         val character = Character(
             id = UUID.randomUUID(),
             name = "Test",
             level = 1,
+            maxHp = 10,
+            currentHp = 10,
+            baseStr = 10,
+            baseDex = 10,
+            baseCon = 10,
+            baseInt = 10,
+            baseWis = 10,
+            baseCha = 10,
             dndClass = dndClass,
             dndRace = DndRace(id = 1, name = "Test"),
-            user = User(id = UUID.randomUUID(), name = "Test", email = "test@test.com", password = "pw"),
+            user = User(id = UUID.randomUUID(), name = "Test", email = "test@test.com", passwordHash = "pw"),
             choicesJson = mapOf("10" to listOf("Option A", "opt_2")) // Array with mixed label and ID
         )
 

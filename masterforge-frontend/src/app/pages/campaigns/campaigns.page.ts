@@ -106,6 +106,11 @@ export class CampaignsPage implements OnInit {
       return;
     }
 
+    if (!this.isPro && this.newCampaign.joinPrice > 0) {
+      this.validationErrorCampaign = 'Solo los directores de juego PRO pueden crear campañas de pago';
+      return;
+    }
+
     this.validationErrorCampaign = null;
     this.api.createCampaign({
       name: this.newCampaign.name.trim(),

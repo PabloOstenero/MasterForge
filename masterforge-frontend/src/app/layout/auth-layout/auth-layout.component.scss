@@ -86,7 +86,7 @@
   background-color: var(--mf-bg-surface, #1e1e1e);
   display: flex;
   flex-direction: column;
-  padding: 24px 0 16px;
+  padding: calc(24px + env(safe-area-inset-top)) 0 calc(16px + env(safe-area-inset-bottom));
   position: fixed;
   top: 0;
   left: 0;
@@ -227,7 +227,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 16px;
+  padding: calc(8px + env(safe-area-inset-top)) 16px 8px;
   border-bottom: 1px solid rgba(201, 168, 76, 0.1);
   background-color: var(--mf-bg-primary, #121212);
   position: relative;
@@ -247,6 +247,7 @@
   display: flex;
   flex-direction: column;
   position: relative;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* Ensure child components take full width */

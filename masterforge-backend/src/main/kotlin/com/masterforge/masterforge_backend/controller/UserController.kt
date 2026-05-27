@@ -134,7 +134,7 @@ class UserController(
                     id = user.id!!,
                     name = user.name,
                     email = user.email,
-                    subscriptionTier = if (user.role == "MANAGER" || user.role == "ADMIN") "PRO" else user.subscriptionTier,
+                    subscriptionTier = if (user.isPro()) "PRO" else "FREE",
                     characters = userCharacters.map { character ->
                         CharacterSimpleDto(
                             id = character.id!!,

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
 import { CampaignDetailPage } from './campaign-detail.page';
@@ -29,8 +29,8 @@ const mockCampaign: CampaignDetailDto = {
 };
 
 const mockSessions: SessionSummaryDto[] = [
-  { id: 'session-1', name: 'Test Session 1', scheduledDate: '2025-06-01T18:00:00.000Z', price: 10 },
-  { id: 'session-2', name: 'Test Session 2', scheduledDate: '2025-06-15T18:00:00.000Z', price: 10 },
+  { id: 'session-1', name: 'Test Session 1', scheduledDate: '2025-06-01T18:00:00.000Z' },
+  { id: 'session-2', name: 'Test Session 2', scheduledDate: '2025-06-15T18:00:00.000Z' },
 ];
 
 const mockPlayers: CampaignPlayerDto[] = [
@@ -468,7 +468,6 @@ describe('CampaignDetailPage — Session creation form', () => {
     expect(apiSpy.createSession).toHaveBeenCalledOnceWith({
       name: 'La Cripta',
       scheduledDate: new Date('2025-06-01T18:00').toISOString(),
-      price: 0,
       campaignId: CAMPAIGN_ID,
     });
     expect(apiSpy.getCampaignSessions).toHaveBeenCalledWith(CAMPAIGN_ID);

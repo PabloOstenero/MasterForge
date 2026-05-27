@@ -99,7 +99,7 @@ class MockPaymentServicePropertyTest : StringSpec() {
                 val campaign = saveCampaign(owner = owner, joinPrice = price)
 
                 val request = PaymentRequest(
-                    campaignId = campaign.id!!,
+                    campaignId = campaign.id!!.toString(),
                     userId = player.id!!,
                     amount = price,
                     mockCardLastFour = "1234",

@@ -211,7 +211,6 @@ describe('CampaignDetailPage PBT — P3: API payload integrity', () => {
         expect(callArgs.name).toBe(name);
         expect(callArgs.scheduledDate).toBe(new Date(scheduledDate).toISOString());
         expect(callArgs.campaignId).toBe(CAMPAIGN_ID);
-        expect(callArgs.price).toBe(0);
       }),
       { numRuns: 50 },
     );
@@ -237,7 +236,6 @@ describe('CampaignDetailPage PBT — P4: Sessions list refresh after success', (
         id: fc.uuid(),
         name: validName(),
         scheduledDate: fc.date().map((d) => d.toISOString()),
-        price: fc.integer({ min: 0, max: 100 }),
       }),
       { minLength: 1, maxLength: 5 },
     );

@@ -25,8 +25,8 @@ import { PaymentProcessorComponent } from './payment-processor.component';
 import {
   PaymentResult,
   PaymentScenario,
-} from '../../../../shared/models/payment.models';
-import { Campaign, CampaignVisibility } from '../../models/campaign.models';
+} from '../../models/payment.models';
+import { Campaign, CampaignVisibility } from '../../../pages/search-campaigns/models/campaign.models';
 
 // ---------------------------------------------------------------------------
 // Arbitraries
@@ -132,7 +132,7 @@ describe('PaymentProcessorComponent — Property-Based Tests', () => {
         const localFixture = TestBed.createComponent(PaymentProcessorComponent);
         const localComponent = localFixture.componentInstance;
 
-        localComponent.campaign = campaign;
+        localComponent.item = campaign;
         localFixture.detectChanges();
 
         // Property: payment form should be shown (not result screen)
@@ -151,7 +151,7 @@ describe('PaymentProcessorComponent — Property-Based Tests', () => {
         // Property: the formatted price should reflect the campaign's joinPrice
         const formattedPrice = localComponent.formattedPrice;
         expect(formattedPrice).toBeTruthy();
-        expect(formattedPrice.length).toBeGreaterThan(0);
+        expect(formattedPrice).toBeGreaterThan(0);
 
         // Property: scenario options should include all PaymentScenario values
         const scenarioValues = localComponent.scenarioOptions.map((o) => o.value);
@@ -179,7 +179,7 @@ describe('PaymentProcessorComponent — Property-Based Tests', () => {
       fc.property(paidCampaignArb, (campaign) => {
         const localFixture = TestBed.createComponent(PaymentProcessorComponent);
         const localComponent = localFixture.componentInstance;
-        localComponent.campaign = campaign;
+        localComponent.item = campaign;
         localFixture.detectChanges();
 
         let cancelledEmitted = false;
@@ -224,7 +224,7 @@ describe('PaymentProcessorComponent — Property-Based Tests', () => {
         (campaign, scenario, failureResult) => {
           const localFixture = TestBed.createComponent(PaymentProcessorComponent);
           const localComponent = localFixture.componentInstance;
-          localComponent.campaign = campaign;
+          localComponent.item = campaign;
           localFixture.detectChanges();
 
           // Select the failure scenario
@@ -268,7 +268,7 @@ describe('PaymentProcessorComponent — Property-Based Tests', () => {
       fc.property(failureScenarioArb, (scenario) => {
         const localFixture = TestBed.createComponent(PaymentProcessorComponent);
         const localComponent = localFixture.componentInstance;
-        localComponent.campaign = makePaidCampaign();
+        localComponent.item = makePaidCampaign();
         localFixture.detectChanges();
 
         localComponent.simulatePaymentScenario(scenario);
@@ -306,7 +306,7 @@ describe('PaymentProcessorComponent — Property-Based Tests', () => {
     beforeEach(() => {
       fixture = TestBed.createComponent(PaymentProcessorComponent);
       component = fixture.componentInstance;
-      component.campaign = makePaidCampaign();
+      component.item = makePaidCampaign();
       fixture.detectChanges();
     });
 
@@ -329,7 +329,7 @@ describe('PaymentProcessorComponent — Property-Based Tests', () => {
     });
 
     it('should show all 5 payment scenario options (Req 5.8)', () => {
-      expect(component.scenarioOptions.length).toBe(5);
+      expect(component.scenarioOptions.length).toBe(6);
       const values = component.scenarioOptions.map((o) => o.value);
       expect(values).toContain(PaymentScenario.SUCCESS);
       expect(values).toContain(PaymentScenario.INSUFFICIENT_FUNDS);

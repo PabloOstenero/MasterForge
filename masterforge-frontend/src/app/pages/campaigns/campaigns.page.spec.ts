@@ -38,8 +38,12 @@ function buildApiSpy(): jasmine.SpyObj<ApiService> {
 }
 
 function buildAuthSpy(userId: string | null = VALID_UUID): jasmine.SpyObj<AuthService> {
-  const spy = jasmine.createSpyObj<AuthService>('AuthService', ['getUserIdFromToken']);
+  const spy = jasmine.createSpyObj<AuthService>('AuthService', [
+    'getUserIdFromToken', 'getCurrentUser', 'isPro'
+  ]);
   spy.getUserIdFromToken.and.returnValue(userId);
+  spy.getCurrentUser.and.returnValue({ subscriptionTier: 'PRO' });
+  spy.isPro.and.returnValue(true);
   return spy;
 }
 
@@ -342,6 +346,32 @@ describe('CampaignsPage — Property-Based Tests', () => {
 
           expect(apiSpy.createCampaign).not.toHaveBeenCalled();
           expect(component.validationErrorCampaign).toBeTruthy();
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  // -------------------------------------------------------------------------
+  // Property 7: Non-PRO users cannot set a positive joinPrice
+  // Feature: campaign-creation-form, Property 7: non-PRO users cannot set positive price
+  // Validates: PRO campaign monetization constraint
+  // -------------------------------------------------------------------------
+  it('P7 — non-PRO users with positive joinPrice does not call API and sets validationErrorCampaign', () => {
+    authSpy.isPro.and.returnValue(false);
+    authSpy.getCurrentUser.and.returnValue({ subscriptionTier: 'FREE' });
+
+    fc.assert(
+      fc.property(
+        fc.float({ min: Number.EPSILON, noNaN: true }),
+        (positivePrice) => {
+          apiSpy.createCampaign.calls.reset();
+          component.validationErrorCampaign = null;
+          component.newCampaign = makeCampaign('Valid Name', '', 1, positivePrice);
+          component.submitCampaign();
+
+          expect(apiSpy.createCampaign).not.toHaveBeenCalled();
+          expect(component.validationErrorCampaign as any).toBe('Solo los directores de juego PRO pueden crear campañas de pago');
         }
       ),
       { numRuns: 100 }

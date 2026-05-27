@@ -14,7 +14,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
 import { ValidationErrorComponent } from './validation-error.component';
-import { ErrorHandlerService } from '../../../../services/error-handler.service';
+import { ErrorHandlerService } from '../../../services/error-handler.service';
 
 // ---------------------------------------------------------------------------
 // Test suite

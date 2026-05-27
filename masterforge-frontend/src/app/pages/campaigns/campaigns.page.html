@@ -146,8 +146,14 @@
               type="number"
               placeholder="0 para gratis"
               [(ngModel)]="newCampaign.joinPrice"
+              [readonly]="!isPro"
               data-testid="input-campaign-join-price">
             </ion-input>
+            @if (!isPro) {
+              <p class="field-hint" style="color: #8a8a8f; font-size: 0.85rem; margin-top: 4px;">
+                Solo los directores de juego PRO pueden monetizar sus campañas.
+              </p>
+            }
           </div>
 
           <!-- Visibility -->

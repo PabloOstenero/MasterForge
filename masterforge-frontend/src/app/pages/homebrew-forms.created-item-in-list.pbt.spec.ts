@@ -185,6 +185,9 @@ function newItemArb(contentType: ContentType, name: string): HomebrewItem {
     id: `pbt-p5-${contentType.toLowerCase()}-${Math.random().toString(36).slice(2)}`,
     name,
     contentType,
+    authorName: 'PBT Author',
+    price: 0,
+    isOwned: true,
   };
 }
 
@@ -453,7 +456,10 @@ describe('Homebrew Creation Forms — Property 5: Created item appears in the us
     const homebrewItemArb = fc.record<HomebrewItem>({
       id: fc.uuid(),
       name: nonEmptyString,
+      authorName: fc.string(),
       contentType: fc.constantFrom<ContentType>(...ALL_CONTENT_TYPES),
+      price: fc.double({ min: 0, max: 100 }),
+      isOwned: fc.boolean(),
     });
 
     fc.assert(
@@ -493,7 +499,10 @@ describe('Homebrew Creation Forms — Property 5: Created item appears in the us
     const homebrewItemArb = fc.record<HomebrewItem>({
       id: fc.uuid(),
       name: nonEmptyString,
+      authorName: fc.string(),
       contentType: fc.constantFrom<ContentType>(...ALL_CONTENT_TYPES),
+      price: fc.double({ min: 0, max: 100 }),
+      isOwned: fc.boolean(),
     });
 
     fc.assert(
@@ -535,13 +544,19 @@ describe('Homebrew Creation Forms — Property 5: Created item appears in the us
     const existingItemArb = fc.record<HomebrewItem>({
       id: fc.uuid(),
       name: nonEmptyString,
+      authorName: fc.string(),
       contentType: fc.constantFrom<ContentType>(...ALL_CONTENT_TYPES),
+      price: fc.double({ min: 0, max: 100 }),
+      isOwned: fc.boolean(),
     });
 
     const newItemArbLocal = fc.record<HomebrewItem>({
       id: fc.uuid(),
       name: nonEmptyString,
+      authorName: fc.string(),
       contentType: fc.constantFrom<ContentType>(...ALL_CONTENT_TYPES),
+      price: fc.double({ min: 0, max: 100 }),
+      isOwned: fc.boolean(),
     });
 
     fc.assert(

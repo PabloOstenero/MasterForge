@@ -39,7 +39,7 @@ data class UserResponseDto(
                 id = user.id!!,
                 name = user.name,
                 email = user.email,
-                subscriptionTier = if (user.role == "MANAGER" || user.role == "ADMIN") "PRO" else user.subscriptionTier.toString(),
+                subscriptionTier = if (user.isPro()) "PRO" else "FREE",
                 role = user.role,
                 balance = user.balance,
                 isActive = user.isActive,
