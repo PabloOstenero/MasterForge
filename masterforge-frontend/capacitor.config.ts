@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.masterforge.app',
-  appName: 'masterforge-frontend',
+  appName: 'MasterForge',
   webDir: 'www'
 };
 
