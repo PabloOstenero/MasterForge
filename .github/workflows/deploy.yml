@@ -34,7 +34,7 @@ jobs:
       - name: Build Application
         run: |
           cd masterforge-frontend
-          npm run build
+          npx ng build --configuration production --base-href /MasterForge/
 
       - name: Add 404 and .nojekyll Fallbacks
         run: |
