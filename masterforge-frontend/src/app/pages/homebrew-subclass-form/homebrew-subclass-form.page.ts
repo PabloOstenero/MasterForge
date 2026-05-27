@@ -392,7 +392,7 @@ export class HomebrewSubclassFormPage implements OnInit {
       description: [''],
       price: [null, Validators.min(0)],
       parentClassId: [null, Validators.required],
-      isOfficial: [true],
+      isOfficial: [this.route.snapshot.queryParamMap?.get('from') === 'official'],
 
 
       // Damage resistances / immunities / condition immunities

@@ -305,7 +305,7 @@ export class HomebrewMonsterFormPage implements OnInit {
       armorClass:      [null, [Validators.required, Validators.min(1), Validators.max(30)]],
       hitPoints:       [null, [Validators.required, Validators.min(1)]],
       price:           [null, Validators.min(0)],
-      isOfficial:      [true],
+      isOfficial:      [this.route.snapshot.queryParamMap?.get('from') === 'official'],
       speed:           ['', Validators.required],
       ...abilityControls,
       challengeRating: [null, [Validators.required, Validators.min(0)]],

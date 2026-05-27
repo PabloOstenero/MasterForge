@@ -229,11 +229,17 @@ describe('HomebrewSubclassFormPage - Property Based Tests', () => {
         const mockRouter = {};
         const mockRoute = { snapshot: { paramMap: { get: () => response.id } } };
 
+        const mockAuthService = {
+          getCurrentUser: () => null,
+          isPro: () => false
+        };
+
         const component = new HomebrewSubclassFormPage(
           fb,
           mockService as any,
           mockRouter as any,
-          mockRoute as any
+          mockRoute as any,
+          mockAuthService as any
         );
 
         // Initialize the form component

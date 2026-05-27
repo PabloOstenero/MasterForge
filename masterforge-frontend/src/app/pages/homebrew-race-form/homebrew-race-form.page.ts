@@ -380,7 +380,7 @@ export class HomebrewRaceFormPage implements OnInit {
       description: [''],
       size:        ['', Validators.required],
       price:       [null, Validators.min(0)],
-      isOfficial:  [true],
+      isOfficial:  [this.route.snapshot.queryParamMap?.get('from') === 'official'],
 
       // Speed (nested FormGroup)
       speeds: this.fb.group({

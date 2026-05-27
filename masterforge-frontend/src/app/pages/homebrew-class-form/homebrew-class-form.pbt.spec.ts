@@ -59,7 +59,8 @@ function createComponent(): HomebrewClassFormPage {
   const homebrewServiceStub: any = {};
   const routerStub: any = {};
   const routeStub: any = { snapshot: { paramMap: { get: () => null } } };
-  const component = new HomebrewClassFormPage(fb, homebrewServiceStub, routerStub, routeStub);
+  const authServiceStub: any = { getCurrentUser: () => null, isPro: () => false };
+  const component = new HomebrewClassFormPage(fb, homebrewServiceStub, routerStub, routeStub, authServiceStub);
   component.ngOnInit();
   return component;
 }

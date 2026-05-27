@@ -128,7 +128,8 @@ describe('buildCombatMechanics() — Property-Based Tests', () => {
           const homebrewServiceStub: any = {};
           const routerStub: any = {};
           const routeStub: any = { snapshot: { paramMap: { get: () => null } } };
-          const component = new HomebrewMonsterFormPage(fb, homebrewServiceStub, routerStub, routeStub);
+          const authServiceStub: any = { getCurrentUser: () => null, isPro: () => false };
+          const component = new HomebrewMonsterFormPage(fb, homebrewServiceStub, routerStub, routeStub, authServiceStub);
           component.ngOnInit();
 
           // Fill all required stats fields
@@ -376,7 +377,8 @@ describe('HomebrewMonsterFormPage FormArray helpers — Property-Based Tests', (
     const homebrewServiceStub: any = {};
     const routerStub: any = {};
     const routeStub: any = { snapshot: { paramMap: { get: () => null } } };
-    const component = new HomebrewMonsterFormPage(fb, homebrewServiceStub, routerStub, routeStub);
+    const authServiceStub: any = { getCurrentUser: () => null, isPro: () => false };
+    const component = new HomebrewMonsterFormPage(fb, homebrewServiceStub, routerStub, routeStub, authServiceStub);
     component.ngOnInit();
     return component;
   }

@@ -158,7 +158,7 @@ export class HomebrewSpellFormPage implements OnInit {
       duration:    ['', Validators.required],
       description: ['', Validators.required],
       price:       [null, Validators.min(0)],
-      isOfficial:  [true],
+      isOfficial:  [this.route.snapshot.queryParamMap?.get('from') === 'official'],
 
       // Boolean toggles (default false)
       verbal:        [false],

@@ -494,7 +494,7 @@ export class HomebrewClassFormPage implements OnInit {
       description: [''],
       price: [null, Validators.min(0)],
       hitDie: ['', Validators.required],
-      isOfficial: [true],
+      isOfficial: [this.route.snapshot.queryParamMap?.get('from') === 'official'],
 
       // Saving throws
       savingThrows: savingThrowsGroup,

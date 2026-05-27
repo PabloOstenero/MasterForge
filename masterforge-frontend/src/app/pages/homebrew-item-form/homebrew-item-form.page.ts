@@ -463,7 +463,7 @@ export class HomebrewItemFormPage implements OnInit {
       valueGp:            [null, Validators.min(0)],
       description:        [''],
       requiresAttunement: [false],
-      isOfficial:         [true],
+      isOfficial:         [this.route.snapshot.queryParamMap?.get('from') === 'official'],
 
       // Weapon sub-group
       weapon: this.fb.group({
