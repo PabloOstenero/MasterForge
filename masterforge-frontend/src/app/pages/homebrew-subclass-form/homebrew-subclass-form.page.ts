@@ -13,7 +13,7 @@ import {
 import { Router, ActivatedRoute } from '@angular/router';
 import {
   IonButton, IonSpinner,
-  IonItem, IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption, IonIcon
+  IonInput, IonTextarea, IonIcon
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -23,7 +23,7 @@ import {
 } from 'ionicons/icons';
 import { trigger, transition, style, animate } from '@angular/animations';
 
-import { StartingEquipmentPickerComponent } from '../../components/starting-equipment-picker/starting-equipment-picker.component';
+
 import { HomebrewService, CreateSubclassDto } from '../../services/homebrew.service';
 import { AuthService } from '../../services/auth.service';
 import { FeatureMechanicsComponent } from '../../components/feature-mechanics/feature-mechanics.component';
@@ -239,8 +239,7 @@ export function buildSubclassFeatures(
     ReactiveFormsModule,
     FormsModule,
     IonButton, IonSpinner,
-    IonItem, IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption,
-    StartingEquipmentPickerComponent,
+    IonInput, IonTextarea,
     FeatureMechanicsComponent,
     FeatureChoiceEditorComponent,
     FeatureEffectEditorComponent,

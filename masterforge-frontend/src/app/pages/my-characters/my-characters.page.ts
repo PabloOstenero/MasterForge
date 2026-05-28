@@ -2,9 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import {
-  IonSpinner, IonCard, IonCardContent,
-  IonButton, IonText, IonRow, IonCol, IonIcon,
-  IonContent,
+  IonSpinner,
+  IonButton, IonIcon,
   AlertController, ToastController
 } from '@ionic/angular/standalone';
 import { ApiService, CharacterSummary } from '../../services/api';
@@ -21,9 +20,7 @@ import { trashOutline, addOutline, shieldHalfOutline, sparklesOutline } from 'io
     CommonModule,
     RouterLink,
     IonSpinner,
-    IonCard, IonCardContent,
-    IonButton, IonText, IonRow, IonCol, IonIcon,
-    IonContent
+    IonButton, IonIcon,
   ],
 })
 export class MyCharactersPage implements OnInit {

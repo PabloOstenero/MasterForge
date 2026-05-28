@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormBuilder, FormArray } from '@angular/forms';
-import { IonInput, IonCheckbox, IonItem, IonLabel, IonIcon, IonButton } from '@ionic/angular/standalone';
+import { IonInput, IonIcon } from '@ionic/angular/standalone';
 import { ABILITIES } from '../../pages/homebrew-class-form/homebrew-class-form.page';
 import { addIcons } from 'ionicons';
 import { shieldOutline, addOutline, flashOutline, trendingUpOutline, wifiOutline } from 'ionicons/icons';
@@ -357,7 +357,7 @@ import { shieldOutline, addOutline, flashOutline, trendingUpOutline, wifiOutline
     }
   `],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, IonInput, IonCheckbox, IonItem, IonLabel, IonIcon, IonButton]
+  imports: [CommonModule, ReactiveFormsModule, IonInput, IonIcon]
 })
 export class FeatureMechanicsComponent implements OnInit {
   @Input() parentForm!: FormGroup;

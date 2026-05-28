@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core'; // Trigger hot-reload
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import {
   IonSpinner, IonList, IonItem, IonLabel, IonButton,
-  IonModal, IonHeader, IonToolbar, IonTitle, IonContent,
-  IonButtons, IonIcon, IonGrid, IonRow, IonCol,
+  IonModal, IonContent, IonIcon,
   IonSearchbar, IonPopover
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -28,10 +27,9 @@ import { getModifier } from '../../utils/dnd-utils';
   standalone: true,
   imports: [
     IonSpinner, IonList, IonItem, IonLabel, IonButton,
-    IonModal, IonHeader, IonToolbar, IonTitle, IonContent,
-    IonButtons, IonIcon, IonGrid, IonRow, IonCol,
+    IonModal, IonContent, IonIcon,
     IonSearchbar, IonPopover,
-    CommonModule, FormsModule, RouterLink,
+    CommonModule, FormsModule,
     ToastNotificationComponent
   ]
 })

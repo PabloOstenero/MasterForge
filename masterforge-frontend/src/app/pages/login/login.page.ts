@@ -4,8 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
   IonContent,
-  IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-  IonInput, IonButton, IonLabel, IonIcon, IonSpinner, ToastController, ModalController
+  IonCard, IonCardContent,
+  IonInput, IonButton, IonIcon, IonSpinner, ToastController, ModalController
 } from '@ionic/angular/standalone';
 import { MfaModalComponent } from '../../components/mfa-modal/mfa-modal.component';
 import { addIcons } from 'ionicons';
@@ -21,8 +21,8 @@ import { AuthService } from '../../services/auth.service';
     CommonModule,
     FormsModule,
     IonContent,
-    IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-    IonInput, IonButton, IonLabel, IonIcon, IonSpinner
+    IonCard, IonCardContent,
+    IonInput, IonButton, IonIcon, IonSpinner
   ]
 })
 export class LoginPage {

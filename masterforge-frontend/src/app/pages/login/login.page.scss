@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use 'src/theme/variables' as *;
 
 .login-content {
@@ -137,8 +138,8 @@
 
 .btn-gold {
   --background: #{$accent-gold};
-  --background-activated: #{darken($accent-gold, 12%)};
-  --background-hover: #{darken($accent-gold, 5%)};
+  --background-activated: #{color.adjust($accent-gold, $lightness: -12%)};
+  --background-hover: #{color.adjust($accent-gold, $lightness: -5%)};
   --color: #{$bg-primary};
   --border-radius: 8px;
   font-weight: 700;

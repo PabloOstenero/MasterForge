@@ -4,8 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
   IonContent,
-  IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-  IonInput, IonButton, IonLabel, IonIcon, IonSpinner
+  IonCard, IonCardContent,
+  IonInput, IonButton, IonIcon, IonSpinner
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { eyeOutline, eyeOffOutline, createOutline } from 'ionicons/icons';
@@ -20,8 +20,8 @@ import { AuthService } from '../../services/auth.service';
     CommonModule,
     FormsModule,
     IonContent,
-    IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-    IonInput, IonButton, IonLabel, IonIcon, IonSpinner
+    IonCard, IonCardContent,
+    IonInput, IonButton, IonIcon, IonSpinner
   ]
 })
 export class RegisterPage {

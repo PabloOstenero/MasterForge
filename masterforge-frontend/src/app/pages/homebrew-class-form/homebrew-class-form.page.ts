@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, FormArray, FormControl, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { IonButton, IonSpinner, IonItem, IonLabel, IonInput, IonTextarea, IonIcon, IonCheckbox, IonSelect, IonSelectOption } from '@ionic/angular/standalone';
+import { IonButton, IonSpinner, IonInput, IonTextarea, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   flash, shield, hammer, moon, add, trash, hammerOutline,
@@ -299,7 +299,7 @@ export function serializeSpellSlotTable(table: SpellSlotTable): number[][] {
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
-    IonButton, IonSpinner, IonItem, IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption, IonIcon, IonCheckbox,
+    IonButton, IonSpinner, IonInput, IonTextarea, IonIcon,
     StartingEquipmentPickerComponent,
     FeatureChoiceEditorComponent,
     FeatureEffectEditorComponent,

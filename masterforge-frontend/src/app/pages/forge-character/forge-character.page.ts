@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
-  IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonButtons, IonBackButton,
+  IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonButtons,
   IonIcon, IonItem, IonLabel, IonInput, IonSelect, IonSelectOption,
   IonGrid, IonRow, IonCol, IonSpinner, IonBadge, IonList,
   IonSegment, IonSegmentButton, IonModal, IonSearchbar, IonFooter
@@ -192,7 +192,7 @@ export function calculateHp(hitDie: number, con: number): number {
     CommonModule,
     FormsModule,
     IonHeader, IonToolbar, IonTitle, IonContent,
-    IonButton, IonButtons, IonBackButton,
+    IonButton, IonButtons,
     IonIcon, IonItem, IonLabel, IonInput, IonSelect, IonSelectOption,
     IonGrid, IonRow, IonCol, IonSpinner, IonBadge, IonList,
     IonSegment, IonSegmentButton, IonModal, IonSearchbar, IonFooter

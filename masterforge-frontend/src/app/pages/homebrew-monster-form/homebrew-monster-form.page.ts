@@ -4,7 +4,7 @@ import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, FormArray, Va
 import { Router, ActivatedRoute } from '@angular/router';
 import {
   IonButton, IonSpinner,
-  IonItem, IonLabel, IonInput, IonTextarea,
+  IonInput, IonTextarea,
 } from '@ionic/angular/standalone';
 
 import { HomebrewService } from '../../services/homebrew.service';
@@ -181,7 +181,7 @@ export function buildCombatMechanics(
     ReactiveFormsModule,
     FormsModule,
     IonButton, IonSpinner,
-    IonItem, IonLabel, IonInput, IonTextarea,
+    IonInput, IonTextarea,
   ],
 })
 export class HomebrewMonsterFormPage implements OnInit {

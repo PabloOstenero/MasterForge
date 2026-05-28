@@ -3,8 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import {
   IonSpinner,
-  IonCard, IonCardContent,
-  IonButton, IonText, IonRow, IonCol, IonIcon,
+  IonButton, IonIcon,
 } from '@ionic/angular/standalone';
 import { ApiService, PlayerCampaignSummary } from '../../services/api';
 import { addIcons } from 'ionicons';
@@ -19,8 +18,7 @@ import { bookOutline, mapOutline, peopleOutline, calendarOutline } from 'ionicon
     CommonModule,
     RouterLink,
     IonSpinner,
-    IonCard, IonCardContent,
-    IonButton, IonText, IonRow, IonCol, IonIcon,
+    IonButton, IonIcon,
   ],
 })
 export class MyCampaignsPage implements OnInit {

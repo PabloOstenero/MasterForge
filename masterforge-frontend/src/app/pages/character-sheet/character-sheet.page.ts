@@ -4,9 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonSegment, IonSegmentButton, IonLabel,
-  IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
+  IonGrid, IonRow, IonCol,
   IonItem, IonBadge, IonList, IonIcon, IonButton, IonFooter, IonBackButton, IonButtons,
-  AlertController, ActionSheetController, ModalController, IonSearchbar, IonModal, IonCheckbox, ToastController
+  AlertController, ActionSheetController, ModalController, IonSearchbar, IonModal, ToastController
 } from '@ionic/angular/standalone';
 import { ApiService } from '../../services/api';
 import { HomebrewService } from '../../services/homebrew.service';
@@ -46,9 +46,9 @@ export const DND_SKILLS = [
   imports: [
     CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent,
     IonSegment, IonSegmentButton, IonLabel, IonGrid, IonRow, IonCol,
-    IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonBadge, IonList,
+    IonItem, IonBadge, IonList,
     IonIcon, IonButton, IonFooter, IonBackButton, IonButtons, IonSearchbar, IonModal,
-    IonCheckbox, FeatureChoicePickerComponent, HitDiceModalComponent, AddItemModalComponent
+    FeatureChoicePickerComponent
   ],
   encapsulation: ViewEncapsulation.None // Re-enabled to allow styling the Alert pop-ups
 })

@@ -2,13 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { 
-  IonContent, 
-  IonHeader, 
-  IonTitle, 
-  IonToolbar, 
   IonIcon, 
   IonRange, 
-  IonLabel, 
   IonSpinner,
   IonToggle,
   AlertController, 
@@ -53,13 +48,8 @@ import * as QRCode from 'qrcode';
     CommonModule, 
     FormsModule, 
     ReactiveFormsModule,
-    IonContent, 
-    IonHeader, 
-    IonTitle, 
-    IonToolbar, 
     IonIcon, 
     IonRange, 
-    IonLabel, 
     IonSpinner,
     IonToggle,
     PaymentProcessorComponent

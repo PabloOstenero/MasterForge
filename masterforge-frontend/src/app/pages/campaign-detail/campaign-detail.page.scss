@@ -477,7 +477,7 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, $accent-gold 0%, darken($accent-gold, 15%) 100%);
+  background: linear-gradient(135deg, $accent-gold 0%, color.adjust($accent-gold, $lightness: -15%) 100%);
   border: none;
   border-radius: 6px;
   color: $bg-primary;

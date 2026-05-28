@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use '../../../theme/variables' as *;
 
 // ── Base Variables ───────────────────────────────────────────────────────────
@@ -96,7 +97,7 @@ $accent-blue: #6495ed;
 .btn-gold {
   --background: #{$accent-gold};
   --color: #121212;
-  --background-hover: #{lighten($accent-gold, 10%)};
+  --background-hover: #{color.adjust($accent-gold, $lightness: 10%)};
   --background-activated: #b8922e;
   --border-radius: 10px;
   font-weight: 700;
@@ -177,7 +178,7 @@ $accent-blue: #6495ed;
 
   &--dm {
     background: rgba($accent-blue, 0.12);
-    color: lighten($accent-blue, 10%);
+    color: color.adjust($accent-blue, $lightness: 10%);
     border-color: rgba($accent-blue, 0.25);
   }
 

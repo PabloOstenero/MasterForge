@@ -5,10 +5,9 @@ import { Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import {
   IonSpinner, IonList, IonItem, IonLabel, IonButton,
-  IonSegment, IonSegmentButton, IonModal, IonHeader,
-  IonToolbar, IonTitle, IonContent, IonButtons, IonIcon,
-  IonBadge, IonNote, IonGrid, IonRow, IonCol, IonFooter,
-  IonSearchbar, IonPopover
+  IonSegment, IonSegmentButton, IonModal,
+  IonToolbar, IonTitle, IonContent, IonIcon,
+  IonFooter, IonSearchbar, IonPopover
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -30,10 +29,9 @@ import { getModifier } from '../../utils/dnd-utils';
   standalone: true,
   imports: [
     IonSpinner, IonList, IonItem, IonLabel, IonButton,
-    IonSegment, IonSegmentButton, IonModal, IonHeader,
-    IonToolbar, IonTitle, IonContent, IonButtons, IonIcon,
-    IonBadge, IonNote, IonGrid, IonRow, IonCol, IonFooter,
-    IonSearchbar, IonPopover,
+    IonSegment, IonSegmentButton, IonModal,
+    IonToolbar, IonTitle, IonContent, IonIcon,
+    IonFooter, IonSearchbar, IonPopover,
     CommonModule, FormsModule, RouterLink,
     ToastNotificationComponent
   ]

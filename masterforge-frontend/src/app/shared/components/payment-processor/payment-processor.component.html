@@ -8,271 +8,201 @@
     <ion-icon name="information-circle-outline" class="disclaimer-icon"></ion-icon>
     <div class="disclaimer-text">
       <strong>⚠️ Simulación académica</strong>
-      <span>Este procesador de pagos es una simulación para fines académicos (TFG). No se realizan transacciones financieras reales.</span>
+      <span>Este procesador de pagos es una simulación para fines académicos (TFG). No se realizan transacciones
+        financieras reales.</span>
     </div>
   </div>
 
   <!-- ── Result screen ── -->
   @if (showResult && paymentResult) {
-    <div
-      class="result-screen"
-      [class.result-screen--success]="paymentResult.success"
-      [class.result-screen--failure]="!paymentResult.success"
-      data-testid="payment-result">
+  <div class="result-screen" [class.result-screen--success]="paymentResult.success"
+    [class.result-screen--failure]="!paymentResult.success" data-testid="payment-result">
 
-      @if (paymentResult.success) {
-        <!-- Success state (Req 5.4) -->
-        <div class="result-icon-wrapper result-icon-wrapper--success">
-          <ion-icon name="checkmark-circle-outline" class="result-icon"></ion-icon>
-        </div>
-        <h3 class="result-title" data-testid="payment-success-title">¡Pago simulado exitoso!</h3>
-        <p class="result-message" data-testid="payment-success-message">
-          Operación con <strong>{{ item.name }}</strong> finalizada correctamente.
-        </p>
-        @if (paymentResult.transactionId) {
-          <p class="result-transaction-id" data-testid="transaction-id">
-            ID de transacción: <code>{{ paymentResult.transactionId }}</code>
-          </p>
-        }
-        <p class="result-disclaimer">
-          Recuerda: esta es una simulación académica. No se ha cobrado ningún importe real.
-        </p>
-      } @else {
-        <!-- Failure state (Req 5.5) -->
-        <div class="result-icon-wrapper result-icon-wrapper--failure">
-          <ion-icon name="close-circle-outline" class="result-icon"></ion-icon>
-        </div>
-        <h3 class="result-title" data-testid="payment-failure-title">Pago simulado fallido</h3>
-        <p class="result-message result-message--error" data-testid="payment-error-message">
-          {{ paymentResult.errorMessage ?? 'El pago no pudo procesarse. Por favor, inténtalo de nuevo.' }}
-        </p>
-        <div class="result-actions">
-          <button
-            class="btn-retry"
-            (click)="retryPayment()"
-            data-testid="btn-retry-payment"
-            type="button">
-            <ion-icon name="refresh-outline"></ion-icon>
-            Reintentar
-          </button>
-          <button
-            class="btn-cancel"
-            (click)="cancelPayment()"
-            data-testid="btn-cancel-payment"
-            type="button">
-            Cancelar
-          </button>
-        </div>
-      }
+    @if (paymentResult.success) {
+    <!-- Success state (Req 5.4) -->
+    <div class="result-icon-wrapper result-icon-wrapper--success">
+      <ion-icon name="checkmark-circle-outline" class="result-icon"></ion-icon>
     </div>
+    <h3 class="result-title" data-testid="payment-success-title">¡Pago simulado exitoso!</h3>
+    <p class="result-message" data-testid="payment-success-message">
+      Operación con <strong>{{ item.name }}</strong> finalizada correctamente.
+    </p>
+    @if (paymentResult.transactionId) {
+    <p class="result-transaction-id" data-testid="transaction-id">
+      ID de transacción: <code>{{ paymentResult.transactionId }}</code>
+    </p>
+    }
+    <p class="result-disclaimer">
+      Recuerda: esta es una simulación académica. No se ha cobrado ningún importe real.
+    </p>
+    } @else {
+    <!-- Failure state (Req 5.5) -->
+    <div class="result-icon-wrapper result-icon-wrapper--failure">
+      <ion-icon name="close-circle-outline" class="result-icon"></ion-icon>
+    </div>
+    <h3 class="result-title" data-testid="payment-failure-title">Pago simulado fallido</h3>
+    <p class="result-message result-message--error" data-testid="payment-error-message">
+      {{ paymentResult.errorMessage ?? 'El pago no pudo procesarse. Por favor, inténtalo de nuevo.' }}
+    </p>
+    <div class="result-actions">
+      <button class="btn-retry" (click)="retryPayment()" data-testid="btn-retry-payment" type="button">
+        <ion-icon name="refresh-outline"></ion-icon>
+        Reintentar
+      </button>
+      <button class="btn-cancel" (click)="cancelPayment()" data-testid="btn-cancel-payment" type="button">
+        Cancelar
+      </button>
+    </div>
+    }
+  </div>
   }
 
   <!-- ── Payment form ── -->
   @if (!showResult) {
-    <div class="payment-form-container">
+  <div class="payment-form-container">
 
-      <!-- Campaign price summary (Req 5.1) -->
-      <div class="price-summary" data-testid="price-summary">
-        <div class="price-summary__campaign">
-          <ion-icon name="cash-outline" class="price-icon"></ion-icon>
-          <div class="price-summary__details">
-            <span class="price-summary__label">Adquirir</span>
-            <span class="price-summary__campaign-name" data-testid="campaign-name-display">{{ item?.name }}</span>
-          </div>
-        </div>
-        <div class="price-summary__amount" data-testid="payment-amount">
-          <span class="price-summary__price">{{ formattedPrice | number:'1.2-2' }}€</span>
-          <span class="price-summary__note">(simulado)</span>
+    <!-- Campaign price summary (Req 5.1) -->
+    <div class="price-summary" data-testid="price-summary">
+      <div class="price-summary__campaign">
+        <ion-icon name="cash-outline" class="price-icon"></ion-icon>
+        <div class="price-summary__details">
+          <span class="price-summary__label">Adquirir</span>
+          <span class="price-summary__campaign-name" data-testid="campaign-name-display">{{ item.name }}</span>
         </div>
       </div>
-
-      <!-- ── Scenario selector (Req 5.8) ── -->
-      <div class="scenario-selector" data-testid="scenario-selector">
-        <label class="scenario-selector__label">
-          <ion-icon name="alert-circle-outline"></ion-icon>
-          Escenario de prueba
-          <app-help-tooltip text="Selecciona el resultado del pago simulado. Útil para probar distintos flujos de la aplicación."></app-help-tooltip>
-        </label>
-        <div class="scenario-chips" data-testid="scenario-chips">
-          @for (option of scenarioOptions; track option.value) {
-            <button
-              class="scenario-chip"
-              [class.scenario-chip--active]="selectedScenario === option.value"
-              [class.scenario-chip--failure]="option.isFailure"
-              [class.scenario-chip--success]="!option.isFailure"
-              (click)="simulatePaymentScenario(option.value)"
-              [attr.data-testid]="'scenario-chip-' + option.value.toLowerCase()"
-              [title]="option.description"
-              type="button">
-              {{ option.label }}
-            </button>
-          }
-        </div>
-        @if (isFailureScenario) {
-          <p class="scenario-warning" data-testid="scenario-warning">
-            ⚠️ Escenario de fallo seleccionado: el pago será rechazado intencionalmente.
-          </p>
-        }
+      <div class="price-summary__amount" data-testid="payment-amount">
+        <span class="price-summary__price">{{ formattedPrice | number:'1.2-2' }}€</span>
+        <span class="price-summary__note">(simulado)</span>
       </div>
-
-      <!-- ── Card form (Req 5.2) ── -->
-      <form
-        [formGroup]="paymentForm"
-        (ngSubmit)="processPayment()"
-        class="card-form"
-        data-testid="card-form"
-        novalidate>
-
-        <div class="form-header">
-          <ion-icon name="card-outline" class="form-header-icon"></ion-icon>
-          <span class="form-header-title">Datos de tarjeta (simulados)</span>
-          <ion-icon name="lock-closed-outline" class="form-header-lock"></ion-icon>
-        </div>
-
-        <!-- Cardholder name -->
-        <div class="form-field">
-          <label class="form-label" for="cardholderName">Nombre del titular</label>
-          <input
-            id="cardholderName"
-            type="text"
-            class="form-input"
-            [class.form-input--error]="paymentForm.get('cardholderName')?.invalid && paymentForm.get('cardholderName')?.touched"
-            formControlName="cardholderName"
-            placeholder="Nombre Apellido"
-            autocomplete="cc-name"
-            data-testid="input-cardholder-name"
-            aria-label="Nombre del titular de la tarjeta"
-          />
-          @if (paymentForm.get('cardholderName')?.touched) {
-            <app-validation-error
-              [errors]="paymentForm.get('cardholderName')?.errors ?? null"
-              fieldName="cardholderName"
-              data-testid="error-cardholder-name">
-            </app-validation-error>
-          }
-        </div>
-
-        <!-- Card number -->
-        <div class="form-field">
-          <label class="form-label" for="cardNumber">Número de tarjeta</label>
-          <input
-            id="cardNumber"
-            type="text"
-            class="form-input form-input--card"
-            [class.form-input--error]="paymentForm.get('cardNumber')?.invalid && paymentForm.get('cardNumber')?.touched"
-            formControlName="cardNumber"
-            placeholder="1234 5678 9012 3456"
-            maxlength="19"
-            autocomplete="cc-number"
-            inputmode="numeric"
-            (input)="onCardNumberInput($event)"
-            data-testid="input-card-number"
-            aria-label="Número de tarjeta de crédito simulada"
-          />
-          @if (paymentForm.get('cardNumber')?.touched) {
-            <app-validation-error
-              [errors]="paymentForm.get('cardNumber')?.errors ?? null"
-              fieldName="cardNumber"
-              data-testid="error-card-number">
-            </app-validation-error>
-          }
-        </div>
-
-        <!-- Expiry + CVV row -->
-        <div class="form-row">
-          <div class="form-field form-field--half">
-            <label class="form-label" for="expiryDate">Caducidad</label>
-            <input
-              id="expiryDate"
-              type="text"
-              class="form-input"
-              [class.form-input--error]="paymentForm.get('expiryDate')?.invalid && paymentForm.get('expiryDate')?.touched"
-              formControlName="expiryDate"
-              placeholder="MM/AA"
-              maxlength="5"
-              autocomplete="cc-exp"
-              inputmode="numeric"
-              (input)="onExpiryInput($event)"
-              data-testid="input-expiry-date"
-              aria-label="Fecha de caducidad de la tarjeta"
-            />
-            @if (paymentForm.get('expiryDate')?.touched) {
-              <app-validation-error
-                [errors]="paymentForm.get('expiryDate')?.errors ?? null"
-                fieldName="expiryDate"
-                data-testid="error-expiry-date">
-              </app-validation-error>
-            }
-          </div>
-
-          <div class="form-field form-field--half">
-            <label class="form-label" for="cvv">CVV</label>
-            <input
-              id="cvv"
-              type="text"
-              class="form-input"
-              [class.form-input--error]="paymentForm.get('cvv')?.invalid && paymentForm.get('cvv')?.touched"
-              formControlName="cvv"
-              placeholder="123"
-              maxlength="4"
-              autocomplete="cc-csc"
-              inputmode="numeric"
-              data-testid="input-cvv"
-              aria-label="Código de seguridad CVV"
-            />
-            @if (paymentForm.get('cvv')?.touched) {
-              <app-validation-error
-                [errors]="paymentForm.get('cvv')?.errors ?? null"
-                fieldName="cvv"
-                data-testid="error-cvv">
-              </app-validation-error>
-            }
-          </div>
-        </div>
-
-        <!-- ── Processing animation ── -->
-        @if (processing) {
-          <div class="processing-overlay" data-testid="processing-overlay">
-            <ion-spinner name="crescent" class="processing-spinner"></ion-spinner>
-            <span class="processing-text">Procesando pago simulado...</span>
-          </div>
-        }
-
-        <!-- ── Form actions ── -->
-        <div class="form-actions">
-          <button
-            type="submit"
-            class="btn-pay"
-            [class.btn-pay--failure]="isFailureScenario"
-            [disabled]="paymentForm.invalid || processing"
-            data-testid="btn-process-payment"
-            [attr.aria-label]="'Procesar pago simulado de ' + formattedPrice">
-            @if (processing) {
-              <ion-spinner name="crescent" class="btn-spinner"></ion-spinner>
-              Procesando...
-            } @else if (isFailureScenario) {
-              <ion-icon name="alert-circle-outline"></ion-icon>
-              Simular fallo ({{ formattedPrice | number:'1.2-2' }}€)
-            } @else {
-              <ion-icon name="lock-closed-outline"></ion-icon>
-              Pagar {{ formattedPrice | number:'1.2-2' }}€ (simulado)
-            }
-          </button>
-
-          <button
-            type="button"
-            class="btn-cancel"
-            (click)="cancelPayment()"
-            [disabled]="processing"
-            data-testid="btn-cancel"
-            aria-label="Cancelar pago">
-            Cancelar
-          </button>
-        </div>
-
-      </form>
-
     </div>
+
+    <!-- ── Scenario selector (Req 5.8) ── -->
+    <div class="scenario-selector" data-testid="scenario-selector">
+      <label class="scenario-selector__label">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        Escenario de prueba
+        <app-help-tooltip
+          text="Selecciona el resultado del pago simulado. Útil para probar distintos flujos de la aplicación."></app-help-tooltip>
+      </label>
+      <div class="scenario-chips" data-testid="scenario-chips">
+        @for (option of scenarioOptions; track option.value) {
+        <button class="scenario-chip" [class.scenario-chip--active]="selectedScenario === option.value"
+          [class.scenario-chip--failure]="option.isFailure" [class.scenario-chip--success]="!option.isFailure"
+          (click)="simulatePaymentScenario(option.value)"
+          [attr.data-testid]="'scenario-chip-' + option.value.toLowerCase()" [title]="option.description" type="button">
+          {{ option.label }}
+        </button>
+        }
+      </div>
+      @if (isFailureScenario) {
+      <p class="scenario-warning" data-testid="scenario-warning">
+        ⚠️ Escenario de fallo seleccionado: el pago será rechazado intencionalmente.
+      </p>
+      }
+    </div>
+
+    <!-- ── Card form (Req 5.2) ── -->
+    <form [formGroup]="paymentForm" (ngSubmit)="processPayment()" class="card-form" data-testid="card-form" novalidate>
+
+      <div class="form-header">
+        <ion-icon name="card-outline" class="form-header-icon"></ion-icon>
+        <span class="form-header-title">Datos de tarjeta (simulados)</span>
+        <ion-icon name="lock-closed-outline" class="form-header-lock"></ion-icon>
+      </div>
+
+      <!-- Cardholder name -->
+      <div class="form-field">
+        <label class="form-label" for="cardholderName">Nombre del titular</label>
+        <input id="cardholderName" type="text" class="form-input"
+          [class.form-input--error]="paymentForm.get('cardholderName')?.invalid && paymentForm.get('cardholderName')?.touched"
+          formControlName="cardholderName" placeholder="Nombre Apellido" autocomplete="cc-name"
+          data-testid="input-cardholder-name" aria-label="Nombre del titular de la tarjeta" />
+        @if (paymentForm.get('cardholderName')?.touched) {
+        <app-validation-error [errors]="paymentForm.get('cardholderName')?.errors ?? null" fieldName="cardholderName"
+          data-testid="error-cardholder-name">
+        </app-validation-error>
+        }
+      </div>
+
+      <!-- Card number -->
+      <div class="form-field">
+        <label class="form-label" for="cardNumber">Número de tarjeta</label>
+        <input id="cardNumber" type="text" class="form-input form-input--card"
+          [class.form-input--error]="paymentForm.get('cardNumber')?.invalid && paymentForm.get('cardNumber')?.touched"
+          formControlName="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number"
+          inputmode="numeric" (input)="onCardNumberInput($event)" data-testid="input-card-number"
+          aria-label="Número de tarjeta de crédito simulada" />
+        @if (paymentForm.get('cardNumber')?.touched) {
+        <app-validation-error [errors]="paymentForm.get('cardNumber')?.errors ?? null" fieldName="cardNumber"
+          data-testid="error-card-number">
+        </app-validation-error>
+        }
+      </div>
+
+      <!-- Expiry + CVV row -->
+      <div class="form-row">
+        <div class="form-field form-field--half">
+          <label class="form-label" for="expiryDate">Caducidad</label>
+          <input id="expiryDate" type="text" class="form-input"
+            [class.form-input--error]="paymentForm.get('expiryDate')?.invalid && paymentForm.get('expiryDate')?.touched"
+            formControlName="expiryDate" placeholder="MM/AA" maxlength="5" autocomplete="cc-exp" inputmode="numeric"
+            (input)="onExpiryInput($event)" data-testid="input-expiry-date"
+            aria-label="Fecha de caducidad de la tarjeta" />
+          @if (paymentForm.get('expiryDate')?.touched) {
+          <app-validation-error [errors]="paymentForm.get('expiryDate')?.errors ?? null" fieldName="expiryDate"
+            data-testid="error-expiry-date">
+          </app-validation-error>
+          }
+        </div>
+
+        <div class="form-field form-field--half">
+          <label class="form-label" for="cvv">CVV</label>
+          <input id="cvv" type="text" class="form-input"
+            [class.form-input--error]="paymentForm.get('cvv')?.invalid && paymentForm.get('cvv')?.touched"
+            formControlName="cvv" placeholder="123" maxlength="4" autocomplete="cc-csc" inputmode="numeric"
+            data-testid="input-cvv" aria-label="Código de seguridad CVV" />
+          @if (paymentForm.get('cvv')?.touched) {
+          <app-validation-error [errors]="paymentForm.get('cvv')?.errors ?? null" fieldName="cvv"
+            data-testid="error-cvv">
+          </app-validation-error>
+          }
+        </div>
+      </div>
+
+      <!-- ── Processing animation ── -->
+      @if (processing) {
+      <div class="processing-overlay" data-testid="processing-overlay">
+        <ion-spinner name="crescent" class="processing-spinner"></ion-spinner>
+        <span class="processing-text">Procesando pago simulado...</span>
+      </div>
+      }
+
+      <!-- ── Form actions ── -->
+      <div class="form-actions">
+        <button type="submit" class="btn-pay" [class.btn-pay--failure]="isFailureScenario"
+          [disabled]="paymentForm.invalid || processing" data-testid="btn-process-payment"
+          [attr.aria-label]="'Procesar pago simulado de ' + formattedPrice">
+          @if (processing) {
+          <ion-spinner name="crescent" class="btn-spinner"></ion-spinner>
+          Procesando...
+          } @else if (isFailureScenario) {
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          Simular fallo ({{ formattedPrice | number:'1.2-2' }}€)
+          } @else {
+          <ion-icon name="lock-closed-outline"></ion-icon>
+          Pagar {{ formattedPrice | number:'1.2-2' }}€ (simulado)
+          }
+        </button>
+
+        <button type="button" class="btn-cancel" (click)="cancelPayment()" [disabled]="processing"
+          data-testid="btn-cancel" aria-label="Cancelar pago">
+          Cancelar
+        </button>
+      </div>
+
+    </form>
+
+  </div>
   }
 
 </div>

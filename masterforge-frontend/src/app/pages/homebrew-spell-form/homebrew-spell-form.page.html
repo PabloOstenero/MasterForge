@@ -308,7 +308,7 @@
                 <button
                   type="button"
                   class="chip"
-                  [class.chip--active]="spellClassesArray.at(i)?.value"
+                  [class.chip--active]="spellClassesArray.at(i).value"
                   (click)="toggleChip(spellClassesArray, i)"
                   [attr.data-testid]="'spell-class-chip-' + cls.toLowerCase()">
                   {{ cls }}
