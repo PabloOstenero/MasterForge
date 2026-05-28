@@ -198,14 +198,14 @@ class CampaignSessionsControllerPropertyTest : StringSpec() {
          * a non-null id (UUID string), a non-null scheduledDate (ISO-8601 string), and
          * a non-null price (decimal). No required field shall be absent or null.
          */
-        "Property 3: every SessionSummaryDto has non-null id, scheduledDate, and price" {
+        "Property 3: every SessionSummaryDto has non-null id and scheduledDate" {
             checkAll(100, Arb.int(1, 10)) { numSessions ->
                 cleanup()
                 val owner = saveUser("DM")
                 val campaign = saveCampaign(owner)
 
                 repeat(numSessions) { i ->
-                    saveSession(campaign, offsetMillis = i.toLong() * 60_000, price = BigDecimal("${i + 1}.00"))
+                    saveSession(campaign, offsetMillis = i.toLong() * 60_000)
                 }
 
                 val token = jwtService.generateToken(owner.id!!, owner.email)
@@ -222,9 +222,6 @@ class CampaignSessionsControllerPropertyTest : StringSpec() {
                     dto.scheduledDate.isNotBlank().shouldBeTrue()
                     // ISO-8601 strings contain 'T' as date/time separator
                     dto.scheduledDate.contains('T').shouldBeTrue()
-
-                    // price must be non-null
-                    dto.price.shouldNotBeNull()
                 }
             }
         }
@@ -280,8 +277,7 @@ class CampaignSessionsControllerPropertyTest : StringSpec() {
 
     private fun saveSession(
         campaign: Campaign,
-        offsetMillis: Long = 0L,
-        price: BigDecimal = BigDecimal("10.00")
+        offsetMillis: Long = 0L
     ): Session {
         // Base epoch + offset so each session has a distinct, deterministic timestamp
         val baseEpoch = 1_700_000_000_000L
@@ -289,7 +285,6 @@ class CampaignSessionsControllerPropertyTest : StringSpec() {
             Session(
                 name = "Test Session",
                 scheduledDate = Timestamp(baseEpoch + offsetMillis),
-                price = price,
                 campaign = campaign
             )
         )
@@ -311,7 +306,6 @@ class CampaignSessionsControllerPropertyTest : StringSpec() {
     data class SessionSummaryResponse(
         val id: String,
         val name: String,
-        val scheduledDate: String,
-        val price: java.math.BigDecimal
+        val scheduledDate: String
     )
 }

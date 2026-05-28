@@ -56,13 +56,15 @@ class CampaignSearchPerformanceTest : StringSpec() {
             checkAll(50, Arb.int(1, 50)) { numCampaigns ->
                 cleanup()
                 val owner = saveUser()
+                val searcher = saveUser()
                 repeat(numCampaigns) { i ->
                     saveCampaign(owner, name = "Campaign $i", description = "Description $i")
                 }
 
                 val pageSize = 10
                 val result = campaignSearchService.searchCampaigns(
-                    SearchCriteriaDto(page = 0, size = pageSize)
+                    SearchCriteriaDto(page = 0, size = pageSize),
+                    searcher.id!!
                 )
 
                 // Property: first page returns min(pageSize, numCampaigns) campaigns
@@ -89,6 +91,7 @@ class CampaignSearchPerformanceTest : StringSpec() {
             checkAll(50, Arb.int(1, 20)) { numCampaigns ->
                 cleanup()
                 val owner = saveUser()
+                val searcher = saveUser()
                 val token = "cachetest${numCampaigns}"
                 repeat(numCampaigns) { i ->
                     saveCampaign(owner, name = "Campaign $token $i", description = "Description $i")
@@ -97,9 +100,9 @@ class CampaignSearchPerformanceTest : StringSpec() {
                 val criteria = SearchCriteriaDto(searchText = token, page = 0, size = 50)
 
                 // First call
-                val result1 = campaignSearchService.searchCampaigns(criteria)
+                val result1 = campaignSearchService.searchCampaigns(criteria, searcher.id!!)
                 // Second call (should return same data)
-                val result2 = campaignSearchService.searchCampaigns(criteria)
+                val result2 = campaignSearchService.searchCampaigns(criteria, searcher.id!!)
 
                 // Property: both calls return the same number of campaigns
                 result1.campaigns.size shouldBe result2.campaigns.size
@@ -174,6 +177,7 @@ class CampaignSearchPerformanceTest : StringSpec() {
             checkAll(30, Arb.int(2, 8)) { numCampaigns ->
                 cleanup()
                 val owner = saveUser()
+                val searcher = saveUser()
                 val tokens = (1..numCampaigns).map { "token$it" }
                 tokens.forEachIndexed { i, token ->
                     saveCampaign(owner, name = "Campaign $token", description = "Description $i")
@@ -182,7 +186,8 @@ class CampaignSearchPerformanceTest : StringSpec() {
                 // Simulate multiple "concurrent" users searching for different tokens
                 val results = tokens.map { token ->
                     campaignSearchService.searchCampaigns(
-                        SearchCriteriaDto(searchText = token, page = 0, size = 50)
+                        SearchCriteriaDto(searchText = token, page = 0, size = 50),
+                        searcher.id!!
                     )
                 }
 
@@ -205,6 +210,7 @@ class CampaignSearchPerformanceTest : StringSpec() {
             checkAll(30, Arb.int(1, 10)) { numCampaigns ->
                 cleanup()
                 val owner = saveUser()
+                val searcher = saveUser()
 
                 // Create campaigns with prices 0, 5, 10, 15, 20, ...
                 repeat(numCampaigns) { i ->
@@ -218,7 +224,8 @@ class CampaignSearchPerformanceTest : StringSpec() {
 
                 // Filter: maxPrice = 10 (should return campaigns with price 0, 5, 10)
                 val result = campaignSearchService.searchCampaigns(
-                    SearchCriteriaDto(maxPrice = BigDecimal(10), page = 0, size = 50)
+                    SearchCriteriaDto(maxPrice = BigDecimal(10), page = 0, size = 50),
+                    searcher.id!!
                 )
 
                 // Property: all returned campaigns have price <= 10

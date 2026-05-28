@@ -319,12 +319,12 @@ export class HomebrewItemFormPage implements OnInit {
   readonly rechargeOptions = RECHARGE_OPTIONS;
 
   get isManagerOrAdmin(): boolean {
-    const user = this.authService.getCurrentUser();
+    const user = this._authService.getCurrentUser();
     return user?.role === 'MANAGER' || user?.role === 'ADMIN';
   }
 
   get isPro(): boolean {
-    return this.authService.isPro();
+    return this._authService.isPro();
   }
 
   constructor(
@@ -332,7 +332,7 @@ export class HomebrewItemFormPage implements OnInit {
     private homebrewService: HomebrewService,
     private router: Router,
     private route: ActivatedRoute,
-    private authService: AuthService,
+    private _authService: AuthService,
   ) {}
 
   // ---------------------------------------------------------------------------
@@ -726,6 +726,7 @@ export class HomebrewItemFormPage implements OnInit {
       price:      this.isPro ? (v.price ?? 0) : 0,
       properties,
       isOfficial: !!v.isOfficial,
+      authorId:   '',
     };
 
     const request$ = this.editMode && this.editId

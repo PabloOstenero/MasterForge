@@ -73,7 +73,7 @@ class CampaignSessionsEndpointTest {
     @Test
     fun `GET sessions for existing campaign returns 200 with mapped DTOs`() {
         val campaign = saveCampaign()
-        val session = saveSession(campaign, epochMillis = 1_700_000_000_000L, price = BigDecimal("15.00"))
+        val session = saveSession(campaign, epochMillis = 1_700_000_000_000L)
 
         mockMvc.perform(
             get("/api/campaigns/${campaign.id}/sessions")
@@ -85,7 +85,6 @@ class CampaignSessionsEndpointTest {
             .andExpect(jsonPath("$").isArray)
             .andExpect(jsonPath("$.length()").value(1))
             .andExpect(jsonPath("$[0].id").value(session.id!!.toString()))
-            .andExpect(jsonPath("$[0].price").value(15.00))
     }
 
     /**
@@ -170,9 +169,9 @@ class CampaignSessionsEndpointTest {
      * Requirement 1.5: SessionSummaryDto must include id, scheduledDate, and price.
      */
     @Test
-    fun `GET sessions response includes id, scheduledDate, and price fields`() {
+    fun `GET sessions response includes id and scheduledDate fields`() {
         val campaign = saveCampaign()
-        saveSession(campaign, epochMillis = 1_700_000_000_000L, price = BigDecimal("9.99"))
+        saveSession(campaign, epochMillis = 1_700_000_000_000L)
 
         mockMvc.perform(
             get("/api/campaigns/${campaign.id}/sessions")
@@ -182,7 +181,6 @@ class CampaignSessionsEndpointTest {
             .andExpect(status().isOk)
             .andExpect(jsonPath("$[0].id").exists())
             .andExpect(jsonPath("$[0].scheduledDate").exists())
-            .andExpect(jsonPath("$[0].price").value(9.99))
     }
 
     /**
@@ -246,13 +244,11 @@ class CampaignSessionsEndpointTest {
 
     private fun saveSession(
         campaign: Campaign,
-        epochMillis: Long,
-        price: BigDecimal = BigDecimal("10.00")
+        epochMillis: Long
     ): Session = sessionRepository.save(
         Session(
             name = "Test Session",
             scheduledDate = Timestamp(epochMillis),
-            price = price,
             campaign = campaign
         )
     )

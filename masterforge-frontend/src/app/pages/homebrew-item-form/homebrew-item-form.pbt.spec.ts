@@ -180,7 +180,7 @@ describe('buildItemProperties() — Property-Based Tests', () => {
     ];
     const shieldOnlyKeys = ['acBonus'];
     const potionOnlyKeys = ['healingDiceCount', 'healingDieType', 'healingAmount', 'effectDescription'];
-    const ammunitionOnlyKeys = ['damageBonus'];
+    const ammunitionOnlyKeys: string[] = [];
     const gearOnlyKeys = ['gearDescription'];
 
     const forbiddenKeys = [
@@ -304,11 +304,11 @@ describe('buildItemProperties() — Property-Based Tests', () => {
 
     /** Weapon with all optional fields cleared */
     const emptyWeapon: WeaponFormValues = {
-      damageDiceCount: null, damageDieType: 'd6', damageBonus: null,
+      damageDiceCount: null, damageDieType: '', damageBonus: null,
       damageType: Array(DAMAGE_TYPES.length).fill(false),
       weaponProperties: Array(WEAPON_PROPERTIES.length).fill(false),
       rangeNormal: '', rangeLong: '',
-      versatileDiceCount: null, versatileDieType: 'd8',
+      versatileDiceCount: null, versatileDieType: '',
       stat: 'str', magicalBonus: 0, attackBonus: null,
     };
 
@@ -325,7 +325,7 @@ describe('buildItemProperties() — Property-Based Tests', () => {
 
     /** Potion with all optional fields cleared */
     const emptyPotion: PotionFormValues = {
-      healingDiceCount: null, healingDieType: 'd4',
+      healingDiceCount: null, healingDieType: '',
       healingAmount: null, effectDescription: '',
     };
 

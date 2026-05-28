@@ -70,6 +70,7 @@ class CampaignSearchServicePropertyTest : StringSpec() {
                 val token = tokens[idx]
                 cleanup()
                 val owner = saveUser()
+                val searcher = saveUser()
 
                 // Campaign whose name contains the token — MUST appear
                 val matchingByName = saveCampaign(
@@ -93,7 +94,8 @@ class CampaignSearchServicePropertyTest : StringSpec() {
                 )
 
                 val result = campaignSearchService.searchCampaigns(
-                    SearchCriteriaDto(searchText = token, page = 0, size = 50)
+                    SearchCriteriaDto(searchText = token, page = 0, size = 50),
+                    searcher.id!!
                 )
 
                 val returnedIds = result.campaigns.map { it.id }.toSet()
@@ -115,12 +117,14 @@ class CampaignSearchServicePropertyTest : StringSpec() {
             checkAll(100, Arb.int(1, 5)) { numCampaigns ->
                 cleanup()
                 val owner = saveUser()
+                val searcher = saveUser()
                 repeat(numCampaigns) { i ->
                     saveCampaign(owner, name = "Campaign $i", description = "Description $i")
                 }
 
                 val result = campaignSearchService.searchCampaigns(
-                    SearchCriteriaDto(searchText = "", page = 0, size = 50)
+                    SearchCriteriaDto(searchText = "", page = 0, size = 50),
+                    searcher.id!!
                 )
 
                 // Property: empty search returns all public campaigns
@@ -132,6 +136,7 @@ class CampaignSearchServicePropertyTest : StringSpec() {
             checkAll(100, Arb.int(1, 3)) { numCampaigns ->
                 cleanup()
                 val owner = saveUser()
+                val searcher = saveUser()
                 repeat(numCampaigns) { i ->
                     saveCampaign(owner, name = "Campaign $i", description = "Description $i")
                 }
@@ -139,7 +144,8 @@ class CampaignSearchServicePropertyTest : StringSpec() {
                 // Use a UUID-based token that is guaranteed not to appear in any campaign
                 val noMatchToken = "NOMATCH_${UUID.randomUUID().toString().replace("-", "")}"
                 val result = campaignSearchService.searchCampaigns(
-                    SearchCriteriaDto(searchText = noMatchToken, page = 0, size = 50)
+                    SearchCriteriaDto(searchText = noMatchToken, page = 0, size = 50),
+                    searcher.id!!
                 )
 
                 // Property: no campaigns match an unrecognised token
@@ -160,6 +166,7 @@ class CampaignSearchServicePropertyTest : StringSpec() {
                 val token = tokens[idx]
                 cleanup()
                 val owner = saveUser()
+                val searcher = saveUser()
 
                 // Create a campaign whose name contains the token in lowercase
                 saveCampaign(
@@ -177,12 +184,14 @@ class CampaignSearchServicePropertyTest : StringSpec() {
 
                 // Search with lowercase token
                 val lowerResult = campaignSearchService.searchCampaigns(
-                    SearchCriteriaDto(searchText = token.lowercase(), page = 0, size = 50)
+                    SearchCriteriaDto(searchText = token.lowercase(), page = 0, size = 50),
+                    searcher.id!!
                 )
 
                 // Search with uppercase token
                 val upperResult = campaignSearchService.searchCampaigns(
-                    SearchCriteriaDto(searchText = token.uppercase(), page = 0, size = 50)
+                    SearchCriteriaDto(searchText = token.uppercase(), page = 0, size = 50),
+                    searcher.id!!
                 )
 
                 // Property: same number of results regardless of case
@@ -201,6 +210,7 @@ class CampaignSearchServicePropertyTest : StringSpec() {
                 val token = tokens[idx]
                 cleanup()
                 val owner = saveUser()
+                val searcher = saveUser()
 
                 saveCampaign(
                     owner = owner,
@@ -214,10 +224,12 @@ class CampaignSearchServicePropertyTest : StringSpec() {
                 }.joinToString("")
 
                 val lowerResult = campaignSearchService.searchCampaigns(
-                    SearchCriteriaDto(searchText = token.lowercase(), page = 0, size = 50)
+                    SearchCriteriaDto(searchText = token.lowercase(), page = 0, size = 50),
+                    searcher.id!!
                 )
                 val mixedResult = campaignSearchService.searchCampaigns(
-                    SearchCriteriaDto(searchText = mixedCase, page = 0, size = 50)
+                    SearchCriteriaDto(searchText = mixedCase, page = 0, size = 50),
+                    searcher.id!!
                 )
 
                 // Property: mixed-case search returns the same results as lowercase

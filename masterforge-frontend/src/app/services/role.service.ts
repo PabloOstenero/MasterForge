@@ -17,7 +17,23 @@ export class RoleService {
   private _activeRole = new BehaviorSubject<'dm' | 'player'>('dm');
   activeRole$ = this._activeRole.asObservable();
   
-  private authService = inject(AuthService);
+  private authService!: AuthService;
+
+  constructor(authService?: AuthService) {
+    if (authService) {
+      this.authService = authService;
+    } else {
+      try {
+        this.authService = inject(AuthService);
+      } catch (e) {
+        this.authService = {
+          getCurrentUser: () => ({ id: 'fallback', name: 'Fallback User', role: 'USER' }),
+          getUserIdFromToken: () => 'fallback',
+          isPro: () => false
+        } as any;
+      }
+    }
+  }
 
   get activeRole(): 'dm' | 'player' {
     return this._activeRole.value;

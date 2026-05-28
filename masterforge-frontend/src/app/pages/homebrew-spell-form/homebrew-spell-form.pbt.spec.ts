@@ -71,7 +71,12 @@ function createComponent(options: {
   const fb = new FormBuilder();
 
   const routeId = options.routeId !== undefined ? options.routeId : null;
-  const routeStub = { snapshot: { paramMap: { get: (_: string) => routeId } } };
+  const routeStub = {
+    snapshot: {
+      paramMap:      { get: (_: string) => routeId },
+      queryParamMap: { get: (_: string) => null },
+    },
+  };
 
   const homebrewServiceStub = options.homebrewServiceStub ?? {
     createSpell: jasmine.createSpy('createSpell').and.returnValue(of({})),
@@ -83,6 +88,7 @@ function createComponent(options: {
 
   const authServiceStub = options.authServiceStub ?? {
     getUserIdFromToken: jasmine.createSpy('getUserIdFromToken').and.returnValue(null),
+    isPro:              () => false, getCurrentUser: () => ({ id: 'user-1', name: 'Test User', role: 'USER' }),
   };
 
   const apiServiceStub = options.apiServiceStub ?? {
@@ -213,6 +219,7 @@ describe('Feature: homebrew-spell-form, Property 3: Valid submission always inje
 
           const authServiceStub = {
             getUserIdFromToken: jasmine.createSpy('getUserIdFromToken').and.returnValue(tokenUserId),
+            isPro:              () => false, getCurrentUser: () => ({ id: 'user-1', name: 'Test User', role: 'USER' }),
           };
 
           const component = createComponent({ homebrewServiceStub, authServiceStub });
@@ -253,6 +260,7 @@ describe('Feature: homebrew-spell-form, Property 3: Valid submission always inje
 
           const authServiceStub = {
             getUserIdFromToken: jasmine.createSpy('getUserIdFromToken').and.returnValue(tokenUserId),
+            isPro:              () => false, getCurrentUser: () => ({ id: 'user-1', name: 'Test User', role: 'USER' }),
           };
 
           // Instantiate the service manually (it uses inject() internally, so we test via component)

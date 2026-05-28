@@ -14,7 +14,6 @@ import com.masterforge.masterforge_backend.repository.CampaignRepository
 import com.masterforge.masterforge_backend.repository.CharacterRepository
 import com.masterforge.masterforge_backend.repository.DndClassRepository
 import com.masterforge.masterforge_backend.repository.DndRaceRepository
-import com.masterforge.masterforge_backend.repository.SessionAttendeeRepository
 import com.masterforge.masterforge_backend.repository.SessionRepository
 import com.masterforge.masterforge_backend.repository.UserRepository
 import com.masterforge.masterforge_backend.service.JwtService
@@ -60,7 +59,6 @@ class CharacterCampaignAssignmentPropertyTest : StringSpec() {
     @Autowired lateinit var campaignEnrollmentRepository: CampaignEnrollmentRepository
     @Autowired lateinit var characterRepository: CharacterRepository
     @Autowired lateinit var sessionRepository: SessionRepository
-    @Autowired lateinit var sessionAttendeeRepository: SessionAttendeeRepository
     @Autowired lateinit var dndClassRepository: DndClassRepository
     @Autowired lateinit var dndRaceRepository: DndRaceRepository
     @Autowired lateinit var jwtService: JwtService
@@ -206,7 +204,6 @@ class CharacterCampaignAssignmentPropertyTest : StringSpec() {
         // Characters reference users/classes/races, so characters must be deleted before users.
         // We intentionally do NOT delete dndClass/dndRace here because other test classes share the
         // same H2 database and may have characters referencing those records.
-        sessionAttendeeRepository.deleteAll()
         sessionRepository.deleteAll()
         characterRepository.deleteAll()
         campaignEnrollmentRepository.deleteAll()
@@ -220,9 +217,7 @@ class CharacterCampaignAssignmentPropertyTest : StringSpec() {
         )
         val dndRace = dndRaceRepository.save(
             DndRace(
-                name = "Human_${UUID.randomUUID()}", price = BigDecimal.ZERO,
-                bonusStr = 1, bonusDex = 1, bonusCon = 1,
-                bonusInt = 1, bonusWis = 1, bonusCha = 1
+                name = "Human_${UUID.randomUUID()}", price = BigDecimal.ZERO
             )
         )
         return dndClass to dndRace

@@ -66,9 +66,7 @@ class CampaignPlayersEndpointTest {
         )
         dndRace = dndRaceRepository.save(
             DndRace(
-                name = "Human", price = BigDecimal.ZERO,
-                bonusStr = 1, bonusDex = 1, bonusCon = 1,
-                bonusInt = 1, bonusWis = 1, bonusCha = 1
+                name = "Human", price = BigDecimal.ZERO
             )
         )
     }

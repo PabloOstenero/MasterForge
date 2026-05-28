@@ -260,11 +260,12 @@ class SearchCampaignsIntegrationPropertyTest : StringSpec() {
         cacheManager.cacheNames.forEach { cacheManager.getCache(it)?.clear() }
     }
 
-    private fun saveUser(): User = userRepository.save(
+    private fun saveUser(balance: java.math.BigDecimal = java.math.BigDecimal("1000.00")): User = userRepository.save(
         User(
             name = "User_${UUID.randomUUID()}",
             email = "user_${UUID.randomUUID()}@test.com",
-            passwordHash = "hash"
+            passwordHash = "hash",
+            balance = balance
         )
     )
 

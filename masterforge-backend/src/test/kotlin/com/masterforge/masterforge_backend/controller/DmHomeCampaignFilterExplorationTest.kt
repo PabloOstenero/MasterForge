@@ -30,7 +30,6 @@ import com.masterforge.masterforge_backend.repository.CampaignRepository
 import com.masterforge.masterforge_backend.repository.CharacterRepository
 import com.masterforge.masterforge_backend.repository.CharacterSpellRepository
 import com.masterforge.masterforge_backend.repository.InventorySlotRepository
-import com.masterforge.masterforge_backend.repository.SessionAttendeeRepository
 import com.masterforge.masterforge_backend.repository.SessionRepository
 import com.masterforge.masterforge_backend.repository.UserRepository
 import com.masterforge.masterforge_backend.service.JwtService
@@ -56,7 +55,6 @@ class DmHomeCampaignFilterExplorationTest : StringSpec() {
     @Autowired lateinit var userRepository: UserRepository
     @Autowired lateinit var campaignRepository: CampaignRepository
     @Autowired lateinit var campaignEnrollmentRepository: CampaignEnrollmentRepository
-    @Autowired lateinit var sessionAttendeeRepository: SessionAttendeeRepository
     @Autowired lateinit var sessionRepository: SessionRepository
     @Autowired lateinit var characterSpellRepository: CharacterSpellRepository
     @Autowired lateinit var inventorySlotRepository: InventorySlotRepository
@@ -68,7 +66,6 @@ class DmHomeCampaignFilterExplorationTest : StringSpec() {
     private lateinit var tokenA: String
 
     private fun cleanAll() {
-        sessionAttendeeRepository.deleteAll()
         sessionRepository.deleteAll()
         characterSpellRepository.deleteAll()
         inventorySlotRepository.deleteAll()

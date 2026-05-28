@@ -39,33 +39,33 @@ describe('CampaignFormatter.formatPrice()', () => {
   });
 
   it('should format a whole-dollar price with two decimal places', () => {
-    expect(CampaignFormatter.formatPrice(10)).toBe('$10.00');
+    expect(CampaignFormatter.formatPrice(10)).toBe('10.00€');
   });
 
   it('should format a fractional price with two decimal places', () => {
-    expect(CampaignFormatter.formatPrice(9.99)).toBe('$9.99');
+    expect(CampaignFormatter.formatPrice(9.99)).toBe('9.99€');
   });
 
   it('should format a price with one decimal digit correctly', () => {
-    expect(CampaignFormatter.formatPrice(5.5)).toBe('$5.50');
+    expect(CampaignFormatter.formatPrice(5.5)).toBe('5.50€');
   });
 
   it('should format a large price correctly', () => {
-    expect(CampaignFormatter.formatPrice(100)).toBe('$100.00');
+    expect(CampaignFormatter.formatPrice(100)).toBe('100.00€');
   });
 
   /**
    * Property: any positive price should start with "$" and contain "."
    * **Validates: Requirements 9.2**
    */
-  it('positive prices should always start with "$" and contain a decimal point', () => {
+  it('positive prices should always end with "€" and contain a decimal point', () => {
     let passed = true;
     fc.assert(
       fc.property(
         fc.double({ min: 0.01, max: 9999, noNaN: true, noDefaultInfinity: true }),
         (price) => {
           const formatted = CampaignFormatter.formatPrice(price);
-          const ok = formatted.startsWith('$') && formatted.includes('.');
+          const ok = formatted.endsWith('€') && formatted.includes('.');
           if (!ok) passed = false;
           return ok;
         },

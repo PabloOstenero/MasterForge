@@ -1,12 +1,11 @@
 package com.masterforge.masterforge_backend.controller
 
 import com.masterforge.masterforge_backend.model.entity.Campaign
+import com.masterforge.masterforge_backend.model.entity.CampaignEnrollment
 import com.masterforge.masterforge_backend.model.entity.Session
-import com.masterforge.masterforge_backend.model.entity.SessionAttendee
-import com.masterforge.masterforge_backend.model.entity.SessionAttendeeId
 import com.masterforge.masterforge_backend.model.entity.User
 import com.masterforge.masterforge_backend.repository.CampaignRepository
-import com.masterforge.masterforge_backend.repository.SessionAttendeeRepository
+import com.masterforge.masterforge_backend.repository.CampaignEnrollmentRepository
 import com.masterforge.masterforge_backend.repository.SessionRepository
 import com.masterforge.masterforge_backend.repository.UserRepository
 import io.kotest.core.spec.style.StringSpec
@@ -33,7 +32,7 @@ import java.util.UUID
  *
  * Validates: Requirement 3.2
  *
- * For any user with at least one SessionAttendee record, each object in the list
+ * For any user with at least one CampaignEnrollment record, each object in the list
  * returned by the repository must contain the fields: campaignId, campaignName,
  * dmName, and nextSessionDate (the latter can be null).
  */
@@ -45,7 +44,7 @@ class PlayerCampaignControllerPropertyTest : StringSpec() {
     override fun extensions() = listOf(SpringExtension)
 
     @Autowired lateinit var userRepository: UserRepository
-    @Autowired lateinit var sessionAttendeeRepository: SessionAttendeeRepository
+    @Autowired lateinit var enrollmentRepository: CampaignEnrollmentRepository
     @Autowired lateinit var sessionRepository: SessionRepository
     @Autowired lateinit var campaignRepository: CampaignRepository
 
@@ -55,7 +54,7 @@ class PlayerCampaignControllerPropertyTest : StringSpec() {
          * Feature: player-campaign-list, Property 6: response contains all required DTO fields
          * Validates: Requirement 3.2
          *
-         * For any user with at least one SessionAttendee record, each object in the list
+         * For any user with at least one CampaignEnrollment record, each object in the list
          * must contain campaignId, campaignName, dmName, and nextSessionDate (nullable).
          */
         "Property 6: each DTO in the response contains all required fields (campaignId, campaignName, dmName, nextSessionDate)" {
@@ -66,11 +65,11 @@ class PlayerCampaignControllerPropertyTest : StringSpec() {
 
                 repeat(numCampaigns) {
                     val campaign = saveCampaign(dm)
-                    val session = saveSession(campaign, future = true)
-                    saveAttendee(player, session)
+                    saveSession(campaign, future = true)
+                    saveEnrollment(player, campaign)
                 }
 
-                val result = sessionAttendeeRepository.findPlayerCampaignsByUserEmail(player.email)
+                val result = enrollmentRepository.findPlayerCampaignsByUserId(player.id!!)
 
                 result.size shouldBe numCampaigns
                 result.forEach { dto ->
@@ -104,11 +103,11 @@ class PlayerCampaignControllerPropertyTest : StringSpec() {
                 repeat(numCampaigns) {
                     val campaign = saveCampaign(dm)
                     campaignNames.add(campaign.name)
-                    val session = saveSession(campaign, future = true)
-                    saveAttendee(player, session)
+                    saveSession(campaign, future = true)
+                    saveEnrollment(player, campaign)
                 }
 
-                val result = sessionAttendeeRepository.findPlayerCampaignsByUserEmail(player.email)
+                val result = enrollmentRepository.findPlayerCampaignsByUserId(player.id!!)
 
                 result.forEach { dto ->
                     // Property: dmName must equal the DM's actual name
@@ -129,11 +128,11 @@ class PlayerCampaignControllerPropertyTest : StringSpec() {
                 repeat(numCampaigns) {
                     val campaign = saveCampaign(dm)
                     campaignIds.add(campaign.id!!)
-                    val session = saveSession(campaign, future = true)
-                    saveAttendee(player, session)
+                    saveSession(campaign, future = true)
+                    saveEnrollment(player, campaign)
                 }
 
-                val result = sessionAttendeeRepository.findPlayerCampaignsByUserEmail(player.email)
+                val result = enrollmentRepository.findPlayerCampaignsByUserId(player.id!!)
 
                 result.forEach { dto ->
                     // Property: campaignId must match one of the created campaigns
@@ -146,8 +145,8 @@ class PlayerCampaignControllerPropertyTest : StringSpec() {
     // ── helpers ──────────────────────────────────────────────────────────────
 
     private fun cleanup() {
-        sessionAttendeeRepository.deleteAll()
         sessionRepository.deleteAll()
+        enrollmentRepository.deleteAll()
         campaignRepository.deleteAll()
         userRepository.deleteAll()
     }
@@ -173,16 +172,14 @@ class PlayerCampaignControllerPropertyTest : StringSpec() {
         else
             Timestamp.from(Instant.now().minus(offsetDays, ChronoUnit.DAYS))
         return sessionRepository.save(
-            Session(name = "Test Session", scheduledDate = date, price = BigDecimal.ZERO, campaign = campaign)
+            Session(name = "Test Session", scheduledDate = date, campaign = campaign)
         )
     }
 
-    private fun saveAttendee(user: User, session: Session): SessionAttendee =
-        sessionAttendeeRepository.save(
-            SessionAttendee(
-                id = SessionAttendeeId(sessionId = session.id!!, userId = user.id!!),
-                hasPaid = false,
-                session = session,
+    private fun saveEnrollment(user: User, campaign: Campaign): CampaignEnrollment =
+        enrollmentRepository.save(
+            CampaignEnrollment(
+                campaign = campaign,
                 user = user
             )
         )

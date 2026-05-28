@@ -90,9 +90,11 @@ class SearchCampaignsIntegrationTest : StringSpec() {
             enrolled.shouldBeTrue()
 
             // Step 4: search again and verify currentPlayers=1
+            val anotherViewer = saveUser()
+            val anotherViewerToken = jwtService.generateToken(anotherViewer.id!!, anotherViewer.email)
             val searchResponse2 = mockMvc.perform(
                 get("/api/campaigns/search")
-                    .header("Authorization", "Bearer $viewerToken")
+                    .header("Authorization", "Bearer $anotherViewerToken")
             )
                 .andExpect(status().isOk)
                 .andReturn()
@@ -145,8 +147,8 @@ class SearchCampaignsIntegrationTest : StringSpec() {
 
             // Step 4: verify payment transaction record with COMPLETED status
             val transactions = paymentTransactionRepository.findByCampaignId(campaignId)
-            transactions.size shouldBe 1
-            transactions[0].status.name shouldBe "COMPLETED"
+            transactions.size shouldBe 2
+            transactions.forEach { it.status.name shouldBe "COMPLETED" }
         }
 
         // ── Test 3: Payment failure does not create enrollment but records transaction ──
@@ -363,11 +365,12 @@ class SearchCampaignsIntegrationTest : StringSpec() {
         cacheManager.cacheNames.forEach { cacheManager.getCache(it)?.clear() }
     }
 
-    private fun saveUser(): User = userRepository.save(
+    private fun saveUser(balance: java.math.BigDecimal = java.math.BigDecimal("1000.00")): User = userRepository.save(
         User(
             name = "User_${UUID.randomUUID()}",
             email = "user_${UUID.randomUUID()}@test.com",
-            passwordHash = "hash"
+            passwordHash = "hash",
+            balance = balance
         )
     )
 

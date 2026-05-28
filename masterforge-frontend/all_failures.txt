@@ -1,0 +1,143 @@
+=== Total failures parsed: 47 ===
+
+1. Spec: ForgeCharacterPage: submitCharacter with structured equipment should pass resolved inventory to createCharacter when class has structured equipment
+   Error: Expected [ Object({ item: Object({ id: 'item-fixed-0' }), quantity: 1, isEquipped: false, isAttuned: false, characterId: '00000000-0000-0000-0000-000000000000' }), Object({ item: Object({ id: 'item-0-opt0' }), quantity: 1, isEquipped: false, isAttuned: false, characterId: '00000000-0000-0000-0000-000000000000' }) ] to contain <jasmine.objectContaining(Object({ itemId: 'item-fixed-0' }))>.
+
+2. Spec: buildItemProperties() ÔÇö Property-Based Tests Property 1: buildItemProperties with itemType=Weapon returns no armor/shield/potion/ammunition/gear keys
+   Error: Key "damageBonus" should not appear in Weapon output: Expected true to be false.
+
+3. Spec: buildCharacterDto: resolveInventory integration should include both fixed grants and selected option lines in inventory
+   Error: Expected [ Object({ item: Object({ id: 'item-fixed-0' }), quantity: 1, isEquipped: false, isAttuned: false, characterId: '00000000-0000-0000-0000-000000000000' }), Object({ item: Object({ id: 'item-0-opt0' }), quantity: 1, isEquipped: false, isAttuned: false, characterId: '00000000-0000-0000-0000-000000000000' }) ] to contain <jasmine.objectContaining(Object({ itemId: 'item-fixed-0' }))>.
+
+4. Spec: buildCharacterDto: resolveInventory integration should include correct inventory lines for structured equipment with selected options
+   Error: Expected [ Object({ item: Object({ id: 'item-0-opt0' }), quantity: 1, isEquipped: false, isAttuned: false, characterId: '00000000-0000-0000-0000-000000000000' }), Object({ item: Object({ id: 'item-1-opt1' }), quantity: 2, isEquipped: false, isAttuned: false, characterId: '00000000-0000-0000-0000-000000000000' }) ] to contain <jasmine.objectContaining(Object({ itemId: 'item-0-opt0', quantity: 1 }))>.
+
+5. Spec: buildCharacterDto: resolveInventory integration should include correct inventory lines for structured equipment with fixed grants only
+   Error: Expected object to have properties
+
+6. Spec: buildCharacterDto: resolveInventory integration should produce separate inventory slots for duplicate item IDs (no merging)
+   Error: Expected object to have properties
+
+7. Spec: HomePage ÔÇö Preservation Property Tests (Task 2) P1 ÔÇö DM "Clientes Totales" card displays the playerCount from GET /api/users/me/player-count
+   Error: P1: "Clientes Totales" card must display "601 jugadores" for playerCount=601: Expected '601' to be '601 jugadores'.
+
+8. Spec: buildCombatMechanics() ÔÇö Property-Based Tests Property 1: form.valid is true regardless of description value when all required stats are valid
+   Error: Expected false to be true.
+
+9. Spec: buildCombatMechanics() ÔÇö Property-Based Tests Property 5: buildCombatMechanics returns an object with exactly the expected keys
+   Error: Expected $.length = 13 to equal 11.
+
+10. Spec: CharacterSheetPage getAutoSpellSlots - Issue 2 Multiclass spell caster summing consolidation should consolidate full, half, and third casters together (Cleric 3 / Ranger 2 / Arcane Trickster 3)
+   Error: Expected undefined to equal Object({ max: 2, available: 2 }).
+
+11. Spec: HomebrewRaceFormPage Error messages on invalid submit attempt should show bonusInt error message after submit with out-of-range bonusInt
+   Error: Expected null to be truthy.
+
+12. Spec: HomebrewRaceFormPage Error messages on invalid submit attempt should show bonusCha error message after submit with out-of-range bonusCha
+   Error: Expected null to be truthy.
+
+13. Spec: HomebrewRaceFormPage Error messages on invalid submit attempt should show bonusWis error message after submit with out-of-range bonusWis
+   Error: Expected null to be truthy.
+
+14. Spec: HomebrewRaceFormPage Error messages on invalid submit attempt should show bonusDex error message after submit with out-of-range bonusDex
+   Error: Expected null to be truthy.
+
+15. Spec: HomebrewRaceFormPage Error messages on invalid submit attempt should show bonusCon error message after submit with out-of-range bonusCon
+   Error: Expected null to be truthy.
+
+16. Spec: HomebrewRaceFormPage Error messages on invalid submit attempt should show bonusStr error message after submit with out-of-range bonusStr
+   Error: Expected null to be truthy.
+
+17. Spec: RoleService ÔÇö P1: Menu contents are role-specific menuItems$ contains "Mis Campa├▒as" iff active role is player (fast-check, ÔëÑ100 runs)
+   Error: Property P1 failed: Property failed after 1 tests
+
+18. Spec: SearchCampaignsPage ÔÇö Accessibility should have accessible page heading
+   Error: Expected null to be truthy.
+
+19. Spec: HomebrewClassFormPage (component) Form validators price field should be invalid when price is null
+   Error: Expected false to be true.
+
+20. Spec: HomebrewClassFormPage (component) Spellcasting toggle logic onPreparationStyleChange should set showSpellsKnown to false when preparationStyle is PREPARED
+   Error: Expected true to be false.
+
+21. Spec: HomebrewClassFormPage (component) Cancel should navigate to /homebrew when cancel() is called
+   Error: TypeError: Cannot read properties of undefined (reading 'get')
+
+22. Spec: HomebrewClassFormPage (component) Submit ÔÇö create mode success should include price in the DTO
+   Error: TypeError: Cannot read properties of undefined (reading 'get')
+
+23. Spec: HomebrewClassFormPage (component) Submit ÔÇö create mode success should call reconcileClassFeatures with the returned class id
+   Error: TypeError: Cannot read properties of undefined (reading 'get')
+
+24. Spec: HomebrewClassFormPage (component) Submit ÔÇö create mode success should include name in the DTO
+   Error: TypeError: Cannot read properties of undefined (reading 'get')
+
+25. Spec: HomebrewClassFormPage (component) Submit ÔÇö create mode success should serialize selected saving throw as true in the DTO
+   Error: TypeError: Cannot read properties of undefined (reading 'get')
+
+26. Spec: HomebrewClassFormPage (component) Submit ÔÇö create mode success should keep error = null after success
+   Error: TypeError: Cannot read properties of undefined (reading 'get')
+
+27. Spec: HomebrewClassFormPage (component) Submit ÔÇö create mode success should include hitDie in the DTO
+   Error: TypeError: Cannot read properties of undefined (reading 'get')
+
+28. Spec: HomebrewClassFormPage (component) Submit ÔÇö create mode success should include savingThrows as a Record in the DTO
+   Error: TypeError: Cannot read properties of undefined (reading 'get')
+
+29. Spec: HomebrewClassFormPage (component) Submit ÔÇö create mode success should serialize unselected saving throw as false in the DTO
+   Error: TypeError: Cannot read properties of undefined (reading 'get')
+
+30. Spec: HomebrewClassFormPage (component) Submit ÔÇö create mode success should include classFeatures in the DTO
+   Error: TypeError: Cannot read properties of undefined (reading 'get')
+
+31. Spec: HomebrewClassFormPage (component) Submit ÔÇö create mode success should not include spellcasting in classFeatures when spellcastingEnabled is false
+   Error: TypeError: Cannot read properties of undefined (reading 'get')
+
+32. Spec: HomebrewClassFormPage (component) Submit ÔÇö create mode success should include spellcasting in classFeatures when spellcastingEnabled is true
+   Error: TypeError: Cannot read properties of undefined (reading 'get')
+
+33. Spec: HomebrewClassFormPage (component) Submit ÔÇö create mode success should navigate to /homebrew on success
+   Error: TypeError: Cannot read properties of undefined (reading 'get')
+
+34. Spec: HomebrewClassFormPage (component) Submit ÔÇö create mode success should set submitting = false after success
+   Error: TypeError: Cannot read properties of undefined (reading 'get')
+
+35. Spec: HomebrewClassFormPage (component) Submit ÔÇö create mode success should call createClass with a DTO
+   Error: TypeError: Cannot read properties of undefined (reading 'get')
+
+36. Spec: HomebrewClassFormPage ÔÇö Edit mode should patch hitDie from loaded class
+   Error: Expected 'dd8' to be 'd8'.
+
+37. Spec: HomebrewClassFormPage ÔÇö Edit mode Submit ÔÇö edit mode should call updateClass with the edit id
+   Error: TypeError: Cannot read properties of undefined (reading 'get')
+
+38. Spec: HomebrewClassFormPage ÔÇö Edit mode Submit ÔÇö edit mode should call updateClass instead of createClass
+   Error: TypeError: Cannot read properties of undefined (reading 'get')
+
+39. Spec: HomebrewClassFormPage ÔÇö Edit mode Submit ÔÇö edit mode should navigate to /homebrew after successful update
+   Error: TypeError: Cannot read properties of undefined (reading 'get')
+
+40. Spec: RoleService ÔÇö unit tests toggleRole() should switch from dm to player
+   Error: ╔ÁNotFound: NG0201: No provider found for `_HttpClient`. Source: DynamicTestModule. Path: _a -> _HttpClient. Find more at https://v20.angular.dev/errors/NG0201
+
+41. Spec: RoleService ÔÇö unit tests toggleRole() should switch from player to dm
+   Error: ╔ÁNotFound: NG0201: No provider found for `_HttpClient`. Source: DynamicTestModule. Path: _a -> _HttpClient. Find more at https://v20.angular.dev/errors/NG0201
+
+42. Spec: RoleService ÔÇö unit tests player menu should contain "Mis Campa├▒as" with route /my-campaigns
+   Error: ╔ÁNotFound: NG0201: No provider found for `_HttpClient`. Source: DynamicTestModule. Path: _a -> _HttpClient. Find more at https://v20.angular.dev/errors/NG0201
+
+43. Spec: RoleService ÔÇö unit tests should be created
+   Error: ╔ÁNotFound: NG0201: No provider found for `_HttpClient`. Source: DynamicTestModule. Path: _a -> _HttpClient. Find more at https://v20.angular.dev/errors/NG0201
+
+44. Spec: RoleService ÔÇö unit tests DM menu should NOT contain "Mis Campa├▒as"
+   Error: ╔ÁNotFound: NG0201: No provider found for `_HttpClient`. Source: DynamicTestModule. Path: _a -> _HttpClient. Find more at https://v20.angular.dev/errors/NG0201
+
+45. Spec: RoleService ÔÇö unit tests player menu should have "Mis Campa├▒as" after "Mis Personajes" and before "Gremio de Campa├▒as"
+   Error: ╔ÁNotFound: NG0201: No provider found for `_HttpClient`. Source: DynamicTestModule. Path: _a -> _HttpClient. Find more at https://v20.angular.dev/errors/NG0201
+
+46. Spec: HomebrewItemFormPage Successful submit should pass authorId as empty string placeholder to createItem (Requirement 14.1)
+   Error: Expected undefined to be ''.
+
+47. Spec: HomePage ÔÇö Property-Based Tests PCL-U3 ÔÇö empty playerCampaigns shows "No est├ís inscrito en ninguna campa├▒a activa." with text-muted
+   Error: Expected false to be true.
+

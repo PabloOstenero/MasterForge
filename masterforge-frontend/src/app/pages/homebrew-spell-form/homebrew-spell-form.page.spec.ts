@@ -19,6 +19,7 @@ import {
 } from './homebrew-spell-form.page';
 import { HomebrewService } from '../../services/homebrew.service';
 import { AuthService } from '../../services/auth.service';
+import { ApiService } from '../../services/api';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -46,6 +47,9 @@ function buildActivatedRouteStub(id: string | null) {
       paramMap: {
         get: (key: string) => (key === 'id' ? id : null),
       },
+      queryParamMap: {
+        get: (key: string) => null,
+      },
     },
   };
 }
@@ -60,6 +64,7 @@ async function createComponent(
 ) {
   const authServiceMock = {
     getUserIdFromToken: () => 'user-1',
+    isPro:              () => false, getCurrentUser: () => ({ id: 'user-1', name: 'Test User', role: 'USER' }),
   };
 
   const routerSpy = jasmine.createSpyObj<Router>('Router', ['navigate']);
@@ -69,6 +74,7 @@ async function createComponent(
     providers: [
       { provide: HomebrewService, useValue: homebrewSpy },
       { provide: AuthService, useValue: authServiceMock },
+      { provide: ApiService, useValue: { get: () => of([]), getClasses: () => of([]) } },
       { provide: ActivatedRoute, useValue: routeStub },
       { provide: Router, useValue: routerSpy },
     ],

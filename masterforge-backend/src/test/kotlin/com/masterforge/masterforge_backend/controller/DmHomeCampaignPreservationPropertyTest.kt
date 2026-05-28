@@ -1,17 +1,14 @@
-﻿package com.masterforge.masterforge_backend.controller
+package com.masterforge.masterforge_backend.controller
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.masterforge.masterforge_backend.model.entity.Campaign
 import com.masterforge.masterforge_backend.model.entity.CampaignVisibility
 import com.masterforge.masterforge_backend.model.entity.Session
-import com.masterforge.masterforge_backend.model.entity.SessionAttendee
-import com.masterforge.masterforge_backend.model.entity.SessionAttendeeId
 import com.masterforge.masterforge_backend.model.entity.User
 import com.masterforge.masterforge_backend.repository.CampaignEnrollmentRepository
 import com.masterforge.masterforge_backend.repository.CampaignRepository
 import com.masterforge.masterforge_backend.repository.CharacterRepository
-import com.masterforge.masterforge_backend.repository.SessionAttendeeRepository
 import com.masterforge.masterforge_backend.repository.SessionRepository
 import com.masterforge.masterforge_backend.repository.UserRepository
 import com.masterforge.masterforge_backend.service.JwtService
@@ -76,7 +73,6 @@ class DmHomeCampaignPreservationPropertyTest : StringSpec() {
     @Autowired lateinit var campaignRepository: CampaignRepository
     @Autowired lateinit var campaignEnrollmentRepository: CampaignEnrollmentRepository
     @Autowired lateinit var sessionRepository: SessionRepository
-    @Autowired lateinit var sessionAttendeeRepository: SessionAttendeeRepository
     @Autowired lateinit var characterRepository: CharacterRepository
     @Autowired lateinit var jwtService: JwtService
 
@@ -107,7 +103,6 @@ class DmHomeCampaignPreservationPropertyTest : StringSpec() {
     ): String = """{"name":"${name.escapeJson()}","description":"${description.escapeJson()}","ownerId":"$ownerId","maxPlayers":$maxPlayers,"joinPrice":$joinPrice,"visibility":"${visibility.escapeJson()}"}"""
 
     private fun cleanAll() {
-        sessionAttendeeRepository.deleteAll()
         sessionRepository.deleteAll()
         characterRepository.deleteAll()
         campaignEnrollmentRepository.deleteAll()
@@ -164,7 +159,15 @@ class DmHomeCampaignPreservationPropertyTest : StringSpec() {
             val validDto = Arb.bind(validName, validDescription, validMaxPlayers, validJoinPrice, validVisibility) { n, d, mp, jp, vis -> CampaignDtoData(n, d, mp, jp, vis) }
             checkAll(iterations = 20, validDto) { dto ->
                 cleanAll()
-                val owner = userRepository.save(User(name = "DM_${UUID.randomUUID()}", email = "dm_${UUID.randomUUID()}@test.com", passwordHash = "hash"))
+                val owner = userRepository.save(
+                    User(
+                        name = "DM_${UUID.randomUUID()}",
+                        email = "dm_${UUID.randomUUID()}@test.com",
+                        passwordHash = "hash",
+                        subscriptionTier = "PRO",
+                        subscriptionExpiresAt = java.time.LocalDateTime.now().plusYears(1)
+                    )
+                )
                 val token = jwtService.generateToken(owner.id!!, owner.email)
                 val body = campaignJson(dto.name, dto.description, owner.id!!, dto.maxPlayers, dto.joinPrice.toPlainString(), dto.visibility.name)
                 val result = mockMvc.perform(post("/api/campaigns").header("Authorization", "Bearer $token").contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isOk).andReturn()

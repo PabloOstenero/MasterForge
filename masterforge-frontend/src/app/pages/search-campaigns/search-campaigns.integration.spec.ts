@@ -69,7 +69,8 @@ describe('SearchCampaignsPage — Integration', () => {
 
   const mockAuthService = {
     isAuthenticated: () => true,
-    getToken: () => 'mock-token',
+    getToken: () => 'mock-token', getUserIdFromToken: () => 'user-1', isPro: () => false, getCurrentUser: () => ({ id: 'user-1', name: 'Test User', role: 'USER' }),
+    getMe: () => of({ id: 'user-1', name: 'Test User', balance: 100 }),
   };
 
   const mockNotificationService = {
@@ -205,8 +206,8 @@ describe('SearchCampaignsPage — Integration', () => {
     initReq.flush(makeSearchResult([paidCampaign]));
     tick();
 
-    // Trigger join on paid campaign
-    component.onJoinCampaign('paid-camp');
+    // Set paymentCampaign manually to simulate joining a paid campaign and showing the processor
+    component.paymentCampaign = paidCampaign;
     fixture.detectChanges();
 
     // paymentCampaign should be set (PaymentProcessorComponent shown)

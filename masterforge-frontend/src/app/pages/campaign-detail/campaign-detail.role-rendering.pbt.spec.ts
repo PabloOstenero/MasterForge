@@ -84,7 +84,14 @@ async function createFixtureForRoleTest(
 
   mockApi.getCampaignById.and.returnValue(of(campaignData));
   mockApi.getCampaignSessions.and.returnValue(of([]));
-  mockApi.getCampaignPlayers.and.returnValue(of([]));
+  const mockPlayer = {
+    id: 'test-user-id',
+    name: 'Test User',
+    email: 'test@example.com',
+    subscriptionTier: 'FREE',
+    characters: []
+  };
+  mockApi.getCampaignPlayers.and.returnValue(of([mockPlayer]));
 
   await TestBed.configureTestingModule({
     imports: [CampaignDetailPage],
@@ -95,12 +102,14 @@ async function createFixtureForRoleTest(
         useValue: { snapshot: { paramMap: { get: () => campaignData.id } } },
       },
       { provide: RoleService, useValue: { activeRole: role } },
-      { provide: AuthService, useValue: { getUserIdFromToken: () => 'test-user-id' } },
+      { provide: AuthService, useValue: { getUserIdFromToken: () => role === 'dm' ? campaignData.owner.id : 'test-user-id', isPro: () => false, getCurrentUser: () => ({ id: 'user-1', name: 'Test User', role: 'USER' }),} },
       Location,
     ],
   }).compileComponents();
 
   const fixture = TestBed.createComponent(CampaignDetailPage);
+  fixture.detectChanges();
+  await fixture.whenStable();
   fixture.detectChanges();
 
   return { component: fixture.componentInstance, nativeElement: fixture.nativeElement };

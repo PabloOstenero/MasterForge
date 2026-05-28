@@ -59,7 +59,7 @@ describe('HomebrewRaceFormPage', () => {
     homebrewServiceSpy.getAllSpells.and.returnValue(of([]));
 
     const authServiceMock = {
-      getUserIdFromToken: () => 'user-1',
+      getUserIdFromToken: () => 'user-1', isPro: () => false, getCurrentUser: () => ({ id: 'user-1', name: 'Test User', role: 'USER' }),
     };
 
     await TestBed.configureTestingModule({
@@ -146,9 +146,9 @@ describe('HomebrewRaceFormPage', () => {
       expect(component.form.get('price')?.errors?.['min']).toBeTruthy();
     });
 
-    it('should be invalid when price is null (required)', () => {
+    it('should be valid when price is null (optional)', () => {
       component.form.patchValue({ price: null });
-      expect(component.form.get('price')?.invalid).toBeTrue();
+      expect(component.form.get('price')?.valid).toBeTrue();
     });
 
     it('should be valid when price is exactly 0', () => {
@@ -163,23 +163,23 @@ describe('HomebrewRaceFormPage', () => {
 
     // --- bonusStr field ---
 
-    it('should be invalid when bonusStr is below -10', () => {
-      component.form.patchValue({ bonusStr: -11 });
+    it('should be invalid when bonusStr is below 0', () => {
+      component.form.patchValue({ bonusStr: -1 });
       expect(component.form.get('bonusStr')?.invalid).toBeTrue();
     });
 
-    it('should have a min error when bonusStr is -11', () => {
-      component.form.patchValue({ bonusStr: -11 });
+    it('should have a min error when bonusStr is -1', () => {
+      component.form.patchValue({ bonusStr: -1 });
       expect(component.form.get('bonusStr')?.errors?.['min']).toBeTruthy();
     });
 
-    it('should be invalid when bonusStr is above 10', () => {
-      component.form.patchValue({ bonusStr: 11 });
+    it('should be invalid when bonusStr is above 5', () => {
+      component.form.patchValue({ bonusStr: 6 });
       expect(component.form.get('bonusStr')?.invalid).toBeTrue();
     });
 
-    it('should have a max error when bonusStr is 11', () => {
-      component.form.patchValue({ bonusStr: 11 });
+    it('should have a max error when bonusStr is 6', () => {
+      component.form.patchValue({ bonusStr: 6 });
       expect(component.form.get('bonusStr')?.errors?.['max']).toBeTruthy();
     });
 
@@ -188,30 +188,30 @@ describe('HomebrewRaceFormPage', () => {
       expect(component.form.get('bonusStr')?.valid).toBeTrue();
     });
 
-    it('should be valid when bonusStr is exactly -10 (lower boundary)', () => {
-      component.form.patchValue({ bonusStr: -10 });
-      expect(component.form.get('bonusStr')?.valid).toBeTrue();
-    });
-
-    it('should be valid when bonusStr is exactly 10 (upper boundary)', () => {
-      component.form.patchValue({ bonusStr: 10 });
-      expect(component.form.get('bonusStr')?.valid).toBeTrue();
-    });
-
-    it('should be valid when bonusStr is 0 (mid-range)', () => {
+    it('should be valid when bonusStr is exactly 0 (lower boundary)', () => {
       component.form.patchValue({ bonusStr: 0 });
+      expect(component.form.get('bonusStr')?.valid).toBeTrue();
+    });
+
+    it('should be valid when bonusStr is exactly 5 (upper boundary)', () => {
+      component.form.patchValue({ bonusStr: 5 });
+      expect(component.form.get('bonusStr')?.valid).toBeTrue();
+    });
+
+    it('should be valid when bonusStr is 2 (mid-range)', () => {
+      component.form.patchValue({ bonusStr: 2 });
       expect(component.form.get('bonusStr')?.valid).toBeTrue();
     });
 
     // --- bonusDex field ---
 
-    it('should be invalid when bonusDex is below -10', () => {
-      component.form.patchValue({ bonusDex: -11 });
+    it('should be invalid when bonusDex is below 0', () => {
+      component.form.patchValue({ bonusDex: -1 });
       expect(component.form.get('bonusDex')?.invalid).toBeTrue();
     });
 
-    it('should be invalid when bonusDex is above 10', () => {
-      component.form.patchValue({ bonusDex: 11 });
+    it('should be invalid when bonusDex is above 5', () => {
+      component.form.patchValue({ bonusDex: 6 });
       expect(component.form.get('bonusDex')?.invalid).toBeTrue();
     });
 
@@ -220,20 +220,20 @@ describe('HomebrewRaceFormPage', () => {
       expect(component.form.get('bonusDex')?.valid).toBeTrue();
     });
 
-    it('should be valid when bonusDex is within range [-10, 10]', () => {
+    it('should be valid when bonusDex is within range [0, 5]', () => {
       component.form.patchValue({ bonusDex: 2 });
       expect(component.form.get('bonusDex')?.valid).toBeTrue();
     });
 
     // --- bonusCon field ---
 
-    it('should be invalid when bonusCon is below -10', () => {
-      component.form.patchValue({ bonusCon: -11 });
+    it('should be invalid when bonusCon is below 0', () => {
+      component.form.patchValue({ bonusCon: -1 });
       expect(component.form.get('bonusCon')?.invalid).toBeTrue();
     });
 
-    it('should be invalid when bonusCon is above 10', () => {
-      component.form.patchValue({ bonusCon: 11 });
+    it('should be invalid when bonusCon is above 5', () => {
+      component.form.patchValue({ bonusCon: 6 });
       expect(component.form.get('bonusCon')?.invalid).toBeTrue();
     });
 
@@ -242,20 +242,20 @@ describe('HomebrewRaceFormPage', () => {
       expect(component.form.get('bonusCon')?.valid).toBeTrue();
     });
 
-    it('should be valid when bonusCon is within range [-10, 10]', () => {
+    it('should be valid when bonusCon is within range [0, 5]', () => {
       component.form.patchValue({ bonusCon: 1 });
       expect(component.form.get('bonusCon')?.valid).toBeTrue();
     });
 
     // --- bonusInt field ---
 
-    it('should be invalid when bonusInt is below -10', () => {
-      component.form.patchValue({ bonusInt: -11 });
+    it('should be invalid when bonusInt is below 0', () => {
+      component.form.patchValue({ bonusInt: -1 });
       expect(component.form.get('bonusInt')?.invalid).toBeTrue();
     });
 
-    it('should be invalid when bonusInt is above 10', () => {
-      component.form.patchValue({ bonusInt: 11 });
+    it('should be invalid when bonusInt is above 5', () => {
+      component.form.patchValue({ bonusInt: 6 });
       expect(component.form.get('bonusInt')?.invalid).toBeTrue();
     });
 
@@ -264,20 +264,20 @@ describe('HomebrewRaceFormPage', () => {
       expect(component.form.get('bonusInt')?.valid).toBeTrue();
     });
 
-    it('should be valid when bonusInt is within range [-10, 10]', () => {
+    it('should be valid when bonusInt is within range [0, 5]', () => {
       component.form.patchValue({ bonusInt: 1 });
       expect(component.form.get('bonusInt')?.valid).toBeTrue();
     });
 
     // --- bonusWis field ---
 
-    it('should be invalid when bonusWis is below -10', () => {
-      component.form.patchValue({ bonusWis: -11 });
+    it('should be invalid when bonusWis is below 0', () => {
+      component.form.patchValue({ bonusWis: -1 });
       expect(component.form.get('bonusWis')?.invalid).toBeTrue();
     });
 
-    it('should be invalid when bonusWis is above 10', () => {
-      component.form.patchValue({ bonusWis: 11 });
+    it('should be invalid when bonusWis is above 5', () => {
+      component.form.patchValue({ bonusWis: 6 });
       expect(component.form.get('bonusWis')?.invalid).toBeTrue();
     });
 
@@ -286,20 +286,20 @@ describe('HomebrewRaceFormPage', () => {
       expect(component.form.get('bonusWis')?.valid).toBeTrue();
     });
 
-    it('should be valid when bonusWis is within range [-10, 10]', () => {
-      component.form.patchValue({ bonusWis: 0 });
+    it('should be valid when bonusWis is within range [0, 5]', () => {
+      component.form.patchValue({ bonusWis: 3 });
       expect(component.form.get('bonusWis')?.valid).toBeTrue();
     });
 
     // --- bonusCha field ---
 
-    it('should be invalid when bonusCha is below -10', () => {
-      component.form.patchValue({ bonusCha: -11 });
+    it('should be invalid when bonusCha is below 0', () => {
+      component.form.patchValue({ bonusCha: -1 });
       expect(component.form.get('bonusCha')?.invalid).toBeTrue();
     });
 
-    it('should be invalid when bonusCha is above 10', () => {
-      component.form.patchValue({ bonusCha: 11 });
+    it('should be invalid when bonusCha is above 5', () => {
+      component.form.patchValue({ bonusCha: 6 });
       expect(component.form.get('bonusCha')?.invalid).toBeTrue();
     });
 
@@ -308,7 +308,7 @@ describe('HomebrewRaceFormPage', () => {
       expect(component.form.get('bonusCha')?.valid).toBeTrue();
     });
 
-    it('should be valid when bonusCha is within range [-10, 10]', () => {
+    it('should be valid when bonusCha is within range [0, 5]', () => {
       component.form.patchValue({ bonusCha: 2 });
       expect(component.form.get('bonusCha')?.valid).toBeTrue();
     });
@@ -357,14 +357,7 @@ describe('HomebrewRaceFormPage', () => {
       expect(priceError).toBeTruthy();
     });
 
-    it('should show price error message after submit with null price', () => {
-      component.form.patchValue({ ...validFormValue(), price: null });
-      component.submit();
-      fixture.detectChanges();
 
-      const priceError = fixture.nativeElement.querySelector('[data-testid="price-error"]');
-      expect(priceError).toBeTruthy();
-    });
 
     it('should show bonusStr error message after submit with out-of-range bonusStr', () => {
       component.form.patchValue({ ...validFormValue(), bonusStr: 11 });

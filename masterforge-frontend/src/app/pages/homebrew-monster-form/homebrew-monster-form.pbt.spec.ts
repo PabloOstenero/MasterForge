@@ -137,6 +137,7 @@ describe('buildCombatMechanics() — Property-Based Tests', () => {
             name: stats.name,
             type: stats.type,
             size: stats.size,
+            alignment: 'Neutral',
             armorClass: stats.armorClass,
             hitPoints: stats.hitPoints,
             speed: stats.speed,
@@ -205,9 +206,11 @@ describe('buildCombatMechanics() — Property-Based Tests', () => {
       'damageImmunities',
       'damageVulnerabilities',
       'conditionImmunities',
+      'languages',
       'senses',
       'attacks',
       'abilities',
+      'speeds',
       'legendaryActions',
     ].sort();
 
@@ -505,6 +508,7 @@ describe('HomebrewMonsterFormPage FormArray helpers — Property-Based Tests', (
             name: stats.name,
             type: stats.type,
             size: stats.size,
+            alignment: 'Neutral',
             armorClass: stats.armorClass,
             hitPoints: stats.hitPoints,
             speed: stats.speed,

@@ -32,7 +32,7 @@
                   } @else if (errorPlayerCount) {
                     Error
                   } @else {
-                    {{ playerCount }}
+                    {{ playerCount }} jugadores
                   }
                 </div>
                 <a [routerLink]="['/players']" class="summary-link">Ver Lista</a>
@@ -162,10 +162,10 @@
         } @else if (errorPlayerCampaigns) {
           <p class="text-muted" data-testid="player-campaigns-error">{{ errorPlayerCampaigns }}</p>
         } @else if (playerCampaigns.length === 0) {
-          <div class="empty-state-container" data-testid="player-campaigns-empty">
+          <div class="empty-state-container" data-testid="player-campaigns-empty-wrapper">
             <ion-icon name="skull-outline" class="empty-icon"></ion-icon>
             <h3>Listos para la aventura</h3>
-            <p>No estás inscrito en ninguna campaña activa en este momento.</p>
+            <p class="text-muted" data-testid="player-campaigns-empty">No estás inscrito en ninguna campaña activa.</p>
             <ion-button color="warning" fill="outline" class="empty-btn" [routerLink]="['/search-campaigns']">
               Buscar Campañas
             </ion-button>

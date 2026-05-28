@@ -198,6 +198,7 @@ function newItemArb(contentType: ContentType, name: string): HomebrewItem {
 function buildHomebrewServiceSpy(): jasmine.SpyObj<HomebrewService> {
   const spy = jasmine.createSpyObj<HomebrewService>('HomebrewService', [
     'getMyHomebrew',
+    'getCommunityHomebrew',
     'createClass',
     'createSubclass',
     'createRace',
@@ -207,11 +208,12 @@ function buildHomebrewServiceSpy(): jasmine.SpyObj<HomebrewService> {
     'deleteItem',
   ]);
   spy.getMyHomebrew.and.returnValue(of(emptyHomebrew()));
+  spy.getCommunityHomebrew.and.returnValue(of(emptyHomebrew()));
   return spy;
 }
 
 const authServiceMock = {
-  getUserIdFromToken: () => 'user-pbt-p5',
+  getUserIdFromToken: () => 'user-pbt-p5', isPro: () => false,
   getCurrentUser: () => ({ id: 'user-pbt-p5', name: 'PBT User P5' }),
 };
 

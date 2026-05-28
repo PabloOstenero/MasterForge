@@ -1,19 +1,17 @@
 package com.masterforge.masterforge_backend.controller
 
 import com.masterforge.masterforge_backend.model.entity.Campaign
+import com.masterforge.masterforge_backend.model.entity.CampaignEnrollment
 import com.masterforge.masterforge_backend.model.entity.Character
 import com.masterforge.masterforge_backend.model.entity.DndClass
 import com.masterforge.masterforge_backend.model.entity.DndRace
 import com.masterforge.masterforge_backend.model.entity.Session
-import com.masterforge.masterforge_backend.model.entity.SessionAttendee
-import com.masterforge.masterforge_backend.model.entity.SessionAttendeeId
 import com.masterforge.masterforge_backend.model.entity.User
 import com.masterforge.masterforge_backend.repository.CampaignRepository
 import com.masterforge.masterforge_backend.repository.CharacterRepository
 import com.masterforge.masterforge_backend.repository.DndClassRepository
 import com.masterforge.masterforge_backend.repository.DndRaceRepository
 import com.masterforge.masterforge_backend.repository.CampaignEnrollmentRepository
-import com.masterforge.masterforge_backend.repository.SessionAttendeeRepository
 import com.masterforge.masterforge_backend.repository.SessionRepository
 import com.masterforge.masterforge_backend.repository.UserRepository
 import io.kotest.core.spec.style.StringSpec
@@ -27,6 +25,7 @@ import io.kotest.property.checkAll
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase
+import org.springframework.data.domain.PageRequest
 import org.springframework.test.context.ActiveProfiles
 import java.math.BigDecimal
 import java.sql.Timestamp
@@ -41,8 +40,8 @@ import java.util.UUID
  * Validates: Requirements 2.2, 2.3, 2.4, 2.5
  *
  * Tests the repository queries that back the three UserController endpoints:
- * - GET /api/users/me/next-session       → findNextSessionDateByUserEmail
- * - GET /api/users/me/active-campaigns   → countDistinctCampaignsByUserEmail
+ * - GET /api/users/me/next-session       → findNextSessionByEnrolledUserId
+ * - GET /api/users/me/active-campaigns   → CampaignEnrollmentRepository.findByUserId
  * - GET /api/users/me/active-characters  → countByUserId
  */
 @DataJpaTest
@@ -54,7 +53,6 @@ class UserControllerPropertyTest : StringSpec() {
 
     @Autowired lateinit var userRepository: UserRepository
     @Autowired lateinit var characterRepository: CharacterRepository
-    @Autowired lateinit var sessionAttendeeRepository: SessionAttendeeRepository
     @Autowired lateinit var sessionRepository: SessionRepository
     @Autowired lateinit var campaignRepository: CampaignRepository
     @Autowired lateinit var enrollmentRepository: CampaignEnrollmentRepository
@@ -100,7 +98,7 @@ class UserControllerPropertyTest : StringSpec() {
          * Feature: player-summary-cards, Property 4: each endpoint returns the correct response shape and value for any player
          * Validates: Requirement 2.4
          */
-        "Property 4: countDistinctCampaignsByUserEmail returns value equal to distinct campaigns enrolled (including 0)" {
+        "Property 4: campaignEnrollmentRepository.findByUserId returns value equal to distinct campaigns enrolled (including 0)" {
             checkAll(100, Arb.int(0, 4)) { numCampaigns ->
                 cleanup()
                 val dm = savePlayer()
@@ -108,30 +106,30 @@ class UserControllerPropertyTest : StringSpec() {
 
                 repeat(numCampaigns) {
                     val campaign = saveCampaign(dm)
-                    val session = saveSession(campaign, future = true)
-                    saveAttendee(player, session)
+                    saveSession(campaign, future = true)
+                    saveEnrollment(player, campaign)
                 }
 
-                val count = campaignRepository.countDistinctCampaignsByUserEmail(player.email)
+                val count = enrollmentRepository.findByUserId(player.id!!).size.toLong()
 
                 count shouldBe numCampaigns.toLong()
                 (count >= 0) shouldBe true
             }
         }
 
-        "Property 4: countDistinctCampaignsByUserEmail counts campaigns not sessions — multiple sessions in same campaign = 1" {
+        "Property 4: campaignEnrollmentRepository counts campaigns not sessions — multiple sessions in same campaign = 1" {
             checkAll(100, Arb.int(1, 4)) { numSessions ->
                 cleanup()
                 val dm = savePlayer()
                 val player = savePlayer()
                 val campaign = saveCampaign(dm)
+                saveEnrollment(player, campaign)
 
                 repeat(numSessions) {
-                    val session = saveSession(campaign, future = true)
-                    saveAttendee(player, session)
+                    saveSession(campaign, future = true)
                 }
 
-                val count = campaignRepository.countDistinctCampaignsByUserEmail(player.email)
+                val count = enrollmentRepository.findByUserId(player.id!!).size.toLong()
                 count shouldBe 1L
             }
         }
@@ -140,59 +138,60 @@ class UserControllerPropertyTest : StringSpec() {
          * Feature: player-summary-cards, Property 4: each endpoint returns the correct response shape and value for any player
          * Validates: Requirement 2.3
          */
-        "Property 4: findNextSessionDateByUserEmail returns null when player has no future sessions (including 0 sessions)" {
+        "Property 4: findNextSessionByEnrolledUserId returns null when player has no future sessions (including 0 sessions)" {
             checkAll(100, Arb.int(0, 3)) { numPastSessions ->
                 cleanup()
                 val dm = savePlayer()
                 val player = savePlayer()
                 val campaign = saveCampaign(dm)
+                saveEnrollment(player, campaign)
 
                 repeat(numPastSessions) {
-                    val session = saveSession(campaign, future = false)
-                    saveAttendee(player, session)
+                    saveSession(campaign, future = false)
                 }
 
-                val result = sessionAttendeeRepository.findNextSessionDateByUserEmail(player.email)
-                result.shouldBeNull()
+                val result = sessionRepository.findNextSessionByEnrolledUserId(player.id!!, PageRequest.of(0, 1))
+                result.firstOrNull().shouldBeNull()
             }
         }
 
-        "Property 4: findNextSessionDateByUserEmail returns the earliest future session date" {
+        "Property 4: findNextSessionByEnrolledUserId returns the earliest future session date" {
             checkAll(100, Arb.int(1, 4)) { numFutureSessions ->
                 cleanup()
                 val dm = savePlayer()
                 val player = savePlayer()
                 val campaign = saveCampaign(dm)
+                saveEnrollment(player, campaign)
 
                 val futureDates = (1..numFutureSessions).map { offset ->
                     val session = saveSession(campaign, future = true, offsetDays = offset.toLong())
-                    saveAttendee(player, session)
                     session.scheduledDate
                 }
 
-                val result = sessionAttendeeRepository.findNextSessionDateByUserEmail(player.email)
+                val result = sessionRepository.findNextSessionByEnrolledUserId(player.id!!, PageRequest.of(0, 1))
 
-                result.shouldNotBeNull()
+                val nextSession = result.firstOrNull()
+                nextSession.shouldNotBeNull()
                 val expectedMin = futureDates.minByOrNull { it.time }!!
-                result.time shouldBe expectedMin.time
+                nextSession.scheduledDate.time shouldBe expectedMin.time
             }
         }
 
-        "Property 4: findNextSessionDateByUserEmail is isolated — ignores sessions of other players" {
+        "Property 4: findNextSessionByEnrolledUserId is isolated — ignores sessions of other players" {
             checkAll(100, Arb.int(1, 3)) { numOtherSessions ->
                 cleanup()
                 val dm = savePlayer()
                 val player = savePlayer()
                 val other = savePlayer()
                 val campaign = saveCampaign(dm)
+                saveEnrollment(other, campaign)
 
                 repeat(numOtherSessions) {
-                    val session = saveSession(campaign, future = true)
-                    saveAttendee(other, session)
+                    saveSession(campaign, future = true)
                 }
 
-                val result = sessionAttendeeRepository.findNextSessionDateByUserEmail(player.email)
-                result.shouldBeNull()
+                val result = sessionRepository.findNextSessionByEnrolledUserId(player.id!!, PageRequest.of(0, 1))
+                result.firstOrNull().shouldBeNull()
             }
         }
     }
@@ -200,7 +199,6 @@ class UserControllerPropertyTest : StringSpec() {
     // ── helpers ──────────────────────────────────────────────────────────────
 
     private fun cleanup() {
-        sessionAttendeeRepository.deleteAll()
         sessionRepository.deleteAll()
         enrollmentRepository.deleteAll()
         characterRepository.deleteAll()
@@ -216,9 +214,7 @@ class UserControllerPropertyTest : StringSpec() {
         )
         val dndRace = dndRaceRepository.save(
             DndRace(
-                name = "Human", price = BigDecimal.ZERO,
-                bonusStr = 1, bonusDex = 1, bonusCon = 1,
-                bonusInt = 1, bonusWis = 1, bonusCha = 1
+                name = "Human", price = BigDecimal.ZERO
             )
         )
         return dndClass to dndRace
@@ -267,16 +263,14 @@ class UserControllerPropertyTest : StringSpec() {
         else
             Timestamp.from(Instant.now().minus(offsetDays, ChronoUnit.DAYS))
         return sessionRepository.save(
-            Session(name = "Test Session", scheduledDate = date, price = BigDecimal.ZERO, campaign = campaign)
+            Session(name = "Test Session", scheduledDate = date, campaign = campaign)
         )
     }
 
-    private fun saveAttendee(user: User, session: Session): SessionAttendee =
-        sessionAttendeeRepository.save(
-            SessionAttendee(
-                id = SessionAttendeeId(sessionId = session.id!!, userId = user.id!!),
-                hasPaid = false,
-                session = session,
+    private fun saveEnrollment(user: User, campaign: Campaign): CampaignEnrollment =
+        enrollmentRepository.save(
+            CampaignEnrollment(
+                campaign = campaign,
                 user = user
             )
         )

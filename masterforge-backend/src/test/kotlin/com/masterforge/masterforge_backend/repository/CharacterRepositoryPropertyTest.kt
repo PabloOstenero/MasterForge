@@ -83,9 +83,7 @@ class CharacterRepositoryPropertyTest : StringSpec() {
                 val dndRace = dndRaceRepository.save(
                     DndRace(
                         name = "Human",
-                        price = BigDecimal.ZERO,
-                        bonusStr = 1, bonusDex = 1, bonusCon = 1,
-                        bonusInt = 1, bonusWis = 1, bonusCha = 1
+                        price = BigDecimal.ZERO
                     )
                 )
 
@@ -162,9 +160,7 @@ class CharacterRepositoryPropertyTest : StringSpec() {
                 val dndRace = dndRaceRepository.save(
                     DndRace(
                         name = "Elf",
-                        price = BigDecimal.ZERO,
-                        bonusStr = 0, bonusDex = 2, bonusCon = 0,
-                        bonusInt = 1, bonusWis = 0, bonusCha = 0
+                        price = BigDecimal.ZERO
                     )
                 )
 
@@ -224,9 +220,7 @@ class CharacterRepositoryPropertyTest : StringSpec() {
                 val dndRace = dndRaceRepository.save(
                     DndRace(
                         name = "Halfling",
-                        price = BigDecimal.ZERO,
-                        bonusStr = 0, bonusDex = 2, bonusCon = 0,
-                        bonusInt = 0, bonusWis = 0, bonusCha = 0
+                        price = BigDecimal.ZERO
                     )
                 )
 
@@ -313,9 +307,7 @@ class CharacterRepositoryPropertyTest : StringSpec() {
                 val dndRace = dndRaceRepository.save(
                     DndRace(
                         name = "Dwarf",
-                        price = BigDecimal.ZERO,
-                        bonusStr = 0, bonusDex = 0, bonusCon = 2,
-                        bonusInt = 0, bonusWis = 0, bonusCha = 0
+                        price = BigDecimal.ZERO
                     )
                 )
 

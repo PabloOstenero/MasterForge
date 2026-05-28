@@ -73,7 +73,7 @@ describe('HomePage — Preservation Property Tests (Task 2)', () => {
   let component: HomePage;
   let apiSpy: jasmine.SpyObj<ApiService>;
   let roleSubject: BehaviorSubject<'dm' | 'player'>;
-  let authServiceMock: { getCurrentUser: () => any; getUserIdFromToken: () => string; logout: () => void };
+  let authServiceMock: any;
 
   beforeEach(async () => {
     apiSpy = buildApiSpy();
@@ -87,7 +87,7 @@ describe('HomePage — Preservation Property Tests (Task 2)', () => {
 
     authServiceMock = {
       getCurrentUser: () => ({ id: 'user-1', name: 'Test User', balance: 0 }),
-      getUserIdFromToken: () => 'user-1',
+      getUserIdFromToken: () => 'user-1', isPro: () => false,
       logout: () => {},
     };
 

@@ -36,10 +36,17 @@ function buildApiSpy(userId: string | null = 'test-user-id'): {
   auth: jasmine.SpyObj<AuthService>;
 } {
   const api = jasmine.createSpyObj<ApiService>('ApiService', ['getCharactersByUser']);
-  const auth = jasmine.createSpyObj<AuthService>('AuthService', ['getUserIdFromToken', 'isAuthenticated']);
+  const auth = jasmine.createSpyObj<AuthService>('AuthService', [
+    'getUserIdFromToken',
+    'isAuthenticated',
+    'getCurrentUser',
+    'isPro'
+  ]);
   api.getCharactersByUser.and.returnValue(of([]));
   auth.getUserIdFromToken.and.returnValue(userId);
   auth.isAuthenticated.and.returnValue(userId !== null);
+  auth.getCurrentUser.and.returnValue({ id: 'user-1', name: 'Test User' });
+  auth.isPro.and.returnValue(false);
   return { api, auth };
 }
 

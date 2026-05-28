@@ -256,9 +256,7 @@ class CampaignDetailPlayersPropertyTest : StringSpec() {
         )
         val dndRace = dndRaceRepository.save(
             DndRace(
-                name = "Human", price = BigDecimal.ZERO,
-                bonusStr = 1, bonusDex = 1, bonusCon = 1,
-                bonusInt = 1, bonusWis = 1, bonusCha = 1
+                name = "Human", price = BigDecimal.ZERO
             )
         )
         return dndClass to dndRace
@@ -327,6 +325,7 @@ class CampaignDetailPlayersPropertyTest : StringSpec() {
     }
 
     /** Minimal response shape mirroring CampaignPlayerDto for assertions. */
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
     data class CampaignPlayerResponse(
         val id: String,
         val name: String,
@@ -335,6 +334,7 @@ class CampaignDetailPlayersPropertyTest : StringSpec() {
         val characters: List<CharacterResponse>
     )
 
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
     data class CharacterResponse(
         val id: String,
         val name: String,

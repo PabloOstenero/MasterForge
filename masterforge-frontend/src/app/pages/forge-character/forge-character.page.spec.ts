@@ -1359,7 +1359,22 @@ describe('Property 15: DTO saving throws match selected class', () => {
             equipmentSelections: {}
           };
           const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
-          expect(dto.savingThrowsProficiencies).toEqual(savingThrows);
+          
+          const expectedSaves = {
+            str: false, dex: false, con: false, int: false, wis: false, cha: false,
+            ...Object.fromEntries(
+              Object.entries(savingThrows).map(([k, v]) => [
+                k === 'Strength' ? 'str' :
+                k === 'Dexterity' ? 'dex' :
+                k === 'Constitution' ? 'con' :
+                k === 'Intelligence' ? 'int' :
+                k === 'Wisdom' ? 'wis' :
+                k === 'Charisma' ? 'cha' : k.toLowerCase(),
+                v
+              ])
+            )
+          };
+          expect(dto.savingThrowsProficiencies).toEqual(expectedSaves);
         }
       ),
       { numRuns: 25 }
@@ -1379,7 +1394,9 @@ describe('Property 15: DTO saving throws match selected class', () => {
       equipmentSelections: {}
     };
     const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
-    expect(dto.savingThrowsProficiencies).toEqual({});
+    expect(dto.savingThrowsProficiencies).toEqual({
+      str: false, dex: false, con: false, int: false, wis: false, cha: false
+    });
   });
 });
 
@@ -1408,17 +1425,16 @@ describe('Property 16: DTO skill proficiencies match selected skills', () => {
           };
           const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
 
-          // Exactly 2 keys
-          expect(Object.keys(dto.skillProficiencies).length).toBe(2);
+          // All 18 keys must be present
+          expect(Object.keys(dto.skillProficiencies).length).toBe(18);
 
-          // Both selected skills are present with value true
-          for (const skillId of selectedSkills) {
-            expect(dto.skillProficiencies[skillId]).toBe(true);
-          }
-
-          // No other skill keys are present
-          for (const key of Object.keys(dto.skillProficiencies)) {
-            expect(selectedSkills).toContain(key);
+          // Both selected skills are present with value true, others false
+          for (const skillId of ALL_SKILL_IDS) {
+            if (selectedSkills.includes(skillId)) {
+              expect(dto.skillProficiencies[skillId]).toBe(true);
+            } else {
+              expect(dto.skillProficiencies[skillId]).toBe(false);
+            }
           }
         }
       ),
@@ -1439,7 +1455,9 @@ describe('Property 16: DTO skill proficiencies match selected skills', () => {
       equipmentSelections: {}
     };
     const dto = buildCharacterDto(formData, formData.finalScores, 8, 'u1');
-    expect(dto.skillProficiencies).toEqual({});
+    
+    const expectedEmptySkills = Object.fromEntries(DND_SKILLS.map(s => [s.id, false]));
+    expect(dto.skillProficiencies).toEqual(expectedEmptySkills);
   });
 });
 
@@ -1478,7 +1496,7 @@ describe('ForgeCharacterPage: submit flow', () => {
     apiServiceSpy.getRaces.and.returnValue(of([]));
     apiServiceSpy.getClasses.and.returnValue(of([]));
 
-    const authServiceSpy = jasmine.createSpyObj('AuthService', ['getUserIdFromToken']);
+    const authServiceSpy = jasmine.createSpyObj('AuthService', ['getUserIdFromToken', 'isPro', 'getCurrentUser']);
     authServiceSpy.getUserIdFromToken.and.returnValue('test-user-id');
 
     await TestBed.configureTestingModule({
@@ -1888,8 +1906,8 @@ describe('buildCharacterDto: resolveInventory integration', () => {
     const dto = buildCharacterDto(baseFormData, baseFormData.finalScores, 8, 'u1', inventory);
 
     expect(dto.inventory.length).toBe(2);
-    expect(dto.inventory[0]).toEqual({ itemId: 'item-fixed-0', quantity: 1 });
-    expect(dto.inventory[1]).toEqual({ itemId: 'item-fixed-1', quantity: 2 });
+    expect(dto.inventory[0]).toEqual(jasmine.objectContaining({ item: { id: 'item-fixed-0' }, quantity: 1 }));
+    expect(dto.inventory[1]).toEqual(jasmine.objectContaining({ item: { id: 'item-fixed-1' }, quantity: 2 }));
   });
 
   it('should include correct inventory lines for structured equipment with selected options', () => {
@@ -1902,8 +1920,8 @@ describe('buildCharacterDto: resolveInventory integration', () => {
     // Set 0, option 0: item-0-opt0 qty 1
     // Set 1, option 1: item-1-opt1 qty 2
     expect(dto.inventory.length).toBe(2);
-    expect(dto.inventory).toContain(jasmine.objectContaining({ itemId: 'item-0-opt0', quantity: 1 }));
-    expect(dto.inventory).toContain(jasmine.objectContaining({ itemId: 'item-1-opt1', quantity: 2 }));
+    expect(dto.inventory).toContain(jasmine.objectContaining({ item: { id: 'item-0-opt0' }, quantity: 1 }));
+    expect(dto.inventory).toContain(jasmine.objectContaining({ item: { id: 'item-1-opt1' }, quantity: 2 }));
   });
 
   it('should include both fixed grants and selected option lines in inventory', () => {
@@ -1915,8 +1933,8 @@ describe('buildCharacterDto: resolveInventory integration', () => {
 
     // 1 fixed grant + 1 option line = 2 total
     expect(dto.inventory.length).toBe(2);
-    expect(dto.inventory).toContain(jasmine.objectContaining({ itemId: 'item-fixed-0' }));
-    expect(dto.inventory).toContain(jasmine.objectContaining({ itemId: 'item-0-opt0' }));
+    expect(dto.inventory).toContain(jasmine.objectContaining({ item: { id: 'item-fixed-0' } }));
+    expect(dto.inventory).toContain(jasmine.objectContaining({ item: { id: 'item-0-opt0' } }));
   });
 
   it('should have empty inventory for legacy equipment (plain string)', () => {
@@ -1952,8 +1970,8 @@ describe('buildCharacterDto: resolveInventory integration', () => {
     const dto = buildCharacterDto(baseFormData, baseFormData.finalScores, 8, 'u1', inventory);
 
     expect(dto.inventory.length).toBe(2);
-    expect(dto.inventory[0]).toEqual({ itemId: 'sword', quantity: 1 });
-    expect(dto.inventory[1]).toEqual({ itemId: 'sword', quantity: 1 });
+    expect(dto.inventory[0]).toEqual(jasmine.objectContaining({ item: { id: 'sword' }, quantity: 1 }));
+    expect(dto.inventory[1]).toEqual(jasmine.objectContaining({ item: { id: 'sword' }, quantity: 1 }));
   });
 });
 
@@ -1971,7 +1989,7 @@ describe('ForgeCharacterPage: submitCharacter with structured equipment', () => 
     apiServiceSpy.getClasses.and.returnValue(of([]));
     apiServiceSpy.createCharacter.and.returnValue(of({ id: 'new-char-id' }));
 
-    const authServiceSpy = jasmine.createSpyObj('AuthService', ['getUserIdFromToken']);
+    const authServiceSpy = jasmine.createSpyObj('AuthService', ['getUserIdFromToken', 'isPro', 'getCurrentUser']);
     authServiceSpy.getUserIdFromToken.and.returnValue('user-1');
 
     await TestBed.configureTestingModule({
@@ -2013,8 +2031,8 @@ describe('ForgeCharacterPage: submitCharacter with structured equipment', () => 
     const callArgs = apiServiceSpy.createCharacter.calls.mostRecent().args[0];
     // 1 fixed grant + 1 option line = 2 inventory items
     expect(callArgs.inventory.length).toBe(2);
-    expect(callArgs.inventory).toContain(jasmine.objectContaining({ itemId: 'item-fixed-0' }));
-    expect(callArgs.inventory).toContain(jasmine.objectContaining({ itemId: 'item-0-opt0' }));
+    expect(callArgs.inventory).toContain(jasmine.objectContaining({ item: { id: 'item-fixed-0' } }));
+    expect(callArgs.inventory).toContain(jasmine.objectContaining({ item: { id: 'item-0-opt0' } }));
   });
 
   it('should pass empty inventory to createCharacter when class has legacy equipment', () => {

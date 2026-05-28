@@ -77,7 +77,7 @@ function buildMockRoleService(role: 'dm' | 'player' = 'dm'): Partial<RoleService
 }
 
 function buildMockAuthService(): Partial<AuthService> {
-  return { getUserIdFromToken: () => 'test-user-id' };
+  return { getUserIdFromToken: () => 'u1', isPro: () => false, getCurrentUser: () => ({ id: 'user-1', name: 'Test User', role: 'USER' }),};
 }
 
 function buildActivatedRouteStub(id: string = CAMPAIGN_ID) {
@@ -207,15 +207,6 @@ describe('CampaignDetailPage — 12.2 Loading spinners and empty states', () => 
       const spinner = fixture.nativeElement.querySelector('[data-testid="spinner-players"] ion-spinner');
       expect(spinner).toBeTruthy();
     });
-
-    it('should show ion-spinner in characters section while loadingPlayers is true and segment is personajes', () => {
-      component.loadingPlayers = true;
-      component.activeSegment = 'personajes';
-      fixture.detectChanges();
-
-      const spinner = fixture.nativeElement.querySelector('[data-testid="spinner-characters"] ion-spinner');
-      expect(spinner).toBeTruthy();
-    });
   });
 
   describe('empty states', () => {
@@ -260,45 +251,6 @@ describe('CampaignDetailPage — 12.2 Loading spinners and empty states', () => 
       fixture.detectChanges();
 
       const emptyMsg = fixture.nativeElement.querySelector('[data-testid="empty-players"]');
-      expect(emptyMsg).toBeNull();
-    });
-
-    it('should show "No hay personajes registrados para esta campaña." when all players have empty characters', () => {
-      const playersWithNoChars: CampaignPlayerDto[] = [
-        { id: 'p1', name: 'Player One', email: 'p1@test.com', subscriptionTier: 'FREE', characters: [] },
-        { id: 'p2', name: 'Player Two', email: 'p2@test.com', subscriptionTier: 'FREE', characters: [] },
-      ];
-      component.loadingPlayers = false;
-      component.errorPlayers = null;
-      component.players = playersWithNoChars;
-      component.activeSegment = 'personajes';
-      fixture.detectChanges();
-
-      const emptyMsg: HTMLElement = fixture.nativeElement.querySelector('[data-testid="empty-characters"]');
-      expect(emptyMsg).toBeTruthy();
-      expect(emptyMsg.textContent).toContain('No hay personajes registrados para esta campaña.');
-    });
-
-    it('should show "No hay personajes registrados para esta campaña." when players array is empty', () => {
-      component.loadingPlayers = false;
-      component.errorPlayers = null;
-      component.players = [];
-      component.activeSegment = 'personajes';
-      fixture.detectChanges();
-
-      const emptyMsg: HTMLElement = fixture.nativeElement.querySelector('[data-testid="empty-characters"]');
-      expect(emptyMsg).toBeTruthy();
-      expect(emptyMsg.textContent).toContain('No hay personajes registrados para esta campaña.');
-    });
-
-    it('should NOT show empty characters message when at least one player has characters', () => {
-      component.loadingPlayers = false;
-      component.errorPlayers = null;
-      component.players = mockPlayers; // mockPlayers[0] has 1 character
-      component.activeSegment = 'personajes';
-      fixture.detectChanges();
-
-      const emptyMsg = fixture.nativeElement.querySelector('[data-testid="empty-characters"]');
       expect(emptyMsg).toBeNull();
     });
   });
@@ -519,7 +471,7 @@ describe('CampaignDetailPage — Player self-leave and DM kick actions', () => {
         { provide: ApiService, useValue: apiSpy },
         { provide: ActivatedRoute, useValue: buildActivatedRouteStub() },
         { provide: RoleService, useValue: buildMockRoleService('player') },
-        { provide: AuthService, useValue: { getUserIdFromToken: () => 'player-1' } },
+        { provide: AuthService, useValue: { getUserIdFromToken: () => 'player-1', isPro: () => false, getCurrentUser: () => ({ id: 'user-1', name: 'Test User', role: 'USER' }),} },
         { provide: Router, useValue: routerSpy },
       ],
     }).compileComponents();

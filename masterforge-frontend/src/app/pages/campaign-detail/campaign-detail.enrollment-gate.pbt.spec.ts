@@ -45,7 +45,16 @@ async function createFixtureForEnrollmentTest(
     'getCharactersByUser',
   ]);
   mockApi.getPlayerCampaigns.and.returnValue(of(enrolledCampaigns));
-  mockApi.getCampaignById.and.returnValue(EMPTY);
+  const campaignData = {
+    id: currentCampaignId,
+    name: 'Test Campaign',
+    description: 'A test campaign',
+    maxPlayers: 4,
+    joinPrice: 0,
+    visibility: 'PUBLIC',
+    owner: { id: 'some-other-dm-id', name: 'DM', email: 'dm@test.com' },
+  };
+  mockApi.getCampaignById.and.returnValue(of(campaignData));
   mockApi.getCampaignSessions.and.returnValue(EMPTY);
   mockApi.getCampaignPlayers.and.returnValue(EMPTY);
   mockApi.getCharactersByUser.and.returnValue(EMPTY);
@@ -59,7 +68,7 @@ async function createFixtureForEnrollmentTest(
         useValue: { snapshot: { paramMap: { get: () => currentCampaignId } } },
       },
       { provide: RoleService, useValue: { activeRole: 'player' } },
-      { provide: AuthService, useValue: { getUserIdFromToken: () => 'test-user-id' } },
+      { provide: AuthService, useValue: { getUserIdFromToken: () => 'test-user-id', isPro: () => false, getCurrentUser: () => ({ id: 'user-1', name: 'Test User', role: 'USER' }),} },
       Location,
     ],
   }).compileComponents();

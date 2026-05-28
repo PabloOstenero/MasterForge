@@ -76,7 +76,9 @@ class HomebrewControllerAuthorStoragePropertyTest : StringSpec() {
             User(
                 name = "User_$tag",
                 email = "user_$tag@test.com",
-                passwordHash = "hash"
+                passwordHash = "hash",
+                subscriptionTier = "PRO",
+                subscriptionExpiresAt = java.time.LocalDateTime.now().plusYears(1)
             )
         )
 
@@ -332,6 +334,7 @@ class HomebrewControllerAuthorStoragePropertyTest : StringSpec() {
                       "cha": 10,
                       "challengeRating": $challengeRating,
                       "xp": 100,
+                      "alignment": "Neutral",
                       "combatMechanics": {},
                       "authorId": "${author.id}"
                     }

@@ -64,7 +64,7 @@ async function createFixture(): Promise<{
         useValue: { snapshot: { paramMap: { get: () => 'test-id' } } },
       },
       { provide: RoleService, useValue: { activeRole: 'dm' } },
-      { provide: AuthService, useValue: { getUserIdFromToken: () => 'test-user-id' } },
+      { provide: AuthService, useValue: { getUserIdFromToken: () => 'test-user-id', isPro: () => false, getCurrentUser: () => ({ id: 'user-1', name: 'Test User', role: 'USER' }),} },
       Location,
     ],
   }).compileComponents();

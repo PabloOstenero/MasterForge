@@ -15,6 +15,7 @@ import * as fc from 'fast-check';
 import { firstValueFrom } from 'rxjs';
 
 import { RoleService } from './role.service';
+import { AuthService } from './auth.service';
 
 // ---------------------------------------------------------------------------
 // Unit tests
@@ -24,7 +25,19 @@ describe('RoleService — unit tests', () => {
   let service: RoleService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: AuthService,
+          useValue: {
+            getCurrentUser: () => ({ id: 'fallback', name: 'Fallback User', role: 'USER' }),
+            getUserIdFromToken: () => 'fallback',
+            isPro: () => false
+          }
+        },
+        RoleService
+      ]
+    });
     service = TestBed.inject(RoleService);
   });
 
@@ -97,7 +110,19 @@ describe('RoleService — P1: Menu contents are role-specific', () => {
           async (roleSequence) => {
             // Create a fresh service instance for each run to avoid state leakage
             TestBed.resetTestingModule();
-            TestBed.configureTestingModule({});
+            TestBed.configureTestingModule({
+              providers: [
+                {
+                  provide: AuthService,
+                  useValue: {
+                    getCurrentUser: () => ({ id: 'fallback', name: 'Fallback User', role: 'USER' }),
+                    getUserIdFromToken: () => 'fallback',
+                    isPro: () => false
+                  }
+                },
+                RoleService
+              ]
+            });
             const service = TestBed.inject(RoleService);
 
             for (const role of roleSequence) {

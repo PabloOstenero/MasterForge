@@ -315,6 +315,7 @@ Additional system design models are available:
 *   [English Planning & Design Document](https://github.com/PabloOstenero/MasterForge/blob/main/documentation/masterforge_planning_design.md)
 *   [English System Design Document](https://github.com/PabloOstenero/MasterForge/blob/main/documentation/system_design_masterforge.md)
 *   [English System Implementation Report](https://github.com/PabloOstenero/MasterForge/blob/main/documentation/system_implementation_masterforge.md)
+*   [MasterForge Testing Guide and Report](https://github.com/PabloOstenero/MasterForge/blob/main/documentation/TESTING.md)
 
 ---
 

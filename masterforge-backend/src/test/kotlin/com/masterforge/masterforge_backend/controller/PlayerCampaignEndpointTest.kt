@@ -5,7 +5,7 @@ import com.masterforge.masterforge_backend.repository.CampaignRepository
 import com.masterforge.masterforge_backend.repository.CharacterRepository
 import com.masterforge.masterforge_backend.repository.DndClassRepository
 import com.masterforge.masterforge_backend.repository.DndRaceRepository
-import com.masterforge.masterforge_backend.repository.SessionAttendeeRepository
+import com.masterforge.masterforge_backend.repository.CampaignEnrollmentRepository
 import com.masterforge.masterforge_backend.repository.SessionRepository
 import com.masterforge.masterforge_backend.repository.UserRepository
 import com.masterforge.masterforge_backend.service.JwtService
@@ -40,7 +40,7 @@ class PlayerCampaignEndpointTest {
     lateinit var userRepository: UserRepository
 
     @Autowired
-    lateinit var sessionAttendeeRepository: SessionAttendeeRepository
+    lateinit var enrollmentRepository: CampaignEnrollmentRepository
 
     @Autowired
     lateinit var sessionRepository: SessionRepository
@@ -62,8 +62,8 @@ class PlayerCampaignEndpointTest {
 
     @BeforeEach
     fun cleanup() {
-        sessionAttendeeRepository.deleteAll()
         sessionRepository.deleteAll()
+        enrollmentRepository.deleteAll()
         characterRepository.deleteAll()
         campaignRepository.deleteAll()
         userRepository.deleteAll()
@@ -85,7 +85,7 @@ class PlayerCampaignEndpointTest {
     }
 
     /**
-     * Requirement 3.3: WHEN the authenticated user has no SessionAttendee records,
+     * Requirement 3.3: WHEN the authenticated user has no CampaignEnrollment records,
      * THE endpoint SHALL return an empty list with HTTP 200.
      */
     @Test

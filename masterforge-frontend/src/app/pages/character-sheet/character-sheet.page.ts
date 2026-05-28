@@ -2698,7 +2698,7 @@ export class CharacterSheetPage implements OnInit {
       const mcSum = (data.classLevels || []).reduce((sum: number, cl: any) => sum + (cl.level || 0), 0);
       const primaryLevel = Math.max(1, (data.level || 1) - mcSum);
 
-      const casting = data.dndClass.classFeatures?.spellcasting || data.subclass?.subclassFeatures?.spellcasting;
+      const casting = data.dndClass.classFeatures?.spellcasting || data.subclass?.subclassFeatures?.spellcasting || data.dndClass?.subclass?.subclassFeatures?.spellcasting;
       if (casting) {
         activeClasses.push({
           name: data.dndClass.name,
@@ -2711,7 +2711,7 @@ export class CharacterSheetPage implements OnInit {
       if (data.classLevels && data.classLevels.length > 0) {
         data.classLevels.forEach((cl: any) => {
           if (cl.dndClass) {
-            const casting = cl.dndClass.classFeatures?.spellcasting || cl.subclass?.subclassFeatures?.spellcasting;
+            const casting = cl.dndClass.classFeatures?.spellcasting || cl.subclass?.subclassFeatures?.spellcasting || cl.dndClass?.subclass?.subclassFeatures?.spellcasting;
             if (casting) {
               activeClasses.push({
                 name: cl.dndClass.name,

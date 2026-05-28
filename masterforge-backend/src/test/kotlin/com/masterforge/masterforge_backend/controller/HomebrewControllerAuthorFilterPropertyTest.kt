@@ -114,8 +114,6 @@ class HomebrewControllerAuthorFilterPropertyTest : StringSpec() {
                 DndRace(
                     name = "Race_${user.id}_$i",
                     price = BigDecimal.ZERO,
-                    bonusStr = 0, bonusDex = 0, bonusCon = 0,
-                    bonusInt = 0, bonusWis = 0, bonusCha = 0,
                     author = user
                 )
             )
@@ -128,6 +126,7 @@ class HomebrewControllerAuthorFilterPropertyTest : StringSpec() {
                     name = "Monster_${user.id}_$i",
                     type = "Humanoid",
                     size = "Medium",
+                    alignment = "Neutral",
                     armorClass = 10,
                     hitPoints = 10,
                     speed = "30 ft.",

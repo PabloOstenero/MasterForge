@@ -313,6 +313,17 @@ describe('HomebrewSubclassFormPage - Property Based Tests', () => {
         // The rebuilt features should match the original subclassFeatures
         // NOTE: we need to parse/stringify to handle undefined vs missing keys in JS objects if necessary
         const expected = JSON.parse(JSON.stringify(response.subclassFeatures));
+        if (expected.features) {
+          expected.features = expected.features.map((f: any) => ({
+            id: null,
+            actionType: 'PASSIVE',
+            hasOptions: false,
+            options: { type: 'SELECT_ONE', count: 1, choices: [], progression: [] },
+            progression: [],
+            properties: { effects: [] },
+            ...f
+          }));
+        }
         const actual = JSON.parse(JSON.stringify(rebuilt));
         
         expect(actual).toEqual(expected);

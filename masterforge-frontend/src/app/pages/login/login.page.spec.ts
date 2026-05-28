@@ -5,6 +5,7 @@ import * as fc from 'fast-check';
 
 import { LoginPage } from './login.page';
 import { AuthService } from '../../services/auth.service';
+import { ToastController, ModalController } from '@ionic/angular/standalone';
 
 // ---------------------------------------------------------------------------
 // Arbitraries
@@ -13,6 +14,18 @@ import { AuthService } from '../../services/auth.service';
 const nonEmptyStringArb = fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0);
 const tokenArb = fc.string({ minLength: 10, maxLength: 200 }).filter(s => s.trim().length > 0);
 const blankStringArb = fc.stringMatching(/^\s*$/);
+
+const toastControllerMock = {
+  create: () => Promise.resolve({
+    present: () => Promise.resolve(),
+  }),
+};
+const modalControllerMock = {
+  create: () => Promise.resolve({
+    present: () => Promise.resolve(),
+    onWillDismiss: () => Promise.resolve({ data: null }),
+  }),
+};
 
 // ---------------------------------------------------------------------------
 // LoginPage — Unit Tests
@@ -24,7 +37,7 @@ describe('LoginPage — Unit Tests', () => {
   let authSpy: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
-    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['login', 'storeToken', 'isAuthenticated', 'getUserIdFromToken', 'fetchAndStoreUser']);
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['login', 'storeToken', 'isAuthenticated', 'getUserIdFromToken', 'fetchAndStoreUser', 'isPro', 'getCurrentUser']);
     authSpy.login.and.returnValue(of({ token: 'test-token' }));
     authSpy.getUserIdFromToken.and.returnValue(null);
     authSpy.fetchAndStoreUser.and.returnValue(of({}));
@@ -33,6 +46,8 @@ describe('LoginPage — Unit Tests', () => {
       imports: [LoginPage],
       providers: [
         { provide: AuthService, useValue: authSpy },
+        { provide: ToastController, useValue: toastControllerMock },
+        { provide: ModalController, useValue: modalControllerMock },
         provideRouter([]),
       ]
     }).compileComponents();
@@ -44,7 +59,7 @@ describe('LoginPage — Unit Tests', () => {
   // Validates: Requirement 5.1
   it('should render the "¿No tienes cuenta? Regístrate" navigation link', () => {
     const compiled: HTMLElement = fixture.nativeElement;
-    const navLink = compiled.querySelector('p.nav-link');
+    const navLink = compiled.querySelector('p.auth-link');
     expect(navLink).toBeTruthy();
     expect(navLink!.textContent).toContain('¿No tienes cuenta?');
     expect(navLink!.textContent).toContain('Regístrate');
@@ -63,7 +78,7 @@ describe('LoginPage — Property-Based Tests', () => {
   let router: Router;
 
   beforeEach(async () => {
-    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['login', 'storeToken', 'isAuthenticated', 'getUserIdFromToken', 'fetchAndStoreUser']);
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['login', 'storeToken', 'isAuthenticated', 'getUserIdFromToken', 'fetchAndStoreUser', 'isPro', 'getCurrentUser']);
     authSpy.login.and.returnValue(of({ token: 'test-token' }));
     authSpy.getUserIdFromToken.and.returnValue(null);
     authSpy.fetchAndStoreUser.and.returnValue(of({}));
@@ -72,6 +87,8 @@ describe('LoginPage — Property-Based Tests', () => {
       imports: [LoginPage],
       providers: [
         { provide: AuthService, useValue: authSpy },
+        { provide: ToastController, useValue: toastControllerMock },
+        { provide: ModalController, useValue: modalControllerMock },
         provideRouter([]),
       ]
     }).compileComponents();

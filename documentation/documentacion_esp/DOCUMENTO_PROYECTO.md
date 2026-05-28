@@ -543,6 +543,7 @@ Para profundizar en las capas profundas de diseño físico de bases de datos, fl
 *   [Diseño del Sistema MasterForge](https://github.com/PabloOstenero/MasterForge/blob/main/documentation/documentacion_esp/dise%C3%B1o_sistema_masterforge.md)
 *   [Implementación del Sistema MasterForge](https://github.com/PabloOstenero/MasterForge/blob/main/documentation/documentacion_esp/implementacion_sistema_masterforge.md)
 *   [Planificación y Plan de Calidad de MasterForge](https://github.com/PabloOstenero/MasterForge/blob/main/documentation/documentacion_esp/planificacion_dise%C3%B1o_masterforge.md)
+*   [Guía de Pruebas y Reporte de MasterForge](https://github.com/PabloOstenero/MasterForge/blob/main/documentation/documentacion_esp/PRUEBAS.md)
 
 ---
 

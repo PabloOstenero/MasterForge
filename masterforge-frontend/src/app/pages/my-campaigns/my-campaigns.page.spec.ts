@@ -144,7 +144,7 @@ describe('MyCampaignsPage — Property-Based Tests', () => {
 
           expect(items.length).toBe(0);
           expect(emptyEl).toBeTruthy();
-          expect(emptyEl.textContent).toContain('No estás inscrito en ninguna campaña.');
+          expect(emptyEl.textContent).toContain('Aún no has emprendido el viaje');
         }),
         { numRuns: 100 }
       );

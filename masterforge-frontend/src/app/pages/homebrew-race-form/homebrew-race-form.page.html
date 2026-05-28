@@ -234,6 +234,9 @@
               placeholder="+0"
               [class.input-error]="form.get('bonusStr')?.invalid && form.get('bonusStr')?.touched">
             </ion-input>
+            @if (form.get('bonusStr')?.invalid && form.get('bonusStr')?.touched) {
+              <p class="error-message" data-testid="bonusStr-error">Bono inválido</p>
+            }
           </div>
           <div class="field-group" style="margin-bottom: 0;">
             <label class="field-label">Destreza (DEX)</label>
@@ -244,6 +247,9 @@
               placeholder="+0"
               [class.input-error]="form.get('bonusDex')?.invalid && form.get('bonusDex')?.touched">
             </ion-input>
+            @if (form.get('bonusDex')?.invalid && form.get('bonusDex')?.touched) {
+              <p class="error-message" data-testid="bonusDex-error">Bono inválido</p>
+            }
           </div>
           <div class="field-group" style="margin-bottom: 0;">
             <label class="field-label">Constitución (CON)</label>
@@ -254,6 +260,9 @@
               placeholder="+0"
               [class.input-error]="form.get('bonusCon')?.invalid && form.get('bonusCon')?.touched">
             </ion-input>
+            @if (form.get('bonusCon')?.invalid && form.get('bonusCon')?.touched) {
+              <p class="error-message" data-testid="bonusCon-error">Bono inválido</p>
+            }
           </div>
           <div class="field-group" style="margin-bottom: 0;">
             <label class="field-label">Inteligencia (INT)</label>
@@ -264,6 +273,9 @@
               placeholder="+0"
               [class.input-error]="form.get('bonusInt')?.invalid && form.get('bonusInt')?.touched">
             </ion-input>
+            @if (form.get('bonusInt')?.invalid && form.get('bonusInt')?.touched) {
+              <p class="error-message" data-testid="bonusInt-error">Bono inválido</p>
+            }
           </div>
           <div class="field-group" style="margin-bottom: 0;">
             <label class="field-label">Sabiduría (WIS)</label>
@@ -274,6 +286,9 @@
               placeholder="+0"
               [class.input-error]="form.get('bonusWis')?.invalid && form.get('bonusWis')?.touched">
             </ion-input>
+            @if (form.get('bonusWis')?.invalid && form.get('bonusWis')?.touched) {
+              <p class="error-message" data-testid="bonusWis-error">Bono inválido</p>
+            }
           </div>
           <div class="field-group" style="margin-bottom: 0;">
             <label class="field-label">Carisma (CHA)</label>
@@ -284,6 +299,9 @@
               placeholder="+0"
               [class.input-error]="form.get('bonusCha')?.invalid && form.get('bonusCha')?.touched">
             </ion-input>
+            @if (form.get('bonusCha')?.invalid && form.get('bonusCha')?.touched) {
+              <p class="error-message" data-testid="bonusCha-error">Bono inválido</p>
+            }
           </div>
         </div>
 

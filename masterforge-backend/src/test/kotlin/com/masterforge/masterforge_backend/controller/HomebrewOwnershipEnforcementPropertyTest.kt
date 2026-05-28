@@ -209,8 +209,6 @@ class HomebrewOwnershipEnforcementPropertyTest : StringSpec() {
                     DndRace(
                         name = name,
                         price = BigDecimal.ZERO,
-                        bonusStr = 0, bonusDex = 0, bonusCon = 0,
-                        bonusInt = 0, bonusWis = 0, bonusCha = 0,
                         author = userA
                     )
                 )
@@ -254,6 +252,7 @@ class HomebrewOwnershipEnforcementPropertyTest : StringSpec() {
                         name = name,
                         type = "Humanoid",
                         size = "Medium",
+                        alignment = "Neutral",
                         armorClass = 10,
                         hitPoints = 10,
                         speed = "30 ft.",

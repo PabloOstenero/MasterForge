@@ -97,7 +97,7 @@ describe('HomePage — Property-Based Tests', () => {
 
     const authServiceMock = {
       getCurrentUser: () => ({ id: 'user-1', name: 'Test User' }),
-      getUserIdFromToken: () => 'user-1',
+      getUserIdFromToken: () => 'user-1', isPro: () => false,
       logout: () => {},
     };
 

@@ -10,7 +10,7 @@ import { AuthService } from '../../services/auth.service';
 // Arbitraries
 // ---------------------------------------------------------------------------
 
-const nonEmptyStringArb = fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0);
+const nonEmptyStringArb = fc.string({ minLength: 6, maxLength: 50 }).filter(s => s.trim().length > 0);
 const blankStringArb = fc.stringMatching(/^\s*$/);
 
 // ---------------------------------------------------------------------------
@@ -22,7 +22,7 @@ describe('RegisterPage — Render', () => {
   let authSpy: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
-    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['login', 'register', 'storeToken', 'isAuthenticated']);
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['login', 'register', 'storeToken', 'isAuthenticated', 'isPro', 'getCurrentUser']);
     authSpy.register.and.returnValue(of({}));
 
     await TestBed.configureTestingModule({
@@ -59,7 +59,7 @@ describe('RegisterPage — Property-Based Tests', () => {
   let router: Router;
 
   beforeEach(async () => {
-    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['login', 'register', 'storeToken', 'isAuthenticated']);
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['login', 'register', 'storeToken', 'isAuthenticated', 'isPro', 'getCurrentUser']);
     authSpy.register.and.returnValue(of({}));
 
     await TestBed.configureTestingModule({

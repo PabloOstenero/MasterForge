@@ -25,6 +25,7 @@ import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { of, throwError } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
 
 import {
   HomebrewClassFormPage,
@@ -422,6 +423,7 @@ describe('HomebrewClassFormPage (component)', () => {
         { provide: HomebrewService, useValue: homebrewServiceSpy },
         { provide: ActivatedRoute, useValue: createActivatedRouteMock(null) },
         { provide: Router, useValue: routerSpy },
+        { provide: AuthService, useValue: { getCurrentUser: () => ({ role: 'USER' }), isPro: () => false } },
       ],
     }).compileComponents();
 
@@ -1312,7 +1314,7 @@ describe('HomebrewClassFormPage (component)', () => {
       component.submit();
       tick();
       const dto = homebrewServiceSpy.createClass.calls.mostRecent().args[0];
-      expect(dto.hitDie).toBe('d8');
+      expect(dto.hitDie).toBe(8 as any);
     }));
 
     it('should include price in the DTO', fakeAsync(() => {
@@ -1472,6 +1474,7 @@ describe('HomebrewClassFormPage — Edit mode', () => {
         { provide: HomebrewService, useValue: homebrewServiceSpy },
         { provide: ActivatedRoute, useValue: createActivatedRouteMock('42') },
         { provide: Router, useValue: routerSpy },
+        { provide: AuthService, useValue: { getCurrentUser: () => ({ role: 'USER' }), isPro: () => false } },
       ],
     }).compileComponents();
 

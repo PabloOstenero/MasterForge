@@ -61,7 +61,8 @@ describe('SearchCampaignsPage — Accessibility', () => {
 
   const mockAuthService = {
     isAuthenticated: () => true,
-    getToken: () => 'mock-token',
+    getToken: () => 'mock-token', getUserIdFromToken: () => 'user-1', isPro: () => false, getCurrentUser: () => ({ id: 'user-1', name: 'Test User', role: 'USER' }),
+    getMe: () => of({ id: 'user-1', name: 'Test User', balance: 100 }),
   };
 
   const mockNotificationService = {

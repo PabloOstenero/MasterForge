@@ -58,7 +58,7 @@ describe('HomebrewSubclassFormPage', () => {
     homebrewServiceSpy.getClasses.and.returnValue(of(MOCK_CLASSES));
 
     const authServiceMock = {
-      getUserIdFromToken: () => 'user-1',
+      getUserIdFromToken: () => 'user-1', isPro: () => false, getCurrentUser: () => ({ id: 'user-1', name: 'Test User', role: 'USER' }),
     };
 
     await TestBed.configureTestingModule({
@@ -477,7 +477,7 @@ describe('buildSubclassFeatures() pure function', () => {
     expect(result.damageResistances).toEqual([]);
     expect(result.damageImmunities).toEqual([]);
     expect(result.conditionImmunities).toEqual([]);
-    expect(result.subclassFeatureEntries).toEqual([]);
+    expect(result.features).toEqual([]);
     expect(result.expandedSpellList).toEqual([]);
     expect(result.resourcePools).toEqual([]);
     expect(result.spellcasting).toBeUndefined();
@@ -517,7 +517,7 @@ describe('buildSubclassFeatures() pure function', () => {
     const result = buildSubclassFeatures(
       [], [], [], emptySkillProfs, [], [], [], features, [], [], null, null
     );
-    expect(result.subclassFeatureEntries).toEqual(features);
+    expect(result.features).toEqual(features);
   });
 
   it('should serialize expanded spell list entries correctly, including level 0', () => {
@@ -597,7 +597,7 @@ describe('HomebrewService Subclass Methods', () => {
       imports: [HttpClientTestingModule],
       providers: [
         HomebrewService,
-        { provide: AuthService, useValue: { getUserIdFromToken: () => 'test-user-123' } }
+        { provide: AuthService, useValue: { getUserIdFromToken: () => 'test-user-123', isPro: () => false, getCurrentUser: () => ({ id: 'user-1', name: 'Test User', role: 'USER' }),} }
       ]
     });
     service = TestBed.inject(HomebrewService);

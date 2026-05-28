@@ -161,6 +161,7 @@ describe('HomebrewPage — Property 2: Grouping by content type', () => {
     const notificationServiceMock = {
       showError: jasmine.createSpy('showError'),
       showSuccess: jasmine.createSpy('showSuccess'),
+      activeToast$: of(null),
     };
 
     await TestBed.configureTestingModule({
@@ -176,6 +177,9 @@ describe('HomebrewPage — Property 2: Grouping by content type', () => {
     fixture = TestBed.createComponent(HomebrewPage);
     component = fixture.componentInstance;
     fixture.detectChanges(); // triggers ngOnInit → resolves synchronously via of()
+    component.categoryLimits = {
+      classes: 1000, subclasses: 1000, races: 1000, monsters: 1000, spells: 1000, items: 1000
+    };
   }
 
   afterEach(() => TestBed.resetTestingModule());
@@ -447,6 +451,7 @@ describe('HomebrewPage — Property 9: Deletion removes item from list', () => {
     const notificationServiceMock = {
       showError: jasmine.createSpy('showError'),
       showSuccess: jasmine.createSpy('showSuccess'),
+      activeToast$: of(null),
     };
 
     await TestBed.configureTestingModule({
@@ -462,6 +467,9 @@ describe('HomebrewPage — Property 9: Deletion removes item from list', () => {
     fixture = TestBed.createComponent(HomebrewPage);
     component = fixture.componentInstance;
     fixture.detectChanges(); // triggers ngOnInit → resolves synchronously via of()
+    component.categoryLimits = {
+      classes: 1000, subclasses: 1000, races: 1000, monsters: 1000, spells: 1000, items: 1000
+    };
   }
 
   afterEach(() => TestBed.resetTestingModule());
@@ -745,6 +753,7 @@ describe('HomebrewPage — Property 10: Delete action present for each item', ()
     const notificationServiceMock = {
       showError: jasmine.createSpy('showError'),
       showSuccess: jasmine.createSpy('showSuccess'),
+      activeToast$: of(null),
     };
 
     await TestBed.configureTestingModule({
@@ -760,6 +769,9 @@ describe('HomebrewPage — Property 10: Delete action present for each item', ()
     fixture = TestBed.createComponent(HomebrewPage);
     component = fixture.componentInstance;
     fixture.detectChanges(); // triggers ngOnInit → resolves synchronously via of()
+    component.categoryLimits = {
+      classes: 1000, subclasses: 1000, races: 1000, monsters: 1000, spells: 1000, items: 1000
+    };
   }
 
   afterEach(() => TestBed.resetTestingModule());

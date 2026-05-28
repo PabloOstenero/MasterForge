@@ -42,7 +42,7 @@ import { MONSTER_SIZES, MONSTER_ABILITY_KEYS } from './homebrew-monster-form/hom
  * This is the "oracle" function that defines what "valid" means for each form.
  */
 function isValidClassData(data: any): boolean {
-  if (!data.name || data.name.trim() === '') return false;
+  if (!data.name || data.name === '') return false;
   if (!data.hitDie) return false;
   if (data.price == null || data.price < 0) return false;
   // At least one saving throw must be true
@@ -53,14 +53,14 @@ function isValidClassData(data: any): boolean {
 }
 
 function isValidSubclassData(data: any): boolean {
-  if (!data.name || data.name.trim() === '') return false;
-  if (!data.description || data.description.trim() === '') return false;
+  if (!data.name || data.name === '') return false;
+  if (!data.description || data.description === '') return false;
   if (data.parentClassId == null) return false;
   return true;
 }
 
 function isValidRaceData(data: any): boolean {
-  if (!data.name || data.name.trim() === '') return false;
+  if (!data.name || data.name === '') return false;
   if (data.price == null || data.price < 0) return false;
   // All six ability bonuses must be present and in range [-10, 10]
   for (const key of ABILITY_BONUS_KEYS) {
@@ -71,12 +71,12 @@ function isValidRaceData(data: any): boolean {
 }
 
 function isValidMonsterData(data: any): boolean {
-  if (!data.name || data.name.trim() === '') return false;
-  if (!data.type || data.type.trim() === '') return false;
+  if (!data.name || data.name === '') return false;
+  if (!data.type || data.type === '') return false;
   if (!data.size || !MONSTER_SIZES.includes(data.size as any)) return false;
   if (data.armorClass == null || data.armorClass < 1 || data.armorClass > 30) return false;
   if (data.hitPoints == null || data.hitPoints < 1) return false;
-  if (!data.speed || data.speed.trim() === '') return false;
+  if (!data.speed || data.speed === '') return false;
   // All six ability scores must be in range [1, 30]
   for (const key of MONSTER_ABILITY_KEYS) {
     const val = data[key];
@@ -88,16 +88,16 @@ function isValidMonsterData(data: any): boolean {
 }
 
 function isValidSpellData(data: any): boolean {
-  if (!data.name || data.name.trim() === '') return false;
+  if (!data.name || data.name === '') return false;
   if (data.level == null || data.level < 0 || data.level > 9) return false;
-  if (!data.school || data.school.trim() === '') return false;
-  if (!data.description || data.description.trim() === '') return false;
+  if (!data.school || data.school === '') return false;
+  if (!data.description || data.description === '') return false;
   return true;
 }
 
 function isValidItemData(data: any): boolean {
-  if (!data.name || data.name.trim() === '') return false;
-  if (!data.type || data.type.trim() === '') return false;
+  if (!data.name || data.name === '') return false;
+  if (!data.type || data.type === '') return false;
   if (data.weight == null || data.weight < 0) return false;
   // properties is optional — no validation needed
   return true;

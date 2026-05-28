@@ -249,15 +249,19 @@ class EnrollmentService(
         val campaign = campaignRepository.findById(campaignId).orElseThrow()
         val dmId = campaign.owner.id!!
 
-        // Step 2: Process internal transfer from Player to DM
+        // Step 2: Process internal transfer from Player to DM, or simulate failure scenario if requested
         // Requirements: 5.4, 5.5, Economy Fix
-        val paymentResult = paymentService.processInternalTransfer(
-            fromUserId = userId,
-            toUserId = dmId,
-            amount = campaign.joinPrice,
-            type = "CAMPAIGN_JOIN",
-            campaignId = campaignId
-        )
+        val paymentResult = if (paymentRequest.simulationScenario != null && paymentRequest.simulationScenario != com.masterforge.masterforge_backend.model.entity.PaymentScenario.SUCCESS) {
+            paymentService.simulatePaymentScenario(paymentRequest, paymentRequest.simulationScenario)
+        } else {
+            paymentService.processInternalTransfer(
+                fromUserId = userId,
+                toUserId = dmId,
+                amount = campaign.joinPrice,
+                type = "CAMPAIGN_JOIN",
+                campaignId = campaignId
+            )
+        }
 
         // Step 3: handle payment outcome
         if (!paymentResult.success) {

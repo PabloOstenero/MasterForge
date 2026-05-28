@@ -16,7 +16,7 @@ describe('AuthGuard — Property-Based Tests', () => {
   let router: Router;
 
   beforeEach(() => {
-    const spy = jasmine.createSpyObj<AuthService>('AuthService', ['isAuthenticated']);
+    const spy = jasmine.createSpyObj<AuthService>('AuthService', ['isAuthenticated', 'getCurrentUser']);
 
     TestBed.configureTestingModule({
       providers: [

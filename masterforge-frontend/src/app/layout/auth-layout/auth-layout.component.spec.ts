@@ -1,10 +1,24 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, discardPeriodicTasks } from '@angular/core/testing';
 import { provideRouter, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Component } from '@angular/core';
 import * as fc from 'fast-check';
 
 import { AuthLayoutComponent } from './auth-layout.component';
 import { AuthService } from '../../services/auth.service';
+import { PersistentNotificationService } from '../../services/persistent-notification.service';
+import { FCMService } from '../../services/fcm.service';
+import { PopoverController } from '@ionic/angular/standalone';
+import { of } from 'rxjs';
+import { RoleService } from '../../services/role.service';
+
+function getCommonMocks() {
+  return [
+    { provide: PersistentNotificationService, useValue: { updateUnreadCount: () => {}, unreadCount$: of(0) } },
+    { provide: FCMService, useValue: { initPush: () => {} } },
+    { provide: PopoverController, useValue: jasmine.createSpyObj('PopoverController', ['create']) },
+    RoleService
+  ];
+}
 
 // Minimal stub component used as child route targets so the router-outlet
 // inside AuthLayoutComponent doesn't render another full sidebar.
@@ -22,22 +36,23 @@ describe('AuthLayoutComponent — Property-Based Tests', () => {
   let authSpy: jasmine.SpyObj<AuthService>;
   let router: Router;
 
-  const NAV_ROUTES = ['/home', '/players', '/campaigns', '/homebrew', '/config'];
+  const NAV_ROUTES = ['/home', '/campaigns', '/official-content', '/bestiary', '/homebrew'];
 
   beforeEach(async () => {
-    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser', 'isPro']);
     authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
       providers: [
+        ...getCommonMocks(),
         { provide: AuthService, useValue: authSpy },
         provideRouter([
           { path: 'home', component: StubPageComponent },
-          { path: 'players', component: StubPageComponent },
           { path: 'campaigns', component: StubPageComponent },
+          { path: 'official-content', component: StubPageComponent },
+          { path: 'bestiary', component: StubPageComponent },
           { path: 'homebrew', component: StubPageComponent },
-          { path: 'config', component: StubPageComponent },
           { path: 'login', component: StubPageComponent },
         ]),
       ]
@@ -96,6 +111,7 @@ describe('AuthLayoutComponent — Property-Based Tests', () => {
         .withContext(`Expected exactly 1 active nav item for route "${route}", got ${activeItems.length}`)
         .toBe(1);
     }
+    discardPeriodicTasks();
   }));
 
   it('P11-active-correct-item — for any active route, the active nav item href matches that route', fakeAsync(() => {
@@ -118,6 +134,7 @@ describe('AuthLayoutComponent — Property-Based Tests', () => {
         .withContext(`Active item href "${activeHref}" should match route "${route}"`)
         .toBe(route);
     }
+    discardPeriodicTasks();
   }));
 
   // -------------------------------------------------------------------------
@@ -172,23 +189,24 @@ describe('AuthLayoutComponent — Property 2: Preservation (Non-Toggle Interacti
   let router: Router;
 
   // The 5 DM items as rendered by the hardcoded template (unfixed code)
-  const DM_ITEM_TITLES = ['Inicio', 'Jugadores', 'Campañas', 'Homebrew', 'Config'];
-  const DM_ROUTES = ['/home', '/players', '/campaigns', '/homebrew', '/config'];
+  const DM_ITEM_TITLES = ['Inicio', 'Campañas', 'Contenido Oficial', 'Bestiario', 'Homebrew'];
+  const DM_ROUTES = ['/home', '/campaigns', '/official-content', '/bestiary', '/homebrew'];
 
   beforeEach(async () => {
-    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser', 'isPro']);
     authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
       providers: [
+        ...getCommonMocks(),
         { provide: AuthService, useValue: authSpy },
         provideRouter([
           { path: 'home', component: StubPageComponent },
-          { path: 'players', component: StubPageComponent },
           { path: 'campaigns', component: StubPageComponent },
+          { path: 'official-content', component: StubPageComponent },
+          { path: 'bestiary', component: StubPageComponent },
           { path: 'homebrew', component: StubPageComponent },
-          { path: 'config', component: StubPageComponent },
           { path: 'login', component: StubPageComponent },
         ]),
       ]
@@ -301,6 +319,7 @@ describe('AuthLayoutComponent — Property 2: Preservation (Non-Toggle Interacti
           .toBeTrue();
       });
     }
+    discardPeriodicTasks();
   }));
 
   // -------------------------------------------------------------------------
@@ -325,10 +344,11 @@ describe('AuthLayoutComponent — Property 2: Preservation (Non-Toggle Interacti
         .withContext(`For route "${route}", expected at most 1 active item but got ${activeItems.length}`)
         .toBeLessThanOrEqual(1);
     }
+    discardPeriodicTasks();
   }));
 
-  it('P2-routerLinkActive-config — navigating to /config applies active class to the Config anchor', fakeAsync(() => {
-    router.navigateByUrl('/config');
+  it('P2-routerLinkActive-official-content — navigating to /official-content applies active class to the Official Content anchor', fakeAsync(() => {
+    router.navigateByUrl('/official-content');
     tick();
     fixture.detectChanges();
 
@@ -336,13 +356,14 @@ describe('AuthLayoutComponent — Property 2: Preservation (Non-Toggle Interacti
       fixture.nativeElement.querySelectorAll('a.nav-item.active')
     );
     expect(activeItems.length)
-      .withContext('Expected exactly 1 active item when navigating to /config')
+      .withContext('Expected exactly 1 active item when navigating to /official-content')
       .toBe(1);
 
     const activeHref = activeItems[0].getAttribute('href') ?? '';
     expect(activeHref)
-      .withContext(`Active item href should be "/config" but got "${activeHref}"`)
-      .toBe('/config');
+      .withContext(`Active item href should be "/official-content" but got "${activeHref}"`)
+      .toBe('/official-content');
+    discardPeriodicTasks();
   }));
 
   // -------------------------------------------------------------------------
@@ -367,7 +388,7 @@ describe('AuthLayoutComponent — Property 2: Preservation (Non-Toggle Interacti
 // ---------------------------------------------------------------------------
 
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
-import { RoleService, MenuItem } from '../../services/role.service';
+import { MenuItem } from '../../services/role.service';
 
 const DM_MENU: MenuItem[] = [
   { title: 'Inicio', icon: 'home-outline', route: '/home' },
@@ -418,12 +439,13 @@ describe('AuthLayoutComponent — Property 1: Bug Condition - Topbar Absent in A
       menuItems$: menuSubject.asObservable(),
     };
 
-    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser', 'isPro']);
     authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
       providers: [
+        ...getCommonMocks(),
         { provide: AuthService, useValue: authSpy },
         { provide: RoleService, useValue: mockRoleService },
         provideRouter([
@@ -469,14 +491,11 @@ describe('AuthLayoutComponent — Property 1: Bug Condition - Topbar Absent in A
   // EXPECTED ON UNFIXED CODE: FAILS
   // Counterexample: Role toggle button is not found in AuthLayoutComponent
   // -------------------------------------------------------------------------
-  it('P1-role-toggle-absent — AuthLayoutComponent renders role toggle ion-button inside .main-content', () => {
-    const mainContent = fixture.nativeElement.querySelector('.main-content');
-    expect(mainContent).withContext('.main-content should exist').toBeTruthy();
-
-    const roleToggleBtn = mainContent.querySelector('ion-button');
+  it('P1-role-toggle-absent — AuthLayoutComponent renders role toggle button', () => {
+    const roleToggleBtn = fixture.nativeElement.querySelector('.role-toggle-sidebar');
     expect(roleToggleBtn)
       .withContext(
-        '[BUG COUNTEREXAMPLE] Role toggle ion-button is not found in AuthLayoutComponent .main-content'
+        '[BUG COUNTEREXAMPLE] Role toggle button is not found in AuthLayoutComponent'
       )
       .toBeTruthy();
   });
@@ -518,33 +537,31 @@ describe('AuthLayoutComponent — Property 1: Bug Condition - Topbar Absent in A
 describe('AuthLayoutComponent — Property 1: Bug Condition (Sidebar Ignores Role Toggle)', () => {
 
   let fixture: ComponentFixture<AuthLayoutComponent>;
-  let mockRoleService: {
-    _subject: BehaviorSubject<MenuItem[]>;
-    _role: 'dm' | 'player';
-    menuItems$: ReturnType<BehaviorSubject<MenuItem[]>['asObservable']>;
-    get activeRole(): 'dm' | 'player';
-    toggleRole(): void;
-  };
+  let mockRoleService: any;
 
   beforeEach(async () => {
     const subject = new BehaviorSubject<MenuItem[]>(DM_MENU);
+    const roleSubject = new BehaviorSubject<'dm' | 'player'>('dm');
     mockRoleService = {
       _subject: subject,
       _role: 'dm' as 'dm' | 'player',
+      activeRole$: roleSubject.asObservable(),
       menuItems$: subject.asObservable(),
       get activeRole() { return this._role; },
       toggleRole() {
         this._role = this._role === 'dm' ? 'player' : 'dm';
+        roleSubject.next(this._role);
         this._subject.next(this._role === 'player' ? PLAYER_MENU : DM_MENU);
       },
     };
 
-    const authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    const authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser', 'isPro']);
     authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
       providers: [
+        ...getCommonMocks(),
         { provide: AuthService, useValue: authSpy },
         { provide: RoleService, useValue: mockRoleService },
         provideRouter([
@@ -793,12 +810,13 @@ describe('AuthLayoutComponent — Task 1 Property Tests: Dropdown State', () => 
   let authSpy: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
-    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser', 'isPro']);
     authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
       providers: [
+        ...getCommonMocks(),
         { provide: AuthService, useValue: authSpy },
         provideRouter([
           { path: 'home', component: StubPageComponent },
@@ -862,12 +880,13 @@ describe('AuthLayoutComponent — Task 2 Subtask 2.1: Overlay Click Closes Dropd
   let authSpy: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
-    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser', 'isPro']);
     authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
       providers: [
+        ...getCommonMocks(),
         { provide: AuthService, useValue: authSpy },
         provideRouter([
           { path: 'home', component: StubPageComponent },
@@ -936,12 +955,13 @@ describe('AuthLayoutComponent — Task 2 Subtask 2.2: Sidebar Nav Items Preserve
       toggleRole: () => {},
     };
 
-    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser', 'isPro']);
     authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
       providers: [
+        ...getCommonMocks(),
         { provide: AuthService, useValue: authSpy },
         { provide: RoleService2, useValue: mockRoleService },
         provideRouter([
@@ -993,12 +1013,13 @@ describe('AuthLayoutComponent — Task 5.1: Structural Unit Tests', () => {
   let authSpy: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
-    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser', 'isPro']);
     authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
       providers: [
+        ...getCommonMocks(),
         { provide: AuthService, useValue: authSpy },
         provideRouter([
           { path: 'home', component: StubPageComponent },
@@ -1110,12 +1131,13 @@ describe('AuthLayoutComponent — Task 5.2: Property 4 — Logout Closes Dropdow
   let router: Router;
 
   beforeEach(async () => {
-    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser', 'isPro']);
     authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
       providers: [
+        ...getCommonMocks(),
         { provide: AuthService, useValue: authSpy },
         provideRouter([
           { path: 'home', component: StubPageComponent },
@@ -1182,12 +1204,13 @@ describe('AuthLayoutComponent — Task 5.3: Property 5 — Settings Closes Dropd
   let router: Router;
 
   beforeEach(async () => {
-    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser', 'isPro']);
     authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
       providers: [
+        ...getCommonMocks(),
         { provide: AuthService, useValue: authSpy },
         provideRouter([
           { path: 'home', component: StubPageComponent },
@@ -1260,7 +1283,7 @@ describe('AuthLayoutComponent — Task 2: Preservation — Username and Behavior
   let roleSubject: BehaviorSubject2<'dm' | 'player'>;
 
   function buildTestBed(user: any) {
-    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser']);
+    authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser', 'isPro']);
     authSpy.getCurrentUser.and.returnValue(user);
 
     roleSubject = new BehaviorSubject2<'dm' | 'player'>('dm');
@@ -1274,6 +1297,7 @@ describe('AuthLayoutComponent — Task 2: Preservation — Username and Behavior
     return TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
       providers: [
+        ...getCommonMocks(),
         { provide: AuthService, useValue: authSpy },
         { provide: RoleService2, useValue: roleServiceMock },
         provideRouter([
@@ -1392,6 +1416,10 @@ describe('AuthLayoutComponent — Task 2: Preservation — Username and Behavior
 
           // Username getter should still return the correct name
           expect(component.username).toBe(name);
+
+          // Open dropdown so username is rendered
+          component.isDropdownOpen = true;
+          fixture.detectChanges();
 
           // Username should be visible in the topbar
           const topbar: HTMLElement | null = fixture.nativeElement.querySelector('.topbar');

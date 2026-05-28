@@ -328,7 +328,7 @@ export class HomebrewSpellFormPage implements OnInit {
     request$.subscribe({
       next: () => {
         this.submitting = false;
-        const returnUrl = this.route.snapshot.queryParamMap.get('from') === 'official' ? '/official-content' : '/homebrew';
+        const returnUrl = this.route.snapshot.queryParamMap?.get('from') === 'official' ? '/official-content' : '/homebrew';
         this.router.navigate([returnUrl]);
       },
       error: (err: any) => {
@@ -344,7 +344,7 @@ export class HomebrewSpellFormPage implements OnInit {
   }
 
   cancel(): void {
-    const returnUrl = this.route.snapshot.queryParamMap.get('from') === 'official' ? '/official-content' : '/homebrew';
+    const returnUrl = this.route.snapshot.queryParamMap?.get('from') === 'official' ? '/official-content' : '/homebrew';
     this.router.navigate([returnUrl]);
   }
 }

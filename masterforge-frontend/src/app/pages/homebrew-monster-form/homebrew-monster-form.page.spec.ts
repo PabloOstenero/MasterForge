@@ -22,6 +22,7 @@ function validFormValue() {
     name: 'Goblin',
     type: 'Humanoid',
     size: 'Small',
+    alignment: 'Neutral Evil',
     armorClass: 15,
     hitPoints: 7,
     speed: '30 ft.',
@@ -53,7 +54,7 @@ describe('HomebrewMonsterFormPage', () => {
     homebrewServiceSpy.createMonster.and.returnValue(of({}));
 
     const authServiceMock = {
-      getUserIdFromToken: () => 'user-1',
+      getUserIdFromToken: () => 'user-1', isPro: () => false, getCurrentUser: () => ({ id: 'user-1', name: 'Test User', role: 'USER' }),
     };
 
     await TestBed.configureTestingModule({

@@ -73,6 +73,7 @@ describe('HomebrewPage', () => {
     const notificationServiceMock = {
       showError: jasmine.createSpy('showError'),
       showSuccess: jasmine.createSpy('showSuccess'),
+      activeToast$: of(null),
     };
 
     await TestBed.configureTestingModule({

@@ -30,15 +30,13 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.masterforge.masterforge_backend.model.entity.Campaign
 import com.masterforge.masterforge_backend.model.entity.CampaignVisibility
 import com.masterforge.masterforge_backend.model.entity.Session
-import com.masterforge.masterforge_backend.model.entity.SessionAttendee
-import com.masterforge.masterforge_backend.model.entity.SessionAttendeeId
+import com.masterforge.masterforge_backend.model.entity.CampaignEnrollment
 import com.masterforge.masterforge_backend.model.entity.User
 import com.masterforge.masterforge_backend.repository.CampaignEnrollmentRepository
 import com.masterforge.masterforge_backend.repository.CampaignRepository
 import com.masterforge.masterforge_backend.repository.CharacterRepository
 import com.masterforge.masterforge_backend.repository.CharacterSpellRepository
 import com.masterforge.masterforge_backend.repository.InventorySlotRepository
-import com.masterforge.masterforge_backend.repository.SessionAttendeeRepository
 import com.masterforge.masterforge_backend.repository.SessionRepository
 import com.masterforge.masterforge_backend.repository.UserRepository
 import com.masterforge.masterforge_backend.service.JwtService
@@ -67,7 +65,6 @@ class HomeSummaryCardsBugExplorationTest : StringSpec() {
     @Autowired lateinit var userRepository: UserRepository
     @Autowired lateinit var campaignRepository: CampaignRepository
     @Autowired lateinit var campaignEnrollmentRepository: CampaignEnrollmentRepository
-    @Autowired lateinit var sessionAttendeeRepository: SessionAttendeeRepository
     @Autowired lateinit var sessionRepository: SessionRepository
     @Autowired lateinit var characterSpellRepository: CharacterSpellRepository
     @Autowired lateinit var inventorySlotRepository: InventorySlotRepository
@@ -75,7 +72,6 @@ class HomeSummaryCardsBugExplorationTest : StringSpec() {
     @Autowired lateinit var jwtService: JwtService
 
     private fun cleanAll() {
-        sessionAttendeeRepository.deleteAll()
         sessionRepository.deleteAll()
         characterSpellRepository.deleteAll()
         inventorySlotRepository.deleteAll()
@@ -108,17 +104,14 @@ class HomeSummaryCardsBugExplorationTest : StringSpec() {
         Session(
             name = "Session_${UUID.randomUUID()}",
             scheduledDate = Timestamp.from(Instant.now().plus(offsetDays, ChronoUnit.DAYS)),
-            price = BigDecimal.ZERO,
             campaign = campaign
         )
     )
 
-    private fun saveAttendee(user: User, session: Session) {
-        sessionAttendeeRepository.save(
-            SessionAttendee(
-                id = SessionAttendeeId(sessionId = session.id!!, userId = user.id!!),
-                hasPaid = false,
-                session = session,
+    private fun saveEnrollment(user: User, campaign: Campaign) {
+        campaignEnrollmentRepository.save(
+            CampaignEnrollment(
+                campaign = campaign,
                 user = user
             )
         )
@@ -197,7 +190,7 @@ class HomeSummaryCardsBugExplorationTest : StringSpec() {
             val session = saveSession(campaign, offsetDays = 7L)
 
             val player = saveUser("Player_A")
-            saveAttendee(player, session)
+            saveEnrollment(player, campaign)
 
             // Authenticate as the player
             val playerToken = jwtService.generateToken(player.id!!, player.email)

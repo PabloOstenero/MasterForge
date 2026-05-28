@@ -10,6 +10,7 @@ import { of, throwError } from 'rxjs';
 
 import { HomebrewItemFormPage } from './homebrew-item-form.page';
 import { HomebrewService } from '../../services/homebrew.service';
+import { AuthService } from '../../services/auth.service';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -47,6 +48,7 @@ describe('HomebrewItemFormPage', () => {
       imports: [HomebrewItemFormPage],
       providers: [
         { provide: HomebrewService, useValue: homebrewServiceSpy },
+        { provide: AuthService, useValue: { getUserIdFromToken: () => 'user-1', isPro: () => false, getCurrentUser: () => ({ id: 'user-1', name: 'Test User', role: 'USER' }),} },
         provideRouter([]),
       ],
     }).compileComponents();

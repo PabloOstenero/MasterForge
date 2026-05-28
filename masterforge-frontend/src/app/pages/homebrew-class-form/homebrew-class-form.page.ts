@@ -492,7 +492,7 @@ export class HomebrewClassFormPage implements OnInit {
       // Identity
       name: ['', Validators.required],
       description: [''],
-      price: [null, Validators.min(0)],
+      price: [null, [Validators.required, Validators.min(0)]],
       hitDie: ['', Validators.required],
       isOfficial: [this.route.snapshot.queryParamMap?.get('from') === 'official'],
 
@@ -560,8 +560,9 @@ export class HomebrewClassFormPage implements OnInit {
       next: (cls: any) => {
         const cf = cls.classFeatures ?? {};
 
-        // Patch basic fields — hitDie comes back as a number (e.g. 8), convert to string ("d8")
-        const hitDieStr = cls.hitDie ? `d${cls.hitDie}` : '';
+        const hitDieStr = cls.hitDie
+          ? (typeof cls.hitDie === 'string' && cls.hitDie.startsWith('d') ? cls.hitDie : `d${cls.hitDie}`)
+          : '';
         this.form.patchValue({
           name: cls.name ?? '',
           description: cls.description ?? '',
@@ -1209,6 +1210,8 @@ export class HomebrewClassFormPage implements OnInit {
     const prepStyle = this.form.get('preparationStyle')?.value;
     if (prepStyle === 'KNOWN') {
       this.form.get('knowledgeStyle')?.setValue('LEARNED');
+    } else if (prepStyle === 'PREPARED') {
+      this.form.get('knowledgeStyle')?.setValue('ALL_LIST');
     }
     this.updateSpellsKnownVisibility();
   }
@@ -1557,7 +1560,7 @@ export class HomebrewClassFormPage implements OnInit {
     request$.subscribe({
       next: (result: any) => {
         const classId = result?.id ?? (this.editMode ? Number(this.editId) : null);
-        const returnUrl = this.route.snapshot.queryParamMap.get('from') === 'official' ? '/official-content' : '/homebrew';
+        const returnUrl = this.route.snapshot.queryParamMap?.get('from') === 'official' ? '/official-content' : '/homebrew';
         if (classId) {
           this.reconcileClassFeatures(classId).then(() => {
             this.submitting = false;
@@ -1612,7 +1615,7 @@ export class HomebrewClassFormPage implements OnInit {
   }
 
   cancel(): void {
-    const returnUrl = this.route.snapshot.queryParamMap.get('from') === 'official' ? '/official-content' : '/homebrew';
+    const returnUrl = this.route.snapshot.queryParamMap?.get('from') === 'official' ? '/official-content' : '/homebrew';
     this.router.navigate([returnUrl]);
   }
 }

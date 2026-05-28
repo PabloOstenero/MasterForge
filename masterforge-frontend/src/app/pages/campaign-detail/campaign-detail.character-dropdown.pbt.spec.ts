@@ -78,7 +78,14 @@ async function createFixtureForDropdownTest(
   mockApi.getPlayerCampaigns.and.returnValue(of(enrolledCampaigns));
   mockApi.getCampaignById.and.returnValue(of(campaignData));
   mockApi.getCampaignSessions.and.returnValue(of([]));
-  mockApi.getCampaignPlayers.and.returnValue(of([]));
+  const mockPlayer = {
+    id: 'test-user-id',
+    name: 'Test User',
+    email: 'test@example.com',
+    subscriptionTier: 'FREE',
+    characters: []
+  };
+  mockApi.getCampaignPlayers.and.returnValue(of([mockPlayer]));
   // Return empty initially; we'll set playerCharacters manually after ngOnInit
   mockApi.getCharactersByUser.and.returnValue(of([]));
 
@@ -91,7 +98,7 @@ async function createFixtureForDropdownTest(
         useValue: { snapshot: { paramMap: { get: () => campaignId } } },
       },
       { provide: RoleService, useValue: { activeRole: 'player' } },
-      { provide: AuthService, useValue: { getUserIdFromToken: () => 'test-user-id' } },
+      { provide: AuthService, useValue: { getUserIdFromToken: () => 'test-user-id', isPro: () => false, getCurrentUser: () => ({ id: 'user-1', name: 'Test User', role: 'USER' }),} },
       Location,
     ],
   }).compileComponents();
@@ -146,7 +153,7 @@ describe('CampaignDetailPage PBT — 7.1 Property 5: Character dropdown fidelity
           // We normalize whitespace on both sides since browsers may add surrounding whitespace
           for (let i = 0; i < characters.length; i++) {
             const char = characters[i];
-            const expectedText = `${char.name} — ${char.dndClass} Nv.${char.level}`.trim();
+            const expectedText = `${char.name} (${char.dndClass} Nv.${char.level})`.trim();
             const actualText = (characterOptions[i].textContent ?? '').trim();
             expect(actualText).toBe(expectedText);
           }

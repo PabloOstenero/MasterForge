@@ -2,6 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { CharacterSheetPage } from './character-sheet.page';
+import { ApiService } from '../../services/api';
+import { HomebrewService } from '../../services/homebrew.service';
+import { AlertController, ActionSheetController, ModalController, ToastController } from '@ionic/angular/standalone';
 
 describe('CharacterSheetPage', () => {
   let component: CharacterSheetPage;
@@ -10,7 +13,16 @@ describe('CharacterSheetPage', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [CharacterSheetPage],
-      providers: [provideHttpClient(), provideRouter([])],
+      providers: [
+        provideHttpClient(),
+        provideRouter([]),
+        { provide: ApiService, useValue: jasmine.createSpyObj('ApiService', ['getCharacter', 'updateSpellSlots', 'updateCharacterHp', 'updateHitDice']) },
+        { provide: HomebrewService, useValue: jasmine.createSpyObj('HomebrewService', ['getAllSpells']) },
+        { provide: AlertController, useValue: jasmine.createSpyObj('AlertController', ['create']) },
+        { provide: ActionSheetController, useValue: jasmine.createSpyObj('ActionSheetController', ['create']) },
+        { provide: ModalController, useValue: jasmine.createSpyObj('ModalController', ['create']) },
+        { provide: ToastController, useValue: jasmine.createSpyObj('ToastController', ['create']) },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CharacterSheetPage);

@@ -134,7 +134,7 @@ class MockPaymentServicePropertyTest : StringSpec() {
                 val campaign = saveCampaign(owner = owner, joinPrice = BigDecimal("10.00"))
 
                 val request = PaymentRequest(
-                    campaignId = campaign.id!!,
+                    campaignId = campaign.id!!.toString(),
                     userId = player.id!!,
                     amount = BigDecimal("10.00"),
                     mockCardLastFour = "4242",
@@ -171,7 +171,7 @@ class MockPaymentServicePropertyTest : StringSpec() {
                 val campaign = saveCampaign(owner = owner, joinPrice = price)
 
                 val request = PaymentRequest(
-                    campaignId = campaign.id!!,
+                    campaignId = campaign.id!!.toString(),
                     userId = player.id!!,
                     amount = price,
                     mockCardLastFour = "5678",
@@ -218,7 +218,7 @@ class MockPaymentServicePropertyTest : StringSpec() {
                 val campaign = saveCampaign(owner = owner, joinPrice = BigDecimal("15.00"))
 
                 val request = PaymentRequest(
-                    campaignId = campaign.id!!,
+                    campaignId = campaign.id!!.toString(),
                     userId = player.id!!,
                     amount = BigDecimal("15.00"),
                     mockCardLastFour = "9999"
@@ -226,8 +226,8 @@ class MockPaymentServicePropertyTest : StringSpec() {
 
                 val result = mockPaymentService.simulatePaymentScenario(request, scenario)
 
-                // Property: SUCCESS → success == true; all others → success == false
-                if (scenario == PaymentScenario.SUCCESS) {
+                // Property: SUCCESS or EXPIRED_SUBSCRIPTION → success == true; all others → success == false
+                if (scenario == PaymentScenario.SUCCESS || scenario == PaymentScenario.EXPIRED_SUBSCRIPTION) {
                     result.success.shouldBeTrue()
                 } else {
                     result.success.shouldBeFalse()
@@ -238,7 +238,7 @@ class MockPaymentServicePropertyTest : StringSpec() {
                 val stored = paymentTransactionRepository.findById(result.transactionId!!).orElse(null)
                 stored.shouldNotBeNull()
 
-                val expectedStatus = if (scenario == PaymentScenario.SUCCESS) {
+                val expectedStatus = if (scenario == PaymentScenario.SUCCESS || scenario == PaymentScenario.EXPIRED_SUBSCRIPTION) {
                     PaymentStatus.COMPLETED
                 } else {
                     PaymentStatus.FAILED

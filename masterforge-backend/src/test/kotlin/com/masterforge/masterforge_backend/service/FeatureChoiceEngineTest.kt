@@ -47,7 +47,7 @@ class FeatureChoiceEngineTest {
             baseWis = 10,
             baseCha = 10,
             dndClass = dndClass,
-            dndRace = DndRace(id = 1, name = "Human", bonusStr = 1, bonusDex = 1, bonusCon = 1, bonusInt = 1, bonusWis = 1, bonusCha = 1),
+            dndRace = DndRace(id = 1, name = "Human"),
             user = User(id = UUID.randomUUID(), name = "Tester", email = "test@test.com", passwordHash = "pw"),
             choicesJson = mapOf("1" to "fast") // Choice using feature ID as key
         )
@@ -88,7 +88,7 @@ class FeatureChoiceEngineTest {
             baseWis = 10,
             baseCha = 10,
             dndClass = dndClass,
-            dndRace = DndRace(id = 2, name = "Orc", bonusStr = 2),
+            dndRace = DndRace(id = 2, name = "Orc"),
             user = User(id = UUID.randomUUID(), name = "Tester", email = "test@test.com", passwordHash = "pw"),
             choicesJson = emptyMap()
         )

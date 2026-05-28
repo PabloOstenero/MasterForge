@@ -61,7 +61,9 @@ class CampaignCreationPropertyTest : StringSpec() {
                 User(
                     name = "DM_${UUID.randomUUID()}",
                     email = "dm_${UUID.randomUUID()}@test.com",
-                    passwordHash = "hash"
+                    passwordHash = "hash",
+                    subscriptionTier = "PRO",
+                    subscriptionExpiresAt = java.time.LocalDateTime.now().plusYears(1)
                 )
             )
             token = jwtService.generateToken(owner.id!!, owner.email)
