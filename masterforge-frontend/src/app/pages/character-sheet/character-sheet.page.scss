@@ -1887,6 +1887,122 @@ ion-modal.add-item-modal::part(content) {
   background: #121212 !important;
 }
 
+/* --- Compact Class Resource Counters --- */
+.resource-compact-row {
+  margin-top: 5px;
+  width: 100%;
+}
+
+.resource-compact-box {
+  background: linear-gradient(135deg, #1E1E1E 0%, #252525 100%);
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 8px 10px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    border-color: rgba(197, 160, 89, 0.4);
+    transform: translateY(-1px);
+  }
+
+  .resource-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+
+    .resource-name {
+      color: #C5A059;
+      font-weight: bold;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .resource-reset {
+      color: #666;
+      font-size: 0.55rem;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+  }
+
+  .resource-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+
+    .resource-value {
+      flex: 1;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: baseline;
+      gap: 2px;
+
+      .current {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: white;
+      }
+
+      .separator {
+        color: #444;
+        font-size: 0.9rem;
+      }
+
+      .max {
+        color: #777;
+        font-size: 0.9rem;
+      }
+    }
+
+    ion-button {
+      --padding-start: 0;
+      --padding-end: 0;
+      margin: 0;
+      height: 28px;
+      width: 28px;
+      font-size: 1.3rem;
+      --color: #C5A059;
+
+      &.btn-resource-dec {
+        --color: #e57373;
+      }
+      &.btn-resource-inc {
+        --color: #81c784;
+      }
+
+      &:active {
+        transform: scale(0.9);
+      }
+    }
+  }
+
+  .resource-progress-bar {
+    height: 3px;
+    background: #121212;
+    border-radius: 1.5px;
+    margin-top: 6px;
+    overflow: hidden;
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #C5A059, #E0C080);
+      transition: width 0.3s ease;
+    }
+  }
+}
+
 
 
 

@@ -105,35 +105,6 @@
 
   @if (currentTab === 'stats') {
   <div class="ion-padding">
-    @if (resourcePools.length > 0) {
-      <h2 class="section-title">Recursos de Clase</h2>
-      <div class="resource-grid ion-margin-bottom">
-        @for (pool of resourcePools; track $index) {
-          <div class="resource-pool-card">
-            <div class="pool-header">
-              <span class="pool-name">{{ pool.name }}</span>
-              <span class="pool-reset">{{ pool.reset === 'SHORT_REST' ? 'Descanso Corto' : 'Descanso Largo' }}</span>
-            </div>
-            <div class="pool-body">
-              <ion-button fill="clear" color="danger" (click)="useResource(pool)" [disabled]="pool.current <= 0">
-                <ion-icon name="remove-circle-outline"></ion-icon>
-              </ion-button>
-              <div class="pool-value">
-                <span class="current">{{ pool.current }}</span>
-                <span class="separator">/</span>
-                <span class="max">{{ pool.max === 999 ? '∞' : pool.max }}</span>
-              </div>
-              <ion-button fill="clear" color="success" (click)="restoreResource(pool)" [disabled]="pool.current >= pool.max">
-                <ion-icon name="add-circle-outline"></ion-icon>
-              </ion-button>
-            </div>
-            <div class="pool-progress-container">
-              <div class="pool-progress-fill" [style.width.%]="pool.max === 999 ? 100 : (pool.current / pool.max) * 100"></div>
-            </div>
-          </div>
-        }
-      </div>
-    }
 
     <h2 class="section-title">Atributos Principales</h2>
 
@@ -269,6 +240,7 @@
       </ion-col>
     </ion-row>
 
+
     <!-- Hit Dice and Death Saves -->
     <ion-row>
       <ion-col size="5">
@@ -312,6 +284,40 @@
         </div>
       </ion-col>
     </ion-row>
+
+    <!-- Class Resources Section (Compact) -->
+    @if (resourcePools.length > 0) {
+      <ion-row class="resource-compact-row ion-margin-bottom">
+        @for (pool of resourcePools; track $index) {
+          <ion-col [size]="resourcePools.length === 1 ? 12 : resourcePools.length === 2 ? 6 : resourcePools.length === 3 ? 4 : 3">
+            <div class="resource-compact-box">
+              <div class="resource-header">
+                <span class="resource-name">{{ pool.name }}</span>
+                <span class="resource-reset" [title]="pool.reset === 'SHORT_REST' ? 'Descanso Corto' : 'Descanso Largo'">
+                  {{ pool.reset === 'SHORT_REST' ? 'S. Rest' : 'L. Rest' }}
+                </span>
+              </div>
+              <div class="resource-controls">
+                <ion-button fill="clear" (click)="useResource(pool)" [disabled]="pool.current <= 0" class="btn-resource-dec">
+                  <ion-icon name="remove-circle-outline"></ion-icon>
+                </ion-button>
+                <div class="resource-value">
+                  <span class="current">{{ pool.current }}</span>
+                  <span class="separator">/</span>
+                  <span class="max">{{ pool.max === 999 ? '∞' : pool.max }}</span>
+                </div>
+                <ion-button fill="clear" (click)="restoreResource(pool)" [disabled]="pool.current >= pool.max" class="btn-resource-inc">
+                  <ion-icon name="add-circle-outline"></ion-icon>
+                </ion-button>
+              </div>
+              <div class="resource-progress-bar">
+                <div class="progress-fill" [style.width.%]="pool.max === 999 ? 100 : (pool.current / pool.max) * 100"></div>
+              </div>
+            </div>
+          </ion-col>
+        }
+      </ion-row>
+    }
 
     <h2 class="section-title" style="margin-top: 20px;">Ataques y Conjuros</h2>
     <div class="attack-header">
