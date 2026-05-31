@@ -41,6 +41,7 @@ describe('AuthLayoutComponent — Property-Based Tests', () => {
   beforeEach(async () => {
     authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser', 'isPro']);
     authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
+    (authSpy as any).currentUser$ = of({ name: 'Test User' });
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
@@ -195,6 +196,7 @@ describe('AuthLayoutComponent — Property 2: Preservation (Non-Toggle Interacti
   beforeEach(async () => {
     authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser', 'isPro']);
     authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
+    (authSpy as any).currentUser$ = of({ name: 'Test User' });
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
@@ -441,6 +443,7 @@ describe('AuthLayoutComponent — Property 1: Bug Condition - Topbar Absent in A
 
     authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser', 'isPro']);
     authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
+    (authSpy as any).currentUser$ = of({ name: 'Test User' });
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
@@ -557,6 +560,7 @@ describe('AuthLayoutComponent — Property 1: Bug Condition (Sidebar Ignores Rol
 
     const authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser', 'isPro']);
     authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
+    (authSpy as any).currentUser$ = of({ name: 'Test User' });
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
@@ -812,6 +816,7 @@ describe('AuthLayoutComponent — Task 1 Property Tests: Dropdown State', () => 
   beforeEach(async () => {
     authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser', 'isPro']);
     authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
+    (authSpy as any).currentUser$ = of({ name: 'Test User' });
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
@@ -882,6 +887,7 @@ describe('AuthLayoutComponent — Task 2 Subtask 2.1: Overlay Click Closes Dropd
   beforeEach(async () => {
     authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser', 'isPro']);
     authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
+    (authSpy as any).currentUser$ = of({ name: 'Test User' });
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
@@ -957,6 +963,7 @@ describe('AuthLayoutComponent — Task 2 Subtask 2.2: Sidebar Nav Items Preserve
 
     authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser', 'isPro']);
     authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
+    (authSpy as any).currentUser$ = of({ name: 'Test User' });
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
@@ -1015,6 +1022,7 @@ describe('AuthLayoutComponent — Task 5.1: Structural Unit Tests', () => {
   beforeEach(async () => {
     authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser', 'isPro']);
     authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
+    (authSpy as any).currentUser$ = of({ name: 'Test User' });
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
@@ -1133,6 +1141,7 @@ describe('AuthLayoutComponent — Task 5.2: Property 4 — Logout Closes Dropdow
   beforeEach(async () => {
     authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser', 'isPro']);
     authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
+    (authSpy as any).currentUser$ = of({ name: 'Test User' });
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
@@ -1206,6 +1215,7 @@ describe('AuthLayoutComponent — Task 5.3: Property 5 — Settings Closes Dropd
   beforeEach(async () => {
     authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser', 'isPro']);
     authSpy.getCurrentUser.and.returnValue({ name: 'Test User' } as any);
+    (authSpy as any).currentUser$ = of({ name: 'Test User' });
 
     await TestBed.configureTestingModule({
       imports: [AuthLayoutComponent],
@@ -1285,6 +1295,7 @@ describe('AuthLayoutComponent — Task 2: Preservation — Username and Behavior
   function buildTestBed(user: any) {
     authSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser', 'isPro']);
     authSpy.getCurrentUser.and.returnValue(user);
+    (authSpy as any).currentUser$ = of(user);
 
     roleSubject = new BehaviorSubject2<'dm' | 'player'>('dm');
 

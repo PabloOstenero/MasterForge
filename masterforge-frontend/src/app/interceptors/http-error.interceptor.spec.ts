@@ -106,6 +106,7 @@ describe('httpErrorInterceptor', () => {
   // -------------------------------------------------------------------------
 
   it('should trigger timeout error when response is delayed beyond 10 seconds', fakeAsync(() => {
+    spyOn(errorHandlerService, 'logError');
     let errorReceived: unknown = null;
 
     httpClient.get('/api/slow').subscribe({
@@ -121,5 +122,6 @@ describe('httpErrorInterceptor', () => {
     expect(errorReceived).toBeTruthy();
     // The error should be a TimeoutError from rxjs
     expect((errorReceived as Error).name).toBe('TimeoutError');
+    expect(errorHandlerService.logError).toHaveBeenCalledWith('HttpInterceptor', errorReceived);
   }));
 });

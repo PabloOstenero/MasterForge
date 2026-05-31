@@ -12,7 +12,7 @@
 
 import { TestBed } from '@angular/core/testing';
 import * as fc from 'fast-check';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 
 import { RoleService } from './role.service';
 import { AuthService } from './auth.service';
@@ -32,7 +32,8 @@ describe('RoleService — unit tests', () => {
           useValue: {
             getCurrentUser: () => ({ id: 'fallback', name: 'Fallback User', role: 'USER' }),
             getUserIdFromToken: () => 'fallback',
-            isPro: () => false
+            isPro: () => false,
+            currentUser$: of({ id: 'fallback', name: 'Fallback User', role: 'USER' })
           }
         },
         RoleService
@@ -117,7 +118,8 @@ describe('RoleService — P1: Menu contents are role-specific', () => {
                   useValue: {
                     getCurrentUser: () => ({ id: 'fallback', name: 'Fallback User', role: 'USER' }),
                     getUserIdFromToken: () => 'fallback',
-                    isPro: () => false
+                    isPro: () => false,
+                    currentUser$: of({ id: 'fallback', name: 'Fallback User', role: 'USER' })
                   }
                 },
                 RoleService
