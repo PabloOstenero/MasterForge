@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 
@@ -19,21 +19,7 @@ export class RoleService {
   
   private authService!: AuthService;
 
-  constructor(authService?: AuthService) {
-    if (authService) {
-      this.authService = authService;
-    } else {
-      try {
-        this.authService = inject(AuthService);
-      } catch (e) {
-        this.authService = {
-          getCurrentUser: () => ({ id: 'fallback', name: 'Fallback User', role: 'USER' }),
-          getUserIdFromToken: () => 'fallback',
-          isPro: () => false
-        } as any;
-      }
-    }
-  }
+  menuItems$!: Observable<MenuItem[]>;
 
   get activeRole(): 'dm' | 'player' {
     return this._activeRole.value;
@@ -57,18 +43,37 @@ export class RoleService {
     { title: 'Homebrew', icon: 'color-wand-outline', sublabel: 'Clases, Subclases, Razas', route: '/homebrew' },
   ];
 
-  menuItems$: Observable<MenuItem[]> = this.activeRole$.pipe(
-    map(role => {
-      let menu = role === 'dm' ? [...this.dmMenu] : [...this.playerMenu];
-      
-      const currentUser = this.authService.getCurrentUser();
-      if (currentUser && (currentUser.role === 'ADMIN' || currentUser.role === 'MANAGER')) {
-        menu.push({ title: 'Panel Admin', icon: 'shield-outline', route: '/players' });
+  constructor(authService?: AuthService) {
+    if (authService) {
+      this.authService = authService;
+    } else {
+      try {
+        this.authService = inject(AuthService);
+      } catch (e) {
+        this.authService = {
+          getCurrentUser: () => ({ id: 'fallback', name: 'Fallback User', role: 'USER' }),
+          getUserIdFromToken: () => 'fallback',
+          isPro: () => false,
+          currentUser$: new BehaviorSubject(null).asObservable()
+        } as any;
       }
-      
-      return menu;
-    })
-  );
+    }
+
+    this.menuItems$ = combineLatest([
+      this.activeRole$,
+      this.authService.currentUser$
+    ]).pipe(
+      map(([role, currentUser]) => {
+        let menu = role === 'dm' ? [...this.dmMenu] : [...this.playerMenu];
+        
+        if (currentUser && (currentUser.role === 'ADMIN' || currentUser.role === 'MANAGER')) {
+          menu.push({ title: 'Panel Admin', icon: 'shield-outline', route: '/players' });
+        }
+        
+        return menu;
+      })
+    );
+  }
 
   toggleRole() {
     const newRole = this._activeRole.value === 'dm' ? 'player' : 'dm';

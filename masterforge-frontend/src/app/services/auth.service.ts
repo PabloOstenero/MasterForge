@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 import { HttpClient, HttpRequest, HttpHandlerFn, HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
@@ -16,10 +17,15 @@ export class AuthService {
 
   // Internal state for the logged-in user
   private _currentUser: any = null;
+  private _currentUser$ = new BehaviorSubject<any>(null);
+  currentUser$ = this._currentUser$.asObservable();
 
   constructor() {
     const savedUser = localStorage.getItem('mf_user');
-    if (savedUser) this._currentUser = JSON.parse(savedUser);
+    if (savedUser) {
+      this._currentUser = JSON.parse(savedUser);
+      this._currentUser$.next(this._currentUser);
+    }
   }
 
   login(email: string, password: string): Observable<any> {
@@ -64,6 +70,7 @@ export class AuthService {
   // Store user profile info (name, id, etc.)
   storeUser(user: any): void {
     this._currentUser = user;
+    this._currentUser$.next(user);
     localStorage.setItem('mf_user', JSON.stringify(user));
   }
 
@@ -131,6 +138,7 @@ export class AuthService {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem('mf_user');
     this._currentUser = null;
+    this._currentUser$.next(null);
   }
 
   isPro(user?: any): boolean {
